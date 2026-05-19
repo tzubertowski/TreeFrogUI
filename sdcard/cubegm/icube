@@ -24,12 +24,28 @@ ITER=0
 while true; do
     ITER=$((ITER+1))
     rm -f "$LAUNCH"
+    killall rkgame 2>/dev/null
     echo "iter $ITER: launching picoarch+frogui" >> "$ICUBE_LOG"
     echo "launching FrogUI..." >> "$LOG"
     "$PICOARCH" "$FROGUI_CORE" "$DUMMY" >> "$LOG" 2>&1
     RC=$?
     echo "iter $ITER: picoarch exited rc=$RC" >> "$ICUBE_LOG"
     echo "picoarch/frogui exited: $RC" >> "$LOG"
-    rm -f "$LAUNCH"
+
+    if [ -f "$LAUNCH" ]; then
+        CORE_PATH=$(sed -n '1p' "$LAUNCH")
+        ROM_PATH=$(sed -n '2p' "$LAUNCH")
+        rm -f "$LAUNCH"
+        echo "iter $ITER: launch file read core=[$CORE_PATH] rom=[$ROM_PATH]" >> "$ICUBE_LOG"
+        if [ -n "$CORE_PATH" ] && [ -n "$ROM_PATH" ]; then
+            killall rkgame 2>/dev/null; sleep 0.3
+            echo "iter $ITER: launching game" >> "$ICUBE_LOG"
+            "$PICOARCH" "$CORE_PATH" "$ROM_PATH" > /mnt/sdcard/game.log 2>&1
+            GAME_RC=$?
+            echo "iter $ITER: game exited rc=$GAME_RC" >> "$ICUBE_LOG"
+        fi
+    else
+        echo "iter $ITER: no launch file found" >> "$ICUBE_LOG"
+    fi
     sleep 0.2
 done

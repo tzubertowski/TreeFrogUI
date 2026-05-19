@@ -1,0 +1,188 @@
+# SF3000 libretro core builder
+# Output: <CORE_NAME>_libretro.so  — drop into /mnt/sdcard/cubegm/cores/
+
+TOOLCHAIN_ROOT := $(HOME)/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot
+MIPS_PREFIX    := $(TOOLCHAIN_ROOT)/opt/ext-toolchain/bin/mips-mti-linux-gnu-
+SYSROOT        := $(TOOLCHAIN_ROOT)/mipsel-buildroot-linux-gnu/sysroot
+
+export CC      := $(MIPS_PREFIX)gcc
+export CXX     := $(MIPS_PREFIX)g++
+export AR      := $(MIPS_PREFIX)ar
+export RANLIB  := $(MIPS_PREFIX)ranlib
+export STRIP   := $(MIPS_PREFIX)strip
+
+CFLAGS_SF3000  := -mips32r2 -march=mips32r2 -mtune=24kc -mfp32 -mhard-float -mlong-calls \
+                   -EL --sysroot=$(SYSROOT) -fPIC -Ofast -DNDEBUG \
+                   -DPLATFORM_SF3000 -DARM=0
+
+export CFLAGS  := $(CFLAGS_SF3000)
+export CXXFLAGS := $(CFLAGS_SF3000)
+export LDFLAGS := -L$(SYSROOT)/usr/lib --sysroot=$(SYSROOT)
+
+# ── Build targets ─────────────────────────────────────────────────────────────
+# Usage: make -f Makefile.sf3000 <target>
+
+.PHONY: all fceumm quicknes snes9x2005 snes9x2002 gambatte gpsp picodrive mgba \
+        genesis-plus-gx tyrquake prboom mame2000 fceumm nestopia tgbdual \
+        gearboy pokemini vba-next fake08 bluemsx frodo cannonball ecwolf \
+        stella2014 prosystem handy race pce wswan gambatte_gb clean
+
+OUT := $(HOME)/sf3000-work/sf3000_multicore/build
+
+$(OUT):
+	mkdir -p $(OUT)
+
+define build_core
+	@echo "Building $(1) → $(OUT)/$(2)_libretro.so"
+	$(MAKE) -C cores/$(1) $(3) \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" LDFLAGS="$(LDFLAGS)" \
+		platform=unix
+	cp cores/$(1)/$(2)_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/$(2)_libretro.so
+	@echo "Done: $(OUT)/$(2)_libretro.so"
+endef
+
+fceumm: | $(OUT)
+	$(MAKE) -C cores/fceumm -f Makefile.libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/fceumm/fceumm_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/fceumm_libretro.so
+
+quicknes: | $(OUT)
+	$(MAKE) -C cores/QuickNES_Core \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/QuickNES_Core/quicknes_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/quicknes_libretro.so
+
+snes9x2005: | $(OUT)
+	$(MAKE) -C cores/snes9x2005 -f Makefile.libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/snes9x2005/snes9x2005_plus_libretro.so $(OUT)/ 2>/dev/null || \
+	cp cores/snes9x2005/snes9x2005_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/*snes9x2005*_libretro.so 2>/dev/null || true
+
+snes9x2002: | $(OUT)
+	$(MAKE) -C cores/snes9x2002 -f Makefile.libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/snes9x2002/snes9x2002_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/snes9x2002_libretro.so
+
+gambatte: | $(OUT)
+	$(MAKE) -C cores/libretro-gambatte -f Makefile.libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/libretro-gambatte/gambatte_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/gambatte_libretro.so
+
+gpsp: | $(OUT)
+	$(MAKE) -C cores/gpsp \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/gpsp/gpsp_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/gpsp_libretro.so
+
+picodrive: | $(OUT)
+	$(MAKE) -C cores/picodrive -f Makefile.libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/picodrive/picodrive_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/picodrive_libretro.so
+
+mgba: | $(OUT)
+	$(MAKE) -C cores/mgba -f Makefile.libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/mgba/mgba_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/mgba_libretro.so
+
+genesis-plus-gx: | $(OUT)
+	$(MAKE) -C cores/Genesis-Plus-GX -f Makefile.libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/Genesis-Plus-GX/genesis_plus_gx_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/genesis_plus_gx_libretro.so
+
+tyrquake: | $(OUT)
+	$(MAKE) -C cores/tyrquake \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/tyrquake/tyrquake_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/tyrquake_libretro.so
+
+prboom: | $(OUT)
+	$(MAKE) -C cores/libretro-prboom \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/libretro-prboom/prboom_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/prboom_libretro.so
+
+mame2000: | $(OUT)
+	$(MAKE) -C cores/mame2000 \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/mame2000/mame2000_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/mame2000_libretro.so
+
+nestopia: | $(OUT)
+	$(MAKE) -C cores/nestopia/libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/nestopia/libretro/nestopia_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/nestopia_libretro.so
+
+tgbdual: | $(OUT)
+	$(MAKE) -C cores/libretro-tgbdual \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/libretro-tgbdual/tgbdual_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/tgbdual_libretro.so
+
+fake08: | $(OUT)
+	$(MAKE) -C cores/fake-08/platform/libretro \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/fake-08/platform/libretro/fake08_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/fake08_libretro.so
+
+bluemsx: | $(OUT)
+	$(MAKE) -C cores/libretro-blueMSX \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/libretro-blueMSX/bluemsx_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/bluemsx_libretro.so
+
+stella2014: | $(OUT)
+	$(MAKE) -C cores/stella2014 \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/stella2014/stella2014_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/stella2014_libretro.so
+
+prosystem: | $(OUT)
+	$(MAKE) -C cores/prosystem \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/prosystem/prosystem_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/prosystem_libretro.so
+
+handy: | $(OUT)
+	$(MAKE) -C cores/libretro-handy \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/libretro-handy/handy_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/handy_libretro.so
+
+race: | $(OUT)
+	$(MAKE) -C cores/RACE \
+		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
+		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+	cp cores/RACE/race_libretro.so $(OUT)/
+	$(STRIP) $(OUT)/race_libretro.so
+
+clean:
+	rm -rf $(OUT)

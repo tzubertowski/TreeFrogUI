@@ -1,3 +1,5 @@
 /.toolchain/
 /build/
 /cores/
+/libs/
+/build.log
