@@ -1,0 +1,33 @@
+#!/bin/sh
+LOG=/mnt/sdcard/frogui.log
+ICUBE_LOG=/mnt/sdcard/icube.log
+> "$LOG"
+echo "=== icube boot $(date '+%H:%M:%S' 2>/dev/null) ===" >> "$ICUBE_LOG"
+
+export LD_LIBRARY_PATH=/mnt/sdcard/cubegm/lib:/mnt/sdcard/cubegm/usr/lib:$LD_LIBRARY_PATH
+
+if ! pidof cubevol > /dev/null 2>&1; then
+    echo "starting cubevol..." >> "$LOG"
+    /usr/bin/cubevol &
+    sleep 0.3
+fi
+
+PICOARCH=/mnt/sdcard/cubegm/picoarch
+FROGUI_CORE=/mnt/sdcard/cubegm/cores/frogui_libretro.so
+# picoarch needs a ROM arg even for no-game cores — pass dummy (core ignores it)
+DUMMY=/mnt/sdcard/cubegm/cores/frogui_libretro.so
+LAUNCH=/tmp/frogui_launch.txt
+
+ITER=0
+while true; do
+    ITER=$((ITER+1))
+    rm -f "$LAUNCH"
+    echo "iter $ITER: launching picoarch+frogui" >> "$ICUBE_LOG"
+    echo "launching FrogUI..." >> "$LOG"
+    "$PICOARCH" "$FROGUI_CORE" "$DUMMY" >> "$LOG" 2>&1
+    RC=$?
+    echo "iter $ITER: picoarch exited rc=$RC" >> "$ICUBE_LOG"
+    echo "picoarch/frogui exited: $RC" >> "$LOG"
+    rm -f "$LAUNCH"
+    sleep 0.2
+done
