@@ -1,6 +1,8 @@
 #!/bin/sh
 LOG=/mnt/sdcard/frogui.log
 ICUBE_LOG=/mnt/sdcard/icube.log
+# Rotate previous log so we don't lose evidence after reboot
+[ -f "$LOG" ] && mv "$LOG" "$LOG.prev"
 > "$LOG"
 echo "=== icube boot $(date '+%H:%M:%S' 2>/dev/null) ===" >> "$ICUBE_LOG"
 
