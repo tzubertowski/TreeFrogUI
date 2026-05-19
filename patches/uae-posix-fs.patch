@@ -1,0 +1,101 @@
+diff --git a/Makefile.libretro b/Makefile.libretro
+index 0598ccd..7dfd42f 100644
+--- a/Makefile.libretro
++++ b/Makefile.libretro
+@@ -35,7 +35,7 @@ SHARED      = -shared -Wl,--version-script=libretro/link.T
+ ifeq ($(platform), sf2000)
+ MORE_CFLAGS = -O3 -Isrc/ -Isrc/include/ -Isrc/menu -Isrc/vkbd -fomit-frame-pointer -fno-threadsafe-statics -Wno-unused -Wno-format -DGCCCONSTFUNC="__attribute__((const))" -DUSE_UNDERSCORE -fno-exceptions -DUNALIGNED_PROFITABLE -DREGPARAM= -DOPTIMIZED_FLAGS -D__inline__=__inline__ -DSHM_SUPPORT_LINKS=0 -DOS_WITHOUT_MEMORY_MANAGEMENT -DVKBD_ALWAYS
+ else
+-MORE_CFLAGS = -g -O3 -Isrc/ -Isrc/include/ -Isrc/menu -Isrc/vkbd -fomit-frame-pointer -fno-threadsafe-statics -Wno-unused -Wno-format -DGCCCONSTFUNC="__attribute__((const))" -DUSE_UNDERSCORE -fno-exceptions -DUNALIGNED_PROFITABLE -DREGPARAM="__attribute__((regparm(3)))" -DOPTIMIZED_FLAGS -D__inline__=__inline__ -DSHM_SUPPORT_LINKS=0 -DOS_WITHOUT_MEMORY_MANAGEMENT -DVKBD_ALWAYS
++MORE_CFLAGS = -g -O3 -fPIC -Isrc/ -Isrc/include/ -Isrc/menu -Isrc/vkbd -fomit-frame-pointer -fno-threadsafe-statics -Wno-unused -Wno-format -DGCCCONSTFUNC="__attribute__((const))" -DUSE_UNDERSCORE -fno-exceptions -DUNALIGNED_PROFITABLE -DREGPARAM="__attribute__((regparm(3)))" -DOPTIMIZED_FLAGS -D__inline__=__inline__ -DSHM_SUPPORT_LINKS=0 -DOS_WITHOUT_MEMORY_MANAGEMENT -DVKBD_ALWAYS
+ endif
+ 
+ MORE_CFLAGS+= -Ilibretro/include/ -Ilibretro/core/
+@@ -151,7 +151,8 @@ OBJS =	\
+ OBJS+=  libretro/core/libretro-core.o \
+ 	libretro/core/core-mapper.o \
+ 	libretro/core/graph.o \
+-	libretro/core/vkbd.o
++	libretro/core/vkbd.o \
++	libretro/fs_posix.o
+ 
+ ifdef LIB7Z
+ CFLAGS+=-DUSE_LIB7Z
+diff --git a/libretro/fs_posix.c b/libretro/fs_posix.c
+new file mode 100644
+index 0000000..570d081
+--- /dev/null
++++ b/libretro/fs_posix.c
+@@ -0,0 +1,60 @@
++/*
++ * SF2000 firmware fs_* → POSIX shim for Linux/libretro builds.
++ * Flag values differ from POSIX for O_CREAT (0x100 vs 0x40), so convert.
++ */
++#include <fcntl.h>
++#include <unistd.h>
++#include <sys/stat.h>
++#include <stdint.h>
++#include <stddef.h>
++
++#define SF_O_RDONLY 0x0000
++#define SF_O_WRONLY 0x0001
++#define SF_O_RDWR   0x0002
++#define SF_O_CREAT  0x0100
++#define SF_O_TRUNC  0x0200
++
++static int sf_flags_to_posix(int sf_flags)
++{
++    int posix = sf_flags & 0x0003; /* O_RDONLY/O_WRONLY/O_RDWR same */
++    if (sf_flags & SF_O_CREAT)  posix |= O_CREAT;
++    if (sf_flags & SF_O_TRUNC)  posix |= O_TRUNC;
++    return posix;
++}
++
++int fs_open(const char *path, int flags, int perms)
++{
++    return open(path, sf_flags_to_posix(flags), (mode_t)perms);
++}
++
++int fs_close(int fd)
++{
++    return close(fd);
++}
++
++ssize_t fs_read(int fd, void *buf, size_t count)
++{
++    return read(fd, buf, count);
++}
++
++ssize_t fs_write(int fd, const void *buf, size_t count)
++{
++    return write(fd, buf, count);
++}
++
++int64_t fs_lseek(int fd, int64_t offset, int whence)
++{
++    return (int64_t)lseek(fd, (off_t)offset, whence);
++}
++
++int fs_mkdir(const char *path, int mode)
++{
++    return mkdir(path, (mode_t)mode);
++}
++
++int fs_sync(const char *path)
++{
++    (void)path;
++    sync();
++    return 0;
++}
+diff --git a/src/sf2000_diag.h b/src/sf2000_diag.h
+index 5a4495a..a677043 100644
+--- a/src/sf2000_diag.h
++++ b/src/sf2000_diag.h
+@@ -43,6 +43,7 @@ static inline void diag_add(const char *msg) {
+ 
+ #else /* not SF2000 */
+ 
++#define xlog(...) ((void)0)
+ #define DIAG(msg)
+ #define DIAG_FATAL(msg)
+ 

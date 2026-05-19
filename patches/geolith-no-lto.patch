@@ -1,0 +1,19 @@
+diff --git a/libretro/Makefile b/libretro/Makefile
+index 29b57da..055d379 100644
+--- a/libretro/Makefile
++++ b/libretro/Makefile
+@@ -667,11 +667,11 @@ ifneq (,$(findstring msvc,$(platform)))
+    CFLAGS   += -MT
+    CXXFLAGS += -MT
+ endif
+-   CFLAGS   += -O2 -flto -DNDEBUG
+-   CXXFLAGS += -O2 -flto -DNDEBUG
++   CFLAGS   += -O2 -DNDEBUG
++   CXXFLAGS += -O2 -DNDEBUG
+ endif
+ 
+-LDFLAGS += $(fpic) $(SHARED) -flto
++LDFLAGS += $(fpic) $(SHARED)
+ FLAGS += $(fpic) 
+ FLAGS += $(INCFLAGS)
+ FLAGS += $(EXTRA_INCLUDES) 

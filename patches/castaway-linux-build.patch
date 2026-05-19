@@ -1,0 +1,40 @@
+diff --git a/Makefile.libretro b/Makefile.libretro
+index f023dae..77496fd 100644
+--- a/Makefile.libretro
++++ b/Makefile.libretro
+@@ -66,7 +66,7 @@ else
+     CFLAGS += -O3
+ endif
+ 
+-CFLAGS += -Wno-unused -Wno-format -Wno-sign-compare
++CFLAGS += -Wno-unused -Wno-format -Wno-sign-compare -Wno-narrowing
+ CFLAGS += -fno-exceptions -fno-rtti -fno-threadsafe-statics
+ 
+ CXXFLAGS = $(CFLAGS)
+diff --git a/libretro/sdl_compat.h b/libretro/sdl_compat.h
+index 74d079c..6c6fc12 100644
+--- a/libretro/sdl_compat.h
++++ b/libretro/sdl_compat.h
+@@ -18,7 +18,7 @@ extern "C" {
+ /* Basic SDL types */
+ typedef uint8_t  Uint8;
+ typedef uint16_t Uint16;
+-typedef uint32_t Uint32;
++typedef unsigned long Uint32;
+ typedef uint64_t Uint64;
+ typedef int8_t   Sint8;
+ typedef int16_t  Sint16;
+diff --git a/src/dcastaway.cpp b/src/dcastaway.cpp
+index fcaa6b7..3262bb7 100644
+--- a/src/dcastaway.cpp
++++ b/src/dcastaway.cpp
+@@ -14,7 +14,8 @@ extern "C" void sf_notify_vbl_done(int vbl);
+ #define xlog(...) ((void)0)
+ #define XLOG(msg) ((void)0)
+ #else
+-#define XLOG(msg)
++#define xlog(...) ((void)0)
++#define XLOG(msg) ((void)0)
+ #define sf_notify_vbl(x) ((void)0)
+ #define sf_notify_vbl_done(x) ((void)0)
+ #endif

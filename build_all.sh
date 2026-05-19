@@ -12,6 +12,20 @@
 set -uo pipefail
 cd "$(dirname "$0")"
 
+# ── Apply patches for externally-owned repos ─────────────────────────────────
+_apply_patch() {
+    local patch="patches/$1" dir="cores/$2"
+    [ -f "$patch" ] || return
+    if git -C "$dir" apply --check "$patch" 2>/dev/null; then
+        git -C "$dir" apply "$patch" && echo "patched $2"
+    else
+        echo "patch already applied or conflict: $1 (skipping)"
+    fi
+}
+_apply_patch geolith-no-lto.patch      libretro-geolith
+_apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
+_apply_patch castaway-linux-build.patch sf2000-atarist-emulator
+
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
 SYSROOT="$TOOLCHAIN/mipsel-buildroot-linux-gnu/sysroot"
