@@ -82,7 +82,8 @@ gambatte: | $(OUT)
 gpsp: | $(OUT)
 	$(MAKE) -C cores/gpsp \
 		CC="$(CC)" CXX="$(CXX)" AR="$(AR)" RANLIB="$(RANLIB)" \
-		CFLAGS="$(CFLAGS)" CXXFLAGS="$(CXXFLAGS)" platform=unix
+		LDFLAGS="-EL -mips32r2 -mhard-float -mfp32 --sysroot=$(SYSROOT) -L$(SYSROOT)/usr/lib -lm -lc" \
+		platform=sf3000
 	cp cores/gpsp/gpsp_libretro.so $(OUT)/
 	$(STRIP) $(OUT)/gpsp_libretro.so
 
