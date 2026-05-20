@@ -55,6 +55,27 @@ Full list: [cores.md](cores.md)
 
 ---
 
+## Background images
+
+TreeFrogUI supports per-folder background images rendered behind the menu (layer 0), with pillboxes and text on top.
+
+Place image files in `/mnt/sdcard/frogui/` named after the folder they should appear for:
+
+```
+/mnt/sdcard/frogui/
+├── main.png          ← root / systems menu
+├── recents.png       ← Recent Games view
+├── favourites.png    ← Favourites view
+├── GBA.png           ← shown when browsing the GBA folder
+├── FC.png            ← shown when browsing the FC (NES) folder
+├── SFC.png           ← SNES folder
+└── ...               ← any folder name works
+```
+
+Supported formats: **PNG, JPEG, BMP** (loaded via stb_image). Images are scaled to fill the full screen (854×480) on load — provide any resolution. The UI pillboxes and text render on top, so semi-transparent or dark/muted images work best for readability.
+
+---
+
 ## BIOS files required
 
 Some cores need BIOS/firmware files. Place them in the system folder the core expects (check individual core docs), typically alongside the ROMs or in a `bios/` subfolder.
