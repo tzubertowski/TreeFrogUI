@@ -20,6 +20,15 @@ FROGUI_CORE=/mnt/sdcard/cubegm/cores/frogui_libretro.so
 DUMMY=/mnt/sdcard/cubegm/cores/frogui_libretro.so
 LAUNCH=/tmp/frogui_launch.txt
 
+# Run mmap exec test once if binary present (remove binary to disable)
+MMAP_TEST=/mnt/sdcard/cubegm/mmap_exec_test
+if [ -f "$MMAP_TEST" ]; then
+    chmod +x "$MMAP_TEST"
+    echo "=== mmap_exec_test ===" >> /mnt/sdcard/mmap_test.log
+    "$MMAP_TEST" >> /mnt/sdcard/mmap_test.log 2>&1
+    echo "exit=$?" >> /mnt/sdcard/mmap_test.log
+fi
+
 ITER=0
 while true; do
     ITER=$((ITER+1))
@@ -27,7 +36,9 @@ while true; do
     killall rkgame 2>/dev/null
     echo "iter $ITER: launching picoarch+frogui" >> "$ICUBE_LOG"
     echo "launching FrogUI..." >> "$LOG"
-    "$PICOARCH" "$FROGUI_CORE" "$DUMMY" >> "$LOG" 2>&1
+    [ -f /mnt/sdcard/lastrun.log.prev ] && mv -f /mnt/sdcard/lastrun.log.prev /mnt/sdcard/lastrun.log.prev2
+    [ -f /mnt/sdcard/lastrun.log ] && mv -f /mnt/sdcard/lastrun.log /mnt/sdcard/lastrun.log.prev
+    "$PICOARCH" "$FROGUI_CORE" "$DUMMY" > /mnt/sdcard/lastrun.log 2>&1
     RC=$?
     echo "iter $ITER: picoarch exited rc=$RC" >> "$ICUBE_LOG"
     echo "picoarch/frogui exited: $RC" >> "$LOG"
