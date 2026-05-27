@@ -14,8 +14,6 @@ A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modi
 
 ⬇️ **[Latest Release](https://github.com/tzubertowski/treefrog-ui/releases)** - Download the latest version
 
-☕ **[Support the Project](https://www.buymeacoffee.com/tzubertowsg)** - Buy me a coffee!
-
 ---
 
 ## What's included
