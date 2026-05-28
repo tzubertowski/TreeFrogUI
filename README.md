@@ -16,6 +16,8 @@ A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modi
 
 ☕ **[Support the Project](https://www.buymeacoffee.com/tzubertowsg)** - Buy me a coffee!
 
+💬 **[v0.1.0 Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)** - Submit anonymous feedback or compatibility reports
+
 ---
 
 ## What's included
@@ -44,7 +46,7 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 ---
 ## ROM folder setup
 
-Create folders on the SD card matching these names. TreeFrogUI auto-detects the correct emulator from the folder name. For built-in cores, see the [picoarch submodules/cores](https://github.com/700zx1/picoarch). Below is the full folder-to-core mapping table:
+Create subfolders inside the `roms/` directory on the root of your SD card matching these names (e.g., `roms/GBA`, `roms/FC`). TreeFrogUI automatically detects the correct emulator based on the folder name. For built-in cores, see the [picoarch submodules/cores](https://github.com/700zx1/picoarch). Below is the full folder-to-core mapping table:
 
 | Folder Name(s) | Target Console / System | Core Shared Library (`.so`) |
 |---|---|---|
@@ -125,6 +127,16 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 TreeFrogUI supports selectable visual color themes, custom pixel fonts, and per-folder background image loading from the SD card.
 
 📦 **[Theming Guide](theme.md)** - Details on customizing colors, background images, fonts, and editing settings
+
+---
+
+## Shortcuts
+
+While playing a game, use the following button combinations:
+
+- **`SELECT + START`** - Opens the in-game menu (picoarch menu for all libretro cores, or emulator menu for PCSX4ALL).
+- **`SELECT + L`** - Load state (slot 0, default).
+- **`SELECT + R`** - Save state (slot 0, default).
 
 ---
 
@@ -251,6 +263,7 @@ This project is a compilation of multiple components, each retaining its origina
  - *Attribution*: Changes have been made to support the SF3000 hardware architecture, resolution, input handling, and directory layout.
  - *ShareAlike*: Any modifications or derivations of the UI frontend code must be distributed under the same CC BY-NC-SA 4.0 license.
  - *NonCommercial*: This software is strictly for non-commercial use. Selling or bundling it with commercial devices is prohibited.
+  - *Assets & Images*: The logo and font were taken from the upstream [FrogUI](https://github.com/tzubertowski/frogui) repository, while the default system background images were sourced from the **[Art Book Next](https://github.com/anthonycaccese/art-book-next-es)** ES-DE theme by Anthony Caccese. These assets are used under their respective open-source and creative commons licenses.
 - **picoarch (Frontend Integration)**: Uses code from `libpicofe` (triple-licensed under GNU GPL v2+, GNU LGPL v2.1+, or the MAME license) and neonloop's wrapper code (licensed under the **BSD 3-Clause License**).
 - **Emulator Cores**: Each emulator core located in the `cores/` directory is built from its respective upstream repository and retains its individual open-source license (such as GPL, BSD, MIT, or MAME license). See [cores.md](cores.md) and individual core subdirectories for details.
 

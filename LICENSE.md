@@ -21,7 +21,7 @@ Copyright (c) 2024-2025 FrogUI Contributors:
 
 To view a copy of this license, visit: http://creativecommons.org/licenses/by-nc-sa/4.0/
 
-*Notice: FrogUI is built upon libretro, which is licensed under GPLv3. The libretro components retain their original GPL licensing. This CC BY-NC-SA 4.0 license applies to the original FrogUI code and creative works.*
+*Notice: FrogUI is built upon libretro, which is licensed under GPLv3. The libretro components retain their original GPL licensing. This CC BY-NC-SA 4.0 license applies to the original FrogUI code and creative works. The logo and font were taken from the upstream [FrogUI](https://github.com/tzubertowski/frogui) repository (under CC BY-NC-SA 4.0), while the default system background images were sourced from the **[Art Book Next](https://github.com/anthonycaccese/art-book-next-es)** ES-DE theme by Anthony Caccese (licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0).*
 
 ---
 

@@ -1,5 +1,0 @@
-theme=Red
-font=GamePocket
-brightness=75
-filter=bilinear
-auto_resume=off

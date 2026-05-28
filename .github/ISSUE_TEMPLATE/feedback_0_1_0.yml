@@ -1,0 +1,48 @@
+name: Release 0.1.0 Feedback
+description: Share your feedback, report bugs, or suggest features for the 0.1.0 release.
+title: "[v0.1.0 Feedback]: "
+labels: ["feedback", "v0.1.0"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thank you for testing TreeFrogUI v0.1.0!
+        Your feedback is extremely valuable in helping to improve compatibility, performance, and features for everyone.
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Which device are you using?
+      description: Please select the handheld console you installed TreeFrogUI on.
+      options:
+        - SF3000
+        - SF3000HD
+        - SF3100
+        - SF3500
+        - GB350
+        - Other (please specify in your feedback)
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: feedback_type
+    attributes:
+      label: Type of Feedback
+      description: Select all categories that apply to your feedback (mixed feedback is welcome!).
+      options:
+        - label: "Bug Report (something is broken or behaving incorrectly)"
+        - label: "Performance Issue (stuttering, slow frame rates, or audio lag)"
+        - label: "Feature Request / Suggestion (ideas for improvements or new options)"
+        - label: "General Feedback / Compatibility report (e.g. 'Works perfectly!')"
+        - label: "Other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Feedback details
+      description: Please provide as much detail as possible (what you tested, which cores, steps to reproduce bugs, etc.).
+      placeholder: "e.g. Performance is great on NES, but GBA games are stuttering on mgba. I noticed that..."
+    validations:
+      required: true
