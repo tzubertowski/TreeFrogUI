@@ -1,14 +1,22 @@
-# TreeFrogUI v0.1.0 - Initial Release Notes
+# TreeFrogUI v0.1.1 - Release Notes
 
-Welcome to the initial release of **TreeFrogUI** (v0.1.0) for the SF3000 handheld console!
+Welcome to **TreeFrogUI** (v0.1.1) for the SF3000 handheld console!
 
 ![UI Preview on SF3000 Console](console.jpg)
 
 > [!IMPORTANT]
-> This is the **INITIAL release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
+> This is an **early release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
-> 📋 **[Submit Anonymous v0.1.0 Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
+> 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
+
+---
+
+## What's New in v0.1.1
+
+- **PICO-8 (fake08) working**: fake08 core now builds and runs; launches both `.p8` (text source) and `.p8.png` (cart image) files from `roms/fake08/`.
+- **Smoother menu fonts**: glyph rendering now alpha-blends edges instead of hard 1-bit thresholding, removing the jagged menu text.
+- **PCSX4ALL BIOS path documented**: place `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (missing BIOS falls back to HLE, lower compatibility).
 
 ---
 
@@ -31,14 +39,6 @@ TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoa
 
 ---
 
-## Latest Changes
-
-- **PICO-8 (fake08) working**: fake08 core now builds and runs; launches both `.p8` (text source) and `.p8.png` (cart image) files from `roms/fake08/`.
-- **Smoother menu fonts**: glyph rendering now alpha-blends edges instead of hard 1-bit thresholding, removing the jagged text.
-- **PCSX4ALL BIOS location documented**: place `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (missing BIOS falls back to HLE, lower compatibility).
-
----
-
 ## Installation Summary
 
 For step-by-step setup instructions, please refer to the [Installation Guide](install.md).
@@ -56,5 +56,5 @@ For step-by-step setup instructions, please refer to the [Installation Guide](in
 ## Troubleshooting & Feedback
 
 - **Black Screen / Only Battery Icon Visible:** If nothing loads or only the battery icon is visible after the boot logo, set up your SD card with the clean **[Stock OS Backup](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)** first, then copy the TreeFrogUI files over.
-- **Submit Feedback Anonymously**: Help improve the project by submitting bugs, performance issues, or compatibility reports on the [v0.1.0 Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header).
+- **Submit Feedback Anonymously**: Help improve the project by submitting bugs, performance issues, or compatibility reports on the [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header).
 - **GitHub Issues**: You can also open an issue on the [GitHub repository](https://github.com/tzubertowski/treefrog-ui/issues).
