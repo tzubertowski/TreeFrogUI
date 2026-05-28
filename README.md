@@ -134,9 +134,9 @@ TreeFrogUI supports selectable visual color themes, custom pixel fonts, and per-
 
 While playing a game, use the following button combinations:
 
-- **`SELECT + START`** - Opens the in-game menu (picoarch menu for all libretro cores, or emulator menu for PCSX4ALL).
-- **`SELECT + L`** - Load state (slot 0, default).
-- **`SELECT + R`** - Save state (slot 0, default).
+- **`SELECT + START`** - Opens the in-game picoarch menu (for all cores *except* PCSX4ALL).
+- **`SELECT + L`** - Opens the emulator menu (for PCSX4ALL *only*) or loads a state (slot 0, default) for other cores.
+- **`SELECT + R`** - Saves a state (slot 0, default) for all cores *except* PCSX4ALL.
 
 ---
 
@@ -251,6 +251,7 @@ treefrog-ui/
 - **picoarch** - libretro frontend adapted for SF3000
 - **FrogUI** - original launcher by tzubertowski, fork of [FrogUI](https://github.com/tzubertowski/FrogUI)
 - **angree** - Amiga (UAE4ALL) and Atari ST (castaway) ports for SF-series handhelds
+- **goph-R** - [SF3000-RE](https://github.com/goph-R/SF3000-RE) reverse engineering project and boot logo specs
 - All libretro core authors
 
 ---
