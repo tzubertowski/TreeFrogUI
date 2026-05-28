@@ -122,6 +122,8 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 
 See [cores.md](cores.md) for detailed build status and source repositories of TreeFrogUI external cores.
 
+**PICO-8 (fake08):** place carts in `roms/fake08/`. Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
+
 ---
 
 ## Theming
@@ -148,6 +150,7 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 
 | System | File needed |
 |--------|-------------|
+| PlayStation 1 (PCSX4ALL) | `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (missing → HLE BIOS, lower compatibility) |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | `kick.rom` (Amiga Kickstart ROM) |
 | Atari ST (castaway) | TOS ROM image |
@@ -243,7 +246,6 @@ treefrog-ui/
 | `arduous` (Arduboy) | ❌ needs cmake - not in toolchain |
 | `o2em` (Odyssey²) | ❌ not yet cloned |
 | `vice` (C64) | commented out - large build, enable manually in build_all.sh |
-| `fake-08` (PICO-8) | not yet built |
 | picoarch binary | not included - obtain from SF3000 multicore project |
 
 ---

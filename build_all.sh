@@ -25,6 +25,7 @@ _apply_patch() {
 _apply_patch geolith-no-lto.patch      libretro-geolith
 _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
+_apply_patch fake08-cpp17-gcc6.patch   fake-08
 
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
@@ -253,6 +254,10 @@ _b lowresnx          lowres-nx/platform/LibRetro ""
 
 echo "-- retro8 make --"
 _b retro8            retro8                    ""
+
+echo "-- fake08 make --"
+git -C "$CORES/fake-08" submodule update --init --recursive 2>/dev/null || true
+_b fake08            fake-08/platform/libretro ""
 
 echo "-- gong make --"
 _b gong              gong                      "-f Makefile.libretro"

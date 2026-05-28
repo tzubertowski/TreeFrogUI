@@ -117,7 +117,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `xrick` | Rick Dangerous | `xrick_libretro.so` | [libretro/xrick-libretro](https://github.com/libretro/xrick-libretro) |
 | `jnb` | Jump 'n Bump | `jumpnbump_libretro.so` | [libretro/jumpnbump-libretro](https://github.com/libretro/jumpnbump-libretro) |
 | `gong` | Pong clone | `gong_libretro.so` | [libretro/gong](https://github.com/libretro/gong) |
-| `fake08` | PICO-8 compat | ❌ `fake08_libretro.so` | [tzubertowski/fake-08](https://github.com/tzubertowski/fake-08) |
+| `fake08` | PICO-8 compat | `fake08_libretro.so` | [tzubertowski/fake-08](https://github.com/tzubertowski/fake-08) |
 | `retro8` | PICO-8 compat | `retro8_libretro.so` | [libretro/retro8](https://github.com/libretro/retro8) |
 | `lowres-nx` | LowRes NX | `lowresnx_libretro.so` | [timoinutilis/lowres-nx](https://github.com/timoinutilis/lowres-nx) |
 | `arduboy` | Arduboy | ❌ `arduous_libretro.so` | [libretro/arduous](https://github.com/libretro/arduous) - needs cmake |
