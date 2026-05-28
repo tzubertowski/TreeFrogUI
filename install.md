@@ -7,6 +7,8 @@ This guide covers the installation of **TreeFrogUI** on the **Datafrog SF3000** 
 ## Before you start
 
 > [!IMPORTANT]
+> **Prerequisite:** You must have the original **stock OS** installed on your SD card. TreeFrogUI runs on top of the stock operating system files.
+> 
 > **Backup your files:** Before making any modifications, backup your SD card, or at least the following files:
 > - `cubegm/icube`
 > - `cubegm/icube_start.sh`
