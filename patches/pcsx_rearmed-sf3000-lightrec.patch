@@ -1,0 +1,152 @@
+diff --git a/deps/lightning/lib/jit_mips.c b/deps/lightning/lib/jit_mips.c
+index 6eb41a0..5445cdf 100644
+--- a/deps/lightning/lib/jit_mips.c
++++ b/deps/lightning/lib/jit_mips.c
+@@ -2148,6 +2148,15 @@ _emit_code(jit_state_t *_jit)
+ #endif
+ 		    _jitc->patches.offset = undo.patch_offset;
+ 		    patch_alist(1);
++		    /* SF3000 fix: discard any instruction left in the MIPS 1-deep
++		     * delay-slot pending buffer before restarting the function.
++		     * The restart resets pc to the function start and re-emits the
++		     * prologue, whose first instr() would otherwise flush this stale
++		     * pending instruction at offset 0 — duplicating the last body
++		     * instruction at the function ENTRY (before the prologue) and
++		     * making blocks that jump to the entry execute it with garbage
++		     * registers (observed: lightrec c_wrapper SIGSEGV @0x268). */
++		    _jitc->inst.pend = 0;
+ 		    goto restart_function;
+ 		}
+ 		/* remember label is defined */
+@@ -2411,7 +2420,11 @@ jit_flush(void *fptr, void *tptr)
+     s = sysconf(_SC_PAGE_SIZE);
+     f = (jit_word_t)fptr & -s;
+     t = (((jit_word_t)tptr) + s - 1) & -s;
+-    _flush_cache((void *)f, t - f, ICACHE);
++    /* SF3000: glibc _flush_cache(ICACHE) does not flush the I-cache here
++     * (JIT code runs against stale icache -> SIGSEGV on first block).
++     * __builtin___clear_cache emits the cacheflush syscall that works on this
++     * kernel (verified by mmap_exec_test). */
++    __builtin___clear_cache((char *)f, (char *)t);
+ #endif
+ }
+ 
+diff --git a/libpcsxcore/lightrec/mem.c b/libpcsxcore/lightrec/mem.c
+index ec62853..b9134a7 100644
+--- a/libpcsxcore/lightrec/mem.c
++++ b/libpcsxcore/lightrec/mem.c
+@@ -35,9 +35,13 @@
+ #endif
+ 
+ static const uintptr_t supported_io_bases[] = {
++	/* Try 0x40000000 first on SF3000: process lives at 0x400000-0x700000,
++	 * leaving 0x40000000-0x407fffff completely free for 4 mirrors + code buf.
++	 * offset_ram=0x40000000 → the sub-par dispatcher path applies it correctly
++	 * (LUI+ADDU addresses are distinguishably high, away from host pointers). */
++	0x40000000,
+ 	0x0,
+ 	0x10000000,
+-	0x40000000,
+ 	0x80000000,
+ };
+ 
+@@ -81,6 +85,15 @@ static int lightrec_mmap_ram(bool hugetlb)
+ 
+         memfd = syscall(SYS_memfd_create, "/lightrec_memfd",
+ 			flags);
++	if (memfd < 0) {
++		/* Old kernels (e.g. SF3000, 2.6.32) lack memfd_create (ENOSYS).
++		 * Fall back to a tmpfs-backed file: mkstemp + unlink keeps a
++		 * shared, ftruncatable fd we can map at all 4 mirror addresses. */
++		char tmpl[] = "/tmp/lightrec_memfd_XXXXXX";
++		memfd = mkstemp(tmpl);
++		if (memfd >= 0)
++			unlink(tmpl);
++	}
+ 	if (memfd < 0) {
+ 		SysMessage("Failed to create memfd: %d", errno);
+ 		err = -errno;
+@@ -97,13 +110,29 @@ static int lightrec_mmap_ram(bool hugetlb)
+ 	for (i = 0; i < ARRAY_SIZE(supported_io_bases); i++) {
+ 		base = supported_io_bases[i];
+ 
++		/* Skip base 0: even with mincore guard, partial MAP_FIXED at 0x0
++		 * destabilises the process (munmap of 0x0-0x3fffff races with the
++		 * runtime).  We fix the offset codegen bug for base 0x10000000 instead.
++		 * Identity map (offset_ram=0) is the ideal but can't be established
++		 * safely here. */
++		if (base == 0)
++			continue;
++
+ 		for (j = 0; j < 4; j++) {
+ 			void *base_ptr = (void *)(base + j * 0x200000);
++			/* Old kernels lack MAP_FIXED_NOREPLACE; plain MAP_FIXED is
++			 * destructive (silently unmaps whatever is there).  Emulate
++			 * NOREPLACE: only MAP_FIXED if mincore says the range is fully
++			 * unmapped (mincore -> -1/ENOMEM).  Otherwise treat as occupied. */
++			unsigned char vec[0x200000 / 4096];
++			if (mincore(base_ptr, 0x200000, vec) == 0 || errno != ENOMEM) {
++				/* range (partly) mapped -> can't use, abandon this base */
++				break;
++			}
+ 			map = mmap_huge(base_ptr, 0x200000, PROT_READ | PROT_WRITE,
+-					MAP_SHARED | MAP_FIXED_NOREPLACE, memfd, 0);
++					MAP_SHARED | MAP_FIXED, memfd, 0);
+ 			if (map == MAP_FAILED)
+ 				break;
+-			// some systems ignore MAP_FIXED_NOREPLACE
+ 			if (map != base_ptr) {
+ 				munmap(map, 0x200000);
+ 				break;
+@@ -155,7 +184,7 @@ int lightrec_init_mmap(void)
+ 	target = base + 0x1f000000;
+ 	map = mmap(target, 0x10000,
+ 		   PROT_READ | PROT_WRITE,
+-		   MAP_PRIVATE | /*MAP_FIXED_NOREPLACE |*/ MAP_ANONYMOUS, -1, 0);
++		   MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS, -1, 0);
+ 	if (map == MAP_FAILED) {
+ 		SysMessage("Unable to mmap parallel port: %d", errno);
+ 		err = -EINVAL;
+@@ -169,7 +198,7 @@ int lightrec_init_mmap(void)
+ 	target = base + 0x1fc00000;
+ 	map = mmap_huge(target, 0x200000,
+ 			PROT_READ | PROT_WRITE,
+-			MAP_PRIVATE | /*MAP_FIXED_NOREPLACE |*/ MAP_ANONYMOUS, -1, 0);
++			MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS, -1, 0);
+ 	if (map == MAP_FAILED) {
+ 		SysMessage("Unable to mmap BIOS: %d", errno);
+ 		err = -EINVAL;
+@@ -183,7 +212,7 @@ int lightrec_init_mmap(void)
+ 	target = base + 0x1f800000;
+ 	map = mmap(target, 0x10000,
+ 		   PROT_READ | PROT_WRITE,
+-		   MAP_PRIVATE | /*MAP_FIXED_NOREPLACE |*/ MAP_ANONYMOUS, 0, 0);
++		   MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS, 0, 0);
+ 	if (map == MAP_FAILED) {
+ 		SysMessage("Unable to mmap scratchpad: %d", errno);
+ 		err = -EINVAL;
+@@ -197,7 +226,7 @@ int lightrec_init_mmap(void)
+ 	target = base + 0x800000;
+ 	map = mmap_huge(target, CODE_BUFFER_SIZE,
+ 			PROT_EXEC | PROT_READ | PROT_WRITE,
+-			MAP_PRIVATE | /*MAP_FIXED_NOREPLACE |*/ MAP_ANONYMOUS,
++			MAP_PRIVATE | MAP_FIXED | MAP_ANONYMOUS,
+ 			-1, 0);
+ 	if (map == MAP_FAILED) {
+ 		SysMessage("Unable to mmap code buffer: %d", errno);
+diff --git a/libpcsxcore/lightrec/plugin.c b/libpcsxcore/lightrec/plugin.c
+index 4f687d9..3b6987c 100644
+--- a/libpcsxcore/lightrec/plugin.c
++++ b/libpcsxcore/lightrec/plugin.c
+@@ -506,11 +506,6 @@ static int lightrec_plugin_init(void)
+ 			lightrec_map, ARRAY_SIZE(lightrec_map),
+ 			&lightrec_ops);
+ 
+-	// fprintf(stderr, "M=0x%lx, P=0x%lx, R=0x%lx, H=0x%lx\n",
+-	// 		(uintptr_t) psxRegs.ptrs.psxM,
+-	// 		(uintptr_t) psxRegs.ptrs.psxP,
+-	// 		(uintptr_t) psxRegs.ptrs.psxR,
+-	// 		(uintptr_t) psxRegs.ptrs.psxH);
+ 
+ #ifndef _WIN32
+ 	signal(SIGPIPE, exit);

@@ -118,6 +118,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `jnb` | Jump 'n Bump | `jumpnbump_libretro.so` | [libretro/jumpnbump-libretro](https://github.com/libretro/jumpnbump-libretro) |
 | `gong` | Pong clone | `gong_libretro.so` | [libretro/gong](https://github.com/libretro/gong) |
 | `fake08` | PICO-8 compat | `fake08_libretro.so` | [tzubertowski/fake-08](https://github.com/tzubertowski/fake-08) |
+| `ps1r` | PlayStation (lightrec JIT) | `pcsx_rearmed_libretro.so` | [libretro/pcsx_rearmed](https://github.com/libretro/pcsx_rearmed) + `patches/pcsx_rearmed-sf3000-lightrec.patch` |
 | `retro8` | PICO-8 compat | `retro8_libretro.so` | [libretro/retro8](https://github.com/libretro/retro8) |
 | `lowres-nx` | LowRes NX | `lowresnx_libretro.so` | [timoinutilis/lowres-nx](https://github.com/timoinutilis/lowres-nx) |
 | `arduboy` | Arduboy | ❌ `arduous_libretro.so` | [libretro/arduous](https://github.com/libretro/arduous) - needs cmake |

@@ -26,6 +26,7 @@ _apply_patch geolith-no-lto.patch      libretro-geolith
 _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
 _apply_patch fake08-cpp17-gcc6.patch   fake-08
+_apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
@@ -258,6 +259,22 @@ _b retro8            retro8                    ""
 echo "-- fake08 make --"
 git -C "$CORES/fake-08" submodule update --init --recursive 2>/dev/null || true
 _b fake08            fake-08/platform/libretro ""
+
+echo "-- pcsx_rearmed make (PS1, lightrec JIT) --"
+# Needs libpicofe submodule; lightrec JIT enabled (patched: GNU lightning MIPS
+# function-restart fix + old-kernel mmap fallbacks — see patches/).
+git -C "$CORES/pcsx_rearmed" submodule update --init --depth=1 frontend/libpicofe 2>/dev/null || true
+make -C "$CORES/pcsx_rearmed" -f Makefile.libretro clean 2>/dev/null || true
+make -C "$CORES/pcsx_rearmed" -f Makefile.libretro platform=unix \
+    CC="$WRAP/mips-gcc" CXX="$WRAP/mips-g++" CC_AS="$WRAP/mips-gcc" CC_LINK="$WRAP/mips-g++" \
+    AR="$AR" ARCH=mips DYNAREC=lightrec HAVE_NEON=0 BUILTIN_GPU=unai -j"$(nproc)" 2>&1
+if [ -f "$CORES/pcsx_rearmed/pcsx_rearmed_libretro.so" ]; then
+    cp "$CORES/pcsx_rearmed/pcsx_rearmed_libretro.so" "$OUT/pcsx_rearmed_libretro.so"
+    "$STRIP" "$OUT/pcsx_rearmed_libretro.so"
+    echo "→ $OUT/pcsx_rearmed_libretro.so"
+else
+    echo "WARNING: .so not found for pcsx_rearmed"
+fi
 
 echo "-- gong make --"
 _b gong              gong                      "-f Makefile.libretro"
