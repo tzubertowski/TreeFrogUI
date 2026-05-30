@@ -31,8 +31,48 @@ index 6eb41a0..5445cdf 100644
  #endif
  }
  
+diff --git a/frontend/libretro_core_options.h b/frontend/libretro_core_options.h
+index bf2ee3c..adfb6a9 100644
+--- a/frontend/libretro_core_options.h
++++ b/frontend/libretro_core_options.h
+@@ -377,7 +377,7 @@ struct retro_core_option_v2_definition option_defs_us[] = {
+          { "fixed_interval", "Fixed Interval" },
+          { NULL, NULL },
+       },
+-      "disabled"
++      "auto"
+    },
+    {
+       "pcsx_rearmed_frameskip_threshold",
+@@ -828,7 +828,7 @@ struct retro_core_option_v2_definition option_defs_us[] = {
+          { "enabled",  NULL },
+          { NULL, NULL},
+       },
+-      "enabled",
++      "disabled",
+    },
+    {
+       "pcsx_rearmed_gpu_unai_skipline",
+@@ -842,7 +842,7 @@ struct retro_core_option_v2_definition option_defs_us[] = {
+          { "enabled",  NULL },
+          { NULL, NULL},
+       },
+-      "disabled",
++      "enabled",
+    },
+    {
+       "pcsx_rearmed_gpu_unai_lighting",
+@@ -870,7 +870,7 @@ struct retro_core_option_v2_definition option_defs_us[] = {
+          { "enabled",  NULL },
+          { NULL, NULL},
+       },
+-      "disabled",
++      "enabled",
+    },
+ #endif /* GPU_UNAI */
+    {
 diff --git a/libpcsxcore/lightrec/mem.c b/libpcsxcore/lightrec/mem.c
-index ec62853..b9134a7 100644
+index ec62853..d3b6514 100644
 --- a/libpcsxcore/lightrec/mem.c
 +++ b/libpcsxcore/lightrec/mem.c
 @@ -35,9 +35,13 @@
@@ -50,7 +90,24 @@ index ec62853..b9134a7 100644
  	0x80000000,
  };
  
-@@ -81,6 +85,15 @@ static int lightrec_mmap_ram(bool hugetlb)
+@@ -50,16 +54,11 @@ static void * mmap_huge(void *addr, size_t length, int prot, int flags,
+ 		map = mmap(addr, length, prot,
+ 			   flags | MAP_HUGETLB | (21 << MAP_HUGE_SHIFT),
+ 			   fd, offset);
+-		if (map != MAP_FAILED)
+-			printf("Hugetlb mmap to address 0x%" PRIxPTR " succeeded\n",
+-			       (uintptr_t) addr);
+ 	}
+ 
+ 	if (map == MAP_FAILED) {
+ 		map = mmap(addr, length, prot, flags, fd, offset);
+ 		if (map != MAP_FAILED) {
+-			printf("Regular mmap to address 0x%" PRIxPTR " succeeded\n",
+-			       (uintptr_t) addr);
+ #ifdef MADV_HUGEPAGE
+ 			madvise(map, length, MADV_HUGEPAGE);
+ #endif
+@@ -81,6 +80,15 @@ static int lightrec_mmap_ram(bool hugetlb)
  
          memfd = syscall(SYS_memfd_create, "/lightrec_memfd",
  			flags);
@@ -66,7 +123,7 @@ index ec62853..b9134a7 100644
  	if (memfd < 0) {
  		SysMessage("Failed to create memfd: %d", errno);
  		err = -errno;
-@@ -97,13 +110,29 @@ static int lightrec_mmap_ram(bool hugetlb)
+@@ -97,13 +105,29 @@ static int lightrec_mmap_ram(bool hugetlb)
  	for (i = 0; i < ARRAY_SIZE(supported_io_bases); i++) {
  		base = supported_io_bases[i];
  
@@ -98,7 +155,7 @@ index ec62853..b9134a7 100644
  			if (map != base_ptr) {
  				munmap(map, 0x200000);
  				break;
-@@ -155,7 +184,7 @@ int lightrec_init_mmap(void)
+@@ -155,7 +179,7 @@ int lightrec_init_mmap(void)
  	target = base + 0x1f000000;
  	map = mmap(target, 0x10000,
  		   PROT_READ | PROT_WRITE,
@@ -107,7 +164,7 @@ index ec62853..b9134a7 100644
  	if (map == MAP_FAILED) {
  		SysMessage("Unable to mmap parallel port: %d", errno);
  		err = -EINVAL;
-@@ -169,7 +198,7 @@ int lightrec_init_mmap(void)
+@@ -169,7 +193,7 @@ int lightrec_init_mmap(void)
  	target = base + 0x1fc00000;
  	map = mmap_huge(target, 0x200000,
  			PROT_READ | PROT_WRITE,
@@ -116,7 +173,7 @@ index ec62853..b9134a7 100644
  	if (map == MAP_FAILED) {
  		SysMessage("Unable to mmap BIOS: %d", errno);
  		err = -EINVAL;
-@@ -183,7 +212,7 @@ int lightrec_init_mmap(void)
+@@ -183,7 +207,7 @@ int lightrec_init_mmap(void)
  	target = base + 0x1f800000;
  	map = mmap(target, 0x10000,
  		   PROT_READ | PROT_WRITE,
@@ -125,7 +182,7 @@ index ec62853..b9134a7 100644
  	if (map == MAP_FAILED) {
  		SysMessage("Unable to mmap scratchpad: %d", errno);
  		err = -EINVAL;
-@@ -197,7 +226,7 @@ int lightrec_init_mmap(void)
+@@ -197,7 +221,7 @@ int lightrec_init_mmap(void)
  	target = base + 0x800000;
  	map = mmap_huge(target, CODE_BUFFER_SIZE,
  			PROT_EXEC | PROT_READ | PROT_WRITE,
