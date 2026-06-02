@@ -1,8 +1,9 @@
-# TreeFrogUI v0.1.1 - Release Notes
+# TreeFrogUI v0.1.3 - Release Notes
 
-Welcome to **TreeFrogUI** (v0.1.1) for the SF3000 handheld console!
+Welcome to **TreeFrogUI** (v0.1.3) for the SF3000 handheld console!
 
-![UI Preview on SF3000 Console](console.jpg)
+> [!WARNING]
+> This release currently works **only on the initial SF3000 hardware iterations**. Support for the **R36SX** is coming soon.
 
 > [!IMPORTANT]
 > This is an **early release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
@@ -12,11 +13,10 @@ Welcome to **TreeFrogUI** (v0.1.1) for the SF3000 handheld console!
 
 ---
 
-## What's New in v0.1.1
+## What's New in v0.1.3
 
-- **PICO-8 (fake08) working**: fake08 core now builds and runs; launches both `.p8` (text source) and `.p8.png` (cart image) files from `roms/fake08/`.
-- **Smoother menu fonts**: glyph rendering now alpha-blends edges instead of hard 1-bit thresholding, removing the jagged menu text.
-- **PCSX4ALL BIOS path documented**: place `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (missing BIOS falls back to HLE, lower compatibility).
+- **Idle freeze fixed**: libretro cores (Gambatte, FCEUmm, gpSP, etc.) could freeze when left running without input. Audio output is now handled on a dedicated thread so the emulator never blocks on the sound device — the hang is gone.
+- **Nearest filter warning**: selecting the **Nearest** scaling filter now shows a notice that it is software-scaled and slower than **Bilinear** (hardware path), which can cause lag on heavier cores.
 
 ---
 
@@ -44,12 +44,6 @@ TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoa
 For step-by-step setup instructions, please refer to the [Installation Guide](install.md).
 
 *Note: You must have the original **stock OS** installed on your SD card as a prerequisite (clean backup available [here](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)).*
-
-1. Back up your current SD card (especially before installing TreeFrogUI or restoring any backups, save a copy of at least `cubegm/icube` and `cubegm/icube_start.sh`).
-2. Download the release archive.
-3. Copy over the extracted `sdcard/` contents directly to the **ROOT** of your SD card (replacing files when prompted).
-4. Insert the card into your SF3000 and boot up!
-5. Put game ROMs in the corresponding subfolders inside the `roms/` directory on the root of your SD card (e.g., `roms/GBA/`, `roms/FC/`).
 
 ---
 
