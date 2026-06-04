@@ -104,10 +104,12 @@ _b snes9x2002        snes9x2002                ""
 echo "-- gambatte make --"
 _b gambatte          libretro-gambatte         "-f Makefile.libretro"
 
-# gpsp: pre-cpp branch, platform=unix + CPU_ARCH=mips for MIPS dynarec
+# gpsp: pre-cpp branch, platform=sf3000 — tzubertowski's dedicated target with
+# MMAP_JIT_CACHE + -fPIC + -nostdlib for the MIPS dynarec. (platform=unix used
+# the generic config and produced a broken dynarec: bad memory base, EWRAM fault.)
 echo "-- gpsp make --"
 make -C "$CORES/gpsp" clean 2>/dev/null || true
-make -C "$CORES/gpsp" platform=unix CPU_ARCH=mips HAVE_DYNAREC=1 \
+make -C "$CORES/gpsp" platform=sf3000 \
     CC="$WRAP/gpsp-gcc" CXX="$WRAP/gpsp-g++" \
     AR="$AR" RANLIB="$RANLIB" LD="$WRAP/gpsp-gcc" \
     LDFLAGS="$LDFLAGS_C" -j$(nproc) 2>&1
