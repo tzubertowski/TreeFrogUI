@@ -6,13 +6,15 @@ cd "$(dirname "$0")"
 
 STAGE="sdcard"
 PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
+PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
 FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
 
 # 1) Refresh staging from latest build artifacts
-[ -f "$PICOARCH" ] && cp "$PICOARCH" "$STAGE/cubegm/picoarch"
-[ -f "$FROGUI" ]   && cp "$FROGUI"   "$STAGE/cubegm/cores/frogui_libretro.so"
-[ -f "$TYRQUAKE" ] && cp "$TYRQUAKE" "$STAGE/cubegm/cores/tyrquake_libretro.so"
+[ -f "$PICOARCH" ]    && cp "$PICOARCH"    "$STAGE/cubegm/picoarch"
+[ -f "$PICOARCH_HI" ] && cp "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
+[ -f "$FROGUI" ]      && cp "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
+[ -f "$TYRQUAKE" ]    && cp "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 echo "Staging refreshed from build outputs."
 
 # 2) Find mounted SF3000 SD (vfat under /run/media/$USER with a cubegm/ dir)
