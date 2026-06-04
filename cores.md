@@ -9,7 +9,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | Folder | System | Core .so | Source |
 |--------|--------|----------|--------|
 | `nes`, `FC` | NES | `fceumm_libretro.so` | [tzubertowski/libretro-fceumm](https://github.com/tzubertowski/libretro-fceumm) |
-| `nesq`, `NES` | NES (fast) | `quicknes_libretro.so` | [tzubertowski/QuickNES_Core](https://github.com/tzubertowski/QuickNES_Core) |
+| `nesq`, `NES` | NES (fast) | `quicknes_libretro.so` | [libretro/QuickNES_Core](https://github.com/libretro/QuickNES_Core) |
 | `nest` | NES (accurate) | `nestopia_libretro.so` | [libretro/nestopia](https://github.com/libretro/nestopia) |
 | `snes`, `SFC` | SNES | `snes9x2005_plus_libretro.so` | [tzubertowski/snes9x2005](https://github.com/tzubertowski/snes9x2005) |
 | `snes02` | SNES (2002) | `snes9x2002_libretro.so` | [tzubertowski/snes9x2002](https://github.com/tzubertowski/snes9x2002) |

@@ -17,7 +17,7 @@ clone() {
 
 # ── tzubertowski forks (improved/MIPS-optimised) ──────────────────────────────
 clone fceumm          https://github.com/tzubertowski/libretro-fceumm
-clone QuickNES_Core   https://github.com/tzubertowski/QuickNES_Core
+clone QuickNES_Core   https://github.com/libretro/QuickNES_Core
 clone snes9x2005      https://github.com/tzubertowski/snes9x2005
 clone snes9x2002      https://github.com/tzubertowski/snes9x2002
 clone libretro-gambatte https://github.com/tzubertowski/libretro-gambatte
