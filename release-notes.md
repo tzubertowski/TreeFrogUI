@@ -1,15 +1,24 @@
-# TreeFrogUI v0.1.3 - Release Notes
+# TreeFrogUI v0.1.4 - Release Notes
 
-Welcome to **TreeFrogUI** (v0.1.3) for the SF3000 handheld console!
+Welcome to **TreeFrogUI** (v0.1.4) for the SF3000 and R36SX handheld consoles!
 
 > [!WARNING]
-> This release currently works **only on the initial SF3000 hardware iterations**. Support for the **R36SX** is coming soon.
+> This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). One build runs on both — the device is auto-detected at boot.
 
 > [!IMPORTANT]
 > This is an **early release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
+
+---
+
+## What's New in v0.1.4
+
+- **R36SX support (v2.6 / v2.7)**: a single build now runs on both the SF3000 and the R36SX. The device is auto-detected at boot (panel resolution, the correct `driver.so`, and the render path are all selected automatically). FrogUI renders natively at each panel's resolution (SF3000 854×480, R36SX 640×480).
+- **gpSP (GBA) fixed**: the MIPS dynarec now works — GBA games run at full speed (previously crashed on launch). Demanding SuperFX titles like Yoshi's Island run but remain heavy.
+- **Arduboy added**: the `arduous` core now builds and runs. Use `.hex` roms (`.arduboy` ZIP files are not supported — extract the `.hex` first).
+- **ZX Spectrum (fuse) controls fixed**: the gamepad now drives the **Kempston** joystick by default (was the Cursor joystick, which most games don't use).
 
 ---
 
@@ -43,7 +52,7 @@ TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoa
 
 For step-by-step setup instructions, please refer to the [Installation Guide](install.md).
 
-*Note: You must have the original **stock OS** installed on your SD card as a prerequisite (clean backup available [here](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)).*
+*Note: You must have the original **stock OS** installed on your SD card as a prerequisite. Clean backups: [SF3000](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z) · [R36SX v2.6](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD) · [R36SX v2.7](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O).*
 
 ---
 
