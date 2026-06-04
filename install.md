@@ -1,14 +1,16 @@
 # TreeFrogUI Installation Guide
 
-This guide covers the installation of **TreeFrogUI** on the **Datafrog SF3000** handheld.
+This guide covers the installation of **TreeFrogUI** on the **Datafrog SF3000** and **R36SX** (firmware **v2.6** / **v2.7**) handhelds. The build auto-detects the device at boot.
 
 ---
 
 ## Before you start
 
 > [!IMPORTANT]
-> **Prerequisite:** You must have the original **stock OS** installed on your SD card. TreeFrogUI runs on top of the stock operating system files. If you need a clean stock OS backup, you can download it here:
-> 📦 **[SF3000 Stock OS SD Card Backup (7z)](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)**
+> **Prerequisite:** You must have the original **stock OS** installed on your SD card. TreeFrogUI runs on top of the stock operating system files. Clean stock OS backups:
+> - 📦 **SF3000:** [Stock OS SD Card Backup (7z)](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)
+> - 📦 **R36SX v2.6:** [Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD)
+> - 📦 **R36SX v2.7:** [Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O)
 > 
 > **Backup your files:** Before installing TreeFrogUI or restoring any stock backups, make sure to back up your current physical SD card, or at least the following files:
 > - `cubegm/icube`

@@ -7,7 +7,7 @@ A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modi
 ![UI Preview on SF3000 Console](console.jpg)
 
 > [!WARNING]
-> This release currently works **only on the initial SF3000 hardware iterations**. Support for the **R36SX** is coming soon.
+> This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). The build auto-detects the device at boot.
 
 > [!NOTE]
 > TreeFrogUI is developed by a single developer and is built primarily for the **SF3000** handheld. It **might** also support similar hardware variants such as the **SF3000HD**, **SF3100**, **SF3500**, and **GB350**. Since I currently do not own these devices to test them myself, compatibility is unverified - please try it out and let me know if it works!
