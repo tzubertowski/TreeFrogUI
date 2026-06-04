@@ -261,6 +261,7 @@ treefrog-ui/
 - **FrogUI** - original launcher by tzubertowski, fork of [FrogUI](https://github.com/tzubertowski/FrogUI)
 - **angree** - Amiga (UAE4ALL) and Atari ST (castaway) ports for SF-series handhelds
 - **goph-R** - [SF3000-RE](https://github.com/goph-R/SF3000-RE) reverse engineering project and boot logo specs
+- **SjslTech** - [YouTube](https://www.youtube.com/@SjslTech) - R36SX testing & contributions
 - All libretro core authors
 
 ---
