@@ -127,6 +127,8 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 
 **PICO-8 (fake08):** place carts in `roms/fake08/`. Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
 
+**Arduboy (arduous):** use `.hex` roms (raw Intel HEX). `.arduboy` files are ZIP archives and are not supported — extract the `.hex` from inside them first.
+
 ---
 
 ## Theming
