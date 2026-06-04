@@ -231,8 +231,28 @@ _b cap32             libretro-cap32            ""
 echo "-- crocods make --"
 _b crocods           libretro-crocods          ""
 
-# arduous needs cmake — skip
-# _b arduous           arduous                   ""
+# arduous (Arduboy): cmake project, but built directly here (no cmake on host).
+# Bundles simavr (git submodule) + arduous + libretro glue into one .so.
+echo "-- arduous make --"
+(
+  AD="$CORES/arduous"
+  if [ -d "$AD" ]; then
+    git -C "$AD" submodule update --init simavr >/dev/null 2>&1
+    AINC="-I$AD/include -I$AD/simavr/simavr/sim -I$AD/simavr/simavr/cores -I$AD/examples/parts -I$AD/simavr/examples/parts -I$AD/src"
+    AOBJ=""; n=0; ok=1
+    SIM="avr_acomp avr_adc avr_bitbang avr_eeprom avr_extint avr_flash avr_ioport avr_lin avr_spi avr_timer avr_twi avr_uart avr_usb avr_watchdog sim_avr sim_cmds sim_core sim_cycle_timers sim_hex sim_interrupts sim_io sim_irq sim_utils sim_vcd_file"
+    for f in $SIM; do o="$AD/_ao_$n.o"; "$WRAP/mips-gcc" $AINC -std=gnu99 -c "$AD/simavr/simavr/sim/$f.c" -o "$o" || ok=0; AOBJ="$AOBJ $o"; n=$((n+1)); done
+    for f in "simavr/simavr/cores/sim_mega32u4.c" "simavr/examples/parts/ssd1306_virt.c" "src/sim_fake_gdb.c"; do o="$AD/_ao_$n.o"; "$WRAP/mips-gcc" $AINC -std=gnu99 -c "$AD/$f" -o "$o" || ok=0; AOBJ="$AOBJ $o"; n=$((n+1)); done
+    for f in "src/arduous/arduous.cpp" "src/arduous/speaker.cpp" "src/libretro/libretro.cpp"; do o="$AD/_ao_$n.o"; "$WRAP/mips-g++" $AINC -std=c++11 -c "$AD/$f" -o "$o" || ok=0; AOBJ="$AOBJ $o"; n=$((n+1)); done
+    if [ "$ok" = 1 ]; then
+      "$WRAP/mips-g++" -fPIC -shared -Wl,--version-script="$AD/link.T" $AOBJ -o "$AD/arduous_libretro.so" -lc -lm && \
+        cp "$AD/arduous_libretro.so" "$OUT/" && "$STRIP" "$OUT/arduous_libretro.so" && echo "→ $OUT/arduous_libretro.so"
+    else
+      echo "arduous: compile failed — skipped"
+    fi
+    rm -f "$AD"/_ao_*.o
+  fi
+)
 
 echo "-- gw make --"
 _b gw                libretro-gw               ""
