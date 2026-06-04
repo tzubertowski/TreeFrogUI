@@ -43,7 +43,10 @@ When playing games, use the following button combinations:
 ## Troubleshooting & Feedback
 
 - **Distorted / sideways boot logo (SF3000):** the package defaults to the R36SX logo. On SF3000 run `fix_bootlogo_sf3000.bat` (Windows) or `fix_bootlogo_sf3000.sh` (Linux/macOS) from the SD card root to install the correct SF3000 logo.
-- **Black Screen / Only Battery Icon Visible:** If nothing loads or only the battery icon is visible after the boot logo, set up your SD card with the clean **[Stock OS Backup](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)** first, then copy the TreeFrogUI files over.
+- **Black Screen / Only Battery Icon Visible:** If nothing loads or only the battery icon is visible after the boot logo, set up your SD card with the clean stock OS backup for your device first, then copy the TreeFrogUI files over:
+  - **SF3000:** [Stock OS SD Card Backup (7z)](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)
+  - **R36SX v2.6:** [Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD)
+  - **R36SX v2.7:** [Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O)
 - **Submit Feedback Anonymously**: Help improve the project by submitting bugs, performance issues, or compatibility reports on the [v0.1.0 Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header).
 - **GitHub Issues**: You can also open an issue on the [GitHub repository](https://github.com/tzubertowski/treefrog-ui/issues).
 
