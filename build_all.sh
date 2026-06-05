@@ -38,6 +38,8 @@ WRAP="$(pwd)/.toolchain"
 mkdir -p "$OUT" "$WRAP"
 
 # ── Compiler wrappers ─────────────────────────────────────────────────────────
+# -mlong-calls is REQUIRED — removing it crashes cores that make far calls
+# (e.g. snes9x2005 SuperFX / Yoshi's Island). Keep it.
 SF3000_FLAGS="-mips32r2 -march=mips32r2 -mtune=24kc -mfp32 -mhard-float -mlong-calls -EL --sysroot=$SYSROOT -Ofast -DNDEBUG"
 
 cat > "$WRAP/mips-gcc" <<EOF
@@ -322,6 +324,27 @@ _b atari800          libretro-atari800         "-f Makefile.libretro"
 
 # echo "-- vice xvic make --"
 # _b vice_xvic         libretro-vice             "" "EMUTYPE=xvic"
+
+# frodo (C64, folders c64f / c64fc): needs Src/libretro-common submodule, NOLIBCO=1
+# (libco path leaves ThePrefs undeclared), and --allow-multiple-definition (gui .cpp
+# redefine strdup/strncasecmp). The bundled Src/zlib has no committed objects, but
+# the toolchain defaults to big-endian — the -EL in $WRAP fixes that.
+echo "-- frodo make --"
+git -C "$CORES/libretro-frodo" submodule update --init --recursive 2>/dev/null || true
+# Apply local fixes (idempotent): RGB565-shared autoload guard + auto-LOAD on boot.
+git -C "$CORES/libretro-frodo" apply --check "$(pwd)/patches/frodo-sf3000-autoload-r36sx.patch" 2>/dev/null \
+    && git -C "$CORES/libretro-frodo" apply "$(pwd)/patches/frodo-sf3000-autoload-r36sx.patch" \
+    && echo "  applied frodo-sf3000-autoload-r36sx.patch"
+make -C "$CORES/libretro-frodo" clean 2>/dev/null || true
+find "$CORES/libretro-frodo" -name "*.o" -delete 2>/dev/null || true
+make -C "$CORES/libretro-frodo" platform=unix NOLIBCO=1 \
+    CC="$WRAP/mips-gcc" CXX="$WRAP/mips-g++" \
+    AR="$AR" RANLIB="$RANLIB" LD="$WRAP/mips-g++" \
+    LDFLAGS="$LDFLAGS_S -Wl,--allow-multiple-definition" -j$(nproc) 2>&1
+[ -f "$CORES/libretro-frodo/frodo_libretro.so" ] && \
+    cp "$CORES/libretro-frodo/frodo_libretro.so" "$OUT/" && \
+    "$STRIP" "$OUT/frodo_libretro.so" && echo "→ $OUT/frodo_libretro.so" || \
+    echo "WARNING: .so not found for frodo"
 
 # ── angree SF2000 ports (Amiga/Mac/AtariST) — libretro .so build ──────────────
 _b_angree() {

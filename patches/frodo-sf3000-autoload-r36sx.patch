@@ -1,0 +1,53 @@
+diff --git a/Src/Display.cpp b/Src/Display.cpp
+index b31294b..eb43588 100644
+--- a/Src/Display.cpp
++++ b/Src/Display.cpp
+@@ -317,9 +317,11 @@ char kbd_feedbuf[255];
+ int kbd_feedbuf_pos;
+ bool autoboot=true;
+ 
+-// Manual autoload coordination variables
+-static bool manual_autoload_triggered = false;
+-static bool any_autoload_in_progress = false;
++// Manual autoload coordination variables (must be the single definition shared
++// with core-mapper.cpp via the extern in Display.h — NOT static, or core-mapper
++// gets its own copy and the START-autostart guard never clears).
++bool manual_autoload_triggered = false;
++bool any_autoload_in_progress = false;
+ 
+ void kbd_buf_feed(char *s)
+ {
+diff --git a/libretro/core/libretro.cpp b/libretro/core/libretro.cpp
+index 07bdeca..9418c59 100644
+--- a/libretro/core/libretro.cpp
++++ b/libretro/core/libretro.cpp
+@@ -626,8 +626,8 @@ void retro_run(void)
+    static int frame_count = 0;
+    frame_count++;
+    
+-   // Show splash screen for first 180 frames (3 seconds at 60fps)
+-   if (frame_count <= 180)
++   // Show splash screen briefly (C64 boot doesn't start until splash ends)
++   if (frame_count <= 60)
+    {
+       draw_splash_screen();
+       video_cb(Retro_Screen,retrow,retroh,retrow<<PIXEL_BYTES);
+@@ -646,6 +646,18 @@ void retro_run(void)
+    // Give the C64 300 frames (~6 seconds at 50fps) to complete boot sequence
+    bool allow_frameskip = (frame_count > 300);
+ 
++   // Auto-load the inserted disk once the C64 has reached the READY prompt.
++   // (START still works as a manual re-trigger via core-mapper.)
++   static bool auto_loaded = false;
++   if (!auto_loaded && frame_count > 200 && RPATH[0] != '\0')
++   {
++      extern void kbd_buf_feed(char *s);
++      extern bool autoboot;
++      kbd_buf_feed((char*)"\rLOAD\"*\",8,1:\rRUN\r");
++      autoboot = true;        /* re-arm: PollKeyboard only types while autoboot */
++      auto_loaded = true;
++   }
++
+    // Frameskip logic - only apply when emulator is running AND after boot delay
+    if(pauseg==0 && frameskip_value > 0 && allow_frameskip)
+    {

@@ -91,7 +91,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `amiga` | Amiga | `uae_libretro.so` | [angree/sf2000-uae-amiga-emulator](https://github.com/angree/sf2000-uae-amiga-emulator) |
 | `msx` | MSX | ❌ `bluemsx_libretro.so` | [tzubertowski/libretro-blueMSX](https://github.com/tzubertowski/libretro-blueMSX) |
 | `c64`, `c64sc` | Commodore 64 | ❌ `vice_x64_libretro.so` | [libretro/vice-libretro](https://github.com/libretro/vice-libretro) |
-| `c64f`, `c64fc` | Commodore 64 (Frodo) | ❌ `frodo_libretro.so` | [tzubertowski/libretro-frodo](https://github.com/tzubertowski/libretro-frodo) |
+| `c64f`, `c64fc` | Commodore 64 (Frodo) | `frodo_libretro.so` | [tzubertowski/libretro-frodo](https://github.com/tzubertowski/libretro-frodo) |
 | `vic20` | Commodore VIC-20 | ❌ `vice_xvic_libretro.so` | [libretro/vice-libretro](https://github.com/libretro/vice-libretro) |
 
 ---
