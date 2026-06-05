@@ -155,9 +155,11 @@ While playing a game, use the following button combinations:
 
 Some cores need BIOS/firmware files. Place them in the system folder the core expects (check individual core docs), typically alongside the ROMs or in a `bios/` subfolder.
 
+> **PlayStation 1 — use a real BIOS.** Drop `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/`. PCSX4ALL falls back to an HLE BIOS when it's missing, but the HLE path causes **graphical glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest Moon). With the real BIOS, saving and compatibility work correctly.
+
 | System | File needed |
 |--------|-------------|
-| PlayStation 1 (PCSX4ALL) | `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (missing → HLE BIOS, lower compatibility) |
+| PlayStation 1 (PCSX4ALL) | `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (**strongly recommended** — without it: graphics/perf/save issues) |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | `kick.rom` (Amiga Kickstart ROM) |
 | Atari ST (castaway) | TOS ROM image |
