@@ -1,6 +1,6 @@
-# TreeFrogUI v0.1.4 - Release Notes
+# TreeFrogUI v0.1.5 - Release Notes
 
-Welcome to **TreeFrogUI** (v0.1.4) for the SF3000 and R36SX handheld consoles!
+Welcome to **TreeFrogUI** (v0.1.5) for the SF3000 and R36SX handheld consoles!
 
 > [!WARNING]
 > This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). One build runs on both — the device is auto-detected at boot.
@@ -10,6 +10,16 @@ Welcome to **TreeFrogUI** (v0.1.4) for the SF3000 and R36SX handheld consoles!
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
+
+---
+
+## What's New in v0.1.5
+
+- **Redesigned in-game pause menu (MinUI-style)**: the `SELECT + START` menu now uses the same TTF font as FrogUI, rounded-pill selection, and the game title + a live screenshot thumbnail. Options pages share the same look.
+- **Per-savestate screenshots**: each save slot stores and shows a thumbnail of the exact moment it was saved. Save/Load now lists **8 slots**; the 10th slot is reserved for auto-resume.
+- **Per-game / per-folder core override**: press **`SELECT`** on a game or system folder in FrogUI to pick which emulator core runs it (default = the folder's core). Choices persist.
+- **Commodore 64 (Frodo)**: the `frodo` core now builds and runs — put disks in a `c64f` (or `c64fc`) folder. The inserted disk auto-loads on boot (`LOAD"*",8,1:RUN`).
+- **PlayStation 1 memory cards fixed**: PCSX4ALL now creates/loads memory cards correctly and saves persist. For best results (graphics, performance, and reliable card saves) drop a real BIOS at `cubegm/cores/.pcsx4all/scph1001.bin` — see the install guide.
 
 ---
 
