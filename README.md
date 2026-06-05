@@ -146,6 +146,8 @@ While playing a game, use the following button combinations:
 - **`SELECT + START`** - Opens the in-game picoarch menu (for all cores *except* PCSX4ALL).
 - **`SELECT + L`** - Opens the emulator menu (for PCSX4ALL *only*) or loads a state (slot 0, default) for other cores.
 - **`SELECT + R`** - Saves a state (slot 0, default) for all cores *except* PCSX4ALL.
+- **`SELECT + Y`** - Cycles fast-forward: **off → 2× → 3× → off**. Audio mutes while fast-forwarding.
+- **`SELECT + B`** - Hold to rewind.
 
 ---
 
