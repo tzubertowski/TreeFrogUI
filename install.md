@@ -42,6 +42,22 @@ When playing games, use the following button combinations:
 
 ---
 
+## PlayStation 1 BIOS (recommended)
+
+PCSX4ALL works best with a **real PS1 BIOS**. Copy `scph1001.bin` to:
+
+```
+/mnt/sdcard/cubegm/cores/.pcsx4all/scph1001.bin
+```
+
+(The filename is matched case-insensitively, so `SCPH1001.BIN` also works.) If the
+file is absent, PCSX4ALL falls back to an HLE BIOS that causes **graphical
+glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest
+Moon). With the real BIOS, memory cards (`.pcsx4all/memcards/`) and compatibility
+work correctly.
+
+---
+
 ## Troubleshooting & Feedback
 
 - **Distorted / sideways boot logo (SF3000):** the package defaults to the R36SX logo. On SF3000 run `fix_bootlogo_sf3000.bat` (Windows) or `fix_bootlogo_sf3000.sh` (Linux/macOS) from the SD card root to install the correct SF3000 logo.
