@@ -1,6 +1,4 @@
-# TreeFrogUI v0.1.5 - Release Notes
-
-Welcome to **TreeFrogUI** (v0.1.5) for the SF3000 and R36SX handheld consoles!
+Welcome to **TreeFrogUI** (v0.1.5) for the SF3000 and R36SX handheld consoles
 
 > [!WARNING]
 > This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). One build runs on both — the device is auto-detected at boot.
@@ -18,25 +16,12 @@ Welcome to **TreeFrogUI** (v0.1.5) for the SF3000 and R36SX handheld consoles!
 - **Redesigned in-game pause menu (MinUI-style)**: the `SELECT + START` menu now uses the same TTF font as FrogUI, rounded-pill selection, and the game title + a live screenshot thumbnail. Options pages share the same look.
 - **Per-savestate screenshots**: each save slot stores and shows a thumbnail of the exact moment it was saved. Save/Load now lists **8 slots**; the 10th slot is reserved for auto-resume.
 - **Per-game / per-folder core override**: press **`SELECT`** on a game or system folder in FrogUI to pick which emulator core runs it (default = the folder's core). Choices persist.
+- **Game search**: press **`X`** in FrogUI to search by name with an on-screen keyboard — scoped to the current folder or across your whole library.
+- **Animated backgrounds**: the system/folder banner now crossfades when you move between systems. Toggle all UI animations in **Settings → Animations**.
+- **Two GBA cores**: the `gba` folder runs upstream **gpSP**; put games in a `gbac` folder to use the multi-core gpSP build instead. FrogUI tells the folders apart automatically.
 - **Commodore 64 (Frodo)**: the `frodo` core now builds and runs — put disks in a `c64f` (or `c64fc`) folder. The inserted disk auto-loads on boot (`LOAD"*",8,1:RUN`).
 - **PlayStation 1 memory cards fixed**: PCSX4ALL now creates/loads memory cards correctly and saves persist. For best results (graphics, performance, and reliable card saves) drop a real BIOS at `cubegm/cores/.pcsx4all/scph1001.bin` — see the install guide.
-
----
-
-## What's New in v0.1.4
-
-- **R36SX support (v2.6 / v2.7)**: a single build now runs on both the SF3000 and the R36SX. The device is auto-detected at boot (panel resolution, the correct `driver.so`, and the render path are all selected automatically). FrogUI renders natively at each panel's resolution (SF3000 854×480, R36SX 640×480).
-- **gpSP (GBA) fixed**: the MIPS dynarec now works — GBA games run at full speed (previously crashed on launch). Demanding SuperFX titles like Yoshi's Island run but remain heavy.
-- **Arduboy added**: the `arduous` core now builds and runs. Use `.hex` roms (`.arduboy` ZIP files are not supported — extract the `.hex` first).
-- **ZX Spectrum (fuse) controls fixed**: the gamepad now drives the **Kempston** joystick by default (was the Cursor joystick, which most games don't use).
-
----
-
-## What's New in v0.1.3
-
-- **Idle freeze fixed**: libretro cores (Gambatte, FCEUmm, gpSP, etc.) could freeze when left running without input. Audio output is now handled on a dedicated thread so the emulator never blocks on the sound device — the hang is gone.
-- **Nearest filter warning**: selecting the **Nearest** scaling filter now shows a notice that it is software-scaled and slower than **Bilinear** (hardware path), which can cause lag on heavier cores.
-
+- **Stability & polish**: fixed Sega/Genesis black-screen crash, oversized in-game FPS overlay, random "back" presses and disappearing menu glyphs while scrolling, and inconsistent fast-forward. Faster Arduboy emulation. Menus now filter accidental right-stick drift.
 ---
 
 ## High-Level Overview
