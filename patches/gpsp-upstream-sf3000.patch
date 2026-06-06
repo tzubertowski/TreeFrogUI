@@ -1,0 +1,38 @@
+diff --git a/Makefile b/Makefile
+index f5e3bf2..3015463 100644
+--- a/Makefile
++++ b/Makefile
+@@ -78,7 +78,19 @@ CORE_DIR    := .
+ LDFLAGS     :=
+ 
+ # Unix
+-ifeq ($(platform), unix)
++# SF3000 / R36SX (HiChip MIPS) — MIPS dynarec, PIC, RGB565 (matches the
++# tzubertowski/gpsp_multicore sf3000 target so the JIT works on this hardware)
++ifeq ($(platform), sf3000)
++	TARGET := $(TARGET_NAME)_libretro.so
++	# NOT -nostdlib: upstream video.cc is C++ — link via g++ + libstdc++.
++	SHARED := -shared -Wl,--version-script=link.T
++	fpic := -fPIC -DPIC
++	HAVE_DYNAREC := 1
++	CPU_ARCH := mips
++	MMAP_JIT_CACHE := 1
++	FRONTEND_SUPPORTS_RGB565 := 1
++
++else ifeq ($(platform), unix)
+ 	TARGET := $(TARGET_NAME)_libretro.so
+ 	fpic := -fPIC
+ 	SHARED := -shared $(FORCE_32BIT) -Wl,--version-script=link.T
+diff --git a/memmap.c b/memmap.c
+index 46bb951..7510cfa 100644
+--- a/memmap.c
++++ b/memmap.c
+@@ -29,7 +29,7 @@
+   #define _MAP_ITERATIONS           1024   // Test -/+2GB in 4MB steps
+   #define _MAP_STEP         (4*1024*1024)
+   #define _VALIDATE_BLOCK_FN(ptr, size) \
+-          validate_addr_section_mips(ptr, size)
++          validate_addr_section_mips(ptr, size, 256)
+ #elif defined(ARM64_ARCH)
+   #define _MAP_ITERATIONS            256   // Test -/+128MB in 1MB steps
+   #define _MAP_STEP           (1024*1024)

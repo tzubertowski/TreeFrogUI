@@ -16,7 +16,8 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `gb` | Game Boy | `gambatte_libretro.so` | [tzubertowski/libretro-gambatte](https://github.com/tzubertowski/libretro-gambatte) |
 | `gbgb` | Game Boy | `gearboy_libretro.so` | [drhelius/Gearboy](https://github.com/drhelius/Gearboy) |
 | `gbb`, `dblcherrygb` | GB (link cable) | `tgbdual_libretro.so` | [libretro/tgbdual-libretro](https://github.com/libretro/tgbdual-libretro) |
-| `gba`, `GBA` | GBA | `gpsp_libretro.so` | [tzubertowski/gpsp_multicore](https://github.com/tzubertowski/gpsp_multicore) |
+| `gba`, `GBA` | GBA | `gpsp_libretro.so` | [libretro/gpsp](https://github.com/libretro/gpsp) (upstream) |
+| `gbac` | GBA (multicore) | `gpsp_multicore_libretro.so` | [tzubertowski/gpsp_multicore](https://github.com/tzubertowski/gpsp_multicore) |
 | `gbav` | GBA | `vba_next_libretro.so` | [libretro/vba-next](https://github.com/libretro/vba-next) |
 | `mgba`, `gbaf` | GBA (accurate) | `mgba_libretro.so` | [libretro/mgba](https://github.com/libretro/mgba) |
 | `pokem` | Pokémon Mini | `pokemini_libretro.so` | [libretro/PokeMini](https://github.com/libretro/PokeMini) |

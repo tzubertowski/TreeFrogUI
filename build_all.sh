@@ -27,6 +27,7 @@ _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
 _apply_patch fake08-cpp17-gcc6.patch   fake-08
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
+_apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
 
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
@@ -50,14 +51,16 @@ cat > "$WRAP/mips-g++" <<EOF
 #!/bin/bash
 exec ${MIPS}g++ $SF3000_FLAGS "\$@"
 EOF
-# gpsp wrapper — no arch flags (platform=mips32 sets them), only sysroot
+# gpsp wrapper — no arch flags (platform=mips32 sets them), only sysroot.
+# -EL forces little-endian: this toolchain's g++ defaults to big-endian (gcc to
+# LE), which silently produced BE objects for upstream gpsp's C++ video.cc.
 cat > "$WRAP/gpsp-gcc" <<EOF
 #!/bin/bash
-exec ${MIPS}gcc --sysroot=$SYSROOT -isystem $SYSROOT/usr/include -fPIC "\$@"
+exec ${MIPS}gcc --sysroot=$SYSROOT -isystem $SYSROOT/usr/include -fPIC -EL "\$@"
 EOF
 cat > "$WRAP/gpsp-g++" <<EOF
 #!/bin/bash
-exec ${MIPS}g++ --sysroot=$SYSROOT -isystem $SYSROOT/usr/include -fPIC "\$@"
+exec ${MIPS}g++ --sysroot=$SYSROOT -isystem $SYSROOT/usr/include -fPIC -EL "\$@"
 EOF
 chmod +x "$WRAP"/mips-gcc "$WRAP"/mips-g++ "$WRAP"/gpsp-gcc "$WRAP"/gpsp-g++
 
@@ -109,14 +112,32 @@ _b gambatte          libretro-gambatte         "-f Makefile.libretro"
 # gpsp: pre-cpp branch, platform=sf3000 — tzubertowski's dedicated target with
 # MMAP_JIT_CACHE + -fPIC + -nostdlib for the MIPS dynarec. (platform=unix used
 # the generic config and produced a broken dynarec: bad memory base, EWRAM fault.)
-echo "-- gpsp make --"
+# gpsp (multicore fork) → gpsp_multicore_libretro.so  (used by the `gbac` folder)
+echo "-- gpsp (multicore) make --"
 make -C "$CORES/gpsp" clean 2>/dev/null || true
 make -C "$CORES/gpsp" platform=sf3000 \
     CC="$WRAP/gpsp-gcc" CXX="$WRAP/gpsp-g++" \
     AR="$AR" RANLIB="$RANLIB" LD="$WRAP/gpsp-gcc" \
     LDFLAGS="$LDFLAGS_C" -j$(nproc) 2>&1
 [ -f "$CORES/gpsp/gpsp_libretro.so" ] && \
-    cp "$CORES/gpsp/gpsp_libretro.so" "$OUT/" && \
+    cp "$CORES/gpsp/gpsp_libretro.so" "$OUT/gpsp_multicore_libretro.so" && \
+    "$STRIP" "$OUT/gpsp_multicore_libretro.so" && echo "→ $OUT/gpsp_multicore_libretro.so"
+
+# gpsp (upstream libretro/gpsp) → gpsp_libretro.so  (default, used by `gba`).
+# video.cc is C++ so the final link must use g++ (+libstdc++); the Makefile link
+# rule uses $(CC), so we compile with gcc/g++ then relink the target with g++.
+echo "-- gpsp (upstream) make --"
+make -C "$CORES/gpsp_upstream" clean 2>/dev/null || true
+make -C "$CORES/gpsp_upstream" platform=sf3000 \
+    CC="$WRAP/gpsp-gcc" CXX="$WRAP/gpsp-g++" \
+    AR="$AR" RANLIB="$RANLIB" -j$(nproc) 2>&1 || true
+rm -f "$CORES/gpsp_upstream/gpsp_libretro.so"
+make -C "$CORES/gpsp_upstream" platform=sf3000 \
+    CC="$WRAP/gpsp-g++" CXX="$WRAP/gpsp-g++" \
+    AR="$AR" RANLIB="$RANLIB" \
+    LDFLAGS="$LDFLAGS_C -lstdc++" gpsp_libretro.so 2>&1
+[ -f "$CORES/gpsp_upstream/gpsp_libretro.so" ] && \
+    cp "$CORES/gpsp_upstream/gpsp_libretro.so" "$OUT/gpsp_libretro.so" && \
     "$STRIP" "$OUT/gpsp_libretro.so" && echo "→ $OUT/gpsp_libretro.so"
 
 # ── standard cores ────────────────────────────────────────────────────────────

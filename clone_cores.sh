@@ -22,6 +22,7 @@ clone snes9x2005      https://github.com/tzubertowski/snes9x2005
 clone snes9x2002      https://github.com/tzubertowski/snes9x2002
 clone libretro-gambatte https://github.com/tzubertowski/libretro-gambatte
 clone gpsp            https://github.com/tzubertowski/gpsp_multicore
+clone gpsp_upstream   https://github.com/libretro/gpsp
 clone libretro-frodo  https://github.com/tzubertowski/libretro-frodo
 clone fake-08         https://github.com/tzubertowski/fake-08
 clone libretro-blueMSX https://github.com/tzubertowski/libretro-blueMSX
