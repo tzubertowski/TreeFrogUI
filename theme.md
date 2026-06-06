@@ -45,6 +45,43 @@ Place your image files in `/mnt/sdcard/frogui/` using the following naming conve
 
 ---
 
+## Game Thumbnails
+
+TreeFrogUI shows a per-game preview image in the right-hand panel while you browse a ROM list. Thumbnails are opt-in — add an image for any game you like; games without one simply show no preview.
+
+### Image Placement & Naming
+
+For each game, place its thumbnail in a hidden `.res/` folder **next to the ROM**, named after the ROM file with a `.rgb565` extension (no original file extension):
+
+```
+roms/GBA/Advance Wars.gba          ← the game
+roms/GBA/.res/Advance Wars.rgb565  ← its thumbnail
+```
+
+So the rule is: `<rom folder>/.res/<rom filename without extension>.rgb565`.
+
+### Format & Sizes
+
+Thumbnails are stored as **headerless raw RGB565** (little-endian) — not PNG/JPG. The image dimensions are detected from the file size, which must be exactly `width × height × 2` bytes. Supported sizes:
+
+| Size | Notes |
+|---|---|
+| `160×160` | **Recommended** |
+| `64×64`, `128×128`, `200×200` | Square alternatives |
+| `250×200`, `200×250` | Landscape / portrait |
+
+### Converting an image to `.rgb565`
+
+Use `ffmpeg` (simplest) to resize and convert artwork to the raw format:
+
+```sh
+ffmpeg -i cover.png -vf scale=160:160 -f rawvideo -pix_fmt rgb565le "Advance Wars.rgb565"
+```
+
+Then drop the result into the game's `.res/` folder. (In-game **savestate** thumbnails in the pause menu are captured automatically and need no setup — this section is only for ROM-browser previews.)
+
+---
+
 ## Built-in Color Themes
 
 TreeFrogUI includes 30 curated color themes to match any preference or device aesthetic. The full list of supported theme names is below:
