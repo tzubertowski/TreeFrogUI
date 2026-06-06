@@ -1,4 +1,4 @@
-Welcome to **TreeFrogUI** (v0.1.5) for the SF3000 and R36SX handheld consoles
+Welcome to **TreeFrogUI** (v0.1.6) for the SF3000 and R36SX handheld consoles
 
 > [!WARNING]
 > This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). One build runs on both — the device is auto-detected at boot.
@@ -11,7 +11,7 @@ Welcome to **TreeFrogUI** (v0.1.5) for the SF3000 and R36SX handheld consoles
 
 ---
 
-## What's New in v0.1.5
+## What's New in v0.1.6
 
 - **Redesigned in-game pause menu (MinUI-style)**: the `SELECT + START` menu now uses the same TTF font as FrogUI, rounded-pill selection, and the game title + a live screenshot thumbnail. Options pages share the same look.
 - **Per-savestate screenshots**: each save slot stores and shows a thumbnail of the exact moment it was saved. Save/Load now lists **8 slots**; the 10th slot is reserved for auto-resume.
