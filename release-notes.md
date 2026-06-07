@@ -1,3 +1,6 @@
+> [!CAUTION]
+> **R36SX v2.7 owners — read this first.** There are **many different v2.7 hardware revisions**, and I do not have access to all of them. Some run TreeFrogUI perfectly (like mine); others get stuck on a **"damaged SD card"** screen. **Your particular v2.7 may or may not work — I cannot guarantee it.** I currently don't own one of the newer v2.7 units to test against; if I manage to find one discounted, I'll get it and try to add support.
+
 Welcome to **TreeFrogUI** (v0.1.6) for the SF3000 and R36SX handheld consoles
 
 > [!WARNING]
