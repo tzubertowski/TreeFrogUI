@@ -180,7 +180,7 @@ cd treefrog-ui
 git submodule update --init frogui
 
 # Clone all emulator core sources
-./clone_cores.sh
+./manage_cores.sh clone
 
 # Build everything
 ./build_all.sh
@@ -231,11 +231,11 @@ cp frogui_libretro.so /mnt/sdcard/cubegm/cores/
 ```
 treefrog-ui/
 ├── frogui/          ← FrogUI source (git submodule, sf3000 branch)
-├── cores/           ← emulator core sources (populated by clone_cores.sh)
+├── cores/           ← emulator core sources (populated by manage_cores.sh)
 ├── build/           ← compiled .so output (gitignored)
 ├── patches/         ← patches applied to externally-owned core repos at build time
 ├── build_all.sh     ← build all cores
-├── clone_cores.sh   ← clone all core source repos
+├── manage_cores.sh  ← manage core source repos (clone/update)
 └── cores.md         ← folder→core mapping reference
 ```
 
