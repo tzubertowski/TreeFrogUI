@@ -27,6 +27,10 @@ Welcome to **TreeFrogUI** (v0.1.6) for the SF3000 and R36SX handheld consoles
 - **Stability & polish**: fixed Sega/Genesis black-screen crash, oversized in-game FPS overlay, random "back" presses and disappearing menu glyphs while scrolling, and inconsistent fast-forward. Faster Arduboy emulation. Menus now filter accidental right-stick drift.
 ---
 
+> [!NOTE]
+> **The right analog stick cannot work as a true analog stick on the R36SX — this is a hardware limitation, not a missing feature.** On this device the right stick is wired straight onto the **same digital lines as the X/A/B/Y face buttons**: pushing the stick is electrically identical to pressing those buttons. The OS exposes **no separate analog signal** for it anywhere — there is no joystick/event device, the input daemon reports only on/off button bits, and the analog-to-digital block the stock firmware uses is left unpowered by the kernel and locks up the device if touched from software. I reverse-engineered every available path to confirm this. As a result, in TreeFrogUI the right stick simply **mirrors the face buttons** and **cannot be remapped to analog axes**. (The menus do filter out accidental stick *drift* so it won't fire buttons on its own.)
+---
+
 ## High-Level Overview
 
 TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoarch` environment on the MIPS-based SF3000 handheld. It provides a clean, minimalistic emulation frontend while supporting a massive range of retro gaming platforms.

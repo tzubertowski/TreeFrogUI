@@ -12,6 +12,9 @@ A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modi
 > [!NOTE]
 > TreeFrogUI is developed by a single developer and is built primarily for the **SF3000** handheld. It **might** also support similar hardware variants such as the **SF3000HD**, **SF3100**, **SF3500**, and **GB350**. Since I currently do not own these devices to test them myself, compatibility is unverified - please try it out and let me know if it works!
 
+> [!NOTE]
+> **About the right analog stick (R36SX):** the right stick **cannot** work as a real analog stick, and no software update can change that. On this console the right stick is physically built to act **exactly like the X / A / B / Y face buttons** — nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" information. The console never hands that analog information to apps like TreeFrogUI. So here the right stick simply **behaves like the face buttons** (and tiny accidental movements are ignored, so it won't press buttons on its own). This is a hardware limitation, not a bug or a missing feature.
+
 
 📦 **[Installation Guide](install.md)** - Start here to install TreeFrogUI on your device
 

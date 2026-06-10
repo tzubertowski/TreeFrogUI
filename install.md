@@ -60,6 +60,7 @@ work correctly.
 
 ## Troubleshooting & Feedback
 
+- **Right analog stick doesn't do analog (R36SX):** this is expected and **cannot be fixed in software**. On the R36SX the right stick is wired to act like the **X / A / B / Y buttons** — it only sends on/off presses, with no analog "how far / which direction" value, and the console never exposes a real analog reading to apps. So in TreeFrogUI the right stick mirrors the face buttons (accidental drift is filtered out). It is a hardware limitation, not a bug.
 - **Distorted / sideways boot logo (SF3000):** the package defaults to the R36SX logo. On SF3000 run `fix_bootlogo_sf3000.bat` (Windows) or `fix_bootlogo_sf3000.sh` (Linux/macOS) from the SD card root to install the correct SF3000 logo.
 - **Black Screen / Only Battery Icon Visible:** If nothing loads or only the battery icon is visible after the boot logo, set up your SD card with the clean stock OS backup for your device first, then copy the TreeFrogUI files over:
   - **SF3000:** [Stock OS SD Card Backup (7z)](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)
