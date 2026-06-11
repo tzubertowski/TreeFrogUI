@@ -16,14 +16,12 @@ Welcome to **TreeFrogUI** (v0.1.7) for the SF3000 and R36SX handheld consoles
 
 ## What's New in v0.1.7
 
-- **No more accidental sleep (R36SX)**: a short press of the power button used to "sleep" the device and then wake to a black screen (backlight on). Sleep is now **disabled** — a short press does nothing, and a **long press still powers off** normally. (Applied automatically by patching the on-device power daemon on first boot; reversible with a stock backup.)
-- **PlayStation 1 (PCSX4ALL) improvements**:
-  - **L2 / R2 buttons** are now mapped.
-  - **Real BIOS preferred** — drop `scph1001.bin` in `cubegm/cores/.pcsx4all/` for correct graphics, performance and memory-card saves (HLE fallback otherwise).
-  - **New speed toggles** in the in-game menu (`SELECT + L`): **Pixel Skip** and **Interlace** trade a little image quality for speed on heavy 3D games like Tekken 3.
-- **PICO-8 (fake08) — much faster**: rebased on the upstream emulator and heavily optimised for this CPU (cached note-frequency table, audio filters no longer run when unused, lower-overhead audio). New **Audio on/off** and **Frame Skip** options in the core menu — many carts now hit full speed.
-- **Arduboy now uses Ardens**: the `arduboy` folder runs the fast **Ardens** core by default (accepts both `.hex` and `.arduboy`). The older cycle-accurate `arduous` core is still selectable — put games in an **`arduous`** folder.
-- **Faster cores across the board**: every core is retuned for the device's MIPS **74Kc** CPU (correct instruction scheduling + DSP2 ASE, `-O3`). picoarch now defaults to **Aspect** scaling, since integer/fullscreen are slower on the hardware scaler.
+- **No accidental sleep (R36SX).** Short power press no longer sleeps to a black screen. Long press still powers off.
+- **PICO-8 way faster.** Rebuilt on the upstream emulator and optimised for this CPU. New **Audio off** and **Frame Skip** options. Many carts now run full speed. Folder renamed **`pico8`** (old `fake08` still works).
+- **Arduboy now uses Ardens** (much faster core). The old `arduous` core is still there: put games in an `arduous` folder.
+- **PS1 (PCSX4ALL).** L2/R2 buttons now work. New **Pixel Skip** + **Interlace** speed toggles in the menu (`SELECT + L`) for heavy games like Tekken 3. Real BIOS recommended (`scph1001.bin` in `cubegm/cores/.pcsx4all/`).
+- **All cores faster.** Retuned for the device's 74Kc CPU (DSP2 + `-O3`). Default scaling is now **Aspect**.
+- **Menu polish.** Smooth iPhone-style background fades (selection stays instant). New **Hide Empty Folders** setting. Right-stick drift no longer triggers phantom presses while navigating.
 ---
 
 > [!NOTE]

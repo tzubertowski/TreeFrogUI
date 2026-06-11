@@ -47,6 +47,7 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Highly configurable cores** - Configurable settings for all cores, allowing for retro features like console palette swaps, LCD ghosting emulation, and more.
 - **In-game saves** - Fully supported across all compatible cores for seamless session saving and loading.
 - **Auto-resume on boot** - Automatically boots back into the last played game or frontend view upon device boot.
+- **Clean, configurable menu** - Smooth iPhone-style background crossfades (instant selection), an optional **Hide Empty Folders** setting, and right-stick drift filtering so accidental touches don't trigger phantom presses while navigating.
 - **Rich theming options** - Custom background images, fonts, and 30 built-in color themes to fit your style.
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
 - **Flexible display scaling** - Easily adjust display scaling modes (Zoom, Aspect Ratio, and Integer Scaling) to suit your preference.
@@ -110,7 +111,7 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **xrick** | Rick Dangerous | `xrick_libretro.so` |
 | **jnb** | Jump 'n Bump | `jumpnbump_libretro.so` |
 | **gw** | Game & Watch | `gw_libretro.so` |
-| **fake08** | PICO-8 (fake08) | `fake08_libretro.so` |
+| **pico8** | PICO-8 (fake08) — also accepts legacy `fake08` folder | `fake08_libretro.so` |
 | **retro8** | PICO-8 (retro8) | `retro8_libretro.so` |
 | **lowres-nx** | LowRes NX | `lowresnx_libretro.so` |
 | **pokem** | Pokémon Mini | `pokemini_libretro.so` |
@@ -129,7 +130,7 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 
 See [cores.md](cores.md) for detailed build status and source repositories of TreeFrogUI external cores.
 
-**PICO-8 (fake08):** place carts in `roms/fake08/`. Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
+**PICO-8 (fake08):** place carts in `roms/pico8/` (the legacy `roms/fake08/` folder still works). Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
 
 **Arduboy:** the `arduboy` folder uses the **Ardens** core (a fast custom AVR emulator) and accepts both `.hex` and `.arduboy` files. The `arduous` folder runs the older simavr-based **arduous** core (cycle-accurate but much slower; `.hex` only) — use it only if a game misbehaves under Ardens.
 
