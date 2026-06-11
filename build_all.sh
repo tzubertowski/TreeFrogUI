@@ -27,7 +27,6 @@ _apply_patch() {
 _apply_patch geolith-no-lto.patch      libretro-geolith
 _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
-_apply_patch fake08-r36sx.patch       fake-08
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
 

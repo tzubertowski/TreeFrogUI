@@ -7,11 +7,16 @@ cd "$(dirname "$0")/cores"
 clone() {
     local dir="$1"
     local url="$2"
+    local branch="${3:-}"
     if [ -d "$dir/.git" ]; then
         echo "SKIP $dir (already cloned)"
     else
         echo "Cloning $dir..."
-        git clone --depth=1 "$url" "$dir"
+        if [ -n "$branch" ]; then
+            git clone --depth=1 --branch "$branch" "$url" "$dir"
+        else
+            git clone --depth=1 "$url" "$dir"
+        fi
     fi
 }
 
@@ -24,7 +29,7 @@ clone libretro-gambatte https://github.com/tzubertowski/libretro-gambatte
 clone gpsp            https://github.com/tzubertowski/gpsp_multicore
 clone gpsp_upstream   https://github.com/libretro/gpsp
 clone libretro-frodo  https://github.com/tzubertowski/libretro-frodo
-clone fake-08         https://github.com/jtothebell/fake-08
+clone fake-08         https://github.com/tzubertowski/fake-08         sf3000
 clone libretro-blueMSX https://github.com/tzubertowski/libretro-blueMSX
 
 # ── standard libretro repos ───────────────────────────────────────────────────
