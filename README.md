@@ -119,7 +119,8 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **fcf** | Fairchild Channel F | `freechaf_libretro.so` |
 | **cdg** | CD+G Karaoke | `pocketcdg_libretro.so` |
 | **chip8** | CHIP-8 | `jaxe_libretro.so` |
-| **arduboy** | Arduboy | `arduous_libretro.so` |
+| **arduboy** | Arduboy (Ardens — fast) | `ardens_libretro.so` |
+| **arduous** | Arduboy (arduous/simavr — cycle-accurate, slower) | `arduous_libretro.so` |
 | **vec** | Vectrex | `vecx_libretro.so` |
 | **o2em** | Odyssey² / Videopac | `o2em_libretro.so` |
 | **gme** | Game Music Emu | `gme_libretro.so` |
@@ -130,7 +131,7 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 
 **PICO-8 (fake08):** place carts in `roms/fake08/`. Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
 
-**Arduboy (arduous):** use `.hex` roms (raw Intel HEX). `.arduboy` files are ZIP archives and are not supported — extract the `.hex` from inside them first.
+**Arduboy:** the `arduboy` folder uses the **Ardens** core (a fast custom AVR emulator) and accepts both `.hex` and `.arduboy` files. The `arduous` folder runs the older simavr-based **arduous** core (cycle-accurate but much slower; `.hex` only) — use it only if a game misbehaves under Ardens.
 
 ---
 
@@ -255,7 +256,8 @@ treefrog-ui/
 | Item | Status |
 |------|--------|
 | `vecx` (Vectrex) | ❌ needs OpenGL - not available on SF3000 |
-| `arduous` (Arduboy) | ❌ needs cmake - not in toolchain |
+| `ardens` (Arduboy, default) | ✅ built directly (no cmake); C++14 libretro target |
+| `arduous` (Arduboy, alt) | ✅ simavr-based, built directly (cycle-accurate, slow) |
 | `o2em` (Odyssey²) | ❌ not yet cloned |
 | `vice` (C64) | commented out - large build, enable manually in build_all.sh |
 | picoarch binary | not included - obtain from SF3000 multicore project |
