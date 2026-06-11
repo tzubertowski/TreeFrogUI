@@ -29,6 +29,7 @@ _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
+_apply_patch ardens-sf3000.patch       Ardens
 
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
@@ -298,6 +299,36 @@ echo "-- arduous make --"
       echo "arduous: compile failed — skipped"
     fi
     rm -f "$AD"/_ao_*.o
+  fi
+)
+
+# Ardens (Arduboy FX): custom fast AVR core (not simavr) — much faster than
+# arduous. CMake project, but built directly here (no cmake on host). libretro
+# target is C++14 (GCC 6.3 OK). Header-only deps come from submodules.
+echo "-- ardens make --"
+(
+  AR_DIR="$CORES/Ardens"
+  if [ -d "$AR_DIR" ]; then
+    git -C "$AR_DIR" submodule update --init --depth=1 deps/bitsery deps/miniz deps/yyjson >/dev/null 2>&1 || true
+    ARARCH="-mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -EL --sysroot=$SYSROOT -fPIC -O3 -fomit-frame-pointer -DNDEBUG"
+    ARDEFS="-DMINIZ_NO_STDIO=1 -DMINIZ_NO_TIME=1 -DARDENS_PLAYER -DARDENS_NO_DEBUGGER -DARDENS_NO_GUI -DARDENS_NO_SAVED_SETTINGS -DARDENS_NO_SCALING -DARDENS_VERSION_MAJOR=1 -DARDENS_VERSION_MINOR=0 -DARDENS_VERSION_PATCH=0 -DARDENS_VERSION=\"1.0.0-sf3000\""
+    ARINC="-I$AR_DIR/src -I$AR_DIR/src/libretro_core -I$AR_DIR/deps -I$AR_DIR/deps/miniz -I$AR_DIR/deps/bitsery/include"
+    arobj=""; k=0; arok=1
+    ARCPP="absim_cpu_data absim_dwarf absim_dwarf_expr absim_arduboy absim_decode absim_merge_instrs absim_execute absim_disassemble absim_load_file absim_reset absim_snapshot absim_led"
+    for f in $ARCPP; do o="$AR_DIR/_ar_$k.o"; ${MIPS}g++ $ARARCH -std=gnu++14 $ARDEFS $ARINC -c "$AR_DIR/src/$f.cpp" -o "$o" || arok=0; arobj="$arobj $o"; k=$((k+1)); done
+    o="$AR_DIR/_ar_$k.o"; ${MIPS}g++ $ARARCH -std=gnu++14 $ARDEFS $ARINC -c "$AR_DIR/src/libretro_core/libretro_impl.cpp" -o "$o" || arok=0; arobj="$arobj $o"; k=$((k+1))
+    for f in deps/yyjson/yyjson deps/miniz/miniz deps/miniz/miniz_tdef deps/miniz/miniz_tinfl deps/miniz/miniz_zip \
+             src/boot/boot_flashcart src/boot/boot_game_d1 src/boot/boot_game_d2 src/boot/boot_game_e2 \
+             src/boot/boot_menu_d1 src/boot/boot_menu_d2 src/boot/boot_menu_e2; do
+      o="$AR_DIR/_ar_$k.o"; ${MIPS}gcc $ARARCH -std=gnu11 $ARDEFS $ARINC -c "$AR_DIR/$f.c" -o "$o" || arok=0; arobj="$arobj $o"; k=$((k+1))
+    done
+    if [ "$arok" = 1 ]; then
+      ${MIPS}g++ $ARARCH -shared -Wl,--version-script="$AR_DIR/src/libretro_core/link.T" $arobj -o "$AR_DIR/ardens_libretro.so" -lc -lm && \
+        cp "$AR_DIR/ardens_libretro.so" "$OUT/" && "$STRIP" "$OUT/ardens_libretro.so" && echo "→ $OUT/ardens_libretro.so"
+    else
+      echo "ardens: compile failed — skipped"
+    fi
+    rm -f "$AR_DIR"/_ar_*.o
   fi
 )
 

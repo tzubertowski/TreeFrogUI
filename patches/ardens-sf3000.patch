@@ -1,0 +1,19 @@
+diff --git a/src/libretro_core/libretro_impl.cpp b/src/libretro_core/libretro_impl.cpp
+index 9c331e5..186a228 100644
+--- a/src/libretro_core/libretro_impl.cpp
++++ b/src/libretro_core/libretro_impl.cpp
+@@ -301,11 +301,9 @@ bool retro_load_game(const struct retro_game_info* game)
+         func_log(RETRO_LOG_ERROR, "Could not set pixel format\n");
+         return false;
+     }
+-    if(!func_env(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, INPUT_DESCS))
+-    {
+-        func_log(RETRO_LOG_ERROR, "Could not set input descriptors\n");
+-        return false;
+-    }
++    /* Input descriptors are cosmetic (button labels). Some frontends (picoarch)
++     * don't implement SET_INPUT_DESCRIPTORS — don't fail the load over it. */
++    func_env(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, INPUT_DESCS);
+     if(!game || !game->path || !game->data || game->size == 0)
+     {
+         func_log(RETRO_LOG_ERROR, "Game format issue\n");

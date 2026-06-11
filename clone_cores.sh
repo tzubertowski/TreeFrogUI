@@ -31,6 +31,7 @@ clone gpsp_upstream   https://github.com/libretro/gpsp
 clone libretro-frodo  https://github.com/tzubertowski/libretro-frodo
 clone fake-08         https://github.com/tzubertowski/fake-08         sf3000
 clone libretro-blueMSX https://github.com/tzubertowski/libretro-blueMSX
+clone Ardens          https://github.com/tiberiusbrown/Ardens          # Arduboy (fast custom AVR core)
 
 # ── standard libretro repos ───────────────────────────────────────────────────
 clone picodrive        https://github.com/libretro/picodrive
