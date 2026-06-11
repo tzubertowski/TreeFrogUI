@@ -14,7 +14,9 @@ cd "$(dirname "$0")"
 
 # ── Apply patches for externally-owned repos ─────────────────────────────────
 _apply_patch() {
-    local patch="patches/$1" dir="cores/$2"
+    # Absolute patch path: git -C runs from the core dir, so a relative
+    # "patches/..." would resolve inside the core (wrong) and silently skip.
+    local patch="$(pwd)/patches/$1" dir="cores/$2"
     [ -f "$patch" ] || return
     if git -C "$dir" apply --check "$patch" 2>/dev/null; then
         git -C "$dir" apply "$patch" && echo "patched $2"
@@ -25,7 +27,7 @@ _apply_patch() {
 _apply_patch geolith-no-lto.patch      libretro-geolith
 _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
-_apply_patch fake08-cpp17-gcc6.patch   fake-08
+_apply_patch fake08-r36sx.patch       fake-08
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
 
@@ -41,7 +43,10 @@ mkdir -p "$OUT" "$WRAP"
 # ── Compiler wrappers ─────────────────────────────────────────────────────────
 # -mlong-calls is REQUIRED — removing it crashes cores that make far calls
 # (e.g. snes9x2005 SuperFX / Yoshi's Island). Keep it.
-SF3000_FLAGS="-mips32r2 -march=mips32r2 -mtune=24kc -mfp32 -mhard-float -mlong-calls -EL --sysroot=$SYSROOT -Ofast -DNDEBUG"
+# Device CPU is a MIPS 74Kc (dual-issue, out-of-order) with the DSP2 ASE
+# (confirmed via /proc/cpuinfo). Tune for 74kc and enable -mdspr2 — 24kc tuning
+# schedules for the wrong pipeline and leaves the DSP instructions unused.
+SF3000_FLAGS="-mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -mlong-calls -EL --sysroot=$SYSROOT -Ofast -DNDEBUG"
 
 cat > "$WRAP/mips-gcc" <<EOF
 #!/bin/bash
@@ -62,7 +67,20 @@ cat > "$WRAP/gpsp-g++" <<EOF
 #!/bin/bash
 exec ${MIPS}g++ --sysroot=$SYSROOT -isystem $SYSROOT/usr/include -fPIC -EL "\$@"
 EOF
-chmod +x "$WRAP"/mips-gcc "$WRAP"/mips-g++ "$WRAP"/gpsp-gcc "$WRAP"/gpsp-g++
+# -O3 variants: a trailing -O3 wins over a core Makefile that hardcodes a lower
+# -O after our flags (fake08's libretro Makefile appends -O2 on platform=unix,
+# which otherwise overrides the wrapper's -Ofast → the core builds at -O2). Use
+# -O3 (not -Ofast) so -ffast-math doesn't alter audio synthesis.
+cat > "$WRAP/mips-gcc-O3" <<EOF
+#!/bin/bash
+exec ${MIPS}gcc $SF3000_FLAGS "\$@" -O3
+EOF
+cat > "$WRAP/mips-g++-O3" <<EOF
+#!/bin/bash
+exec ${MIPS}g++ $SF3000_FLAGS "\$@" -O3
+EOF
+chmod +x "$WRAP"/mips-gcc "$WRAP"/mips-g++ "$WRAP"/gpsp-gcc "$WRAP"/gpsp-g++ \
+         "$WRAP"/mips-gcc-O3 "$WRAP"/mips-g++-O3
 
 AR="${MIPS}ar"
 RANLIB="${MIPS}ranlib"
@@ -101,7 +119,9 @@ echo "-- quicknes make --"
 _b quicknes          QuickNES_Core             ""
 
 echo "-- snes9x2005 make --"
-_b snes9x2005_plus   snes9x2005                ""
+# snes9x2005's unix Makefile path hardcodes -O2 (the -Ofast block is ARM-only),
+# overriding our wrapper's -Ofast. Build with the -O3 wrappers so -O3 wins.
+_b snes9x2005_plus   snes9x2005                "" "CC=$WRAP/mips-gcc-O3 CXX=$WRAP/mips-g++-O3"
 
 echo "-- snes9x2002 make --"
 _b snes9x2002        snes9x2002                ""
@@ -261,7 +281,7 @@ echo "-- arduous make --"
   AD="$CORES/arduous"
   # simavr's per-instruction interpreter is call-heavy → drop -mlong-calls (the
   # call thunks dominate its hot loop) and add -fomit-frame-pointer for speed.
-  ADFLAGS="-mips32r2 -march=mips32r2 -mtune=24kc -mfp32 -mhard-float -EL --sysroot=$SYSROOT -fPIC -Ofast -fomit-frame-pointer -DNDEBUG"
+  ADFLAGS="-mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -EL --sysroot=$SYSROOT -fPIC -Ofast -fomit-frame-pointer -DNDEBUG"
   ACC="${MIPS}gcc $ADFLAGS"
   ACXX="${MIPS}g++ $ADFLAGS"
   if [ -d "$AD" ]; then
@@ -308,7 +328,9 @@ _b retro8            retro8                    ""
 
 echo "-- fake08 make --"
 git -C "$CORES/fake-08" submodule update --init --recursive 2>/dev/null || true
-_b fake08            fake-08/platform/libretro ""
+# fake08's Makefile appends -O2 (platform=unix) which would override our -Ofast.
+# Build with the -O3 wrappers so the trailing -O3 wins (PICO-8 is a hot Lua VM).
+_b fake08            fake-08/platform/libretro "" "CC=$WRAP/mips-gcc-O3 CXX=$WRAP/mips-g++-O3"
 
 echo "-- pcsx_rearmed make (PS1, lightrec JIT) --"
 # Needs libpicofe submodule; lightrec JIT enabled (patched: GNU lightning MIPS

@@ -1,0 +1,246 @@
+diff --git a/platform/libretro/libretro.cpp b/platform/libretro/libretro.cpp
+index 589d4f2..419a022 100644
+--- a/platform/libretro/libretro.cpp
++++ b/platform/libretro/libretro.cpp
+@@ -40,6 +40,8 @@ const int PicoScreenWidth = 128;
+ const int PicoScreenHeight = 128;
+ 
+ static int scale = 1;
++static bool audio_enabled = true;
++static int frameskip = 0;     /* 0 = draw every frame; N = skip N draws between drawn frames */
+ static int crop_h_left = 0;
+ static int crop_h_right = 0;
+ static int crop_v_top = 0;
+@@ -90,6 +92,14 @@ static void check_variables(bool startup)
+         }
+     }
+ 
++    var.key = "fake08_audio";
++    if (enviro_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
++        audio_enabled = (strcmp(var.value, "disabled") != 0);
++
++    var.key = "fake08_frameskip";
++    if (enviro_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
++        frameskip = atoi(var.value);
++
+ 
+     var.key = "fake08_crop_h_left";
+ 
+@@ -400,12 +410,15 @@ EXPORT void retro_run()
+     
+     setInputState(currKDown, currKHeld, picoMouseX, picoMouseY, mouseBtnState);
+ 
+-    _vm->Step();
+-    //_vm->UpdateAndDraw();
++    // Frameskip: skip _draw on N of every N+1 frames (logic still runs) for speed.
++    static int drawCounter = 0;
++    bool skipDraw = (frameskip > 0) && ((drawCounter % (frameskip + 1)) != 0);
++    drawCounter++;
++    _vm->Step(skipDraw);
+     kHeld = currKHeld;
+     kDown = currKDown;
+ 
+-    if (frame % 2 == 0) {
++    if (audio_enabled && frame % 2 == 0) {
+         _audio->FillAudioBuffer(&audioBuffer, 0, SAMPLESPERFRAME);
+         audio_batch_cb(audioBuffer, SAMPLESPERFRAME);
+     }
+diff --git a/platform/libretro/libretro_core_options.h b/platform/libretro/libretro_core_options.h
+index 02c3a1a..5110e5e 100644
+--- a/platform/libretro/libretro_core_options.h
++++ b/platform/libretro/libretro_core_options.h
+@@ -116,6 +116,30 @@ struct retro_core_option_definition option_defs_us[] = {
+       },
+       "0",
+    },
++   {
++      "fake08_audio",
++      "Audio Output",
++      "Disable audio to free CPU on slow devices (PICO-8 audio synthesis is CPU-heavy).",
++      {
++         { "enabled",  NULL },
++         { "disabled", NULL },
++         { NULL, NULL },
++      },
++      "enabled",
++   },
++   {
++      "fake08_frameskip",
++      "Frame Skip",
++      "Skip rendering on some frames to gain speed (game logic still runs). Higher = faster but choppier.",
++      {
++         { "0", "disabled" },
++         { "1", "1 frame" },
++         { "2", "2 frames" },
++         { "3", "3 frames" },
++         { NULL, NULL },
++      },
++      "0",
++   },
+    { NULL, NULL, NULL, {{0}}, NULL },
+ };
+ 
+diff --git a/source/Audio.cpp b/source/Audio.cpp
+index c81829c..be3e28e 100644
+--- a/source/Audio.cpp
++++ b/source/Audio.cpp
+@@ -1,3 +1,4 @@
++#include "cxx17compat.h"
+ #include "Audio.h"
+ #include "synth.h"
+ #include "filter.h"
+@@ -238,7 +239,7 @@ void Audio::api_music(int pattern, int16_t fade_len, int16_t mask){
+ }
+ 
+ void Audio::set_music_pattern(int pattern) {
+-    using std::max, std::min;
++    using std::max; using std::min;
+ 
+     // stop all previously playing music sounds
+     for (int n = 0; n < 4; ++n)
+@@ -381,7 +382,7 @@ void Audio::update_sfx_state(sfx_state& cur_sfx, z8::synth_param& new_synth,
+                               float freq_factor, float length, bool is_music, 
+                               bool can_loop, bool half_rate, double inv_frames_per_second)
+ {
+-    using std::fabs, std::fmod, std::floor, std::max;
++    using std::fabs; using std::fmod; using std::floor; using std::max;
+ 
+     if (cur_sfx.sfx == -1) return;
+ 
+diff --git a/source/cart.cpp b/source/cart.cpp
+index db7be29..318350b 100644
+--- a/source/cart.cpp
++++ b/source/cart.cpp
+@@ -26,7 +26,7 @@
+ 
+ 
+ static char const *legacyCompressionLut = "\n 0123456789abcdefghijklmnopqrstuvwxyz!#%(){}[]<>+=/*:;.,~_";
+-static std::regex _includeRegex = std::regex("\\s*#include\\s+([\\\\/A-Za-z0-9_\\-\\.]+)");
++static std::regex _includeRegex = std::regex("\\s*#include\\s+([\\/A-Za-z0-9_.-]+)");
+ 
+ //https://github.com/samhocevar/zepto8/blob/b1a13516945c49e47495c739e6a43a241ad99291/src/pico8/code.cpp
+ // Move to front structure
+diff --git a/source/cxx17compat.h b/source/cxx17compat.h
+new file mode 100644
+index 0000000..36714c2
+--- /dev/null
++++ b/source/cxx17compat.h
+@@ -0,0 +1,29 @@
++#pragma once
++/* C++17 library bits missing from the GCC 6.3 (Codescape) libstdc++ used to
++ * build for the R36SX/SF3000. Provides std::string_view and std::clamp so the
++ * upstream fake-08 sources compile unchanged on this toolchain. */
++#include <algorithm>
++
++#if defined(__cpp_lib_string_view)
++#include <string_view>
++#else
++#include <experimental/string_view>
++namespace std {
++    using experimental::basic_string_view;
++    using experimental::string_view;
++    using experimental::u16string_view;
++    using experimental::u32string_view;
++    using experimental::wstring_view;
++}
++#endif
++
++#if !defined(__cpp_lib_clamp)
++namespace std {
++    template<class T> constexpr const T& clamp(const T& v, const T& lo, const T& hi) {
++        return v < lo ? lo : (hi < v ? hi : v);
++    }
++    template<class T, class C> constexpr const T& clamp(const T& v, const T& lo, const T& hi, C comp) {
++        return comp(v, lo) ? lo : (comp(hi, v) ? hi : v);
++    }
++}
++#endif
+diff --git a/source/emojiconversion.cpp b/source/emojiconversion.cpp
+index 759a568..435d4c0 100644
+--- a/source/emojiconversion.cpp
++++ b/source/emojiconversion.cpp
+@@ -23,7 +23,7 @@
+ #include <codecvt>
+ #include <cstring>
+ #include <regex>
+-#include <string_view>
++#include "cxx17compat.h"
+ #include <map>
+ 
+ #include "emojiconversion.h"
+diff --git a/source/emojiconversion.h b/source/emojiconversion.h
+index 4ad3049..01b2d9f 100644
+--- a/source/emojiconversion.h
++++ b/source/emojiconversion.h
+@@ -1,3 +1,4 @@
++#include "cxx17compat.h"
+ #include <string>
+ #include <regex>
+ 
+diff --git a/source/mathhelpers.h b/source/mathhelpers.h
+index 9084905..7f116c6 100644
+--- a/source/mathhelpers.h
++++ b/source/mathhelpers.h
+@@ -1,3 +1,4 @@
++#include "cxx17compat.h"
+ #pragma once
+ 
+ //std::clamp is in c++17, but not c++11
+diff --git a/source/p8GlobalLuaFunctions.h b/source/p8GlobalLuaFunctions.h
+index 3158b96..9369cb8 100644
+--- a/source/p8GlobalLuaFunctions.h
++++ b/source/p8GlobalLuaFunctions.h
+@@ -547,7 +547,7 @@ function __z8_run_cart(cart_code)
+                     if (_update) _update()
+                 end
+                 if _draw then
+-                    _draw()
++                    if (not __z8_skipdraw) _draw()
+                     flip()
+                 else
+                     yield()
+diff --git a/source/synth.cpp b/source/synth.cpp
+index a7b5e0b..c059f79 100644
+--- a/source/synth.cpp
++++ b/source/synth.cpp
+@@ -26,7 +26,7 @@ static float rand_float()
+ 
+ float synth::waveform(synth_param &params)
+ {
+-    using std::fabs, std::fmod;
++    using std::fabs; using std::fmod;
+ 
+     float advance = params.phi;
+     float t = fmod(advance, 1.f);
+diff --git a/source/vm.cpp b/source/vm.cpp
+index 63a6a63..cbe4d09 100644
+--- a/source/vm.cpp
++++ b/source/vm.cpp
+@@ -611,9 +611,13 @@ void Vm::deserializeCartDataToMemory(std::string cartDataStr) {
+     }
+ }
+ 
+-bool Vm::Step(){
++bool Vm::Step(bool skipDraw){
+     _picoFrameCount++;
+     bool ret = false;
++    /* Frameskip: tell the Lua main loop to skip _draw() this frame (game logic
++     * still runs). Skips the expensive sprite/map rendering to gain speed. */
++    lua_pushboolean(_luaState, skipDraw ? 1 : 0);
++    lua_setglobal(_luaState, "__z8_skipdraw");
+     lua_getglobal(_luaState, "__z8_tick");
+     int status = lua_pcall(_luaState, 0, 1, 0);
+     if (status != LUA_OK)
+diff --git a/source/vm.h b/source/vm.h
+index 7206d7f..0b8dad2 100644
+--- a/source/vm.h
++++ b/source/vm.h
+@@ -78,7 +78,7 @@ class Vm {
+     bool LoadCart(const unsigned char* cartData, size_t size, bool loadBiosOnFail = true);
+ 
+     // void UpdateAndDraw();
+-    bool Step();
++    bool Step(bool skipDraw = false);
+ 
+     uint8_t* GetPicoInteralFb();
+     uint8_t* GetScreenPaletteMap();
