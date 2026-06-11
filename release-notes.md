@@ -1,7 +1,7 @@
 > [!CAUTION]
 > **R36SX v2.7 owners — read this first.** There are **many different v2.7 hardware revisions**, and I do not have access to all of them. Some run TreeFrogUI perfectly (like mine); others get stuck on a **"damaged SD card"** screen. **Your particular v2.7 may or may not work — I cannot guarantee it.** I currently don't own one of the newer v2.7 units to test against; if I manage to find one discounted, I'll get it and try to add support.
 
-Welcome to **TreeFrogUI** (v0.1.6) for the SF3000 and R36SX handheld consoles
+Welcome to **TreeFrogUI** (v0.1.7) for the SF3000 and R36SX handheld consoles
 
 > [!WARNING]
 > This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). One build runs on both — the device is auto-detected at boot.
@@ -14,17 +14,16 @@ Welcome to **TreeFrogUI** (v0.1.6) for the SF3000 and R36SX handheld consoles
 
 ---
 
-## What's New in v0.1.6
+## What's New in v0.1.7
 
-- **Redesigned in-game pause menu (MinUI-style)**: the `SELECT + START` menu now uses the same TTF font as FrogUI, rounded-pill selection, and the game title + a live screenshot thumbnail. Options pages share the same look.
-- **Per-savestate screenshots**: each save slot stores and shows a thumbnail of the exact moment it was saved. Save/Load now lists **8 slots**; the 10th slot is reserved for auto-resume.
-- **Per-game / per-folder core override**: press **`SELECT`** on a game or system folder in FrogUI to pick which emulator core runs it (default = the folder's core). Choices persist.
-- **Game search**: press **`X`** in FrogUI to search by name with an on-screen keyboard — scoped to the current folder or across your whole library.
-- **Animated backgrounds**: the system/folder banner now crossfades when you move between systems. Toggle all UI animations in **Settings → Animations**.
-- **Two GBA cores**: the `gba` folder runs upstream **gpSP**; put games in a `gbac` folder to use the multi-core gpSP build instead. FrogUI tells the folders apart automatically.
-- **Commodore 64 (Frodo)**: the `frodo` core now builds and runs — put disks in a `c64f` (or `c64fc`) folder. The inserted disk auto-loads on boot (`LOAD"*",8,1:RUN`).
-- **PlayStation 1 memory cards fixed**: PCSX4ALL now creates/loads memory cards correctly and saves persist. For best results (graphics, performance, and reliable card saves) drop a real BIOS at `cubegm/cores/.pcsx4all/scph1001.bin` — see the install guide.
-- **Stability & polish**: fixed Sega/Genesis black-screen crash, oversized in-game FPS overlay, random "back" presses and disappearing menu glyphs while scrolling, and inconsistent fast-forward. Faster Arduboy emulation. Menus now filter accidental right-stick drift.
+- **No more accidental sleep (R36SX)**: a short press of the power button used to "sleep" the device and then wake to a black screen (backlight on). Sleep is now **disabled** — a short press does nothing, and a **long press still powers off** normally. (Applied automatically by patching the on-device power daemon on first boot; reversible with a stock backup.)
+- **PlayStation 1 (PCSX4ALL) improvements**:
+  - **L2 / R2 buttons** are now mapped.
+  - **Real BIOS preferred** — drop `scph1001.bin` in `cubegm/cores/.pcsx4all/` for correct graphics, performance and memory-card saves (HLE fallback otherwise).
+  - **New speed toggles** in the in-game menu (`SELECT + L`): **Pixel Skip** and **Interlace** trade a little image quality for speed on heavy 3D games like Tekken 3.
+- **PICO-8 (fake08) — much faster**: rebased on the upstream emulator and heavily optimised for this CPU (cached note-frequency table, audio filters no longer run when unused, lower-overhead audio). New **Audio on/off** and **Frame Skip** options in the core menu — many carts now hit full speed.
+- **Arduboy now uses Ardens**: the `arduboy` folder runs the fast **Ardens** core by default (accepts both `.hex` and `.arduboy`). The older cycle-accurate `arduous` core is still selectable — put games in an **`arduous`** folder.
+- **Faster cores across the board**: every core is retuned for the device's MIPS **74Kc** CPU (correct instruction scheduling + DSP2 ASE, `-O3`). picoarch now defaults to **Aspect** scaling, since integer/fullscreen are slower on the hardware scaler.
 ---
 
 > [!NOTE]

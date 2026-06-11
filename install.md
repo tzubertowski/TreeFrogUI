@@ -56,6 +56,19 @@ glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harves
 Moon). With the real BIOS, memory cards (`.pcsx4all/memcards/`) and compatibility
 work correctly.
 
+**Speed toggles:** for heavy 3D games (e.g. Tekken 3) that don't run full speed,
+open the PCSX4ALL menu with **`SELECT + L`** and turn on **Pixel Skip** and/or
+**Interlace** — they trade a little image quality for a real speed boost.
+
+---
+
+## Arduboy
+
+The **`arduboy`** folder uses the **Ardens** core (fast) and accepts both `.hex`
+and `.arduboy` files. If a game misbehaves, the older cycle-accurate **arduous**
+core is still available — put that game in an **`arduous`** folder instead (it is
+much slower; `.hex` only).
+
 ---
 
 ## Troubleshooting & Feedback
