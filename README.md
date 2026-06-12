@@ -4,10 +4,16 @@
 
 A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modified fork of [FrogUI](https://github.com/tzubertowski/frogui).
 
+> ### ☕ [Support TreeFrogUI on ko-fi.com/proszty](https://ko-fi.com/proszty)
+> Every donation funds the **next device port** (R36SX v2.7, SF3000 V3, SF3500, SF3100, GB350, HDMI clones). Every supported device so far was bought with my own money. [**Donate here.**](https://ko-fi.com/proszty)
+
 ![UI Preview on SF3000 Console](console.jpg)
 
 > [!WARNING]
 > This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). The build auto-detects the device at boot.
+
+> [!CAUTION]
+> **R36SX v2.7 owners read this first.** There are **many different v2.7 hardware revisions**, and I don't have access to all of them. Some run TreeFrogUI perfectly (like mine); others get stuck on a **"damaged SD card"** screen. **Your particular v2.7 may or may not work, I can't guarantee it.** I don't currently own one of the newer v2.7 units to test against. Want me to track one down and add support? ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**.
 
 > [!NOTE]
 > TreeFrogUI is developed by a single developer and is built primarily for the **SF3000** handheld. It **might** also support similar hardware variants such as the **SF3000HD**, **SF3100**, **SF3500**, and **GB350**. Since I currently do not own these devices to test them myself, compatibility is unverified - please try it out and let me know if it works!
@@ -22,7 +28,7 @@ A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modi
 
 ⬇️ **[Latest Release](https://github.com/tzubertowski/treefrog-ui/releases)** - Download the latest version
 
-☕ **[Support the Project](https://www.buymeacoffee.com/tzubertowsg)** - Buy me a coffee!
+☕ **[Support the Project](https://ko-fi.com/proszty)** - Fund the next device port
 
 💬 **[v0.1.0 Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)** - Submit anonymous feedback or compatibility reports
 
@@ -262,6 +268,24 @@ treefrog-ui/
 | `o2em` (Odyssey²) | ❌ not yet cloned |
 | `vice` (C64) | commented out - large build, enable manually in build_all.sh |
 | picoarch binary | not included - obtain from SF3000 multicore project |
+
+---
+
+## Porting TreeFrogUI to other devices
+
+Want TreeFrogUI on a device that isn't supported yet? R36SX v2.7 (bootloader
+protection), SF3000 V3 (bootloader protection), SF3500, SF3100, GB350, HDMI-out
+clones, and others are all on the wishlist.
+
+The catch: porting needs the actual hardware in hand. Bootloaders differ, input
+and display wiring differ, the protected variants need live debugging. There's
+no way to do it blind.
+
+Every device supported so far was bought out of my own pocket. There are far
+more clones out there than I can reasonably keep buying.
+
+If you want to see a port happen, chip in: **https://ko-fi.com/proszty**.
+Donations go straight toward buying the next device to port to.
 
 ---
 

@@ -1,6 +1,3 @@
-> [!CAUTION]
-> **R36SX v2.7 owners — read this first.** There are **many different v2.7 hardware revisions**, and I do not have access to all of them. Some run TreeFrogUI perfectly (like mine); others get stuck on a **"damaged SD card"** screen. **Your particular v2.7 may or may not work — I cannot guarantee it.** I currently don't own one of the newer v2.7 units to test against; if I manage to find one discounted, I'll get it and try to add support.
-
 Welcome to **TreeFrogUI** (v0.1.7) for the SF3000 and R36SX handheld consoles
 
 > [!WARNING]
@@ -22,10 +19,6 @@ Welcome to **TreeFrogUI** (v0.1.7) for the SF3000 and R36SX handheld consoles
 - **PS1 (PCSX4ALL).** L2/R2 buttons now work. New **Pixel Skip** + **Interlace** speed toggles in the menu (`SELECT + L`) for heavy games like Tekken 3. Real BIOS recommended (`scph1001.bin` in `cubegm/cores/.pcsx4all/`).
 - **All cores faster.** Retuned for the device's 74Kc CPU (DSP2 + `-O3`). Default scaling is now **Aspect**.
 - **Menu polish.** Smooth iPhone-style background fades (selection stays instant). New **Hide Empty Folders** setting. Right-stick drift no longer triggers phantom presses while navigating.
----
-
-> [!NOTE]
-> **The right analog stick cannot work as a true analog stick on the R36SX — this is a hardware limitation, not a missing feature.** On this device the right stick is wired straight onto the **same digital lines as the X/A/B/Y face buttons**: pushing the stick is electrically identical to pressing those buttons. The OS exposes **no separate analog signal** for it anywhere — there is no joystick/event device, the input daemon reports only on/off button bits, and the analog-to-digital block the stock firmware uses is left unpowered by the kernel and locks up the device if touched from software. I reverse-engineered every available path to confirm this. As a result, in TreeFrogUI the right stick simply **mirrors the face buttons** and **cannot be remapped to analog axes**. (The menus do filter out accidental stick *drift* so it won't fire buttons on its own.)
 ---
 
 ## High-Level Overview
@@ -60,3 +53,19 @@ For step-by-step setup instructions, please refer to the [Installation Guide](in
 - **Black Screen / Only Battery Icon Visible:** If nothing loads or only the battery icon is visible after the boot logo, set up your SD card with the clean **[Stock OS Backup](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)** first, then copy the TreeFrogUI files over.
 - **Submit Feedback Anonymously**: Help improve the project by submitting bugs, performance issues, or compatibility reports on the [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header).
 - **GitHub Issues**: You can also open an issue on the [GitHub repository](https://github.com/tzubertowski/treefrog-ui/issues).
+
+---
+
+## Want TreeFrogUI on another device?
+
+R36SX v2.7 (bootloader protection), SF3000 V3 (bootloader protection), SF3500,
+SF3100, GB350, HDMI-out clones, and more are all on the wishlist.
+
+The catch: porting needs the actual hardware in hand. Bootloaders differ, input
+and display wiring differ, the protected variants need live debugging. No way to
+do it blind.
+
+Every device supported so far was bought out of my own pocket, and there are far
+more clones than I can keep buying.
+
+If you want to see a port happen, chip in: ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**. Donations go straight toward the next device to port to.
