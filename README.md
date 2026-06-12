@@ -151,7 +151,8 @@ Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one
 Drop `<out.img>` in `roms/pico286/<game>/` and launch it (mounts as C:).
 
 **Controls / menu:**
-- **SELECT + START** — open the pico286 **main menu**: Resume, Keyboard, Disk swap, Mouse mode on/off, Mouse speed, CPU speed, Reset, Exit to menu. (D-pad navigates, A selects, Left/Right adjusts Mouse/CPU speed, B closes.)
+- **SELECT + START** — open the pico286 **main menu**: Resume, Keyboard, Disk swap, Mouse mode, Mouse speed, Joystick mode, CPU speed, Frame skip, Reset, Exit to menu. (D-pad navigates, A selects, Left/Right adjusts the speed/skip rows, B closes.)
+- **Joystick mode** (menu toggle): D-pad → game-port axes, A/B → joystick buttons 1/2.
 - **L + R** — quick on-screen keyboard (D-pad moves, A presses, B closes) for typing DOS commands.
 - **Mouse mode** (toggle in the menu): D-pad moves the cursor, A = left click, B = right click. Needs a mouse driver, which the bundled FreeDOS loads automatically (CTMOUSE).
 - In-game buttons: A=Enter, B=Esc, X=Space, Y=Ctrl, L=Shift, R=Alt.
