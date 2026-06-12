@@ -1,8 +1,5 @@
 Welcome to **TreeFrogUI** (v0.1.7) for the SF3000 and R36SX handheld consoles
 
-> [!WARNING]
-> This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). One build runs on both — the device is auto-detected at boot.
-
 > [!IMPORTANT]
 > This is an **early release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
 > 

@@ -30,6 +30,7 @@ _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
 _apply_patch ardens-sf3000.patch       Ardens
+_apply_patch pico286-sf3000.patch      pico-286
 
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
@@ -175,6 +176,16 @@ _b tyrquake          tyrquake                  ""
 
 echo "-- prboom make --"
 _b prboom            libretro-prboom           ""
+
+echo "-- pico286 standalone DOS/PC make --"
+# Standalone binary (not a libretro .so). Builds with its own self-locating
+# script; output is cores/pico-286/pico286 -> copy to cubegm/ on the SD card.
+if [ -d "$CORES/pico-286/port_sf3000" ]; then
+    bash "$CORES/pico-286/port_sf3000/build.sh" 2>&1 | tail -2
+    [ -f "$CORES/pico-286/pico286" ] && cp "$CORES/pico-286/pico286" "$OUT/pico286" && echo "→ $OUT/pico286"
+else
+    echo "WARNING: cores/pico-286/port_sf3000 missing (run clone_cores.sh + _apply_patch)"
+fi
 
 echo "-- mame2000 make --"
 _b mame2000          mame2000                  ""

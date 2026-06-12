@@ -91,6 +91,9 @@ clone libretro-xmil    https://github.com/libretro/xmil-libretro
 clone vaporspec        https://github.com/libretro/vaporspec
 clone libretro-atari800 https://github.com/libretro/libretro-atari800
 
+# ── pico-286 standalone DOS/PC emulator (8086-286) ──────────────────────────
+clone pico-286         https://github.com/xrip/pico-286
+
 # ── angree SF2000 ports (Amiga/Atari ST) ────────────────────────────────────
 clone sf2000-uae-amiga-emulator          https://github.com/angree/sf2000-uae-amiga-emulator
 clone sf2000-atarist-emulator            https://github.com/angree/sf2000-atarist-emulator

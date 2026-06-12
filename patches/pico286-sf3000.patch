@@ -1,0 +1,1826 @@
+diff --git a/port_sf3000/build.sh b/port_sf3000/build.sh
+new file mode 100755
+index 0000000..80535ab
+--- /dev/null
++++ b/port_sf3000/build.sh
+@@ -0,0 +1,26 @@
++#!/bin/bash
++# Build the pico286 standalone DOS/PC emulator for SF3000/R36SX (MIPS 74Kc).
++# Self-locating: resolves the pico-286 source root from this script's location.
++set -e
++cd "$(cd "$(dirname "$0")/.." && pwd)"
++TC="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
++MIPS="$TC/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
++SYSROOT="$TC/mipsel-buildroot-linux-gnu/sysroot"
++A="-mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -mlong-calls -fms-extensions -EL --sysroot=$SYSROOT -O2 -w -DUSE_EMU8950_OPL=1 -DEMU8950_SLOT_RENDER=1 -DEMU8950_NO_RATECONV=1 -DEMU8950_NO_WAVE_TABLE_MAP=1 -DEMU8950_NO_TLL=1 -DEMU8950_NO_FLOAT=1 -DEMU8950_NO_TIMER=1 -DEMU8950_NO_TEST_FLAG=1 -DEMU8950_SIMPLER_NOISE=1 -DEMU8950_SHORT_NOISE_UPDATE_CHECK=1 -DEMU8950_LINEAR_SKIP=1 -DEMU8950_LINEAR_END_OF_NOTE_OPTIMIZATION -DEMU8950_NO_PERCUSSION_MODE=1 -DEMU8950_LINEAR=1"
++INC="-Isrc -Isrc/emulator -Isrc/emulator/includes -Isrc/emu8950 -Ifindfirst -Iport_sf3000"
++rm -rf /tmp/p286; mkdir -p /tmp/p286; OBJ=""
++cc()  { "${MIPS}gcc" $A -std=gnu11   $INC -c "$1" -o "$2"; }
++cxx() { "${MIPS}g++" $A -std=gnu++14 $INC -c "$1" -o "$2"; }
++n=0
++for f in $(find src/emulator src/emu8950 -name "*.c") src/printf/printf.c findfirst/findfirst.c findfirst/spec.c port_sf3000/host_stubs.c; do
++  o=/tmp/p286/c$n.o; cc "$f" "$o"; OBJ="$OBJ $o"; n=$((n+1))
++done
++for f in $(find src/emulator src/emu8950 -name "*.cpp") port_sf3000/sf3000-main.cpp; do
++  o=/tmp/p286/x$n.o; cxx "$f" "$o"; OBJ="$OBJ $o"; n=$((n+1))
++done
++# hwdisp.c is C
++o=/tmp/p286/hwdisp.o; cc port_sf3000/hwdisp.c "$o"; OBJ="$OBJ $o"
++echo "=== link ==="
++"${MIPS}g++" $A $INC $OBJ -o pico286 -L"$SYSROOT/usr/lib" -lpthread -ldl -lm -lc
++"${MIPS}strip" pico286
++ls -la pico286; file pico286 | cut -d, -f1-2
+diff --git a/port_sf3000/host_stubs.c b/port_sf3000/host_stubs.c
+new file mode 100644
+index 0000000..81db0b3
+--- /dev/null
++++ b/port_sf3000/host_stubs.c
+@@ -0,0 +1,14 @@
++/* Host/SF3000 stubs for Pico-only symbols so the emulator core links without
++ * the RP2040 PSRAM driver or the Pico virtual-memory swap. PSRAM is never
++ * available here (PSRAM_AVAILABLE=false), so these sit in dead branches and
++ * only need to resolve at link time. */
++#include <stdint.h>
++#include <stdbool.h>
++bool     PSRAM_AVAILABLE   = false;
++uint32_t butter_psram_size = 0;
++uint8_t  read8psram (uint32_t a)             { (void)a; return 0; }
++uint16_t read16psram(uint32_t a)             { (void)a; return 0; }
++uint32_t read32psram(uint32_t a)             { (void)a; return 0; }
++void     write8psram (uint32_t a, uint8_t v) { (void)a; (void)v; }
++void     write16psram(uint32_t a, uint16_t v){ (void)a; (void)v; }
++void     write32psram(uint32_t a, uint32_t v){ (void)a; (void)v; }
+diff --git a/port_sf3000/hwdisp.c b/port_sf3000/hwdisp.c
+new file mode 100644
+index 0000000..1f9fadc
+--- /dev/null
++++ b/port_sf3000/hwdisp.c
+@@ -0,0 +1,316 @@
++/* sf3000-hwdisp implementation. dlopen's driver.so, calls video_driver_*.
++ *
++ * Driver scales src dims → panel (854x480) via HCGE DMA with bilinear filter.
++ * Two filter modes:
++ *   - HW (default): pass src as-is, driver scales (bilinear).
++ *   - Nearest: SW nearest-upscale src to driver native (1280x720) framing,
++ *     so driver doesn't scale further → pixels stay sharp.
++ *
++ * Aspect-pad: when target aspect set, source is centered horizontally with
++ * black pillar-bars so driver's stretch becomes uniform. */
++
++#include "hwdisp.h"
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <dlfcn.h>
++
++#define HW_W   1280
++#define HW_H    720
++#define HW_PITCH (HW_W * 2)
++#define HW_BUFSZ (HW_W * HW_H * 2)
++
++static void   *g_handle = NULL;
++static int     g_active = 0;
++
++typedef int  (*fn_init_t)(void);
++typedef void (*fn_deinit_t)(void);
++typedef int  (*fn_disp_t)(void *src, int w, int h, int pitch);
++
++static fn_init_t   p_init   = NULL;
++static fn_deinit_t p_deinit = NULL;
++static fn_disp_t   p_disp   = NULL;
++
++/* Aspect-pad staging buffer (lazy alloc, resized on demand) */
++static uint16_t *g_pad_buf  = NULL;
++static int       g_pad_cap  = 0;
++static int       g_pad_w    = 0;
++static int       g_pad_h    = 0;
++
++/* Nearest-upscale buffer (always 1280x720) */
++static uint16_t *g_near_buf = NULL;
++
++static int g_aspect_num = 0;
++static int g_aspect_den = 0;
++static int g_filter_nearest = 0;
++
++int hwdisp_init(void) {
++    if (g_active) return 0;
++
++    g_handle = dlopen("/mnt/sdcard/cubegm/driver.so", RTLD_NOW | RTLD_GLOBAL);
++    if (!g_handle) {
++        fprintf(stderr, "hwdisp: dlopen failed: %s\n", dlerror());
++        return -1;
++    }
++
++    p_init   = (fn_init_t)  dlsym(g_handle, "video_drivers_init");
++    p_deinit = (fn_deinit_t)dlsym(g_handle, "video_driver_deinit");
++    p_disp   = (fn_disp_t)  dlsym(g_handle, "video_driver_disp_frame");
++
++    if (!p_init || !p_deinit || !p_disp) {
++        fprintf(stderr, "hwdisp: dlsym failed (init=%p deinit=%p disp=%p)\n",
++                p_init, p_deinit, p_disp);
++        dlclose(g_handle); g_handle = NULL;
++        return -1;
++    }
++
++    int rv = p_init();
++    if (rv <= 0) {
++        fprintf(stderr, "hwdisp: video_drivers_init returned %d\n", rv);
++        dlclose(g_handle); g_handle = NULL;
++        return -1;
++    }
++
++    g_active = 1;
++    fprintf(stderr, "hwdisp: HW path active (init rv=%d)\n", rv);
++    return 0;
++}
++
++int hwdisp_active(void) { return g_active; }
++
++void hwdisp_set_target_aspect(int num, int den) {
++    g_aspect_num = num;
++    g_aspect_den = den;
++}
++
++void hwdisp_set_filter(int nearest) {
++    g_filter_nearest = nearest ? 1 : 0;
++    /* If switching to nearest, ensure native buffer exists. */
++    if (g_filter_nearest && !g_near_buf) {
++        g_near_buf = (uint16_t*)malloc(HW_BUFSZ);
++        if (g_near_buf) memset(g_near_buf, 0, HW_BUFSZ);
++    }
++}
++
++/* Pad horizontally: src(w×h) → g_pad_buf(pad_w×h), src centered, sides black. */
++static void pad_horizontal(const void *src, int w, int h, int pitch_bytes, int pad_w) {
++    int need = pad_w * h;
++    if (need > g_pad_cap) {
++        free(g_pad_buf);
++        g_pad_cap = need + 4096;
++        g_pad_buf = (uint16_t*)malloc(g_pad_cap * sizeof(uint16_t));
++        g_pad_h   = 0;
++        g_pad_w   = 0;
++    }
++    if (!g_pad_buf) return;
++
++    int off_x = (pad_w - w) / 2;
++    if (off_x < 0) off_x = 0;
++
++    if (pad_w != g_pad_w || h != g_pad_h) {
++        memset(g_pad_buf, 0, (size_t)pad_w * h * sizeof(uint16_t));
++        g_pad_w = pad_w;
++        g_pad_h = h;
++    }
++
++    for (int y = 0; y < h; y++) {
++        const uint16_t *srow = (const uint16_t *)((const char *)src + y * pitch_bytes);
++        uint16_t *drow = g_pad_buf + (size_t)y * pad_w + off_x;
++        memcpy(drow, srow, (size_t)w * sizeof(uint16_t));
++    }
++}
++
++/* Nearest-upscale src into g_near_buf (1280×720). Pads with black to fit
++ * target aspect if set. Otherwise full-stretch upscales to 1280×720.
++ *
++ * Fast paths:
++ *   - Integer scale (dst_w = w*n, dst_h = h*m): unrolled replication +
++ *     vertical row memcpy. Avoids per-pixel lookup tables.
++ *   - Generic: xmap lookup. */
++static void upscale_nearest(const void *src, int w, int h, int pitch_bytes) {
++    if (!g_near_buf) return;
++
++    int dst_w, dst_h;
++    if (g_aspect_num > 0 && g_aspect_den > 0) {
++        /* Integer scale preferring largest factor that still fits */
++        int my = HW_H / h;
++        if (my < 1) my = 1;
++        int dw = w * my;
++        if (dw > HW_W) {
++            /* Width-limited: pick scale by width instead */
++            my = HW_W / w; if (my < 1) my = 1;
++            dw = w * my;
++        }
++        dst_h = h * my;
++        dst_w = dw;
++    } else {
++        /* Full stretch: integer-snap to 1280×720 if possible */
++        int mx = HW_W / w; if (mx < 1) mx = 1;
++        int my = HW_H / h; if (my < 1) my = 1;
++        dst_w = w * mx; dst_h = h * my;
++    }
++    int off_x = (HW_W - dst_w) / 2;
++    int off_y = (HW_H - dst_h) / 2;
++    if (off_x < 0) off_x = 0;
++    if (off_y < 0) off_y = 0;
++
++    /* Clear borders only when geometry changes */
++    static int last_dst_w = -1, last_dst_h = -1;
++    if (dst_w != last_dst_w || dst_h != last_dst_h) {
++        memset(g_near_buf, 0, HW_BUFSZ);
++        last_dst_w = dst_w; last_dst_h = dst_h;
++    }
++
++    const int sp = pitch_bytes / 2;
++    const uint16_t *s = (const uint16_t *)src;
++    const int nx = dst_w / w;    /* H replication factor (integer) */
++    const int ny = dst_h / h;    /* V replication factor (integer) */
++
++    /* Integer-scale fast path: expand one row, copy ny times.
++     * Use uint32_t writes (2 px/word) where alignment permits. */
++    if (nx >= 1 && ny >= 1 && nx * w == dst_w && ny * h == dst_h) {
++        const int row_bytes = dst_w * 2;
++        for (int sy = 0; sy < h; sy++) {
++            const uint16_t *srow = s + sy * sp;
++            uint16_t *drow = g_near_buf + (size_t)(sy * ny + off_y) * HW_W + off_x;
++
++            switch (nx) {
++            case 1:
++                memcpy(drow, srow, (size_t)w * 2);
++                break;
++            case 2: {
++                /* 1 src px → 1 uint32_t write (p|p<<16) */
++                uint32_t *d32 = (uint32_t *)drow;
++                for (int sx = 0; sx < w; sx++) {
++                    uint32_t p = srow[sx];
++                    d32[sx] = p | (p << 16);
++                }
++                break;
++            }
++            case 3:
++                for (int sx = 0; sx < w; sx++) {
++                    uint16_t p = srow[sx];
++                    uint16_t *dp = drow + sx * 3;
++                    dp[0] = p; dp[1] = p; dp[2] = p;
++                }
++                break;
++            case 4: {
++                /* 1 src px → 2 uint32_t writes */
++                uint32_t *d32 = (uint32_t *)drow;
++                for (int sx = 0; sx < w; sx++) {
++                    uint32_t p = srow[sx];
++                    uint32_t pp = p | (p << 16);
++                    d32[sx*2  ] = pp;
++                    d32[sx*2+1] = pp;
++                }
++                break;
++            }
++            case 5:
++                for (int sx = 0; sx < w; sx++) {
++                    uint16_t p = srow[sx];
++                    uint16_t *dp = drow + sx * 5;
++                    dp[0] = p; dp[1] = p; dp[2] = p; dp[3] = p; dp[4] = p;
++                }
++                break;
++            case 6: {
++                uint32_t *d32 = (uint32_t *)drow;
++                for (int sx = 0; sx < w; sx++) {
++                    uint32_t p = srow[sx];
++                    uint32_t pp = p | (p << 16);
++                    d32[sx*3  ] = pp;
++                    d32[sx*3+1] = pp;
++                    d32[sx*3+2] = pp;
++                }
++                break;
++            }
++            case 8: {
++                uint32_t *d32 = (uint32_t *)drow;
++                for (int sx = 0; sx < w; sx++) {
++                    uint32_t p = srow[sx];
++                    uint32_t pp = p | (p << 16);
++                    d32[sx*4  ] = pp;
++                    d32[sx*4+1] = pp;
++                    d32[sx*4+2] = pp;
++                    d32[sx*4+3] = pp;
++                }
++                break;
++            }
++            default:
++                for (int sx = 0; sx < w; sx++) {
++                    uint16_t p = srow[sx];
++                    uint16_t *dp = drow + sx * nx;
++                    for (int k = 0; k < nx; k++) dp[k] = p;
++                }
++                break;
++            }
++
++            /* Vertical replication: copy this row (ny-1) more times */
++            for (int v = 1; v < ny; v++)
++                memcpy(drow + (size_t)v * HW_W, drow, row_bytes);
++        }
++        return;
++    }
++
++    /* Generic fallback: xmap lookup */
++    static int xmap[HW_W];
++    static int last_w_map = -1, last_dst_w_map = -1;
++    if (w != last_w_map || dst_w != last_dst_w_map) {
++        for (int dx = 0; dx < dst_w; dx++) xmap[dx] = dx * w / dst_w;
++        last_w_map = w; last_dst_w_map = dst_w;
++    }
++    for (int dy = 0; dy < dst_h; dy++) {
++        int sy = dy * h / dst_h;
++        const uint16_t *srow = s + sy * sp;
++        uint16_t *drow = g_near_buf + (size_t)(dy + off_y) * HW_W + off_x;
++        for (int dx = 0; dx < dst_w; dx++)
++            drow[dx] = srow[xmap[dx]];
++    }
++}
++
++void hwdisp_present(const void *src, int w, int h, int pitch_bytes) {
++    if (!g_active || !p_disp || !src) return;
++
++    /* Nearest filter: SW upscale to 1280×720, driver does no further scale. */
++    if (g_filter_nearest) {
++        if (!g_near_buf) {
++            g_near_buf = (uint16_t*)malloc(HW_BUFSZ);
++            if (g_near_buf) memset(g_near_buf, 0, HW_BUFSZ);
++        }
++        if (g_near_buf) {
++            upscale_nearest(src, w, h, pitch_bytes);
++            p_disp(g_near_buf, HW_W, HW_H, HW_PITCH);
++            return;
++        }
++        /* Fallthrough to HW path if alloc failed */
++    }
++
++    /* HW (bilinear) path: pass through, optional aspect pad. */
++    if (g_aspect_num <= 0 || g_aspect_den <= 0) {
++        p_disp((void *)src, w, h, pitch_bytes);
++        return;
++    }
++
++    int pad_w = h * g_aspect_num / g_aspect_den;
++    if (pad_w <= w) {
++        p_disp((void *)src, w, h, pitch_bytes);
++        return;
++    }
++
++    pad_horizontal(src, w, h, pitch_bytes, pad_w);
++    if (!g_pad_buf) {
++        p_disp((void *)src, w, h, pitch_bytes);
++        return;
++    }
++    p_disp(g_pad_buf, pad_w, h, pad_w * 2);
++}
++
++void hwdisp_deinit(void) {
++    if (!g_active) return;
++    if (p_deinit) p_deinit();
++    if (g_pad_buf) { free(g_pad_buf); g_pad_buf = NULL; g_pad_cap = 0; g_pad_w = 0; g_pad_h = 0; }
++    if (g_near_buf) { free(g_near_buf); g_near_buf = NULL; }
++    if (g_handle) { dlclose(g_handle); g_handle = NULL; }
++    p_init = NULL; p_deinit = NULL; p_disp = NULL;
++    g_active = 0;
++}
+diff --git a/port_sf3000/hwdisp.h b/port_sf3000/hwdisp.h
+new file mode 100644
+index 0000000..9a0dc6b
+--- /dev/null
++++ b/port_sf3000/hwdisp.h
+@@ -0,0 +1,41 @@
++/* sf3000-hwdisp — hardware display via driver.so + HCGE.
++ * Wraps SF3000 HiChip Graphics Engine for rotation+scale+present in HW.
++ * Falls back transparently if driver.so unavailable. */
++#ifndef SF3000_HWDISP_H
++#define SF3000_HWDISP_H
++
++#include <stddef.h>
++#include <stdint.h>
++
++/* Initialize HW display backend. Returns 0 on success, -1 if unavailable
++ * (caller falls back to software path). */
++int  hwdisp_init(void);
++
++/* True if HW path is active (init succeeded). */
++int  hwdisp_active(void);
++
++/* Set target output aspect for padding (default 0,0 = no pad, full stretch).
++ * Driver scales source dims to panel; setting target aspect causes
++ * hwdisp_present to copy source into a staging buffer padded with black
++ * to match the target aspect, so driver's stretch becomes uniform.
++ *
++ * Typical: hwdisp_set_target_aspect(16, 9) for the SF3000 panel. Then a
++ * 4:3 source ends up letter/pillar-boxed correctly. */
++void hwdisp_set_target_aspect(int num, int den);
++
++/* Filter mode (default 0 = HW bilinear via driver scale).
++ * 1 = SW nearest upscale to driver native (1280x720) before send — driver
++ *     does no further scaling, pixels stay sharp. Adds CPU cost. */
++void hwdisp_set_filter(int nearest);
++
++/* Present an RGB565 frame to the panel via HW.
++ * src: RGB565 pixel buffer (16bpp)
++ * w, h: source dimensions
++ * pitch_bytes: source row stride in bytes
++ * HW scales+rotates+presents on physical panel automatically. */
++void hwdisp_present(const void *src, int w, int h, int pitch_bytes);
++
++/* Cleanup. Safe to call even if init failed. */
++void hwdisp_deinit(void);
++
++#endif
+diff --git a/port_sf3000/sf3000-main.cpp b/port_sf3000/sf3000-main.cpp
+new file mode 100644
+index 0000000..c942a1c
+--- /dev/null
++++ b/port_sf3000/sf3000-main.cpp
+@@ -0,0 +1,1057 @@
++#include <pthread.h>
++#include <unistd.h>
++#include <cstring>
++#include <signal.h>
++#include <sys/time.h>
++#include <cstdio>
++#include <cstdlib>
++#include <cstdarg>
++#include <stdint.h>
++#include <sys/ipc.h>
++#include <sys/shm.h>
++#include <dirent.h>
++#include <fcntl.h>
++#include <sys/mman.h>
++#include <sys/ioctl.h>
++#include <linux/fb.h>
++extern "C" {
++#include "hwdisp.h"
++}
++#include "emulator/emulator.h"
++#include "emulator/includes/font8x16.h"
++#include "emulator/includes/font8x8.h"
++#include "emu8950.h"
++
++/* ---- SF3000 platform glue (replaces MiniFB/X11 + linux-audio) ---- */
++extern "C" uint8_t insertdisk(uint8_t drivenum, const char *pathname);
++
++/* RGB565 staging for the HW display (SCREEN is XRGB8888 640x480). */
++static uint16_t fb565[640 * 480];
++
++/* cubevol /tmp/joy_key shared-memory button state (like picoarch/pcsx4all). */
++static volatile uint32_t *cv_keys = NULL;
++static void sf3000_input_init(void) {
++    key_t k = ftok("/tmp/joy_key", 'a');
++    if (k == (key_t)-1) return;
++    int id = shmget(k, 4, 0666);
++    if (id < 0) return;
++    void *p = shmat(id, NULL, 0);
++    if (p != (void *)-1) cv_keys = (volatile uint32_t *)p;
++}
++static inline int cvbtn(uint32_t s, int b) { return (s >> b) & 1; }
++
++/* The battery/volume OSD is drawn by cubevol on /dev/fb1 (ARGB plane). Clear it
++ * (alpha=0) to hide during gameplay; FrogUI redraws it when it relaunches. */
++static void fb1_clear(void) {
++    int fd = open("/dev/fb1", O_RDWR);
++    if (fd < 0) return;
++    struct fb_fix_screeninfo finfo;
++    if (ioctl(fd, FBIOGET_FSCREENINFO, &finfo) == 0 && finfo.smem_len > 0) {
++        void *m = mmap(NULL, finfo.smem_len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
++        if (m != MAP_FAILED) { memset(m, 0, finfo.smem_len); munmap(m, finfo.smem_len); }
++    }
++    close(fd);
++}
++
++/* Inject a PC scancode straight into the emulated keyboard controller
++ * (same path HandleInput uses: port60 + IRQ1). down=0 sends the break code. */
++static inline void send_scancode(uint8_t sc, int down) {
++    port60 = down ? sc : (uint8_t)(sc | 0x80);
++    port64 |= 2;
++    doirq(1);
++}
++
++/* Audio: stubbed for first bring-up (silent). Wired to the SF3000 driver next,
++ * like pcsx4all. The core's sampling path stays intact. */
++static inline int linux_audio_init(int a, int b, int c) { (void)a;(void)b;(void)c; return 0; }
++static inline int linux_audio_start(void) { return 0; }
++static inline const char *linux_audio_get_backend_name(void) { return "sf3000-stub"; }
++static inline int linux_audio_write(int16_t *buf, int frames) { (void)buf;(void)frames; return 0; }
++static inline void linux_audio_close(void) {}
++
++static uint32_t ALIGN(4, SCREEN[640 * 480]);
++uint8_t ALIGN(4, DEBUG_VRAM[80 * 10]) = {0};
++
++int cursor_blink_state = 0;
++uint8_t log_debug = 0;
++
++extern OPL *emu8950_opl;
++
++#define AUDIO_BUFFER_LENGTH ((SOUND_FREQUENCY / 10))
++static int16_t audio_buffer[AUDIO_BUFFER_LENGTH * 2] = {};
++static int sample_index = 0;
++
++extern "C" void adlib_getsample(int16_t *sndptr, intptr_t numsamples);
++
++extern "C" void _putchar(char character) {
++    putchar(character);
++    static int x = 0, y = 0;
++
++    if (y == 10) {
++        y = 9;
++        memmove(DEBUG_VRAM, DEBUG_VRAM + 80, 80 * 9);
++        memset(DEBUG_VRAM + 80 * 9, 0, 80);
++    }
++    uint8_t *vidramptr = DEBUG_VRAM + y * 80 + x;
++
++    if ((unsigned) character >= 32) {
++        if (character >= 96) character -= 32;
++        *vidramptr = ((character - 32) & 63) | 0 << 6;
++        if (x == 80) {
++            x = 0;
++            y++;
++        } else
++            x++;
++    } else if (character == '\n') {
++        x = 0;
++        y++;
++    } else if (character == '\r') {
++        x = 0;
++    } else if (character == 8 && x > 0) {
++        x--;
++        *vidramptr = 0;
++    }
++}
++
++static void p286log(const char *fmt, ...);
++extern "C" uint8_t dbg_last3d8, dbg_last3d9;
++
++static inline uint32_t spread8(uint32_t plane) {
++    plane = (plane | (plane << 12)) & 0x000F000Fu;
++    plane = (plane | (plane <<  6)) & 0x03030303u;
++    plane = (plane | (plane <<  3)) & 0x11111111u;
++    return plane;
++}
++static inline uint32_t ega_pack8_from_planes(const uint32_t ega_planes) {
++    const uint32_t pixel1 = spread8(ega_planes        & 0xFFu);
++    const uint32_t pixel2 = spread8((ega_planes >> 8) & 0xFFu);
++    const uint32_t pixel3 = spread8((ega_planes >>16) & 0xFFu);
++    const uint32_t pixel4 = spread8(ega_planes >>24);
++    return pixel1 | pixel2 << 1 | pixel3 << 2 | pixel4 << 3;
++}
++
++static inline void renderer() {
++    static uint8_t v = 0;
++    if (v != videomode) {
++        p286log("videomode change %x -> %x (3d8=%02x 3d9=%02x cs=%d int=%d fg=%d)",
++                v, videomode, dbg_last3d8, dbg_last3d9, cga_colorset, cga_intensity, cga_foreground_color);
++        v = videomode;
++    }
++
++    uint8_t *vidramptr = (uint8_t *) (VIDEORAM + 0x8000 + ((vram_offset & 0xffff) << 1));
++    uint8_t cols = 80;
++    for (int y = 0; y < 480; y++) {
++        if (y >= 399)
++            port3DA = 8;
++        else
++            port3DA = 0;
++
++        if (y & 1)
++            port3DA |= 1;
++
++        uint32_t *pixels = SCREEN + y * 640;
++        if (y < 400)
++            switch (videomode) {
++                case 0x00:
++                case 0x01: {
++                    uint16_t y_div_16 = y / 16;
++                    uint8_t glyph_line = (y / 2) & 7;
++                    uint32_t *text_buffer_line = &VIDEORAM[0x8000 + y_div_16 * 80];
++
++                    for (int column = 0; column < 40; column++) {
++                        uint8_t glyph_pixels = font_8x8[(*text_buffer_line++ & 0xFF) * 8 + glyph_line];
++                        uint8_t color = *text_buffer_line++;
++
++                        uint8_t cursor_active = cursor_blink_state &&
++                                                y_div_16 == CURSOR_Y && column == CURSOR_X &&
++                                                glyph_line >= cursor_start && glyph_line <= cursor_end;
++
++                        for (uint8_t bit = 0; bit < 8; bit++) {
++                            uint8_t pixel_color;
++                            if (cursor_active) {
++                                pixel_color = color & 0x0F;
++                            } else if (cga_blinking && color >> 7 & 1) {
++                                pixel_color = cursor_blink_state ? color >> 4 & 0x7 : color & 0x7;
++                            } else {
++                                pixel_color = glyph_pixels >> bit & 1 ? color & 0x0f : color >> 4;
++                            }
++                            *pixels++ = *pixels++ = cga_palette[pixel_color];
++                        }
++                    }
++                    break;
++                }
++                case 0x02:
++                case 0x03: {
++                    uint16_t y_div_16 = y / 16;
++                    uint8_t glyph_line = y & 15;
++                    uint32_t *text_row = &VIDEORAM[0x8000 + y_div_16 * 160];
++                    for (uint8_t column = 0; column < 80; column++) {
++                        uint8_t charcode = *text_row++ & 0xff;
++                        uint8_t color = *text_row++ & 0xff;
++                        uint8_t glyph_row = font_8x16[charcode * 16 + glyph_line];
++
++                        uint8_t cursor_active =
++                                cursor_blink_state && y_div_16 == CURSOR_Y && column == CURSOR_X &&
++                                (cursor_start > cursor_end
++                                     ? !(glyph_line >= cursor_end << 1 &&
++                                         glyph_line <= cursor_start << 1)
++                                     : glyph_line >= cursor_start << 1 && glyph_line <= cursor_end << 1);
++
++                        for (int bit = 0; bit < 8; bit++) {
++                            uint8_t pixel_color;
++                            if (cursor_active) {
++                                pixel_color = color & 0x0F;
++                            } else if (cga_blinking && color >> 7 & 1) {
++                                if (cursor_blink_state) {
++                                    pixel_color = color >> 4 & 0x7;
++                                } else {
++                                    pixel_color = glyph_row >> bit & 1 ? color & 0x0f : (color >> 4 & 0x7);
++                                }
++                            } else {
++                                pixel_color = glyph_row >> bit & 1 ? color & 0x0f : color >> 4;
++                            }
++                            *pixels++ = cga_palette[pixel_color];
++                        }
++                    }
++                    break;
++                }
++                case 0x04:
++                case 0x05: {
++                    uint32_t *cga_row = &VIDEORAM[0x8000 + ((y / 2 >> 1) * 80 + (y / 2 & 1) * 8192)];
++                    uint8_t *current_cga_palette = (uint8_t *) cga_gfxpal[cga_colorset][cga_intensity];
++
++                    for (int x = 320 / 4; x--;) {
++                        uint8_t cga_byte = *cga_row++ & 0xFF;
++                        *pixels++ = *pixels++ = cga_palette[cga_byte >> 6 & 3
++                                                                ? current_cga_palette[cga_byte >> 6 & 3]
++                                                                : cga_foreground_color];
++                        *pixels++ = *pixels++ = cga_palette[cga_byte >> 4 & 3
++                                                                ? current_cga_palette[cga_byte >> 4 & 3]
++                                                                : cga_foreground_color];
++                        *pixels++ = *pixels++ = cga_palette[cga_byte >> 2 & 3
++                                                                ? current_cga_palette[cga_byte >> 2 & 3]
++                                                                : cga_foreground_color];
++                        *pixels++ = *pixels++ = cga_palette[cga_byte >> 0 & 3
++                                                                ? current_cga_palette[cga_byte >> 0 & 3]
++                                                                : cga_foreground_color];
++                    }
++                    break;
++                }
++                case 0x06: {
++                    uint32_t *cga_row = &VIDEORAM[0x8000 + (y / 2 >> 1) * 80 + (y / 2 & 1) * 8192];
++                    for (int x = 640 / 8; x--;) {
++                        uint8_t cga_byte = *cga_row++;
++                        *pixels++ = cga_palette[(cga_byte >> 7 & 1) * cga_foreground_color];
++                        *pixels++ = cga_palette[(cga_byte >> 6 & 1) * cga_foreground_color];
++                        *pixels++ = cga_palette[(cga_byte >> 5 & 1) * cga_foreground_color];
++                        *pixels++ = cga_palette[(cga_byte >> 4 & 1) * cga_foreground_color];
++                        *pixels++ = cga_palette[(cga_byte >> 3 & 1) * cga_foreground_color];
++                        *pixels++ = cga_palette[(cga_byte >> 2 & 1) * cga_foreground_color];
++                        *pixels++ = cga_palette[(cga_byte >> 1 & 1) * cga_foreground_color];
++                        *pixels++ = cga_palette[(cga_byte >> 0 & 1) * cga_foreground_color];
++                    }
++                    break;
++                }
++                case 0x1e:
++                    cols = 90;
++                    vram_offset = 5;
++                    if (y >= 348) break;
++                case 0x07: {
++                    uint32_t *cga_row = &VIDEORAM[(y & 3) * 8192 + y / 4 * cols];
++                    for (int x = 640 / 8; x--;) {
++                        uint8_t cga_byte = *cga_row++ & 0xFF;
++                        *pixels++ = cga_palette[(cga_byte >> 7 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 6 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 5 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 4 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 3 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 2 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 1 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 0 & 1) * 15];
++                    }
++                    break;
++                }
++                case 0x08:
++                case 0x74: /* 160x200x16 */
++                case 0x76: /* cga composite / tandy */ {
++                    uint32_t *palette;
++                    switch (videomode) {
++                        case 0x08:
++                            palette = tga_palette;
++                            break;
++                        case 0x74:
++                            palette = cga_composite_palette[cga_intensity << 1];
++                            break;
++                        case 0x76:
++                            palette = cga_composite_palette[0];
++                            break;
++                    }
++
++                    uint32_t *tga_row = &VIDEORAM[tga_offset + (y / 2 >> 1) * 80 + (y / 2 & 1) * 8192];
++                    for (int x = 320 / 4; x--;) {
++                        uint8_t two_pixels = *tga_row++;
++                        uint8_t pixel1_color = two_pixels >> 4;
++                        uint8_t pixel2_color = two_pixels & 15;
++
++                        if (!pixel1_color && videomode == 0x8) pixel1_color = cga_foreground_color;
++                        if (!pixel2_color && videomode == 0x8) pixel2_color = cga_foreground_color;
++
++                        *pixels++ = *pixels++ = *pixels++ = *pixels++ = palette[pixel1_color];
++                        *pixels++ = *pixels++ = *pixels++ = *pixels++ = palette[pixel2_color];
++                    }
++                    break;
++                }
++                case 0x09: /* tandy 320x200 16 color */ {
++                    uint32_t *tga_row = &VIDEORAM[tga_offset + (y / 2 & 3) * 8192 + y / 8 * 160];
++                    for (int x = 320 / 2; x--;) {
++                        uint8_t tga_byte = *tga_row++ & 0xFF;
++                        *pixels++ = *pixels++ = tga_palette[tga_palette_map[tga_byte >> 4 & 15]];
++                        *pixels++ = *pixels++ = tga_palette[tga_palette_map[tga_byte & 15]];
++                    }
++                    break;
++                }
++                case 0x0a: /* tandy 640x200 16 color */ {
++                    uint32_t *tga_row = &VIDEORAM[y / 2 * 320];
++                    for (int x = 640 / 2; x--;) {
++                        uint8_t tga_byte = *tga_row++;
++                        *pixels++ = tga_palette[tga_palette_map[tga_byte >> 4 & 15]];
++                        *pixels++ = tga_palette[tga_palette_map[tga_byte & 15]];
++                    }
++                    break;
++                }
++                case 0x0D: /* EGA 320x200 16-color */ {
++                    const uint32_t *ega_row = &VIDEORAM[(y / 2) * 40];
++                    for (int i = 0; i < 40; i++) {
++                        uint32_t ega_planes = *ega_row++;
++                        uint32_t eight_pixels = ega_pack8_from_planes(ega_planes);
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels >> 28];
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels >> 24 & 0xF];
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels >> 20 & 0xF];
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels >> 16 & 0xF];
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels >> 12 & 0xF];
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels >> 8 & 0xF];
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels >> 4 & 0xF];
++                        *pixels++ = *pixels++ = vga_palette[eight_pixels & 0xF];
++                    }
++                    break;
++                }
++                case 0x0E: /* EGA 640x200 16-color */ {
++                    const uint32_t *ega_row = &VIDEORAM[(y / 2) * 80];
++                    for (int i = 0; i < 80; i++) {
++                        uint32_t ega_planes = *ega_row++;
++                        uint32_t eight_pixels = ega_pack8_from_planes(ega_planes);
++                        *pixels++ = vga_palette[eight_pixels >> 28];
++                        *pixels++ = vga_palette[eight_pixels >> 24 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 20 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 16 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 12 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 8 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 4 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels & 0xF];
++                    }
++                    break;
++                }
++                case 0x10: /* EGA 640x350 16-color */
++                    if (y >= 350) break;
++                case 0x12: /* VGA 640x480 16-color */ {
++                    const uint32_t *ega_row = &VIDEORAM[y * 80];
++                    for (int i = 0; i < 80; i++) {
++                        uint32_t ega_planes = *ega_row++;
++                        uint32_t eight_pixels = ega_pack8_from_planes(ega_planes);
++                        *pixels++ = vga_palette[eight_pixels >> 28];
++                        *pixels++ = vga_palette[eight_pixels >> 24 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 20 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 16 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 12 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 8 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels >> 4 & 0xF];
++                        *pixels++ = vga_palette[eight_pixels & 0xF];
++                    }
++                    break;
++                }
++                case 0x11: /* VGA 640x480 2-color */ {
++                    uint32_t *cga_row = &VIDEORAM[y * 80];
++                    for (int x = 640 / 8; x--;) {
++                        uint8_t cga_byte = *cga_row++;
++                        *pixels++ = cga_palette[(cga_byte >> 7 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 6 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 5 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 4 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 3 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 2 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 1 & 1) * 15];
++                        *pixels++ = cga_palette[(cga_byte >> 0 & 1) * 15];
++                    }
++                    break;
++                }
++                case 0x13: {
++                    if (vga_planar_mode) {
++                        uint32_t *vga_row = &VIDEORAM[vram_offset + (y >> 1) * (320 / 4)];
++                        for (int x = 0; x < 320 / 4; x++) {
++                            uint32_t four_pixels = *vga_row++;
++                            *pixels++ = *pixels++ = vga_palette[four_pixels & 0xFF];
++                            *pixels++ = *pixels++ = vga_palette[four_pixels >> 8 & 0xFF];
++                            *pixels++ = *pixels++ = vga_palette[four_pixels >> 16 & 0xFF];
++                            *pixels++ = *pixels++ = vga_palette[four_pixels >> 24];
++                        }
++                    } else {
++                        uint32_t *vga_row = &VIDEORAM[vram_offset + (y >> 1) * 320];
++                        for (int x = 0; x < 320; x++) {
++                            uint32_t four_pixels = *vga_row++;
++                            *pixels++ = *pixels++ = vga_palette[four_pixels & 0xFF];
++                        }
++                    }
++                    break;
++                }
++                case 0x78: /* 80x100x16 textmode */
++                    cols = 40;
++                case 0x77: /* 160x100x16 textmode */ {
++                    uint16_t y_div_4 = y / 4;
++                    uint8_t odd_even = y / 2 & 1;
++                    uint32_t *cga_row = &VIDEORAM[0x8000 + y_div_4 * 160];
++                    for (uint8_t column = 0; column < cols; column++) {
++                        uint8_t charcode = cga_row[column * 2] & 0xFF;
++                        uint8_t glyph_row = font_8x8[charcode * 8 + odd_even];
++                        uint8_t color = cga_row[column * 2 + 1] & 0xFF;
++                        for (uint8_t bit = 0; bit < 8; bit++) {
++                            *pixels++ = cga_palette[glyph_row >> bit & 1 ? color & 0x0f : color >> 4];
++                        }
++                    }
++                    break;
++                }
++                case 0x79: /* 80x200x16 textmode */ {
++                    int y_div_2 = y / 2;
++                    uint32_t *cga_row = &VIDEORAM[0x8000 + y_div_2 * 80 + (y_div_2 & 1 * 8192)];
++                    for (int column = 0; column < 40; column++) {
++                        uint8_t charcode = cga_row[column * 2] & 0xFF;
++                        uint8_t glyph_row = font_8x8[charcode * 8];
++                        uint8_t color = cga_row[column * 2 + 1] & 0xFF;
++                        for (int bit = 0; bit < 8; bit++) {
++                            *pixels++ = *pixels++ = cga_palette[glyph_row >> bit & 1 ? color & 0x0f : color >> 4];
++                        }
++                    }
++                    break;
++                }
++                case 0x87: {
++                    int y_div_2 = y / 8;
++                    uint32_t *cga_row = &VIDEORAM[0x8000 + y_div_2 * 80 + (y_div_2 & 1 * 8192)];
++                    for (int column = 0; column < 40; column++) {
++                        uint8_t charcode = cga_row[column * 2] & 0xFF;
++                        uint8_t glyph_row = font_8x8[charcode * 8 + (y_div_2 % 8)];
++                        uint8_t color = cga_row[column * 2 + 1] & 0xFF;
++                        for (int bit = 0; bit < 8; bit++) {
++                            *pixels++ = *pixels++ = cga_palette[glyph_row >> bit & 1 ? color & 0x0f : color >> 4];
++                        }
++                    }
++                    break;
++                }
++                default: {
++                    static uint8_t warned = 0;
++                    if (warned != videomode) { p286log("UNHANDLED videomode %x", videomode); warned = videomode; }
++                    break;
++                }
++            }
++    }
++}
++
++extern "C" void HandleInput(unsigned int keycode, int isKeyDown) {
++    // Convert X11 keycode to PC scancode
++    unsigned char scancode = 0;
++
++    switch (keycode) {
++        case 27: scancode = 0x01;
++            break; // Escape
++        case 49: scancode = 0x02;
++            break; // 1
++        case 50: scancode = 0x03;
++            break; // 2
++        case 51: scancode = 0x04;
++            break; // 3
++        case 52: scancode = 0x05;
++            break; // 4
++        case 53: scancode = 0x06;
++            break; // 5
++        case 54: scancode = 0x07;
++            break; // 6
++        case 55: scancode = 0x08;
++            break; // 7
++        case 56: scancode = 0x09;
++            break; // 8
++        case 57: scancode = 0x0A;
++            break; // 9
++        case 48: scancode = 0x0B;
++            break; // 0
++        case 65: scancode = 0x1E;
++            break; // A
++        case 66: scancode = 0x30;
++            break; // B
++        case 67: scancode = 0x2E;
++            break; // C
++        case 68: scancode = 0x20;
++            break; // D
++        case 69: scancode = 0x12;
++            break; // E
++        case 70: scancode = 0x21;
++            break; // F
++        case 71: scancode = 0x22;
++            break; // G
++        case 72: scancode = 0x23;
++            break; // H
++        case 73: scancode = 0x17;
++            break; // I
++        case 74: scancode = 0x24;
++            break; // J
++        case 75: scancode = 0x25;
++            break; // K
++        case 76: scancode = 0x26;
++            break; // L
++        case 77: scancode = 0x32;
++            break; // M
++        case 78: scancode = 0x31;
++            break; // N
++        case 79: scancode = 0x18;
++            break; // O
++        case 80: scancode = 0x19;
++            break; // P
++        case 81: scancode = 0x10;
++            break; // Q
++        case 82: scancode = 0x13;
++            break; // R
++        case 83: scancode = 0x1F;
++            break; // S
++        case 84: scancode = 0x14;
++            break; // T
++        case 85: scancode = 0x16;
++            break; // U
++        case 86: scancode = 0x2F;
++            break; // V
++        case 87: scancode = 0x11;
++            break; // W
++        case 88: scancode = 0x2D;
++            break; // X
++        case 89: scancode = 0x15;
++            break; // Y
++        case 90: scancode = 0x2C;
++            break; // Z
++        case 32: scancode = 0x39;
++            break; // Space
++        case 13: scancode = 0x1C;
++            break; // Enter
++        case 8: scancode = 0x0E;
++            break; // Backspace
++        case 9: scancode = 0x0F;
++            break; // Tab
++        case 37: scancode = 0x4B;
++            break; // Left
++        case 38: scancode = 0x48;
++            break; // Up
++        case 39: scancode = 0x4D;
++            break; // Right
++        case 40: scancode = 0x50;
++            break; // Down
++        case 112: scancode = 0x3B;
++            break; // F1
++        case 113: scancode = 0x3C;
++            break; // F2
++        case 114: scancode = 0x3D;
++            break; // F3
++        case 115: scancode = 0x3E;
++            break; // F4
++        case 116: scancode = 0x3F;
++            break; // F5
++        case 117: scancode = 0x40;
++            break; // F6
++        case 118: scancode = 0x41;
++            break; // F7
++        case 119: scancode = 0x42;
++            break; // F8
++        case 120: scancode = 0x43;
++            break; // F9
++        case 121: scancode = 0x44;
++            break; // F10
++        case 122: scancode = 0x57;
++            break; // F11
++        case 123: scancode = 0x58;
++            break; // F12
++        case 16: scancode = 0x2A;
++            break; // Shift
++        case 17: scancode = 0x1D;
++            break; // Ctrl
++        case 18: scancode = 0x38;
++            break; // Alt
++        default: scancode = 0;
++            break;
++    }
++
++    if (!isKeyDown && scancode != 0) {
++        scancode |= 0x80;
++    }
++
++    port60 = scancode;
++    port64 |= 2;
++    doirq(1);
++}
++
++extern "C" void HandleMouse(int x, int y, int buttons) {
++    static int prev_x = 0, prev_y = 0;
++    sermouseevent(buttons, x - prev_x, y - prev_y);
++    prev_y = y;
++    prev_x = x;
++}
++
++extern "C" int HanldeMenu(int menu_id, int checked) {
++    switch (menu_id) {
++        case 1:
++            return !checked;
++        case 2:
++            return !checked;
++        default:
++            return 0;
++    }
++}
++
++static volatile int running = 1;
++
++void signal_handler(int sig) {
++    running = 0;
++}
++
++pthread_mutex_t update_mutex = PTHREAD_MUTEX_INITIALIZER;
++pthread_cond_t update_cond = PTHREAD_COND_INITIALIZER;
++volatile int update_ready = 0;
++
++void *sound_thread(void *arg) {
++    while (running) {
++        pthread_mutex_lock(&update_mutex);
++        while (!update_ready && running) {
++            pthread_cond_wait(&update_cond, &update_mutex);
++        }
++        if (!running) {
++            pthread_mutex_unlock(&update_mutex);
++            break;
++        }
++        update_ready = 0;
++        pthread_mutex_unlock(&update_mutex);
++
++        // Send audio buffer to Linux audio system
++        if (linux_audio_write(audio_buffer, AUDIO_BUFFER_LENGTH) != 0) {
++            // Audio write failed, but continue running
++            // printf("Audio write failed!\n");
++            // usleep(1000); // 1ms delay
++        }
++    }
++    return NULL;
++}
++
++void *ticks_thread(void *arg) {
++    struct timespec start, current;
++    clock_gettime(CLOCK_MONOTONIC, &start);
++
++    uint64_t elapsed_system_timer = 0;
++    uint64_t elapsed_blink_tics = 0;
++    uint64_t elapsed_frame_tics = 0;
++    uint64_t last_dss_tick = 0;
++    uint64_t last_sb_tick = 0;
++    uint64_t last_sound_tick = 0;
++
++    int16_t last_dss_sample = 0;
++    int16_t last_sb_sample = 0;
++
++    const uint64_t hostfreq = 1000000000; // nanoseconds
++
++    while (running) {
++        clock_gettime(CLOCK_MONOTONIC, &current);
++
++        uint64_t elapsedTime = (current.tv_sec - start.tv_sec) * hostfreq + (current.tv_nsec - start.tv_nsec);
++
++        // Timer interrupt (~18.2 Hz)
++        if (elapsedTime - elapsed_system_timer >= hostfreq / timer_period) {
++            doirq(0);
++            elapsed_system_timer = elapsedTime;
++        }
++
++        // Disney Sound Source frequency ~7KHz
++        if (elapsedTime - last_dss_tick >= hostfreq / 7000) {
++            last_dss_sample = dss_sample();
++            last_dss_tick = elapsedTime;
++        }
++
++        // Sound Blaster
++        if (elapsedTime - last_sb_tick >= hostfreq / 22050) {
++            last_sb_sample = blaster_sample();
++            last_sb_tick = elapsedTime;
++        }
++
++        // Audio samples
++        if (elapsedTime - last_sound_tick >= hostfreq / SOUND_FREQUENCY) {
++            get_sound_sample(last_dss_sample + last_sb_sample, &audio_buffer[sample_index]);
++            sample_index += 2;
++            
++
++            if (sample_index >= AUDIO_BUFFER_LENGTH * 2) {
++                pthread_mutex_lock(&update_mutex);
++                update_ready = 1;
++                pthread_cond_signal(&update_cond);
++                pthread_mutex_unlock(&update_mutex);
++                sample_index = 0;
++            }
++
++            last_sound_tick = elapsedTime;
++        }
++
++        // Cursor blink
++        if (elapsedTime - elapsed_blink_tics >= 333333333) {
++            // ~3Hz
++            cursor_blink_state ^= 1;
++            elapsed_blink_tics = elapsedTime;
++        }
++
++        // Frame rendering (60 FPS)
++        if (elapsedTime - elapsed_frame_tics >= 16666666) {
++            // ~60Hz
++            renderer();
++            elapsed_frame_tics = elapsedTime;
++        }
++
++        // No sleep - let the timing be controlled by clock precision
++    }
++    return NULL;
++}
++
++/* Map joy_key buttons to PC keys (edge-detected). Dpad = arrows, A = Enter,
++ * B = Esc, X = Space, Y = Ctrl, START = Enter, SELECT = Tab. (On-screen
++ * keyboard for full text input comes next.) */
++/* ---------------- On-screen keyboard (for DOS / typing commands) ----------------
++ * Toggle: hold L + R together. While open, the D-pad moves the cursor, A presses
++ * the highlighted key, B closes. Game input is suspended while the KB is open. */
++struct VKey { const char *l; uint8_t sc; uint8_t sh; };
++static const struct { int n; struct VKey k[12]; } KBROWS[] = {
++    {12,{{"1",0x02},{"2",0x03},{"3",0x04},{"4",0x05},{"5",0x06},{"6",0x07},{"7",0x08},{"8",0x09},{"9",0x0A},{"0",0x0B},{"-",0x0C},{"=",0x0D}}},
++    {11,{{"Q",0x10},{"W",0x11},{"E",0x12},{"R",0x13},{"T",0x14},{"Y",0x15},{"U",0x16},{"I",0x17},{"O",0x18},{"P",0x19},{"\\",0x2B}}},
++    {10,{{"A",0x1E},{"S",0x1F},{"D",0x20},{"F",0x21},{"G",0x22},{"H",0x23},{"J",0x24},{"K",0x25},{"L",0x26},{":",0x27,1}}},
++    {9, {{"Z",0x2C},{"X",0x2D},{"C",0x2E},{"V",0x2F},{"B",0x30},{"N",0x31},{"M",0x32},{".",0x34},{"/",0x35}}},
++    {6, {{"SPC",0x39},{"ENT",0x1C},{"BSP",0x0E},{"ESC",0x01},{"TAB",0x0F},{"^C",0x2E,2}}},
++};
++#define KB_NROWS ((int)(sizeof(KBROWS)/sizeof(KBROWS[0])))
++static int kb_visible = 0, kb_r = 0, kb_c = 0;
++
++/* ---- Disk-swap menu: list of floppy .img files in the game's folder ---- */
++#define DISK_MAX 24
++static char disk_dir[512];
++static char disk_names[DISK_MAX][128];
++static char disk_paths[DISK_MAX][640];
++static int  disk_count = 0, disk_cur = 0;
++static int  dm_visible = 0, dm_sel = 0;
++
++static int has_img_ext(const char *n) {
++    const char *d = strrchr(n, '.');
++    return d && (!strcasecmp(d, ".img") || !strcasecmp(d, ".ima") || !strcasecmp(d, ".vfd"));
++}
++/* Scan the directory of `path` for sibling floppy images (sorted). */
++static void disk_scan(const char *path) {
++    disk_count = 0; disk_cur = 0;
++    strncpy(disk_dir, path, sizeof(disk_dir)-1);
++    char *sl = strrchr(disk_dir, '/');
++    if (!sl) { disk_dir[0] = '.'; disk_dir[1] = 0; } else *sl = 0;
++    DIR *d = opendir(disk_dir);
++    if (!d) return;
++    struct dirent *e;
++    while ((e = readdir(d)) && disk_count < DISK_MAX) {
++        if (e->d_name[0] == '.') continue;
++        if (!has_img_ext(e->d_name)) continue;
++        snprintf(disk_paths[disk_count], sizeof(disk_paths[0]), "%s/%s", disk_dir, e->d_name);
++        strncpy(disk_names[disk_count], e->d_name, sizeof(disk_names[0])-1);
++        disk_count++;
++    }
++    closedir(d);
++    /* simple insertion sort by name so disk1, disk2, ... come in order */
++    for (int i = 1; i < disk_count; i++)
++        for (int j = i; j > 0 && strcasecmp(disk_names[j-1], disk_names[j]) > 0; j--) {
++            char tn[128], tp[640];
++            strcpy(tn, disk_names[j]); strcpy(disk_names[j], disk_names[j-1]); strcpy(disk_names[j-1], tn);
++            strcpy(tp, disk_paths[j]); strcpy(disk_paths[j], disk_paths[j-1]); strcpy(disk_paths[j-1], tp);
++        }
++    /* mark which one matches the launched path as current */
++    for (int i = 0; i < disk_count; i++)
++        if (!strcmp(disk_paths[i], path)) { disk_cur = i; dm_sel = i; break; }
++}
++
++static inline void kb_putc(int x, int y, char c, uint16_t fg, uint16_t bg) {
++    const unsigned char *g = &font_8x8[(uint8_t)c * 8];
++    for (int row = 0; row < 8; row++) {
++        uint8_t bits = g[row];
++        for (int col = 0; col < 8; col++) {
++            uint16_t p = (bits >> col & 1) ? fg : bg;
++            for (int dy = 0; dy < 2; dy++) for (int dx = 0; dx < 2; dx++) {
++                int px = x + col*2 + dx, py = y + row*2 + dy;
++                if ((unsigned)px < 640 && (unsigned)py < 480) fb565[py*640+px] = p;
++            }
++        }
++    }
++}
++static inline void kb_puts(int x, int y, const char *s, uint16_t fg, uint16_t bg) {
++    for (; *s; s++, x += 14) kb_putc(x, y, *s, fg, bg);
++}
++
++/* Scancode queue drained one entry per video frame, so every make/break gets
++ * its own serviced IRQ1 (sending make+break in one frame coalesces the IRQ and
++ * the guest sees nothing / a stuck key). */
++static uint8_t scq_sc[64]; static uint8_t scq_dn[64]; static int scq_h = 0, scq_t = 0;
++static void scq_push(uint8_t sc, int dn) { int n = (scq_t + 1) & 63; if (n != scq_h) { scq_sc[scq_t] = sc; scq_dn[scq_t] = dn; scq_t = n; } }
++static void scq_drain1(void) { if (scq_h != scq_t) { send_scancode(scq_sc[scq_h], scq_dn[scq_h]); scq_h = (scq_h + 1) & 63; } }
++
++/* Draw the keyboard overlay into fb565 (called from present when visible). */
++static void kb_draw(void) {
++    const uint16_t PANEL = 0x10A2, FG = 0xFFFF, HLBG = 0xFD20, HLFG = 0x0000,
++                   BORD = 0x4A69, KEYBG = 0x2104;
++    const int cellw = 52, cellh = 28, x0 = 4, y0 = 480 - (KB_NROWS*cellh) - 8;
++    for (int yy = y0 - 6; yy < 480; yy++)
++        for (int xx = 0; xx < 640; xx++) fb565[yy*640+xx] = PANEL;
++    for (int r = 0; r < KB_NROWS; r++) {
++        for (int c = 0; c < KBROWS[r].n; c++) {
++            int x = x0 + c*cellw, y = y0 + r*cellh, w = cellw - 3, h = cellh - 3;
++            int sel = (r == kb_r && c == kb_c);
++            uint16_t bg = sel ? HLBG : KEYBG, fg = sel ? HLFG : FG;
++            for (int yy = y; yy < y + h && yy < 480; yy++)
++                for (int xx = x; xx < x + w && xx < 640; xx++) {
++                    int edge = (yy == y || yy == y+h-1 || xx == x || xx == x+w-1);
++                    fb565[yy*640+xx] = edge ? BORD : bg;
++                }
++            kb_puts(x + 5, y + 6, KBROWS[r].k[c].l, fg, bg);
++        }
++    }
++}
++
++/* Draw the disk-swap menu overlay into fb565. */
++static void dm_draw(void) {
++    const uint16_t BG = 0x10A2, FG = 0xFFFF, HLBG = 0x07E0, HLFG = 0x0000;
++    const int x0 = 40, y0 = 70, w = 560, rowh = 22;
++    int bot = y0 + disk_count*rowh + 8; if (bot > 480) bot = 480;
++    for (int yy = y0 - 24; yy < bot; yy++)
++        if ((unsigned)yy < 480) for (int xx = 20; xx < 620; xx++) fb565[yy*640+xx] = BG;
++    kb_puts(x0, y0 - 18, "DISK  A:INSERT B:  B:CLOSE", FG, BG);
++    for (int i = 0; i < disk_count; i++) {
++        int y = y0 + i*rowh, sel = (i == dm_sel);
++        uint16_t fg = sel ? HLFG : FG, bg = sel ? HLBG : BG;
++        if (sel) for (int yy = y; yy < y+rowh-2 && yy < 480; yy++)
++            for (int xx = x0-4; xx < x0+w && xx < 640; xx++) fb565[yy*640+xx] = bg;
++        char line[140];
++        snprintf(line, sizeof line, "%c %s", i == disk_cur ? '*' : ' ', disk_names[i]);
++        kb_puts(x0, y, line, fg, bg);
++    }
++}
++
++/* Send the currently-highlighted key (with shift/ctrl if needed). */
++static void kb_press(void) {
++    struct VKey vk = KBROWS[kb_r].k[kb_c];
++    if (vk.sh == 1) send_scancode(0x2A, 1);          /* LShift */
++    if (vk.sh == 2) send_scancode(0x1D, 1);          /* LCtrl  */
++    send_scancode(vk.sc, 1);
++    send_scancode(vk.sc, 0);
++    if (vk.sh == 1) send_scancode(0x2A, 0);
++    if (vk.sh == 2) send_scancode(0x1D, 0);
++}
++
++static void sf3000_poll_input(void) {
++    if (!cv_keys) return;
++    scq_drain1();   /* feed at most one queued scancode per frame */
++    static uint32_t prev = 0;
++    uint32_t k = *cv_keys;
++    /* SELECT (bit0) + START (bit3) -> quit to FrogUI (icube relaunches menu) */
++    if (cvbtn(k,0) && cvbtn(k,3)) { p286log("quit (SELECT+START)"); exit(0); }
++
++    /* L (bit10) + R (bit11) edge toggles the on-screen keyboard */
++    int lr_now = cvbtn(k,10) && cvbtn(k,11);
++    int lr_was = cvbtn(prev,10) && cvbtn(prev,11);
++    if (lr_now && !lr_was) { kb_visible = !kb_visible; dm_visible = 0; prev = k; return; }
++
++    /* SELECT (bit0) + L (bit10) edge toggles the disk-swap menu */
++    int ss_now = cvbtn(k,0) && cvbtn(k,10);
++    int ss_was = cvbtn(prev,0) && cvbtn(prev,10);
++    if (ss_now && !ss_was && disk_count > 0) { dm_visible = !dm_visible; kb_visible = 0; dm_sel = disk_cur; prev = k; return; }
++
++    if (dm_visible) {
++        int up = cvbtn(k,4)&&!cvbtn(prev,4), dn = cvbtn(k,6)&&!cvbtn(prev,6);
++        int a  = cvbtn(k,13)&&!cvbtn(prev,13), b = cvbtn(k,14)&&!cvbtn(prev,14);
++        if (up) { if (--dm_sel < 0) dm_sel = disk_count-1; }
++        if (dn) { if (++dm_sel >= disk_count) dm_sel = 0; }
++        if (a) { p286log("swap B: -> %s rv=%d", disk_paths[dm_sel], insertdisk(1, disk_paths[dm_sel])); disk_cur = dm_sel; dm_visible = 0; }
++        if (b) dm_visible = 0;
++        prev = k;
++        return;
++    }
++
++    if (kb_visible) {
++        static int a_held = 0; static uint8_t held_sc = 0, held_sh = 0;
++        int a = cvbtn(k,13);
++        if (a && !a_held) {                       /* A down: queue make */
++            struct VKey vk = KBROWS[kb_r].k[kb_c];
++            if (vk.sh == 1) scq_push(0x2A, 1);     /* LShift */
++            if (vk.sh == 2) scq_push(0x1D, 1);     /* LCtrl  */
++            scq_push(vk.sc, 1);
++            held_sc = vk.sc; held_sh = vk.sh; a_held = 1;
++        } else if (!a && a_held) {                /* A up: queue break */
++            scq_push(held_sc, 0);
++            if (held_sh == 1) scq_push(0x2A, 0);
++            if (held_sh == 2) scq_push(0x1D, 0);
++            a_held = 0;
++        }
++        if (!a_held) {                            /* navigate only when not typing */
++            int up=cvbtn(k,4)&&!cvbtn(prev,4), dn=cvbtn(k,6)&&!cvbtn(prev,6);
++            int lf=cvbtn(k,7)&&!cvbtn(prev,7), rt=cvbtn(k,5)&&!cvbtn(prev,5);
++            int b =cvbtn(k,14)&&!cvbtn(prev,14);
++            if (up) { if (--kb_r < 0) kb_r = KB_NROWS-1; }
++            if (dn) { if (++kb_r >= KB_NROWS) kb_r = 0; }
++            if (kb_c >= KBROWS[kb_r].n) kb_c = KBROWS[kb_r].n - 1;
++            if (lf) { if (--kb_c < 0) kb_c = KBROWS[kb_r].n-1; }
++            if (rt) { if (++kb_c >= KBROWS[kb_r].n) kb_c = 0; }
++            if (b) kb_visible = 0;
++        }
++        prev = k;
++        return;
++    }
++
++    static const struct { int bit; uint8_t sc; } map[] = {
++        {4,0x48},{6,0x50},{7,0x4B},{5,0x4D},   /* up down left right */
++        {13,0x1C},{14,0x01},{12,0x39},{15,0x1D},/* A=Enter B=Esc X=Space Y=Ctrl */
++        {10,0x2A},{11,0x38},                    /* L=Shift R=Alt */
++        {3,0x1C},{0,0x0F},                      /* START=Enter SELECT=Tab */
++    };
++    for (unsigned i = 0; i < sizeof(map)/sizeof(map[0]); i++) {
++        int now = cvbtn(k, map[i].bit), was = cvbtn(prev, map[i].bit);
++        if (now && !was) send_scancode(map[i].sc, 1);
++        else if (!now && was) send_scancode(map[i].sc, 0);
++    }
++    prev = k;
++}
++
++/* Present SCREEN (XRGB8888 640x480) via the HW display (RGB565). */
++static void sf3000_present(void) {
++    /* renderer() fills only rows 0..399 (outer loop caps at y<400), so
++       letterbox: center those 400 rows in the 480-row panel (40px bars). */
++    const int ytop = (480 - 400) / 2; /* 40 */
++    memset(fb565, 0, ytop * 640 * sizeof(uint16_t));
++    memset(fb565 + (ytop + 400) * 640, 0, (480 - ytop - 400) * 640 * sizeof(uint16_t));
++    const uint32_t *s = SCREEN;
++    uint16_t *d = fb565 + ytop * 640;
++    for (int i = 0; i < 640 * 400; i++) {
++        uint32_t p = s[i];
++        d[i] = (uint16_t)(((p >> 19) & 0x1F) << 11 |
++                          ((p >> 10) & 0x3F) << 5  |
++                          ((p >> 3)  & 0x1F));
++    }
++    if (kb_visible) kb_draw();
++    if (dm_visible) dm_draw();
++    hwdisp_present(fb565, 640, 480, 640 * 2);
++}
++
++/* Crash/bring-up logging to the SD card (gated on log.txt existing). */
++static void p286log(const char *fmt, ...) {
++    FILE *f = fopen("/mnt/sdcard/log.txt", "a");
++    if (!f) return;
++    fprintf(f, "P286 ");
++    va_list ap; va_start(ap, fmt); vfprintf(f, fmt, ap); va_end(ap);
++    fputc('\n', f); fflush(f); fsync(fileno(f)); fclose(f);
++}
++
++int main(int argc, char **argv) {
++    signal(SIGINT, signal_handler);
++    signal(SIGTERM, signal_handler);
++    p286log("start argv1=%s", (argc > 1 && argv[1]) ? argv[1] : "(none)");
++
++    if (hwdisp_init() != 0) {
++        p286log("hwdisp_init FAILED");
++        return -1;
++    }
++    p286log("hwdisp_init ok");
++    fb1_clear();   /* hide battery/volume OSD during gameplay */
++    sf3000_input_init();
++
++    memset(SCREEN, 0, sizeof(SCREEN));
++    emu8950_opl = OPL_new(3579552, SOUND_FREQUENCY);
++    blaster_reset();
++    sn76489_reset();
++    p286log("opl+reset ok");
++
++    /* Disk image passed by FrogUI. Floppy images (<= 1.44MB: 360K/720K/1.2M/1.44M)
++     * go in drive A: (0); anything larger is treated as a hard disk (128). Wrong
++     * geometry can crash insertdisk, so size-detect rather than guess. */
++    if (argc > 1 && argv[1] && argv[1][0]) {
++        long sz = 0;
++        FILE *fd = fopen(argv[1], "rb");
++        if (fd) { fseek(fd, 0, SEEK_END); sz = ftell(fd); fclose(fd); }
++        p286log("disk %s size=%ld", argv[1], sz);
++        /* If a FreeDOS boot floppy is present in cubegm, boot it and mount the
++         * launched image as a DATA drive (floppy=B:, hard disk=C:); FreeDOS
++         * auto-runs RUN.BAT / first .EXE/.COM/.BAT on C: then B:. If FreeDOS is
++         * absent, boot the launched image directly (self-booting games). */
++        const char *fdpath = "/mnt/sdcard/cubegm/bios/x86BOOT.img";
++        FILE *ft = fopen(fdpath, "rb");
++        int have_fd = (ft != NULL); if (ft) fclose(ft);
++        if (have_fd) {
++            if (sz > 0 && sz <= 1474560) {
++                /* floppy game: scan the folder for all floppy images so the
++                 * built-in disk-swap menu (SELECT+START) can switch B: on the
++                 * fly. Boot with disk 1 (first in sorted order) in B:. */
++                disk_scan(argv[1]);
++                const char *first = disk_count > 0 ? disk_paths[0] : argv[1];
++                disk_cur = 0; dm_sel = 0;
++                p286log("game floppy B: (%d disks) rv=%d", disk_count, insertdisk(1, (char*)first));
++            } else {
++                p286log("game HDD C: rv=%d",   insertdisk(128, argv[1]));  /* C: */
++            }
++            p286log("boot FreeDOS A: (%s) rv=%d", fdpath, insertdisk(0, (char*)fdpath));
++        } else if (sz > 0 && sz <= 1474560) {
++            p286log("direct boot floppy A: rv=%d", insertdisk(0, argv[1]));
++        } else {
++            p286log("direct HDD C: rv=%d", insertdisk(128, argv[1]));
++        }
++    }
++
++    /* Wire the memory-access function pointers to the onboard-RAM variants
++     * (host has the RAM[] array; no PSRAM/swap). pico-main does this per memory
++     * mode; linux-main relied on it being done elsewhere. Without it the
++     * pointers are NULL and exec86 crashes on the first memory access. */
++    write86 = write86_ob; writew86 = writew86_ob; writedw86 = writedw86_ob;
++    read86  = read86_ob;  readw86  = readw86_ob;  readdw86  = readdw86_ob;
++    p286log("accessors wired (_ob)");
++
++    p286log("reset86...");
++    reset86();
++    p286log("reset86 ok, entering loop");
++
++    linux_audio_init(SOUND_FREQUENCY, 2, AUDIO_BUFFER_LENGTH);
++    linux_audio_start();
++
++    pthread_t sound_tid, ticks_tid;
++#ifndef P286_NOTHREADS
++    pthread_create(&sound_tid, NULL, sound_thread, NULL);
++    pthread_create(&ticks_tid, NULL, ticks_thread, NULL);
++#else
++    (void)sound_tid; (void)ticks_tid;
++    p286log("THREADS DISABLED (debug)");
++#endif
++
++    static int dbgframe = 0;
++    while (running) {
++        exec86(32768);
++        if (dbgframe < 5) p286log("frame %d: post exec86", dbgframe);
++#ifdef P286_NOTHREADS
++        renderer();        /* drive video from main loop in single-thread debug */
++        if ((dbgframe & 15) == 0) doirq(0);   /* fake timer tick */
++#endif
++        sf3000_poll_input();
++        sf3000_present();
++        if (dbgframe < 5) { p286log("frame %d: presented", dbgframe); dbgframe++; }
++    }
++
++#ifndef P286_NOTHREADS
++    pthread_cancel(sound_tid);
++    pthread_cancel(ticks_tid);
++    pthread_join(sound_tid, NULL);
++    pthread_join(ticks_tid, NULL);
++#endif
++    linux_audio_close();
++    hwdisp_deinit();
++    return 0;
++}
+diff --git a/src/emulator/cpu.c b/src/emulator/cpu.c
+index abc9844..8bddaaa 100644
+--- a/src/emulator/cpu.c
++++ b/src/emulator/cpu.c
+@@ -655,10 +655,9 @@ void intcall86(uint8_t intnum) {
+             insertdisk(128, "\\XT\\hdd.img");
+             insertdisk(129, "\\XT\\hdd2.img");
+ #else
+-            insertdisk(0, "../fdd0.img");
+-            insertdisk(1, "../fdd1.img");
+-            insertdisk(128, "../hdd.img");
+-            insertdisk(129, "../hdd2.img");
++            /* SF3000: the disk image was already inserted by the platform main
++             * from the launched file — don't re-insert hardcoded defaults
++             * (they don't exist here and would clobber the booted disk). */
+ #endif
+             if (1) {
+                 /* PCjr reserves the top of its internal 128KB of RAM for video RAM.  * Sidecars can extend it past 128KB but it
+diff --git a/src/emulator/disks-win32.c.inl b/src/emulator/disks-win32.c.inl
+index 74c1b14..253634a 100644
+--- a/src/emulator/disks-win32.c.inl
++++ b/src/emulator/disks-win32.c.inl
+@@ -59,8 +59,8 @@ uint8_t insertdisk(uint8_t drivenum, const char *pathname) {
+     size_t size = ftell(file);
+     rewind(file);
+ 
+-    // Validate size constraints
+-    if (size < 360 * 1024 || size > 0x1f782000UL || (size & 511)) {
++    // Validate size constraints (160 KB min covers single-sided PC booters)
++    if (size < 160 * 1024 || size > 0x1f782000UL || (size & 511)) {
+         fclose(file);
+ //        fprintf(stderr, "DISK: ERROR: invalid disk size for drive %02Xh (%lu bytes)\n", drivenum, (unsigned long) size);
+         return 0;
+@@ -73,19 +73,16 @@ uint8_t insertdisk(uint8_t drivenum, const char *pathname) {
+         sects = 63;
+         heads = 16;
+         cyls = size / (sects * heads * 512);
+-    } else {  // Floppy disk
+-        cyls = 80;
+-        sects = 18;
+-        heads = 2;
+-
+-        if (size <= 368640) {  // 360 KB or lower
+-            cyls = 40;
+-            sects = 9;
+-            heads = 2;
+-        } else if (size <= 737280) {
+-            sects = 9;
+-        } else if (size <= 1228800) {
+-            sects = 15;
++    } else {  // Floppy/booter — match standard PC geometries by exact size
++        switch (size) {
++            case 163840:  cyls = 40; heads = 1; sects = 8;  break; // 160 KB
++            case 184320:  cyls = 40; heads = 1; sects = 9;  break; // 180 KB
++            case 327680:  cyls = 40; heads = 2; sects = 8;  break; // 320 KB
++            case 368640:  cyls = 40; heads = 2; sects = 9;  break; // 360 KB
++            case 737280:  cyls = 80; heads = 2; sects = 9;  break; // 720 KB
++            case 1228800: cyls = 80; heads = 2; sects = 15; break; // 1.2 MB
++            case 1474560: cyls = 80; heads = 2; sects = 18; break; // 1.44 MB
++            default:      cyls = 80; heads = 2; sects = 18; break; // best effort
+         }
+     }
+ 
+diff --git a/src/emulator/memory.c b/src/emulator/memory.c
+index 8906f40..76ea6b9 100644
+--- a/src/emulator/memory.c
++++ b/src/emulator/memory.c
+@@ -2,6 +2,11 @@
+ 
+ #include "includes/bios.h"
+ #include "emulator.h"
++#include <string.h>
++static inline uint16_t rdU16(const void*p){uint16_t v;memcpy(&v,p,2);return v;}
++static inline uint32_t rdU32(const void*p){uint32_t v;memcpy(&v,p,4);return v;}
++static inline void wrU16(void*p,uint16_t v){memcpy(p,&v,2);}
++static inline void wrU32(void*p,uint32_t v){memcpy(p,&v,4);}
+ #include "ems.c.inl"
+ #if PICO_ON_DEVICE
+ #include "psram_spi.h"
+@@ -51,18 +56,18 @@ void writew86_ob(const uint32_t address, const uint16_t value) {
+         write86(address + 1, (uint8_t) ((value >> 8) & 0xFF));
+     } else {
+         if (address < RAM_SIZE) {
+-            *(uint16_t *) &RAM[address] = value;
++            wrU16(&RAM[address], value);
+         } else if (address >= VIDEORAM_START && address < VIDEORAM_END) {
+             vga_mem_write16(address, value);
+         } else if (address >= EMS_START && address < EMS_END) {
+             ems_writew(address - EMS_START, value);
+         } else if (address >= UMB_START && address < UMB_END) {
+-            *(uint16_t *) &UMB[address - UMB_START] = value;
++            wrU16(&UMB[address - UMB_START], value);
+         } else if (address >= HMA_START && address < HMA_END) {
+             if (a20_enabled) {
+-                *(uint16_t *) &HMA[address - HMA_START] = value;
++                wrU16(&HMA[address - HMA_START], value);
+             } else {
+-                *(uint16_t *) &RAM[address - HMA_START] = value;
++                wrU16(&RAM[address - HMA_START], value);
+             }
+         } else if (!a20_enabled && address >= HMA_END) {
+             writew86(address - HMA_START, value);
+@@ -78,7 +83,7 @@ void writedw86_ob(const uint32_t address, const uint32_t value) {
+         write86(address + 3, (uint8_t) ((value >> 24) & 0xFF));
+     } else {
+         if (address < RAM_SIZE) {
+-            *(uint32_t *) &RAM[address] = value;
++            wrU32(&RAM[address], value);
+         } else if (address >= VIDEORAM_START && address < VIDEORAM_END) {
+             write86(address, (uint8_t) (value & 0xFF));
+             write86(address + 1, (uint8_t) ((value >> 8) & 0xFF));
+@@ -87,12 +92,12 @@ void writedw86_ob(const uint32_t address, const uint32_t value) {
+         } else if (address >= EMS_START && address < EMS_END) {
+             ems_writedw(address - EMS_START, value);
+         } else if (address >= UMB_START && address < UMB_END) {
+-            *(uint32_t *) &UMB[address - UMB_START] = value;
++            wrU32(&UMB[address - UMB_START], value);
+         } else if (address >= HMA_START && address < HMA_END) {
+             if (a20_enabled) {
+-                *(uint32_t *) &HMA[address - HMA_START] = value;
++                wrU32(&HMA[address - HMA_START], value);
+             } else {
+-                *(uint32_t *) &RAM[address - HMA_START] = value;
++                wrU32(&RAM[address - HMA_START], value);
+             }
+         } else if (!a20_enabled && address >= HMA_END) {
+             writedw86(address - HMA_START, value);
+@@ -141,28 +146,28 @@ uint16_t readw86_ob(const uint32_t address) {
+         return (uint16_t) read86(address) | ((uint16_t) read86(address + 1) << 8);
+     }
+     if (address < RAM_SIZE) {
+-        return *(uint16_t *) &RAM[address];
++        return rdU16(&RAM[address]);
+     }
+     if (address >= VIDEORAM_START && address < VIDEORAM_END) {
+         return  vga_mem_read16(address);
+     }
+     // if (address >= VBIOS_START && address < VBIOS_END) {
+-        // return *(uint16_t *) &VGABIOS[address - VBIOS_START];
++        // return rdU16(&VGABIOS[address - VBIOS_START]);
+     // }
+     if (address >= EMS_START && address < EMS_END) {
+         return ems_readw(address - EMS_START);
+     }
+     if (address >= UMB_START && address < UMB_END) {
+-        return *(uint16_t *) &UMB[address - UMB_START];
++        return rdU16(&UMB[address - UMB_START]);
+     }
+     if (address >= BIOS_START && address < HMA_START) {
+-        return *(uint16_t *) &BIOS[address - BIOS_START];
++        return rdU16(&BIOS[address - BIOS_START]);
+     }
+     if (address >= HMA_START && address < HMA_END) {
+         if (a20_enabled) {
+-            return *(uint16_t *) &HMA[address - HMA_START];
++            return rdU16(&HMA[address - HMA_START]);
+         }
+-        return *(uint16_t *) &RAM[address - HMA_START];
++        return rdU16(&RAM[address - HMA_START]);
+     }
+     if (!a20_enabled && address >= HMA_END) {
+         return readw86(address - HMA_START);
+@@ -178,7 +183,7 @@ uint32_t readdw86_ob(const uint32_t address) {
+                | ((uint32_t) read86(address + 3) << 24);
+     }
+     if (address < RAM_SIZE) {
+-        return *(uint32_t *) &RAM[address];
++        return rdU32(&RAM[address]);
+     }
+     if (address >= VIDEORAM_START && address < VIDEORAM_END) {
+         return (uint32_t) read86(address)
+@@ -190,16 +195,16 @@ uint32_t readdw86_ob(const uint32_t address) {
+         return ems_readdw(address - EMS_START);
+     }
+     if (address >= UMB_START && address < UMB_END) {
+-        return *(uint32_t *) &UMB[address - UMB_START];
++        return rdU32(&UMB[address - UMB_START]);
+     }
+     if (address >= BIOS_START && address < HMA_START) {
+-        return *(uint32_t *) &BIOS[address - BIOS_START];
++        return rdU32(&BIOS[address - BIOS_START]);
+     }
+     if (address >= HMA_START && address < HMA_END) {
+         if (a20_enabled) {
+-            return *(uint32_t *) &HMA[address - HMA_START];
++            return rdU32(&HMA[address - HMA_START]);
+         }
+-        return *(uint32_t *) &RAM[address - HMA_START];
++        return rdU32(&RAM[address - HMA_START]);
+     }
+     if (!a20_enabled && address >= HMA_END) {
+         return readdw86(address - HMA_START);
+@@ -246,7 +251,7 @@ void writew86_mp(const uint32_t address, const uint16_t value) {
+         write86(address + 1, (uint8_t) ((value >> 8) & 0xFF));
+     } else {
+         if (address < LO_MEM) {
+-            *(uint16_t *) &SRAM[address] = value;
++            wrU16(&SRAM[address], value);
+         } else if (address < VIDEORAM_START) {
+             write16psram(address, value);
+         } else if (address >= VIDEORAM_START && address < VIDEORAM_END) {
+@@ -260,7 +265,7 @@ void writew86_mp(const uint32_t address, const uint16_t value) {
+             if (a20_enabled) {
+                 write16psram(address, value);
+             } else {
+-                *(uint16_t *) &SRAM[address - HMA_START] = value;
++                wrU16(&SRAM[address - HMA_START], value);
+             }
+         } else if (!a20_enabled && address >= HMA_END) {
+             writew86(address - HMA_START, value);
+@@ -276,7 +281,7 @@ void writedw86_mp(const uint32_t address, const uint32_t value) {
+         write86(address + 3, (uint8_t) ((value >> 24) & 0xFF));
+     } else {
+         if (address < LO_MEM) {
+-            *(uint32_t *) &SRAM[address] = value;
++            wrU32(&SRAM[address], value);
+         } else if (address < VIDEORAM_START) {
+             write32psram(address, value);
+         } else if (address >= VIDEORAM_START && address < VIDEORAM_END) {
+@@ -292,7 +297,7 @@ void writedw86_mp(const uint32_t address, const uint32_t value) {
+             if (a20_enabled) {
+                 write32psram(address, value);
+             } else {
+-                *(uint32_t *) &SRAM[address - HMA_START] = value;
++                wrU32(&SRAM[address - HMA_START], value);
+             }
+         } else if (!a20_enabled && address >= HMA_END) {
+             writedw86(address - HMA_START, value);
+@@ -344,7 +349,7 @@ uint16_t readw86_mp(const uint32_t address) {
+         return (uint16_t) read86_mp(address) | ((uint16_t) read86_mp(address + 1) << 8);
+     }
+     if (address < LO_MEM) {
+-        return *(uint16_t *) &SRAM[address];
++        return rdU16(&SRAM[address]);
+     }
+     if (address < VIDEORAM_START) {
+         return read16psram(address);
+@@ -353,7 +358,7 @@ uint16_t readw86_mp(const uint32_t address) {
+         return (uint16_t) read86_mp(address) | ((uint16_t) read86_mp(address + 1) << 8);
+     }
+     // if (address >= VBIOS_START && address < VBIOS_END) {
+-        // return *(uint16_t *) &VGABIOS[address - VBIOS_START];
++        // return rdU16(&VGABIOS[address - VBIOS_START]);
+     // }
+     if (address >= EMS_START && address < EMS_END) {
+         return ems_readw(address - EMS_START);
+@@ -362,13 +367,13 @@ uint16_t readw86_mp(const uint32_t address) {
+         return read16psram(address - UMB_START);
+     }
+     if (address >= BIOS_START && address < HMA_START) {
+-        return *(uint16_t *) &BIOS[address - BIOS_START];
++        return rdU16(&BIOS[address - BIOS_START]);
+     }
+     if (address >= HMA_START && address < HMA_END) {
+         if (a20_enabled) {
+             return read16psram(address);
+         }
+-        return *(uint16_t *) &SRAM[address - HMA_START];
++        return rdU16(&SRAM[address - HMA_START]);
+     }
+     if (!a20_enabled && address >= HMA_END) {
+         return readw86_mp(address - HMA_START);
+@@ -384,7 +389,7 @@ uint32_t readdw86_mp(const uint32_t address) {
+                | ((uint32_t) read86_mp(address + 3) << 24);
+     }
+     if (address < LO_MEM) {
+-        return *(uint32_t *) &SRAM[address];
++        return rdU32(&SRAM[address]);
+     }
+     if (address < VIDEORAM_START) {
+         return read32psram(address);
+@@ -402,13 +407,13 @@ uint32_t readdw86_mp(const uint32_t address) {
+         return read32psram(address - UMB_START);
+     }
+     if (address >= BIOS_START && address < HMA_START) {
+-        return *(uint32_t *) &BIOS[address - BIOS_START];
++        return rdU32(&BIOS[address - BIOS_START]);
+     }
+     if (address >= HMA_START && address < HMA_END) {
+         if (a20_enabled) {
+             return read32psram(address);
+         }
+-        return *(uint32_t *) &SRAM[address - HMA_START];
++        return rdU32(&SRAM[address - HMA_START]);
+     }
+     if (!a20_enabled && address >= HMA_END) {
+         return readdw86_mp(address - HMA_START);
+@@ -545,7 +550,7 @@ uint16_t readw86_sw(const uint32_t address) {
+         return (uint16_t) read86_sw(address) | ((uint16_t) read86_sw(address + 1) << 8);
+     }
+     // if (address >= VBIOS_START && address < VBIOS_END) {
+-        // return *(uint16_t *) &VGABIOS[address - VBIOS_START];
++        // return rdU16(&VGABIOS[address - VBIOS_START]);
+     // }
+     if (address >= EMS_START && address < EMS_END) {
+         return ems_readw(address - EMS_START);
+@@ -554,7 +559,7 @@ uint16_t readw86_sw(const uint32_t address) {
+         return swap_read16(address);
+     }
+     if (address >= BIOS_START && address < HMA_START) {
+-        return *(uint16_t *) &BIOS[address - BIOS_START];
++        return rdU16(&BIOS[address - BIOS_START]);
+     }
+     if (address >= HMA_START && address < HMA_END) {
+         if (a20_enabled) {
+@@ -591,7 +596,7 @@ uint32_t readdw86_sw(const uint32_t address) {
+         return swap_read32(address);
+     }
+     if (address >= BIOS_START && address < HMA_START) {
+-        return *(uint32_t *) &BIOS[address - BIOS_START];
++        return rdU32(&BIOS[address - BIOS_START]);
+     }
+     if (address >= HMA_START && address < HMA_END) {
+         if (a20_enabled) {
+diff --git a/src/emulator/video/cga.c b/src/emulator/video/cga.c
+index 4b4d945..4da1cdb 100644
+--- a/src/emulator/video/cga.c
++++ b/src/emulator/video/cga.c
+@@ -107,6 +107,7 @@ uint32_t cga_composite_palette[3][16] = {
+ };
+ uint8_t color_burst = 0;
+ 
++uint8_t dbg_last3d8 = 0, dbg_last3d9 = 0;  /* last CGA mode/colour reg, for the videomode log */
+ void cga_portout(uint16_t portnum, uint16_t value) {
+     // https://www.youtube.com/watch?v=ttPhnUUxy94
+     // https://www.youtube.com/watch?v=44eNkE1YoiI
+@@ -127,6 +128,7 @@ void cga_portout(uint16_t portnum, uint16_t value) {
+ //         printf("3d8 %x\n", value);
+         // 0x13 -- 640 dot mode -- 0b10011
+             //if (videomode >= 0xd) return;
++            dbg_last3d8 = value;
+             cga_hires = (value >> 4) & 1;
+             color_burst = (value >> 2) & 1;
+ 
+@@ -171,6 +173,7 @@ void cga_portout(uint16_t portnum, uint16_t value) {
+ #endif
+             break;
+         case 0x3D9: // Colour control register
++            dbg_last3d9 = value;
+             cga_foreground_color = value & 0b1111;
+             if (!color_burst)
+                 cga_colorset = value >> 5 & 1;

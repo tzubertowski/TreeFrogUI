@@ -98,6 +98,7 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **amstradb** | Amstrad CPC (CPC+) | `cap32_libretro.so` |
 | **thom** | Thomson MO/TO | `theodore_libretro.so` |
 | **xmil** | Sharp X68000 | `x68k_libretro.so` |
+| **pico286** | DOS / PC (8086–286, standalone) | `pico286` + `freedos.img` (see below) |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **prboom** | Doom / Heretic | `prboom_libretro.so` |
 | **wolf3d** | Wolfenstein 3D | `ecwolf_libretro.so` |
@@ -129,6 +130,29 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 **PICO-8 (fake08):** place carts in `roms/pico8/` (the legacy `roms/fake08/` folder still works). Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
 
 **Arduboy:** the `arduboy` folder uses the **Ardens** core (a fast custom AVR emulator) and accepts both `.hex` and `.arduboy` files. The `arduous` folder runs the older simavr-based **arduous** core (cycle-accurate but much slower; `.hex` only) — use it only if a game misbehaves under Ardens.
+
+### DOS / PC games (pico286)
+
+`pico286` is a standalone 8086–286 PC emulator. It runs DOS games from disk images you put in `roms/pico286/`.
+
+**One-time setup — provide FreeDOS:** download the **FreeDOS 1.4 "Floppy Edition"** from [freedos.org/download](https://www.freedos.org/download/), take **`144m/x86BOOT.img`** from the zip, and drop it (unchanged) into **`cubegm/bios/x86BOOT.img`**.
+
+> A pre-configured `x86BOOT.img` (language menu removed, auto-run enabled) ships with TreeFrogUI. If you instead use the stock one straight from FreeDOS, it still boots but stops at the language menu / DOS prompt — use the on-screen keyboard to continue.
+
+**How it boots:** when `cubegm/bios/x86BOOT.img` is present, launching any game image boots FreeDOS and mounts your game as a data drive (a **floppy-sized image → B:**, a **larger image → C:**), then auto-runs `RUN.BAT` (or the first `.EXE`/`.COM`/`.BAT`) it finds on C: then B:. If `x86BOOT.img` is absent, pico286 boots your image directly (for self-booting games).
+
+**What to provide — just drop the floppies:**
+Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one. pico286 finds **all** floppies in that folder, boots FreeDOS with **disk 1 in B:**, and auto-runs the game. For multi-disk games, open the **disk-swap menu** when the game asks for the next disk.
+
+**Disk-swap menu:** press **SELECT + START** together → pick a disk with the D-pad → **A** inserts it into B: (the `*` marks the current one), **B** closes.
+
+**Big / installed games (optional):** for games you'd rather install to a hard disk, build one C: image (optionally with a `RUN.BAT` holding the exact launch command):
+```
+./make_dos_img.sh <game_folder> <out.img> [size_MB]
+```
+Drop `<out.img>` in `roms/pico286/<game>/` and launch it (mounts as C:).
+
+**On-screen keyboard:** press **L + R** together to toggle it (D-pad moves, A presses, B closes) for typing DOS commands. Game face buttons: A=Enter, B=Esc, X=Space, Y=Ctrl, L=Shift, R=Alt.
 
 ---
 
