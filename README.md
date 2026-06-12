@@ -142,9 +142,7 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 **How it boots:** when `cubegm/bios/x86BOOT.img` is present, launching any game image boots FreeDOS and mounts your game as a data drive (a **floppy-sized image → B:**, a **larger image → C:**), then auto-runs `RUN.BAT` (or the first `.EXE`/`.COM`/`.BAT`) it finds on C: then B:. If `x86BOOT.img` is absent, pico286 boots your image directly (for self-booting games).
 
 **What to provide — just drop the floppies:**
-Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one. pico286 finds **all** floppies in that folder, boots FreeDOS with **disk 1 in B:**, and auto-runs the game. For multi-disk games, open the **disk-swap menu** when the game asks for the next disk.
-
-**Disk-swap menu:** press **SELECT + START** together → pick a disk with the D-pad → **A** inserts it into B: (the `*` marks the current one), **B** closes.
+Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one. pico286 finds **all** floppies in that folder, boots FreeDOS with **disk 1 in B:**, and auto-runs the game. For multi-disk games, swap disks from the menu when the game asks for the next one.
 
 **Big / installed games (optional):** for games you'd rather install to a hard disk, build one C: image (optionally with a `RUN.BAT` holding the exact launch command):
 ```
@@ -152,7 +150,11 @@ Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one
 ```
 Drop `<out.img>` in `roms/pico286/<game>/` and launch it (mounts as C:).
 
-**On-screen keyboard:** press **L + R** together to toggle it (D-pad moves, A presses, B closes) for typing DOS commands. Game face buttons: A=Enter, B=Esc, X=Space, Y=Ctrl, L=Shift, R=Alt.
+**Controls / menu:**
+- **SELECT + START** — open the pico286 **main menu**: Resume, Keyboard, Disk swap, Mouse mode on/off, Mouse speed, CPU speed, Reset, Exit to menu. (D-pad navigates, A selects, Left/Right adjusts Mouse/CPU speed, B closes.)
+- **L + R** — quick on-screen keyboard (D-pad moves, A presses, B closes) for typing DOS commands.
+- **Mouse mode** (toggle in the menu): D-pad moves the cursor, A = left click, B = right click. Needs a mouse driver, which the bundled FreeDOS loads automatically (CTMOUSE).
+- In-game buttons: A=Enter, B=Esc, X=Space, Y=Ctrl, L=Shift, R=Alt.
 
 ---
 

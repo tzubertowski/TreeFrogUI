@@ -421,10 +421,10 @@ index 0000000..9a0dc6b
 +#endif
 diff --git a/port_sf3000/sf3000-main.cpp b/port_sf3000/sf3000-main.cpp
 new file mode 100644
-index 0000000..03004d1
+index 0000000..fc7208c
 --- /dev/null
 +++ b/port_sf3000/sf3000-main.cpp
-@@ -0,0 +1,1085 @@
+@@ -0,0 +1,1150 @@
 +#include <pthread.h>
 +#include <unistd.h>
 +#include <cstring>
@@ -1166,6 +1166,14 @@ index 0000000..03004d1
 + * mouse (needs a DOS mouse driver loaded, e.g. CTMOUSE, for INT33 games). */
 +extern "C" void sermouseevent(uint8_t buttons, int8_t xrel, int8_t yrel);
 +static int mouse_mode = 0;
++static int mouse_sens = 2;            /* 1..3 cursor speed multiplier */
++
++/* Main menu (SELECT+START). exec_loops = CPU instructions per frame (speed). */
++static int menu_visible = 0, menu_sel = 0;
++static uint32_t exec_loops = 32768;
++static int cpu_speed = 1;             /* 0 slow, 1 normal, 2 fast */
++static const uint32_t CPU_LOOPS[3] = { 16384, 32768, 49152 };
++#define MENU_N 8
 +
 +/* ---- Disk-swap menu: list of floppy .img files in the game's folder ---- */
 +#define DISK_MAX 24
@@ -1273,6 +1281,44 @@ index 0000000..03004d1
 +    }
 +}
 +
++/* Build the label for main-menu row i into buf. */
++static void menu_label(int i, char *buf, int n) {
++    static const char *cpu[3] = { "SLOW", "NORMAL", "FAST" };
++    switch (i) {
++        case 0: snprintf(buf, n, "RESUME"); break;
++        case 1: snprintf(buf, n, "KEYBOARD"); break;
++        case 2: if (disk_count > 0) snprintf(buf, n, "DISK: %s", disk_names[disk_cur]);
++                else snprintf(buf, n, "DISK: (none)"); break;
++        case 3: snprintf(buf, n, "MOUSE MODE: %s", mouse_mode ? "ON" : "OFF"); break;
++        case 4: snprintf(buf, n, "MOUSE SPEED: %d", mouse_sens); break;
++        case 5: snprintf(buf, n, "CPU SPEED: %s", cpu[cpu_speed]); break;
++        case 6: snprintf(buf, n, "RESET (REBOOT)"); break;
++        case 7: snprintf(buf, n, "EXIT TO MENU"); break;
++        default: buf[0] = 0;
++    }
++}
++
++/* Draw the main menu overlay into fb565. */
++static void menu_draw(void) {
++    const uint16_t BG = 0x10A2, FG = 0xFFFF, HLBG = 0x07E0, HLFG = 0x0000, BORD = 0x4A69;
++    const int x0 = 120, w = 400, y0 = 90, rowh = 30;
++    int x1 = x0 + w, y1 = y0 + MENU_N*rowh + 18;
++    for (int yy = y0 - 30; yy < y1 && yy < 480; yy++)
++        for (int xx = x0 - 14; xx < x1 && xx < 640; xx++) {
++            int edge = (yy==y0-30 || yy==y1-1 || xx==x0-14 || xx==x1-1);
++            fb565[yy*640+xx] = edge ? BORD : BG;
++        }
++    kb_puts(x0, y0 - 24, "PICO286 MENU", FG, BG);
++    for (int i = 0; i < MENU_N; i++) {
++        int y = y0 + i*rowh, sel = (i == menu_sel);
++        uint16_t fg = sel ? HLFG : FG, bg = sel ? HLBG : BG;
++        if (sel) for (int yy = y-2; yy < y+rowh-6 && yy < 480; yy++)
++            for (int xx = x0-8; xx < x1-6 && xx < 640; xx++) fb565[yy*640+xx] = bg;
++        char line[80]; menu_label(i, line, sizeof line);
++        kb_puts(x0, y, line, fg, bg);
++    }
++}
++
 +/* Send the currently-highlighted key (with shift/ctrl if needed). */
 +static void kb_press(void) {
 +    struct VKey vk = KBROWS[kb_r].k[kb_c];
@@ -1289,29 +1335,47 @@ index 0000000..03004d1
 +    scq_drain1();   /* feed at most one queued scancode per frame */
 +    static uint32_t prev = 0;
 +    uint32_t k = *cv_keys;
-+    /* SELECT (bit0) + START (bit3) -> quit to FrogUI (icube relaunches menu) */
-+    if (cvbtn(k,0) && cvbtn(k,3)) { p286log("quit (SELECT+START)"); exit(0); }
++    /* SELECT (bit0) + START (bit3) edge -> open the main menu */
++    int ms_now = cvbtn(k,0) && cvbtn(k,3);
++    int ms_was = cvbtn(prev,0) && cvbtn(prev,3);
++    if (ms_now && !ms_was) { menu_visible = !menu_visible; kb_visible = dm_visible = 0; menu_sel = 0; prev = k; return; }
 +
-+    /* L (bit10) + R (bit11) edge toggles the on-screen keyboard */
++    /* L (bit10) + R (bit11) edge -> on-screen keyboard quick toggle */
 +    int lr_now = cvbtn(k,10) && cvbtn(k,11);
 +    int lr_was = cvbtn(prev,10) && cvbtn(prev,11);
-+    if (lr_now && !lr_was) { kb_visible = !kb_visible; dm_visible = 0; prev = k; return; }
++    if (lr_now && !lr_was) { kb_visible = !kb_visible; menu_visible = dm_visible = 0; prev = k; return; }
 +
-+    /* SELECT (bit0) + L (bit10) edge toggles the disk-swap menu */
-+    int ss_now = cvbtn(k,0) && cvbtn(k,10);
-+    int ss_was = cvbtn(prev,0) && cvbtn(prev,10);
-+    if (ss_now && !ss_was && disk_count > 0) { dm_visible = !dm_visible; kb_visible = 0; dm_sel = disk_cur; prev = k; return; }
-+
-+    /* SELECT (bit0) + R (bit11) edge toggles virtual mouse mode */
-+    int sr_now = cvbtn(k,0) && cvbtn(k,11);
-+    int sr_was = cvbtn(prev,0) && cvbtn(prev,11);
-+    if (sr_now && !sr_was) { mouse_mode = !mouse_mode; kb_visible = dm_visible = 0; prev = k; return; }
++    if (menu_visible) {
++        int up=cvbtn(k,4)&&!cvbtn(prev,4), dn=cvbtn(k,6)&&!cvbtn(prev,6);
++        int lf=cvbtn(k,7)&&!cvbtn(prev,7), rt=cvbtn(k,5)&&!cvbtn(prev,5);
++        int a =cvbtn(k,13)&&!cvbtn(prev,13), b=cvbtn(k,14)&&!cvbtn(prev,14);
++        if (up) { if (--menu_sel < 0) menu_sel = MENU_N-1; }
++        if (dn) { if (++menu_sel >= MENU_N) menu_sel = 0; }
++        int act = a;
++        if (menu_sel == 4 && (lf||rt)) { mouse_sens += rt?1:-1; if(mouse_sens<1)mouse_sens=3; if(mouse_sens>3)mouse_sens=1; }
++        else if (menu_sel == 5 && (lf||rt)) { cpu_speed += rt?1:-1; if(cpu_speed<0)cpu_speed=2; if(cpu_speed>2)cpu_speed=0; exec_loops=CPU_LOOPS[cpu_speed]; }
++        else if (act) {
++            switch (menu_sel) {
++                case 0: menu_visible = 0; break;
++                case 1: kb_visible = 1; menu_visible = 0; break;
++                case 2: if (disk_count > 0) { dm_visible = 1; dm_sel = disk_cur; menu_visible = 0; } break;
++                case 3: mouse_mode = !mouse_mode; break;
++                case 4: if (++mouse_sens > 3) mouse_sens = 1; break;
++                case 5: if (++cpu_speed > 2) cpu_speed = 0; exec_loops = CPU_LOOPS[cpu_speed]; break;
++                case 6: p286log("reset86 (menu)"); reset86(); menu_visible = 0; break;
++                case 7: p286log("exit (menu)"); exit(0); break;
++            }
++        }
++        if (b) menu_visible = 0;
++        prev = k;
++        return;
++    }
 +
 +    if (mouse_mode) {
 +        static int held = 0; static uint8_t pb = 0;
 +        int u=cvbtn(k,4), d=cvbtn(k,6), l=cvbtn(k,7), r=cvbtn(k,5);
 +        held = (u||d||l||r) ? held+1 : 0;
-+        int spd = 2 + held/3; if (spd > 16) spd = 16;
++        int spd = (1 + held/4) * mouse_sens; if (spd > 24) spd = 24;
 +        int dx = (r-l)*spd, dy = (d-u)*spd;
 +        uint8_t buttons = (cvbtn(k,13)?1:0) | (cvbtn(k,14)?2:0);  /* A=left B=right */
 +        if (dx || dy || buttons != pb) {
@@ -1394,9 +1458,10 @@ index 0000000..03004d1
 +                          ((p >> 10) & 0x3F) << 5  |
 +                          ((p >> 3)  & 0x1F));
 +    }
++    if (menu_visible) menu_draw();
 +    if (kb_visible) kb_draw();
 +    if (dm_visible) dm_draw();
-+    if (mouse_mode) kb_puts(8, 6, "MOUSE", 0x07E0, 0x0000);
++    if (mouse_mode && !menu_visible) kb_puts(8, 6, "MOUSE", 0x07E0, 0x0000);
 +    hwdisp_present(fb565, 640, 480, 640 * 2);
 +}
 +
@@ -1489,7 +1554,7 @@ index 0000000..03004d1
 +
 +    static int dbgframe = 0;
 +    while (running) {
-+        exec86(32768);
++        exec86(exec_loops);
 +        if (dbgframe < 5) p286log("frame %d: post exec86", dbgframe);
 +#ifdef P286_NOTHREADS
 +        renderer();        /* drive video from main loop in single-thread debug */
