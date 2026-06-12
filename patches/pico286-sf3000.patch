@@ -421,10 +421,10 @@ index 0000000..9a0dc6b
 +#endif
 diff --git a/port_sf3000/sf3000-main.cpp b/port_sf3000/sf3000-main.cpp
 new file mode 100644
-index 0000000..c942a1c
+index 0000000..03004d1
 --- /dev/null
 +++ b/port_sf3000/sf3000-main.cpp
-@@ -0,0 +1,1057 @@
+@@ -0,0 +1,1085 @@
 +#include <pthread.h>
 +#include <unistd.h>
 +#include <cstring>
@@ -1162,6 +1162,11 @@ index 0000000..c942a1c
 +#define KB_NROWS ((int)(sizeof(KBROWS)/sizeof(KBROWS[0])))
 +static int kb_visible = 0, kb_r = 0, kb_c = 0;
 +
++/* Virtual mouse: D-pad moves, A=left, B=right. Feeds the emulated COM1 serial
++ * mouse (needs a DOS mouse driver loaded, e.g. CTMOUSE, for INT33 games). */
++extern "C" void sermouseevent(uint8_t buttons, int8_t xrel, int8_t yrel);
++static int mouse_mode = 0;
++
 +/* ---- Disk-swap menu: list of floppy .img files in the game's folder ---- */
 +#define DISK_MAX 24
 +static char disk_dir[512];
@@ -1297,6 +1302,28 @@ index 0000000..c942a1c
 +    int ss_was = cvbtn(prev,0) && cvbtn(prev,10);
 +    if (ss_now && !ss_was && disk_count > 0) { dm_visible = !dm_visible; kb_visible = 0; dm_sel = disk_cur; prev = k; return; }
 +
++    /* SELECT (bit0) + R (bit11) edge toggles virtual mouse mode */
++    int sr_now = cvbtn(k,0) && cvbtn(k,11);
++    int sr_was = cvbtn(prev,0) && cvbtn(prev,11);
++    if (sr_now && !sr_was) { mouse_mode = !mouse_mode; kb_visible = dm_visible = 0; prev = k; return; }
++
++    if (mouse_mode) {
++        static int held = 0; static uint8_t pb = 0;
++        int u=cvbtn(k,4), d=cvbtn(k,6), l=cvbtn(k,7), r=cvbtn(k,5);
++        held = (u||d||l||r) ? held+1 : 0;
++        int spd = 2 + held/3; if (spd > 16) spd = 16;
++        int dx = (r-l)*spd, dy = (d-u)*spd;
++        uint8_t buttons = (cvbtn(k,13)?1:0) | (cvbtn(k,14)?2:0);  /* A=left B=right */
++        if (dx || dy || buttons != pb) {
++            if (dx > 63) dx = 63; if (dx < -63) dx = -63;
++            if (dy > 63) dy = 63; if (dy < -63) dy = -63;
++            sermouseevent(buttons, (int8_t)dx, (int8_t)dy);
++        }
++        pb = buttons;
++        prev = k;
++        return;
++    }
++
 +    if (dm_visible) {
 +        int up = cvbtn(k,4)&&!cvbtn(prev,4), dn = cvbtn(k,6)&&!cvbtn(prev,6);
 +        int a  = cvbtn(k,13)&&!cvbtn(prev,13), b = cvbtn(k,14)&&!cvbtn(prev,14);
@@ -1369,6 +1396,7 @@ index 0000000..c942a1c
 +    }
 +    if (kb_visible) kb_draw();
 +    if (dm_visible) dm_draw();
++    if (mouse_mode) kb_puts(8, 6, "MOUSE", 0x07E0, 0x0000);
 +    hwdisp_present(fb565, 640, 480, 640 * 2);
 +}
 +
