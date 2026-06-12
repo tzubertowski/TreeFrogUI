@@ -10,17 +10,7 @@ A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modi
 ![UI Preview on SF3000 Console](console.jpg)
 
 > [!WARNING]
-> This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). The build auto-detects the device at boot.
-
-> [!CAUTION]
-> **R36SX v2.7 owners read this first.** There are **many different v2.7 hardware revisions**, and I don't have access to all of them. Some run TreeFrogUI perfectly (like mine); others get stuck on a **"damaged SD card"** screen. **Your particular v2.7 may or may not work, I can't guarantee it.** I don't currently own one of the newer v2.7 units to test against. Want me to track one down and add support? ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**.
-
-> [!NOTE]
-> TreeFrogUI is developed by a single developer and is built primarily for the **SF3000** handheld. It **might** also support similar hardware variants such as the **SF3000HD**, **SF3100**, **SF3500**, and **GB350**. Since I currently do not own these devices to test them myself, compatibility is unverified - please try it out and let me know if it works!
-
-> [!NOTE]
-> **About the right analog stick (R36SX):** the right stick **cannot** work as a real analog stick, and no software update can change that. On this console the right stick is physically built to act **exactly like the X / A / B / Y face buttons** — nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" information. The console never hands that analog information to apps like TreeFrogUI. So here the right stick simply **behaves like the face buttons** (and tiny accidental movements are ignored, so it won't press buttons on its own). This is a hardware limitation, not a bug or a missing feature.
-
+> This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). The build auto-detects the device at boot. Device-specific caveats are in [Device notes](#device-notes) below.
 
 📦 **[Installation Guide](install.md)** - Start here to install TreeFrogUI on your device
 
@@ -268,6 +258,23 @@ treefrog-ui/
 | `o2em` (Odyssey²) | ❌ not yet cloned |
 | `vice` (C64) | commented out - large build, enable manually in build_all.sh |
 | picoarch binary | not included - obtain from SF3000 multicore project |
+
+---
+
+## Device notes
+
+### R36SX
+
+> [!CAUTION]
+> **v2.7 owners read this first.** There are **many different v2.7 hardware revisions**, and I don't have access to all of them. Some run TreeFrogUI perfectly (like mine); others get stuck on a **"damaged SD card"** screen. **Your particular v2.7 may or may not work, I can't guarantee it.** I don't currently own one of the newer v2.7 units to test against. Want me to track one down and add support? ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**.
+
+> [!NOTE]
+> **Right analog stick.** The right stick **cannot** work as a real analog stick, and no software update can change that. On this console it's physically wired to act **exactly like the X / A / B / Y face buttons**: nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" info. The console never hands analog data to apps like TreeFrogUI. So the right stick simply **mirrors the face buttons** (tiny accidental movements are ignored, so it won't fire on its own). Hardware limitation, not a bug or missing feature.
+
+### SF3000
+
+> [!NOTE]
+> Built primarily for the **SF3000**. It **might** also run on similar variants like the **SF3000HD**, **SF3100**, **SF3500**, and **GB350**. I don't own these to test, so compatibility is unverified. Try it and let me know if it works. Want one supported properly? ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**.
 
 ---
 
