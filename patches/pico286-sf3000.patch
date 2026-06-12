@@ -421,10 +421,10 @@ index 0000000..9a0dc6b
 +#endif
 diff --git a/port_sf3000/sf3000-main.cpp b/port_sf3000/sf3000-main.cpp
 new file mode 100644
-index 0000000..fc7208c
+index 0000000..457d148
 --- /dev/null
 +++ b/port_sf3000/sf3000-main.cpp
-@@ -0,0 +1,1150 @@
+@@ -0,0 +1,1202 @@
 +#include <pthread.h>
 +#include <unistd.h>
 +#include <cstring>
@@ -441,6 +441,7 @@ index 0000000..fc7208c
 +#include <sys/mman.h>
 +#include <sys/ioctl.h>
 +#include <linux/fb.h>
++#include <dlfcn.h>
 +extern "C" {
 +#include "hwdisp.h"
 +}
@@ -488,13 +489,39 @@ index 0000000..fc7208c
 +    doirq(1);
 +}
 +
-+/* Audio: stubbed for first bring-up (silent). Wired to the SF3000 driver next,
-+ * like pcsx4all. The core's sampling path stays intact. */
-+static inline int linux_audio_init(int a, int b, int c) { (void)a;(void)b;(void)c; return 0; }
++static void p286log(const char *fmt, ...);   /* fwd: SD-card diagnostics */
++
++/* Audio: output PCM via driver.so (HCGE) hardware mixer, same path picoarch uses.
++ * sound_driver_playframe() takes a chunk of 735 stereo int16 frames (44100/60).
++ * The core fills audio_buffer at SOUND_FREQUENCY; we hand it over in 735-frame
++ * chunks (AUDIO_BUFFER_LENGTH = 4410 = 6 chunks). */
++#define SND_CHUNK 735
++static void (*snd_init)(void) = NULL;
++static void (*snd_playframe)(const void *) = NULL;
++static void (*snd_deinit)(void) = NULL;
++static int snd_ok = 0;
++static int linux_audio_init(int a, int b, int c) {
++    (void)a;(void)b;(void)c;
++    void *drv = dlopen("/mnt/sdcard/cubegm/driver.so", RTLD_LAZY);
++    if (!drv) { p286log("audio: driver.so load FAILED"); return -1; }
++    snd_init      = (void(*)(void))dlsym(drv, "sound_driver_init");
++    snd_playframe = (void(*)(const void*))dlsym(drv, "sound_driver_playframe");
++    snd_deinit    = (void(*)(void))dlsym(drv, "sound_driver_deinit");
++    if (!snd_playframe) { p286log("audio: sound_driver_playframe missing"); return -1; }
++    if (snd_init) snd_init();
++    snd_ok = 1; p286log("audio: driver.so ok");
++    return 0;
++}
 +static inline int linux_audio_start(void) { return 0; }
-+static inline const char *linux_audio_get_backend_name(void) { return "sf3000-stub"; }
-+static inline int linux_audio_write(int16_t *buf, int frames) { (void)buf;(void)frames; return 0; }
-+static inline void linux_audio_close(void) {}
++static inline const char *linux_audio_get_backend_name(void) { return "sf3000-driver"; }
++static int linux_audio_write(int16_t *buf, int frames) {
++    if (!snd_ok) return 0;
++    /* hand over in fixed 735-frame chunks (2 int16 per frame) */
++    for (int off = 0; off + SND_CHUNK <= frames; off += SND_CHUNK)
++        snd_playframe(buf + off * 2);
++    return 0;
++}
++static inline void linux_audio_close(void) { if (snd_ok && snd_deinit) snd_deinit(); snd_ok = 0; }
 +
 +static uint32_t ALIGN(4, SCREEN[640 * 480]);
 +uint8_t ALIGN(4, DEBUG_VRAM[80 * 10]) = {0};
@@ -1168,12 +1195,19 @@ index 0000000..fc7208c
 +static int mouse_mode = 0;
 +static int mouse_sens = 2;            /* 1..3 cursor speed multiplier */
 +
++/* Virtual joystick -> emulated PC game port (0x201). */
++extern "C" { extern int8_t pc_joy_x, pc_joy_y; extern uint8_t pc_joy_btn; }
++static int joystick_mode = 0;
++
++/* Frame skip: render+present 1 of (frameskip+1) frames to give the CPU more time. */
++static int frameskip = 0;
++
 +/* Main menu (SELECT+START). exec_loops = CPU instructions per frame (speed). */
 +static int menu_visible = 0, menu_sel = 0;
 +static uint32_t exec_loops = 32768;
 +static int cpu_speed = 1;             /* 0 slow, 1 normal, 2 fast */
 +static const uint32_t CPU_LOOPS[3] = { 16384, 32768, 49152 };
-+#define MENU_N 8
++#define MENU_N 10
 +
 +/* ---- Disk-swap menu: list of floppy .img files in the game's folder ---- */
 +#define DISK_MAX 24
@@ -1291,9 +1325,11 @@ index 0000000..fc7208c
 +                else snprintf(buf, n, "DISK: (none)"); break;
 +        case 3: snprintf(buf, n, "MOUSE MODE: %s", mouse_mode ? "ON" : "OFF"); break;
 +        case 4: snprintf(buf, n, "MOUSE SPEED: %d", mouse_sens); break;
-+        case 5: snprintf(buf, n, "CPU SPEED: %s", cpu[cpu_speed]); break;
-+        case 6: snprintf(buf, n, "RESET (REBOOT)"); break;
-+        case 7: snprintf(buf, n, "EXIT TO MENU"); break;
++        case 5: snprintf(buf, n, "JOYSTICK: %s", joystick_mode ? "ON" : "OFF"); break;
++        case 6: snprintf(buf, n, "CPU SPEED: %s", cpu[cpu_speed]); break;
++        case 7: snprintf(buf, n, "FRAME SKIP: %d", frameskip); break;
++        case 8: snprintf(buf, n, "RESET (REBOOT)"); break;
++        case 9: snprintf(buf, n, "EXIT TO MENU"); break;
 +        default: buf[0] = 0;
 +    }
 +}
@@ -1353,17 +1389,20 @@ index 0000000..fc7208c
 +        if (dn) { if (++menu_sel >= MENU_N) menu_sel = 0; }
 +        int act = a;
 +        if (menu_sel == 4 && (lf||rt)) { mouse_sens += rt?1:-1; if(mouse_sens<1)mouse_sens=3; if(mouse_sens>3)mouse_sens=1; }
-+        else if (menu_sel == 5 && (lf||rt)) { cpu_speed += rt?1:-1; if(cpu_speed<0)cpu_speed=2; if(cpu_speed>2)cpu_speed=0; exec_loops=CPU_LOOPS[cpu_speed]; }
++        else if (menu_sel == 6 && (lf||rt)) { cpu_speed += rt?1:-1; if(cpu_speed<0)cpu_speed=2; if(cpu_speed>2)cpu_speed=0; exec_loops=CPU_LOOPS[cpu_speed]; }
++        else if (menu_sel == 7 && (lf||rt)) { frameskip += rt?1:-1; if(frameskip<0)frameskip=3; if(frameskip>3)frameskip=0; }
 +        else if (act) {
 +            switch (menu_sel) {
 +                case 0: menu_visible = 0; break;
 +                case 1: kb_visible = 1; menu_visible = 0; break;
 +                case 2: if (disk_count > 0) { dm_visible = 1; dm_sel = disk_cur; menu_visible = 0; } break;
-+                case 3: mouse_mode = !mouse_mode; break;
++                case 3: mouse_mode = !mouse_mode; if (mouse_mode) joystick_mode = 0; break;
 +                case 4: if (++mouse_sens > 3) mouse_sens = 1; break;
-+                case 5: if (++cpu_speed > 2) cpu_speed = 0; exec_loops = CPU_LOOPS[cpu_speed]; break;
-+                case 6: p286log("reset86 (menu)"); reset86(); menu_visible = 0; break;
-+                case 7: p286log("exit (menu)"); exit(0); break;
++                case 5: joystick_mode = !joystick_mode; if (joystick_mode) mouse_mode = 0; break;
++                case 6: if (++cpu_speed > 2) cpu_speed = 0; exec_loops = CPU_LOOPS[cpu_speed]; break;
++                case 7: if (++frameskip > 3) frameskip = 0; break;
++                case 8: p286log("reset86 (menu)"); reset86(); menu_visible = 0; break;
++                case 9: p286log("exit (menu)"); exit(0); break;
 +            }
 +        }
 +        if (b) menu_visible = 0;
@@ -1384,6 +1423,14 @@ index 0000000..fc7208c
 +            sermouseevent(buttons, (int8_t)dx, (int8_t)dy);
 +        }
 +        pb = buttons;
++        prev = k;
++        return;
++    }
++
++    if (joystick_mode) {
++        pc_joy_x = cvbtn(k,7) ? -100 : (cvbtn(k,5) ? 100 : 0);   /* left / right */
++        pc_joy_y = cvbtn(k,4) ? -100 : (cvbtn(k,6) ? 100 : 0);   /* up / down */
++        pc_joy_btn = (cvbtn(k,13)?1:0) | (cvbtn(k,14)?2:0);      /* A=btn1 B=btn2 */
 +        prev = k;
 +        return;
 +    }
@@ -1462,6 +1509,7 @@ index 0000000..fc7208c
 +    if (kb_visible) kb_draw();
 +    if (dm_visible) dm_draw();
 +    if (mouse_mode && !menu_visible) kb_puts(8, 6, "MOUSE", 0x07E0, 0x0000);
++    if (joystick_mode && !menu_visible) kb_puts(8, 6, "JOY", 0xFFE0, 0x0000);
 +    hwdisp_present(fb565, 640, 480, 640 * 2);
 +}
 +
@@ -1553,6 +1601,7 @@ index 0000000..fc7208c
 +#endif
 +
 +    static int dbgframe = 0;
++    int fs_count = 0;
 +    while (running) {
 +        exec86(exec_loops);
 +        if (dbgframe < 5) p286log("frame %d: post exec86", dbgframe);
@@ -1561,7 +1610,10 @@ index 0000000..fc7208c
 +        if ((dbgframe & 15) == 0) doirq(0);   /* fake timer tick */
 +#endif
 +        sf3000_poll_input();
-+        sf3000_present();
++        /* frame skip: present 1 of (frameskip+1) iterations so the CPU runs
++         * more between displays (menu overlays always show immediately). */
++        if (fs_count == 0 || menu_visible || kb_visible || dm_visible) sf3000_present();
++        if (++fs_count > frameskip) fs_count = 0;
 +        if (dbgframe < 5) { p286log("frame %d: presented", dbgframe); dbgframe++; }
 +    }
 +
@@ -1889,6 +1941,36 @@ index 8906f40..76ea6b9 100644
      }
      if (address >= HMA_START && address < HMA_END) {
          if (a20_enabled) {
+diff --git a/src/emulator/ports.c b/src/emulator/ports.c
+index 85f8daf..05988ad 100644
+--- a/src/emulator/ports.c
++++ b/src/emulator/ports.c
+@@ -28,10 +28,10 @@ static uint16_t adlibregmem[5], adlib_register = 0;
+ static uint8_t adlibstatus = 0;
+ 
+ static int8_t joystick_tick;
++/* Host-driven game-port state (set by the SF3000 platform layer). */
++int8_t pc_joy_x = 0, pc_joy_y = 0; uint8_t pc_joy_btn = 0;
+ static INLINE void joystick_out() {
+-#if PICO_ON_DEVICE
+     joystick_tick = -127;
+-#endif
+ }
+ 
+ static INLINE uint8_t joystick_in() {
+@@ -46,6 +46,12 @@ static INLINE uint8_t joystick_in() {
+     if (joystick_tick < axis_y) data |= 2;
+     if (nespad_state & DPAD_A) data ^= 0x10;
+     if (nespad_state & DPAD_B) data ^= 0x20;
++#else
++    joystick_tick++;
++    if (joystick_tick < pc_joy_x) data |= 1;
++    if (joystick_tick < pc_joy_y) data |= 2;
++    if (pc_joy_btn & 1) data ^= 0x10;   /* button 1 */
++    if (pc_joy_btn & 2) data ^= 0x20;   /* button 2 */
+ #endif
+     return data;
+ }
 diff --git a/src/emulator/video/cga.c b/src/emulator/video/cga.c
 index 4b4d945..4da1cdb 100644
 --- a/src/emulator/video/cga.c
