@@ -112,7 +112,10 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **retro8** | PICO-8 (retro8) | `retro8_libretro.so` |
 | **lowres-nx** | LowRes NX | `lowresnx_libretro.so` |
 | **pokem** | Pokémon Mini | `pokemini_libretro.so` |
-| **m2k** | MAME 2000 | `mame2000_libretro.so` |
+| **m2k** | MAME 2000 (MAME 0.37b5 romset) | `mame2000_libretro.so` |
+| **cps1** | Capcom CPS-1 arcade | `fbalpha2012_cps1_libretro.so` |
+| **cps2** | Capcom CPS-2 arcade | `fbalpha2012_cps2_libretro.so` |
+| **neogeo** | Neo Geo arcade | `fbalpha2012_neogeo_libretro.so` |
 | **int** | Mattel Intellivision | `freeintv_libretro.so` |
 | **fcf** | Fairchild Channel F | `freechaf_libretro.so` |
 | **cdg** | CD+G Karaoke | `pocketcdg_libretro.so` |
@@ -130,6 +133,29 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 **PICO-8 (fake08):** place carts in `roms/pico8/` (the legacy `roms/fake08/` folder still works). Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
 
 **Arduboy:** the `arduboy` folder uses the **Ardens** core (a fast custom AVR emulator) and accepts both `.hex` and `.arduboy` files. The `arduous` folder runs the older simavr-based **arduous** core (cycle-accurate but much slower; `.hex` only) — use it only if a game misbehaves under Ardens.
+
+### Arcade (MAME / FB Alpha / Neo Geo)
+
+Arcade games are `.zip` files of a romset. **Keep them zipped** — the core reads the zip directly, do not extract.
+
+| Folder | Core | Romset it needs |
+|---|---|---|
+| `cps1` | FB Alpha 2012 | Capcom **CPS-1** games |
+| `cps2` | FB Alpha 2012 | Capcom **CPS-2** games |
+| `neogeo` | FB Alpha 2012 | **Neo Geo** games (also needs `neogeo.zip` BIOS in the folder) |
+| `m2k` | MAME 2000 | misc arcade, **MAME 0.37b5** romset |
+
+> [!IMPORTANT]
+> **Romsets are version-locked.** Each core only loads ROMs from the matching set:
+> the `cps1`/`cps2`/`neogeo` folders need a **FB Alpha 2012** romset, and `m2k`
+> needs a **MAME 0.37b5** romset. A zip from a different MAME/FBNeo version will
+> **fail to load** even if the game name matches — this is the #1 cause of arcade
+> ROMs not working. Neo Geo games also need the **`neogeo.zip`** BIOS in the same
+> folder.
+
+Pick the folder by hardware: Street Fighter II etc. → `cps1`, Marvel vs Capcom etc.
+→ `cps2`, Metal Slug/KOF etc. → `neogeo`. For Neo Geo you can also use the dedicated
+`geolith` core. Heavy CPS-2/Neo Geo titles may run slow on this CPU.
 
 ### DOS / PC games (pico286)
 

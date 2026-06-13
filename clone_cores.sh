@@ -40,6 +40,9 @@ clone Genesis-Plus-GX  https://github.com/libretro/Genesis-Plus-GX
 clone tyrquake         https://github.com/libretro/tyrquake
 clone libretro-prboom  https://github.com/libretro/libretro-prboom
 clone mame2000         https://github.com/libretro/mame2000-libretro
+clone fbalpha2012_cps1   https://github.com/libretro/fbalpha2012_cps1
+clone fbalpha2012_cps2   https://github.com/libretro/fbalpha2012_cps2
+clone fbalpha2012_neogeo https://github.com/libretro/fbalpha2012_neogeo
 clone stella2014       https://github.com/libretro/stella2014-libretro
 clone prosystem        https://github.com/libretro/prosystem-libretro
 clone nestopia         https://github.com/libretro/nestopia

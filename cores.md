@@ -105,7 +105,10 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `wolf3d` | Wolfenstein 3D | `ecwolf_libretro.so` | [libretro/ecwolf](https://github.com/libretro/ecwolf) |
 | `prboom` | Doom / Heretic | `prboom_libretro.so` | [libretro/libretro-prboom](https://github.com/libretro/libretro-prboom) |
 | `outrun` | Out Run (arcade) | `cannonball_libretro.so` | [libretro/cannonball](https://github.com/libretro/cannonball) |
-| `m2k` | MAME 2000 | `mame2000_libretro.so` | [libretro/mame2000-libretro](https://github.com/libretro/mame2000-libretro) |
+| `m2k` | MAME 2000 (MAME 0.37b5 romset) | `mame2000_libretro.so` | [libretro/mame2000-libretro](https://github.com/libretro/mame2000-libretro) |
+| `cps1` | Capcom CPS-1 (FB Alpha 2012) | `fbalpha2012_cps1_libretro.so` | [libretro/fbalpha2012_cps1](https://github.com/libretro/fbalpha2012_cps1) |
+| `cps2` | Capcom CPS-2 (FB Alpha 2012) | `fbalpha2012_cps2_libretro.so` | [libretro/fbalpha2012_cps2](https://github.com/libretro/fbalpha2012_cps2) |
+| `neogeo` | Neo Geo (FB Alpha 2012) | `fbalpha2012_neogeo_libretro.so` | [libretro/fbalpha2012_neogeo](https://github.com/libretro/fbalpha2012_neogeo) |
 | `pico286` | DOS / PC (8086–286) — **standalone** binary, boots via FreeDOS | `pico286` (+ `cubegm/bios/x86BOOT.img`) | [xrip/pico-286](https://github.com/xrip/pico-286) + `patches/pico286-sf3000.patch` |
 
 ---

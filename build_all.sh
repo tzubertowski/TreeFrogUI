@@ -190,6 +190,11 @@ fi
 echo "-- mame2000 make --"
 _b mame2000          mame2000                  ""
 
+echo "-- FB Alpha 2012 arcade (CPS-1 / CPS-2 / Neo Geo) make --"
+_b fbalpha2012_cps1   fbalpha2012_cps1   ""
+_b fbalpha2012_cps2   fbalpha2012_cps2   ""
+_b fbalpha2012_neogeo fbalpha2012_neogeo ""
+
 echo "-- stella2014 make --"
 _b stella2014        stella2014                "" "LDFLAGS=$LDFLAGS_S"
 
