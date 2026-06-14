@@ -9,6 +9,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | Folder | System | Core .so | Source |
 |--------|--------|----------|--------|
 | `nes`, `FC` | NES | `fceumm_libretro.so` | [tzubertowski/libretro-fceumm](https://github.com/tzubertowski/libretro-fceumm) |
+| `fds` | Famicom Disk System (needs `disksys.rom`) | `fceumm_libretro.so` | [tzubertowski/libretro-fceumm](https://github.com/tzubertowski/libretro-fceumm) |
 | `nesq`, `NES` | NES (fast) | `quicknes_libretro.so` | [libretro/QuickNES_Core](https://github.com/libretro/QuickNES_Core) |
 | `nest` | NES (accurate) | `nestopia_libretro.so` | [libretro/nestopia](https://github.com/libretro/nestopia) |
 | `snes`, `SFC` | SNES | `snes9x2005_plus_libretro.so` | [tzubertowski/snes9x2005](https://github.com/tzubertowski/snes9x2005) |
@@ -31,6 +32,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | Folder | System | Core .so | Source |
 |--------|--------|----------|--------|
 | `sega`, `MD`, `SMS` | Mega Drive / Master System | `picodrive_libretro.so` | [libretro/picodrive](https://github.com/libretro/picodrive) |
+| `32x` | Sega 32X (may run slow) | `picodrive_libretro.so` | [libretro/picodrive](https://github.com/libretro/picodrive) |
 | `gpgx` | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
 | `segacd` | Sega CD / Mega CD (needs BIOS) | `genesis_plus_gx_libretro.so` | [libretro/Genesis-Plus-GX](https://github.com/libretro/Genesis-Plus-GX) |
 | `gg`, `GG` | Game Gear | `gearsystem_libretro.so` | [drhelius/Gearsystem](https://github.com/drhelius/Gearsystem) |

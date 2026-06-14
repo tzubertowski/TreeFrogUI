@@ -58,6 +58,7 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **FC**, **nes** | NES / Famicom | `fceumm_libretro.so` |
 | **NES**, **nesq** | NES / Famicom (fast) | `quicknes_libretro.so` |
 | **nest** | NES / Famicom (accurate) | `nestopia_libretro.so` |
+| **fds** | Famicom Disk System | `fceumm_libretro.so` |
 | **SFC**, **snes** | Super Famicom / SNES | `snes9x2005_plus_libretro.so` |
 | **snes02** | SNES (accurate / alt) | `snes9x2002_libretro.so` |
 | **GBA**, **gba** | Game Boy Advance | `gpsp_libretro.so` |
@@ -67,6 +68,7 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **gbgb** | Game Boy (Gearboy) | `gearboy_libretro.so` |
 | **gbb** | Game Boy (TGBDual) | `tgbdual_libretro.so` |
 | **MD**, **SMS**, **sega** | Mega Drive / Genesis / Master System | `picodrive_libretro.so` |
+| **32x** | Sega 32X (may run slow) | `picodrive_libretro.so` |
 | **GG**, **gg** | Game Gear | `gearsystem_libretro.so` |
 | **gpgx** | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
 | **segacd** | Sega CD / Mega CD | `genesis_plus_gx_libretro.so` |
@@ -218,6 +220,7 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | `kick.rom` (Amiga Kickstart ROM) |
 | Atari ST (castaway) | TOS ROM image |
+| Famicom Disk System (fds) | `disksys.rom` in **`cubegm/bios/`** |
 | Neo Geo (geolith / neogeo) | `neogeo.zip` BIOS in **`cubegm/bios/`** |
 | Sega CD / Mega CD (segacd) | `bios_CD_U.bin` / `bios_CD_E.bin` / `bios_CD_J.bin` (region BIOS) in **`cubegm/bios/`** |
 | PC-FX (beetle-pcfx) | `pcfx.rom` |
