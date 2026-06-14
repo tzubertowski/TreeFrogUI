@@ -175,22 +175,34 @@ Pick the folder by hardware: Street Fighter II etc. → `cps1`, Marvel vs Capcom
 
 ### DOS / PC games (pico286)
 
-`pico286` is a standalone 8086-286 PC emulator. It runs DOS games from disk images you put in `roms/pico286/`.
+`pico286` runs old DOS / PC games (the 8086 to 286 era: Prince of Persia, Digger, Oregon Trail, etc). Games go in `roms/pico286/`.
 
-**One-time setup - provide FreeDOS:** download the **FreeDOS 1.4 "Floppy Edition"** from [freedos.org/download](https://www.freedos.org/download/), take **`144m/x86BOOT.img`** from the zip, and drop it (unchanged) into **`cubegm/bios/x86BOOT.img`**.
+**Step 1 (do this once): give it FreeDOS.**
+A ready-made FreeDOS file already ships with TreeFrogUI at `cubegm/bios/x86BOOT.img`, so you usually do nothing. If it is missing: download the **FreeDOS 1.4 "Floppy Edition"** from [freedos.org/download](https://www.freedos.org/download/), open the zip, take the file **`144m/x86BOOT.img`**, and copy it to **`cubegm/bios/x86BOOT.img`** on the card. (FreeDOS is the little operating system the games run on top of. You only set this up once.)
 
-> A pre-configured `x86BOOT.img` (language menu removed, auto-run enabled) ships with TreeFrogUI. If you instead use the stock one straight from FreeDOS, it still boots but stops at the language menu / DOS prompt - use the on-screen keyboard to continue.
+**Step 2: add a game. The easy way (no tools, works on any computer):**
+1. Get the game as **floppy disk images** (files ending in `.img`).
+2. Make a folder for it, like `roms/pico286/prince/`.
+3. Copy the `.img` files into that folder.
+4. Launch it from the menu. It boots FreeDOS and starts the game by itself.
 
-**How it boots:** when `cubegm/bios/x86BOOT.img` is present, launching any game image boots FreeDOS and mounts your game as a data drive (a **floppy-sized image → B:**, a **larger image → C:**), then auto-runs `RUN.BAT` (or the first `.EXE`/`.COM`/`.BAT`) it finds on C: then B:. If `x86BOOT.img` is absent, pico286 boots your image directly (for self-booting games).
+That's it. Most DOS games come as one or a few floppy `.img` files and just work this way.
 
-**What to provide - just drop the floppies:**
-Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one. pico286 finds **all** floppies in that folder, boots FreeDOS with **disk 1 in B:**, and auto-runs the game. For multi-disk games, swap disks from the menu when the game asks for the next one.
+**Multi-disk games:** if a game asks to "insert disk 2", press **SELECT + START** for the menu, choose **Disk swap**, pick disk 2, press A. Then continue in the game.
 
-**Big / installed games (optional):** for games you'd rather install to a hard disk, build one C: image (optionally with a `RUN.BAT` holding the exact launch command):
-```
-./make_dos_img.sh <game_folder> <out.img> [size_MB]
-```
-Drop `<out.img>` in `roms/pico286/<game>/` and launch it (mounts as C:).
+**Big games that need a "hard disk" (optional, advanced):**
+Some bigger games come as loose files (an `OREGON.EXE` and friends), not floppies. For those you pack the files into one hard-disk image. Make a folder with all the game files, add a text file named `RUN.BAT` inside it containing the command to start the game (for example one line: `OREGON`), then build the image:
+
+- **Linux / macOS:** run the included script (needs `mtools` installed):
+  ```
+  ./make_dos_img.sh  <game_folder>  oregon.img  16
+  ```
+- **Windows:** the script does not run on Windows directly. Easiest options:
+  1. **WSL** (Windows Subsystem for Linux): install it, `sudo apt install mtools`, then run the same `./make_dos_img.sh` command above. Recommended.
+  2. **DOSBox** (works everywhere): `imgmake oregon.img -t hd -size 16`, then mount it and copy the game files in. See DOSBox docs for `imgmake`/`mount`.
+  3. Any tool that can **make a FAT16 disk image** and copy files into it (e.g. WinImage: New image, 16 MB, format FAT16, drag the files in, Save As `.img`).
+
+Drop the resulting `oregon.img` into `roms/pico286/oregon/` and launch it.
 
 **Controls / menu:**
 - **SELECT + START** - open the pico286 **main menu**: Resume, Keyboard, Disk swap, Mouse mode, Mouse speed, Joystick mode, CPU speed, Frame skip, Reset, Exit to menu. (D-pad navigates, A selects, Left/Right adjusts the speed/skip rows, B closes.)
