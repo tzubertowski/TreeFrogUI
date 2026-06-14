@@ -2,25 +2,31 @@
 
 # TreeFrogUI for SF3000
 
-A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modified fork of [FrogUI](https://github.com/tzubertowski/frogui).
-
-> ### ☕ [Support TreeFrogUI on ko-fi.com/proszty](https://ko-fi.com/proszty)
-> Every donation funds the **next device port** (R36SX v2.7, SF3000 V3, SF3500, SF3100, GB350, HDMI clones). Every supported device so far was bought with my own money. [**Donate here.**](https://ko-fi.com/proszty)
+A free, custom game-menu (frontend) for the SF3000 and R36SX handhelds. It replaces the stock menu and runs hundreds of retro systems.
 
 ![UI Preview on SF3000 Console](console.jpg)
 
-> [!WARNING]
-> This release supports the initial **SF3000** hardware iterations and the **R36SX** (firmware **v2.6** and **v2.7**). The build auto-detects the device at boot. Device-specific caveats are in [Device notes](#device-notes) below.
+> # ☕ Please donate — [ko-fi.com/proszty](https://ko-fi.com/proszty)
+> TreeFrogUI is free and made by one person. **Every device I support, I bought with my own money.** Donations are what let me buy the next handheld and add support for it (R36SX v2.7, SF3000 V3, SF3500, SF3100, GB350, HDMI clones, and more).
+>
+> If TreeFrogUI gave you even one hour of fun, please chip in. It genuinely decides whether the next port happens.
+>
+> ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
 
-📦 **[Installation Guide](install.md)** - Start here to install TreeFrogUI on your device
+### New here? Start with these
+- 📦 **[How to install it](install.md)** — start here, step by step
+- 🕹️ **[How to add games + which folder](#rom-folder-setup)** — where to put your ROMs
+- 🎨 **[How to customise it](theme.md)** — themes, fonts, game art / box art / thumbnails, backgrounds
+- ⬇️ **[Download the latest version](https://github.com/tzubertowski/treefrog-ui/releases)**
+- 💬 **[Report a bug / give feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
-🎨 **[Customisation Guide](theme.md)** - Themes, fonts, game art / box art / thumbnails, and backgrounds
-
-⬇️ **[Latest Release](https://github.com/tzubertowski/treefrog-ui/releases)** - Download the latest version
-
-☕ **[Support the Project](https://ko-fi.com/proszty)** - Fund the next device port
-
-💬 **[v0.1.0 Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)** - Submit anonymous feedback or compatibility reports
+> **Words you'll see (plain English):**
+> - **SD card** = the little memory card your games live on.
+> - **"root of the SD card"** = the **top level** of the card, **not inside any folder**. When you open the card on your PC and see folders like `cubegm`, `roms`, `frogui`, that first screen **is** the root.
+> - **folder** = a directory you make on the card (e.g. `roms/GBA`). The folder **name** decides which system it runs.
+> - **ROM** = a game file.
+> - **BIOS** = an extra system file some consoles need to run (you supply it; see [BIOS files](#bios-files-required)).
+> - **keep zips zipped** = for arcade games, do **not** unzip the `.zip`. Drop it in as-is.
 
 ---
 
@@ -51,7 +57,13 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 ---
 ## ROM folder setup
 
-Create subfolders inside the `roms/` directory on the root of your SD card matching these names (e.g., `roms/GBA`, `roms/FC`). TreeFrogUI automatically detects the correct emulator based on the folder name. For built-in cores, see the [picoarch submodules/cores](https://github.com/700zx1/picoarch). Below is the full folder-to-core mapping table:
+**How to add games:**
+1. On your PC, open the SD card. Find the **`roms`** folder (it's at the root, the top level of the card).
+2. Inside `roms`, make a folder named for the system you want, exactly as in the table below. Example: for Game Boy Advance games, make `roms/GBA`.
+3. Copy your game files into that folder.
+4. Put the card back in, launch TreeFrogUI, and the system shows up.
+
+The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, `FC` runs NES, etc). Some systems accept a few different names, all listed below.
 
 | Folder Name(s) | Target Console / System | Core Shared Library (`.so`) |
 |---|---|---|
