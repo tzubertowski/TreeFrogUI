@@ -151,8 +151,8 @@ Arcade games are `.zip` files of a romset. **Keep them zipped** — the core rea
 > the `cps1`/`cps2`/`neogeo` folders need a **FB Alpha 2012** romset, and `m2k`
 > needs a **MAME 0.37b5** romset. A zip from a different MAME/FBNeo version will
 > **fail to load** even if the game name matches — this is the #1 cause of arcade
-> ROMs not working. Neo Geo games also need the **`neogeo.zip`** BIOS in the same
-> folder.
+> ROMs not working. Neo Geo games also need the **`neogeo.zip`** BIOS placed in
+> **`cubegm/bios/`** (the system folder), **not** the rom folder.
 
 Pick the folder by hardware: Street Fighter II etc. → `cps1`, Marvel vs Capcom etc.
 → `cps2`, Metal Slug/KOF etc. → `neogeo`. For Neo Geo you can also use the dedicated
@@ -218,8 +218,8 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | `kick.rom` (Amiga Kickstart ROM) |
 | Atari ST (castaway) | TOS ROM image |
-| Neo Geo (geolith / neogeo) | Neo Geo BIOS (`neogeo.zip` for the FBA `neogeo` folder) |
-| Sega CD / Mega CD (segacd) | `bios_CD_U.bin` / `bios_CD_E.bin` / `bios_CD_J.bin` (region BIOS) in the genesis_plus_gx system folder |
+| Neo Geo (geolith / neogeo) | `neogeo.zip` BIOS in **`cubegm/bios/`** |
+| Sega CD / Mega CD (segacd) | `bios_CD_U.bin` / `bios_CD_E.bin` / `bios_CD_J.bin` (region BIOS) in **`cubegm/bios/`** |
 | PC-FX (beetle-pcfx) | `pcfx.rom` |
 | PC-88 (quasi88) | NEC PC-88 BIOS files |
 
