@@ -235,13 +235,17 @@ See the [Customisation Guide](theme.md) for exact sizes, naming, theme list, and
 
 ## Shortcuts
 
-While playing a game, use the following button combinations:
+While playing a game, **SELECT** is the function key (like the MENU button on other handhelds). Hotkeys follow the OnionOS layout:
 
-- **`SELECT + START`** - Opens the in-game picoarch menu (for all cores *except* PCSX4ALL).
-- **`SELECT + L`** - Opens the emulator menu (for PCSX4ALL *only*) or loads a state (slot 0, default) for other cores.
-- **`SELECT + R`** - Saves a state (slot 0, default) for all cores *except* PCSX4ALL.
-- **`SELECT + Y`** - Cycles fast-forward: **off → 2× → 3× → off**. Audio mutes while fast-forwarding.
-- **`SELECT + B`** - Hold to rewind.
+- **`SELECT + START`** - open the in-game menu.
+- **`SELECT + R2`** - save state.
+- **`SELECT + L2`** - load state.
+- **`SELECT + R1`** - fast-forward: off, 2x, 3x, off (audio mutes). Off by default, turn it on per core in the menu (Audio and video).
+- **`SELECT + B`** - hold to rewind. Off by default, turn it on per core in the menu (it uses RAM and slows the game).
+
+> Fast-forward and rewind are now **per-core toggles** (menu, Audio and video). They stay off until you enable them, so cores that don't need them keep full RAM and speed.
+
+PCSX4ALL (PS1) is a standalone emulator with its own menu and hotkeys.
 
 ---
 
