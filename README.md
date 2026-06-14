@@ -14,7 +14,7 @@ A custom minimal Emulation Frontend for Libretro/Retroarch cores, a heavily modi
 
 📦 **[Installation Guide](install.md)** - Start here to install TreeFrogUI on your device
 
-🎨 **[Theming Guide](theme.md)** - Learn how to customize themes, backgrounds, and fonts
+🎨 **[Customisation Guide](theme.md)** - Themes, fonts, game art / box art / thumbnails, and backgrounds
 
 ⬇️ **[Latest Release](https://github.com/tzubertowski/treefrog-ui/releases)** - Download the latest version
 
@@ -189,11 +189,35 @@ Drop `<out.img>` in `roms/pico286/<game>/` and launch it (mounts as C:).
 
 ---
 
-## Theming
+## Customisation (themes, fonts, game art / box art / thumbnails, backgrounds)
 
-TreeFrogUI supports selectable visual color themes, custom pixel fonts, and per-folder background image loading from the SD card.
+Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide](theme.md)**. The quick version:
 
-📦 **[Theming Guide](theme.md)** - Details on customizing colors, background images, fonts, and editing settings
+**Theme (colors)** — in TreeFrogUI: Settings → Theme, press Left/Right. 30 built-in color themes. (The in-game emulator menu picks up the same theme colors automatically.)
+
+**Font** — Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it.
+
+**Game art / box art / cover / thumbnail** (the picture shown for each game) — put the image in a hidden `.res/` folder next to the ROM, named after the ROM with a `.rgb565` extension:
+```
+roms/GBA/Advance Wars.gba
+roms/GBA/.res/Advance Wars.rgb565    ← the box art
+```
+Convert any cover image with:
+```
+ffmpeg -i cover.png -vf scale=160:160 -f rawvideo -pix_fmt rgb565le "Advance Wars.rgb565"
+```
+(Rule: `<rom folder>/.res/<rom name without extension>.rgb565`.)
+
+**Background image** (per system / screen) — drop a `854×480` `.png`/`.jpg`/`.bmp` in **`frogui/`**, named after the screen or folder:
+```
+frogui/main.png          ← main systems list
+frogui/recents.png       ← recent games
+frogui/favourites.png    ← favorites
+frogui/FC.png            ← the FC (NES) folder (name must match the roms folder)
+```
+Use dark/muted images so menu text stays readable.
+
+See the [Customisation Guide](theme.md) for exact sizes, naming, theme list, and fonts.
 
 ---
 
