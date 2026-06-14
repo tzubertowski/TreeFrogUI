@@ -6,17 +6,17 @@ A free, custom game-menu (frontend) for the SF3000 and R36SX handhelds. It repla
 
 ![UI Preview on SF3000 Console](console.jpg)
 
-> # ☕ Please donate — [ko-fi.com/proszty](https://ko-fi.com/proszty)
-> TreeFrogUI is free and made by one person. **Every device I support, I bought with my own money.** Donations are what let me buy the next handheld and add support for it (R36SX v2.7, SF3000 V3, SF3500, SF3100, GB350, HDMI clones, and more).
+> # ☕ Consider donating to extend device support: [ko-fi.com/proszty](https://ko-fi.com/proszty)
+> TreeFrogUI is free and made by one person. Every device I support, I bought with my own money. Donations are what let me buy the next handheld and add support for it (R36SX v2.7, SF3000 V3, SF3500, SF3100, GB350, HDMI clones, and more).
 >
-> If TreeFrogUI gave you even one hour of fun, please chip in. It genuinely decides whether the next port happens.
+> If TreeFrogUI gave you some fun, please consider chipping in. It genuinely decides whether the next port happens.
 >
 > ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
 
 ### New here? Start with these
-- 📦 **[How to install it](install.md)** — start here, step by step
-- 🕹️ **[How to add games + which folder](#rom-folder-setup)** — where to put your ROMs
-- 🎨 **[How to customise it](theme.md)** — themes, fonts, game art / box art / thumbnails, backgrounds
+- 📦 **[How to install it](install.md)** - start here, step by step
+- 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
+- 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
 - ⬇️ **[Download the latest version](https://github.com/tzubertowski/treefrog-ui/releases)**
 - 💬 **[Report a bug / give feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
@@ -113,7 +113,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **amstradb** | Amstrad CPC (CPC+) | `cap32_libretro.so` |
 | **thom** | Thomson MO/TO | `theodore_libretro.so` |
 | **xmil** | Sharp X68000 | `x68k_libretro.so` |
-| **pico286** | DOS / PC (8086–286, standalone) | `pico286` + `freedos.img` (see below) |
+| **pico286** | DOS / PC (8086-286, standalone) | `pico286` + `freedos.img` (see below) |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **prboom** | Doom / Heretic | `prboom_libretro.so` |
 | **wolf3d** | Wolfenstein 3D | `ecwolf_libretro.so` |
@@ -123,7 +123,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **xrick** | Rick Dangerous | `xrick_libretro.so` |
 | **jnb** | Jump 'n Bump | `jumpnbump_libretro.so` |
 | **gw** | Game & Watch | `gw_libretro.so` |
-| **pico8** | PICO-8 (fake08) — also accepts legacy `fake08` folder | `fake08_libretro.so` |
+| **pico8** | PICO-8 (fake08) - also accepts legacy `fake08` folder | `fake08_libretro.so` |
 | **retro8** | PICO-8 (retro8) | `retro8_libretro.so` |
 | **lowres-nx** | LowRes NX | `lowresnx_libretro.so` |
 | **tic80** | TIC-80 fantasy console | `tic80_libretro.so` |
@@ -136,8 +136,8 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **fcf** | Fairchild Channel F | `freechaf_libretro.so` |
 | **cdg** | CD+G Karaoke | `pocketcdg_libretro.so` |
 | **chip8** | CHIP-8 | `jaxe_libretro.so` |
-| **arduboy** | Arduboy (Ardens — fast) | `ardens_libretro.so` |
-| **arduous** | Arduboy (arduous/simavr — cycle-accurate, slower) | `arduous_libretro.so` |
+| **arduboy** | Arduboy (Ardens - fast) | `ardens_libretro.so` |
+| **arduous** | Arduboy (arduous/simavr - cycle-accurate, slower) | `arduous_libretro.so` |
 | **vec** | Vectrex | `vecx_libretro.so` |
 | **o2em** | Odyssey² / Videopac | `o2em_libretro.so` |
 | **gme** | Game Music Emu | `gme_libretro.so` |
@@ -148,11 +148,11 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 
 **PICO-8 (fake08):** place carts in `roms/pico8/` (the legacy `roms/fake08/` folder still works). Both `.p8` (text source) and `.p8.png` (cart image) formats are supported.
 
-**Arduboy:** the `arduboy` folder uses the **Ardens** core (a fast custom AVR emulator) and accepts both `.hex` and `.arduboy` files. The `arduous` folder runs the older simavr-based **arduous** core (cycle-accurate but much slower; `.hex` only) — use it only if a game misbehaves under Ardens.
+**Arduboy:** the `arduboy` folder uses the **Ardens** core (a fast custom AVR emulator) and accepts both `.hex` and `.arduboy` files. The `arduous` folder runs the older simavr-based **arduous** core (cycle-accurate but much slower; `.hex` only) - use it only if a game misbehaves under Ardens.
 
 ### Arcade (MAME / FB Alpha / Neo Geo)
 
-Arcade games are `.zip` files of a romset. **Keep them zipped** — the core reads the zip directly, do not extract.
+Arcade games are `.zip` files of a romset. **Keep them zipped** - the core reads the zip directly, do not extract.
 
 | Folder | Core | Romset it needs |
 |---|---|---|
@@ -165,7 +165,7 @@ Arcade games are `.zip` files of a romset. **Keep them zipped** — the core rea
 > **Romsets are version-locked.** Each core only loads ROMs from the matching set:
 > the `cps1`/`cps2`/`neogeo` folders need a **FB Alpha 2012** romset, and `m2k`
 > needs a **MAME 0.37b5** romset. A zip from a different MAME/FBNeo version will
-> **fail to load** even if the game name matches — this is the #1 cause of arcade
+> **fail to load** even if the game name matches - this is the #1 cause of arcade
 > ROMs not working. Neo Geo games also need the **`neogeo.zip`** BIOS placed in
 > **`cubegm/bios/`** (the system folder), **not** the rom folder.
 
@@ -175,15 +175,15 @@ Pick the folder by hardware: Street Fighter II etc. → `cps1`, Marvel vs Capcom
 
 ### DOS / PC games (pico286)
 
-`pico286` is a standalone 8086–286 PC emulator. It runs DOS games from disk images you put in `roms/pico286/`.
+`pico286` is a standalone 8086-286 PC emulator. It runs DOS games from disk images you put in `roms/pico286/`.
 
-**One-time setup — provide FreeDOS:** download the **FreeDOS 1.4 "Floppy Edition"** from [freedos.org/download](https://www.freedos.org/download/), take **`144m/x86BOOT.img`** from the zip, and drop it (unchanged) into **`cubegm/bios/x86BOOT.img`**.
+**One-time setup - provide FreeDOS:** download the **FreeDOS 1.4 "Floppy Edition"** from [freedos.org/download](https://www.freedos.org/download/), take **`144m/x86BOOT.img`** from the zip, and drop it (unchanged) into **`cubegm/bios/x86BOOT.img`**.
 
-> A pre-configured `x86BOOT.img` (language menu removed, auto-run enabled) ships with TreeFrogUI. If you instead use the stock one straight from FreeDOS, it still boots but stops at the language menu / DOS prompt — use the on-screen keyboard to continue.
+> A pre-configured `x86BOOT.img` (language menu removed, auto-run enabled) ships with TreeFrogUI. If you instead use the stock one straight from FreeDOS, it still boots but stops at the language menu / DOS prompt - use the on-screen keyboard to continue.
 
 **How it boots:** when `cubegm/bios/x86BOOT.img` is present, launching any game image boots FreeDOS and mounts your game as a data drive (a **floppy-sized image → B:**, a **larger image → C:**), then auto-runs `RUN.BAT` (or the first `.EXE`/`.COM`/`.BAT`) it finds on C: then B:. If `x86BOOT.img` is absent, pico286 boots your image directly (for self-booting games).
 
-**What to provide — just drop the floppies:**
+**What to provide - just drop the floppies:**
 Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one. pico286 finds **all** floppies in that folder, boots FreeDOS with **disk 1 in B:**, and auto-runs the game. For multi-disk games, swap disks from the menu when the game asks for the next one.
 
 **Big / installed games (optional):** for games you'd rather install to a hard disk, build one C: image (optionally with a `RUN.BAT` holding the exact launch command):
@@ -193,9 +193,9 @@ Put the game's floppy images (`.img`) into `roms/pico286/<game>/` and launch one
 Drop `<out.img>` in `roms/pico286/<game>/` and launch it (mounts as C:).
 
 **Controls / menu:**
-- **SELECT + START** — open the pico286 **main menu**: Resume, Keyboard, Disk swap, Mouse mode, Mouse speed, Joystick mode, CPU speed, Frame skip, Reset, Exit to menu. (D-pad navigates, A selects, Left/Right adjusts the speed/skip rows, B closes.)
+- **SELECT + START** - open the pico286 **main menu**: Resume, Keyboard, Disk swap, Mouse mode, Mouse speed, Joystick mode, CPU speed, Frame skip, Reset, Exit to menu. (D-pad navigates, A selects, Left/Right adjusts the speed/skip rows, B closes.)
 - **Joystick mode** (menu toggle): D-pad → game-port axes, A/B → joystick buttons 1/2.
-- **L + R** — quick on-screen keyboard (D-pad moves, A presses, B closes) for typing DOS commands.
+- **L + R** - quick on-screen keyboard (D-pad moves, A presses, B closes) for typing DOS commands.
 - **Mouse mode** (toggle in the menu): D-pad moves the cursor, A = left click, B = right click. Needs a mouse driver, which the bundled FreeDOS loads automatically (CTMOUSE).
 - In-game buttons: A=Enter, B=Esc, X=Space, Y=Ctrl, L=Shift, R=Alt.
 
@@ -205,11 +205,11 @@ Drop `<out.img>` in `roms/pico286/<game>/` and launch it (mounts as C:).
 
 Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide](theme.md)**. The quick version:
 
-**Theme (colors)** — in TreeFrogUI: Settings → Theme, press Left/Right. 30 built-in color themes. (The in-game emulator menu picks up the same theme colors automatically.)
+**Theme (colors)** - in TreeFrogUI: Settings → Theme, press Left/Right. 30 built-in color themes. (The in-game emulator menu picks up the same theme colors automatically.)
 
-**Font** — Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it.
+**Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it.
 
-**Game art / box art / cover / thumbnail** (the picture shown for each game) — put the image in a hidden `.res/` folder next to the ROM, named after the ROM with a `.rgb565` extension:
+**Game art / box art / cover / thumbnail** (the picture shown for each game) - put the image in a hidden `.res/` folder next to the ROM, named after the ROM with a `.rgb565` extension:
 ```
 roms/GBA/Advance Wars.gba
 roms/GBA/.res/Advance Wars.rgb565    ← the box art
@@ -220,7 +220,7 @@ ffmpeg -i cover.png -vf scale=160:160 -f rawvideo -pix_fmt rgb565le "Advance War
 ```
 (Rule: `<rom folder>/.res/<rom name without extension>.rgb565`.)
 
-**Background image** (per system / screen) — drop a `854×480` `.png`/`.jpg`/`.bmp` in **`frogui/`**, named after the screen or folder:
+**Background image** (per system / screen) - drop a `854×480` `.png`/`.jpg`/`.bmp` in **`frogui/`**, named after the screen or folder:
 ```
 frogui/main.png          ← main systems list
 frogui/recents.png       ← recent games
@@ -249,11 +249,11 @@ While playing a game, use the following button combinations:
 
 Some cores need BIOS/firmware files. Place them in the system folder the core expects (check individual core docs), typically alongside the ROMs or in a `bios/` subfolder.
 
-> **PlayStation 1 — use a real BIOS.** Drop `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/`. PCSX4ALL falls back to an HLE BIOS when it's missing, but the HLE path causes **graphical glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest Moon). With the real BIOS, saving and compatibility work correctly.
+> **PlayStation 1 - use a real BIOS.** Drop `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/`. PCSX4ALL falls back to an HLE BIOS when it's missing, but the HLE path causes **graphical glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest Moon). With the real BIOS, saving and compatibility work correctly.
 
 | System | File needed |
 |--------|-------------|
-| PlayStation 1 (PCSX4ALL) | `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (**strongly recommended** — without it: graphics/perf/save issues) |
+| PlayStation 1 (PCSX4ALL) | `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (**strongly recommended** - without it: graphics/perf/save issues) |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | `kick.rom` (Amiga Kickstart ROM) |
 | Atari ST (castaway) | TOS ROM image |
