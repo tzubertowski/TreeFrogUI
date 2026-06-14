@@ -242,21 +242,31 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 ### Steps
 
 ```sh
-git clone git@github.com:tzubertowski/treefrog-ui.git
-cd treefrog-ui
+# Workspace root holds all the source repos as siblings
+mkdir -p ~/sf3000-work && cd ~/sf3000-work
 
-# Clone FrogUI source (submodule)
-git submodule update --init frogui
+# Main repo (build scripts, patches, staging, docs)
+git clone git@github.com:tzubertowski/treefrog-ui.git sf3000_treefrogui
 
-# Clone all emulator core sources
-./clone_cores.sh
+# Frontend + standalone emulator sources (separate repos, built in place)
+git clone -b r36sx git@github.com:tzubertowski/FrogUI.git FrogUI
+git clone -b r36sx git@github.com:tzubertowski/TreeFrogUI_picoarch.git picoarch
+git clone        git@github.com:tzubertowski/TreeFrogUI_pcsx4all.git pcsx4all
+git -C picoarch submodule update --init libretro-common   # libpicofe is vendored
 
-# Build everything
-./build_all.sh
+cd sf3000_treefrogui
+./clone_cores.sh      # clones all libretro core upstreams into cores/
+./build_all.sh        # applies patches/, builds cores + pico286 + TIC-80 (needs cmake)
 
-# Results in build/*.so - copy to SD card
+# .so cores land in build/ ; pico286/pcsx4all binaries go to staging cubegm/
 cp build/*.so /mnt/sdcard/cubegm/cores/
 ```
+
+Repos: **treefrog-ui** (this), **FrogUI** (launcher core), **TreeFrogUI_picoarch**
+(libretro frontend, our fork), **TreeFrogUI_pcsx4all** (standalone PS1). pico286
+is reconstructed from `patches/pico286-sf3000.patch` onto the upstream `xrip/pico-286`
+clone, so it needs no separate repo. BIOS, romsets, and the FreeDOS `x86BOOT.img`
+are user-supplied (see the BIOS section).
 
 ### Build FrogUI only
 
