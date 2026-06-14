@@ -31,7 +31,8 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | Folder | System | Core .so | Source |
 |--------|--------|----------|--------|
 | `sega`, `MD`, `SMS` | Mega Drive / Master System | `picodrive_libretro.so` | [libretro/picodrive](https://github.com/libretro/picodrive) |
-| `gpgx` | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` | [libretro/Genesis-Plus-GX](https://github.com/libretro/Genesis-Plus-GX) |
+| `gpgx` | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
+| `segacd` | Sega CD / Mega CD (needs BIOS) | `genesis_plus_gx_libretro.so` | [libretro/Genesis-Plus-GX](https://github.com/libretro/Genesis-Plus-GX) |
 | `gg`, `GG` | Game Gear | `gearsystem_libretro.so` | [drhelius/Gearsystem](https://github.com/drhelius/Gearsystem) |
 
 ---

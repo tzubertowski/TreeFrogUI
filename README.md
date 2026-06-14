@@ -69,6 +69,7 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **MD**, **SMS**, **sega** | Mega Drive / Genesis / Master System | `picodrive_libretro.so` |
 | **GG**, **gg** | Game Gear | `gearsystem_libretro.so` |
 | **gpgx** | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
+| **segacd** | Sega CD / Mega CD | `genesis_plus_gx_libretro.so` |
 | **PS**, **ps1**, **psx** | PlayStation | `pcsx_rearmed_libretro.so` |
 | **pce** | PC Engine / TurboGrafx-16 | `mednafen_pce_fast_libretro.so` |
 | **pcesgx** | PC Engine SuperGrafx | `mednafen_supergrafx_libretro.so` |
@@ -217,7 +218,8 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | `kick.rom` (Amiga Kickstart ROM) |
 | Atari ST (castaway) | TOS ROM image |
-| Neo Geo (geolith) | Neo Geo BIOS |
+| Neo Geo (geolith / neogeo) | Neo Geo BIOS (`neogeo.zip` for the FBA `neogeo` folder) |
+| Sega CD / Mega CD (segacd) | `bios_CD_U.bin` / `bios_CD_E.bin` / `bios_CD_J.bin` (region BIOS) in the genesis_plus_gx system folder |
 | PC-FX (beetle-pcfx) | `pcfx.rom` |
 | PC-88 (quasi88) | NEC PC-88 BIOS files |
 
