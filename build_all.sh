@@ -80,8 +80,21 @@ cat > "$WRAP/mips-g++-O3" <<EOF
 #!/bin/bash
 exec ${MIPS}g++ $SF3000_FLAGS "\$@" -O3
 EOF
+# fba wrapper — FBA2012 family needs -fsigned-char (MIPS chars are unsigned by
+# default; FBA's old code assumes signed) and -fno-strict-aliasing (its CPU cores
+# type-pun). Both appended AFTER "$@" so the core Makefile's trailing -O2 can't
+# re-enable strict aliasing. Without these the cores segfault at game load.
+FBA_FIX="-fno-strict-aliasing -fsigned-char"
+cat > "$WRAP/fba-gcc" <<EOF
+#!/bin/bash
+exec ${MIPS}gcc $SF3000_FLAGS "\$@" $FBA_FIX
+EOF
+cat > "$WRAP/fba-g++" <<EOF
+#!/bin/bash
+exec ${MIPS}g++ $SF3000_FLAGS "\$@" $FBA_FIX
+EOF
 chmod +x "$WRAP"/mips-gcc "$WRAP"/mips-g++ "$WRAP"/gpsp-gcc "$WRAP"/gpsp-g++ \
-         "$WRAP"/mips-gcc-O3 "$WRAP"/mips-g++-O3
+         "$WRAP"/mips-gcc-O3 "$WRAP"/mips-g++-O3 "$WRAP"/fba-gcc "$WRAP"/fba-g++
 
 AR="${MIPS}ar"
 RANLIB="${MIPS}ranlib"
@@ -94,12 +107,14 @@ LDFLAGS_SC="-shared -Wl,--no-undefined -mips32r2 -mhard-float -mfp32 -EL --sysro
 
 _b() {
     local name="$1" dir="$2" mk="${3:-}" extra="${4:-}"
+    # CC_WRAP lets a caller swap the compiler wrapper (e.g. fba-g++); default mips.
+    local cw="${CC_WRAP:-mips}"
     echo "-- $name make --"
     local full="$CORES/$dir"
     make -C "$full" $mk clean 2>/dev/null || true
     make -C "$full" $mk platform=unix \
-        CC="$WRAP/mips-gcc" CXX="$WRAP/mips-g++" \
-        AR="$AR" RANLIB="$RANLIB" LD="$WRAP/mips-g++" \
+        CC="$WRAP/$cw-gcc" CXX="$WRAP/$cw-g++" \
+        AR="$AR" RANLIB="$RANLIB" LD="$WRAP/$cw-g++" \
         LDFLAGS="$LDFLAGS" $extra -j$(nproc) 2>&1
     local so
     for so in \
@@ -225,9 +240,10 @@ echo "-- mame2000 make --"
 _b mame2000          mame2000                  ""
 
 echo "-- FB Alpha 2012 arcade (CPS-1 / CPS-2 / Neo Geo) make --"
-_b fbalpha2012_cps1   fbalpha2012_cps1   ""
-_b fbalpha2012_cps2   fbalpha2012_cps2   ""
-_b fbalpha2012_neogeo fbalpha2012_neogeo ""
+# CC_WRAP=fba → -fsigned-char + -fno-strict-aliasing (else segfault at game load)
+CC_WRAP=fba _b fbalpha2012_cps1   fbalpha2012_cps1   ""
+CC_WRAP=fba _b fbalpha2012_cps2   fbalpha2012_cps2   ""
+CC_WRAP=fba _b fbalpha2012_neogeo fbalpha2012_neogeo ""
 
 echo "-- stella2014 make --"
 _b stella2014        stella2014                "" "LDFLAGS=$LDFLAGS_S"
