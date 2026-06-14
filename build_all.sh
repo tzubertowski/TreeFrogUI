@@ -187,6 +187,40 @@ else
     echo "WARNING: cores/pico-286/port_sf3000 missing (run clone_cores.sh + _apply_patch)"
 fi
 
+echo "-- TIC-80 fantasy console (cmake) make --"
+# CMake cross-build. Needs cmake (set $CMAKE, default 'cmake') + the vendor
+# submodules. Output: tic80_libretro.so.
+if [ -d "$CORES/TIC-80" ]; then
+    CMAKE="${CMAKE:-cmake}"
+    if command -v "$CMAKE" >/dev/null; then
+        git -C "$CORES/TIC-80" submodule update --init --depth 1 --recursive 2>&1 | tail -1
+        cat > /tmp/tic80_mips.cmake <<EOF
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR mips)
+set(CMAKE_C_COMPILER   ${MIPS}gcc)
+set(CMAKE_CXX_COMPILER ${MIPS}g++)
+set(CMAKE_SYSROOT ${SYSROOT})
+set(FL "-mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -mlong-calls -EL")
+set(CMAKE_C_FLAGS_INIT   "\${FL}")
+set(CMAKE_CXX_FLAGS_INIT "\${FL}")
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+EOF
+        rm -rf /tmp/tic80_build
+        "$CMAKE" -S "$CORES/TIC-80" -B /tmp/tic80_build \
+            -DCMAKE_TOOLCHAIN_FILE=/tmp/tic80_mips.cmake -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_LIBRETRO=ON -DBUILD_SDL=OFF -DBUILD_PLAYER=OFF -DBUILD_EDITORS=OFF \
+            -DBUILD_PRO=OFF -DBUILD_WITH_ALL=OFF >/dev/null 2>&1
+        "$CMAKE" --build /tmp/tic80_build --target tic80_libretro -j$(nproc) 2>&1 | tail -1
+        [ -f /tmp/tic80_build/bin/tic80_libretro.so ] && \
+            cp /tmp/tic80_build/bin/tic80_libretro.so "$OUT/tic80_libretro.so" && \
+            "$STRIP" "$OUT/tic80_libretro.so" && echo "→ $OUT/tic80_libretro.so"
+    else
+        echo "WARNING: cmake not found ($CMAKE); skipping TIC-80"
+    fi
+fi
+
 echo "-- mame2000 make --"
 _b mame2000          mame2000                  ""
 

@@ -97,6 +97,9 @@ clone libretro-atari800 https://github.com/libretro/libretro-atari800
 # ── pico-286 standalone DOS/PC emulator (8086-286) ──────────────────────────
 clone pico-286         https://github.com/xrip/pico-286
 
+# ── TIC-80 fantasy console (CMake build; submodules fetched in build_all.sh) ─
+clone TIC-80           https://github.com/nesbox/TIC-80
+
 # ── angree SF2000 ports (Amiga/Atari ST) ────────────────────────────────────
 clone sf2000-uae-amiga-emulator          https://github.com/angree/sf2000-uae-amiga-emulator
 clone sf2000-atarist-emulator            https://github.com/angree/sf2000-atarist-emulator

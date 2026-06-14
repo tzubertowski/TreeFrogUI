@@ -129,6 +129,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `ps1r` | PlayStation (lightrec JIT) | `pcsx_rearmed_libretro.so` | [libretro/pcsx_rearmed](https://github.com/libretro/pcsx_rearmed) + `patches/pcsx_rearmed-sf3000-lightrec.patch` |
 | `retro8` | PICO-8 compat | `retro8_libretro.so` | [libretro/retro8](https://github.com/libretro/retro8) |
 | `lowres-nx` | LowRes NX | `lowresnx_libretro.so` | [timoinutilis/lowres-nx](https://github.com/timoinutilis/lowres-nx) |
+| `tic80` | TIC-80 fantasy console (.tic carts) | `tic80_libretro.so` | [nesbox/TIC-80](https://github.com/nesbox/TIC-80) |
 | `arduboy` | Arduboy (default) | `ardens_libretro.so` | [tiberiusbrown/Ardens](https://github.com/tiberiusbrown/Ardens) + `patches/ardens-sf3000.patch` - fast custom AVR core, C++14 libretro target, built directly (no cmake) |
 | `arduous` | Arduboy (alt, cycle-accurate) | `arduous_libretro.so` | [libretro/arduous](https://github.com/libretro/arduous) - simavr submodule, built directly (no cmake); much slower than Ardens |
 | `chip8` | CHIP-8 | ❌ `jaxe_libretro.so` | [libretro/jaxe](https://github.com/libretro/jaxe) |

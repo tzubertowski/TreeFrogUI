@@ -114,6 +114,7 @@ Create subfolders inside the `roms/` directory on the root of your SD card match
 | **pico8** | PICO-8 (fake08) — also accepts legacy `fake08` folder | `fake08_libretro.so` |
 | **retro8** | PICO-8 (retro8) | `retro8_libretro.so` |
 | **lowres-nx** | LowRes NX | `lowresnx_libretro.so` |
+| **tic80** | TIC-80 fantasy console | `tic80_libretro.so` |
 | **pokem** | Pokémon Mini | `pokemini_libretro.so` |
 | **m2k** | MAME 2000 (MAME 0.37b5 romset) | `mame2000_libretro.so` |
 | **cps1** | Capcom CPS-1 arcade | `fbalpha2012_cps1_libretro.so` |
