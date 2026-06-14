@@ -235,6 +235,9 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 
 - SF3000 cross-toolchain at `~/sf3000-work/sf3000toolchain/`
 - `git`, `make`, `nproc`
+- `cmake` (only for the cmake-based cores: TIC-80; a static build from
+  [Kitware](https://github.com/Kitware/CMake/releases) works, no root needed).
+  `build_all.sh` skips those cores with a warning if cmake is absent.
 
 ### Steps
 
