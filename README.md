@@ -51,6 +51,8 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Auto-resume on boot** - Automatically boots back into the last played game or frontend view upon device boot.
 - **Clean, configurable menu** - Smooth iPhone-style background crossfades (instant selection), an optional **Hide Empty Folders** setting, and right-stick drift filtering so accidental touches don't trigger phantom presses while navigating.
 - **Rich theming options** - Custom background images, fonts, and 30 built-in color themes to fit your style.
+- **Game switcher** - Optional OnionOS-style recents carousel: big box art (or the last save-state screenshot if no art), resumes where you left off. Turn it on in Settings (Game Switcher), it replaces the recents list.
+- **Play-time stats** - Tracks how long you play each game, shown in the browser.
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
 - **Flexible display scaling** - Easily adjust display scaling modes (Zoom, Aspect Ratio, and Integer Scaling) to suit your preference.
 
