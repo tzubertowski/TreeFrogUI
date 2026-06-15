@@ -80,18 +80,24 @@ cat > "$WRAP/mips-g++-O3" <<EOF
 #!/bin/bash
 exec ${MIPS}g++ $SF3000_FLAGS "\$@" -O3
 EOF
-# fba wrapper — FBA2012 family needs -fsigned-char (MIPS chars are unsigned by
-# default; FBA's old code assumes signed) and -fno-strict-aliasing (its CPU cores
-# type-pun). Both appended AFTER "$@" so the core Makefile's trailing -O2 can't
-# re-enable strict aliasing. Without these the cores segfault at game load.
+# fba wrapper — FBA2012 family needs:
+#  -fsigned-char       MIPS chars are unsigned by default; FBA's old code assumes
+#                      signed. (Crash/wrong behaviour without it.)
+#  -fno-strict-aliasing  its CPU cores type-pun heavily.
+#  NO -mdspr2          the DSP ASE codegen makes FBA's fixed-point sound/blit emit
+#                      an instruction this device faults on (SIGILL a few frames
+#                      into a game). Drop it for FBA only; -Ofast is kept.
+# Flags appended AFTER "$@" so the core Makefile's trailing -O2 can't re-enable
+# strict aliasing.
+FBA_FLAGS="$(echo "$SF3000_FLAGS" | sed 's/-mdspr2 //')"
 FBA_FIX="-fno-strict-aliasing -fsigned-char"
 cat > "$WRAP/fba-gcc" <<EOF
 #!/bin/bash
-exec ${MIPS}gcc $SF3000_FLAGS "\$@" $FBA_FIX
+exec ${MIPS}gcc $FBA_FLAGS "\$@" $FBA_FIX
 EOF
 cat > "$WRAP/fba-g++" <<EOF
 #!/bin/bash
-exec ${MIPS}g++ $SF3000_FLAGS "\$@" $FBA_FIX
+exec ${MIPS}g++ $FBA_FLAGS "\$@" $FBA_FIX
 EOF
 chmod +x "$WRAP"/mips-gcc "$WRAP"/mips-g++ "$WRAP"/gpsp-gcc "$WRAP"/gpsp-g++ \
          "$WRAP"/mips-gcc-O3 "$WRAP"/mips-g++-O3 "$WRAP"/fba-gcc "$WRAP"/fba-g++
