@@ -1,5 +1,9 @@
 Welcome to **TreeFrogUI** (v0.1.8) for the SF3000 and R36SX handheld consoles
 
+> [!TIP]
+> **Consider donating to extend support for these devices:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
+> Every supported device was bought out of pocket. Donations go straight toward the next device to port to, and toward keeping these ones updated.
+
 > [!IMPORTANT]
 > This is an **early release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
 > 
