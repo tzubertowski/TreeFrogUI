@@ -29,6 +29,7 @@ Welcome to **TreeFrogUI** (v0.1.8) for the SF3000 and R36SX handheld consoles
 - **OnionOS-style hotkeys.** `SELECT + L2` load state, `SELECT + R2` save state, `SELECT + R1` fast-forward, `SELECT + START` menu.
 - **Per-core Fast Forward and Rewind.** Enable either one per system in the in-game menu; settings stick per core.
 - **Save states no longer freeze.** Fixed a hang when saving on some cores.
+- **No more random inputs.** Right analog-stick drift no longer fires phantom button presses while you navigate or play.
 - **PS1 buttons fixed.** Face buttons now map correctly (Cross/Circle/Square/Triangle).
 ---
 
