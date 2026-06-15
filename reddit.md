@@ -13,6 +13,8 @@ Also new:
 
 Single auto-detecting build for both SF3000 and R36SX. Free and open source.
 
+Thanks to community donations, an **SF3500 dev unit is already in the post** and should get a port soon.
+
 If you want to see it ported to more handhelds (the hardware has to be bought to port it), consider chipping in: ko-fi.com/proszty
 
 Feedback and bug reports very welcome.
