@@ -1,4 +1,4 @@
-Welcome to **TreeFrogUI** (v0.1.7) for the SF3000 and R36SX handheld consoles
+Welcome to **TreeFrogUI** (v0.1.8) for the SF3000 and R36SX handheld consoles
 
 > [!IMPORTANT]
 > This is an **early release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
@@ -8,14 +8,12 @@ Welcome to **TreeFrogUI** (v0.1.7) for the SF3000 and R36SX handheld consoles
 
 ---
 
-## What's New in v0.1.7
+## What's New in v0.1.8
 
-- **No accidental sleep (R36SX).** Short power press no longer sleeps to a black screen. Long press still powers off.
-- **PICO-8 way faster.** Rebuilt on the upstream emulator and optimised for this CPU. New **Audio off** and **Frame Skip** options. Many carts now run full speed. Folder renamed **`pico8`** (old `fake08` still works).
-- **Arduboy now uses Ardens** (much faster core). The old `arduous` core is still there: put games in an `arduous` folder.
-- **PS1 (PCSX4ALL).** L2/R2 buttons now work. New **Pixel Skip** + **Interlace** speed toggles in the menu (`SELECT + L`) for heavy games like Tekken 3. Real BIOS recommended (`scph1001.bin` in `cubegm/cores/.pcsx4all/`).
-- **All cores faster.** Retuned for the device's 74Kc CPU (DSP2 + `-O3`). Default scaling is now **Aspect**.
-- **Menu polish.** Smooth iPhone-style background fades (selection stays instant). New **Hide Empty Folders** setting. Right-stick drift no longer triggers phantom presses while navigating.
+- **Arcade games now work.** CPS-1, CPS-2 and Neo Geo run via FB Alpha 2012. Put games in `cps1`, `cps2` or `neogeo` folders. **Neo Geo needs `neogeo.zip` in the same folder as the games** (`roms/neogeo/`), not just the BIOS folder. Romsets must match FB Alpha 2012 (0.2.97.30); newer or older sets will fail to load. Heavy games like Metal Slug may need **Frameskip 1** (in-game menu, `SELECT + START`, Emulator options) to hit full speed.
+- **Game Switcher.** A new recent-games view: full-screen box art (or the last screenshot of the game) plus how long you have played it. **On by default.** Press **Left/Right** to flip between games, **A** to jump back in. Turn it off in Settings if you prefer the plain list.
+- **Per-game screenshots.** Open the in-game menu once (`SELECT + START`) and TreeFrogUI snaps the current frame as that game's art for the switcher. No box art needed.
+- **Play-time tracking.** TreeFrogUI now records how long you play each game and shows it in the Game Switcher.
 ---
 
 ## High-Level Overview
