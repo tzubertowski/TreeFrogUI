@@ -116,7 +116,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **amstradb** | Amstrad CPC (CPC+) | `cap32_libretro.so` |
 | **thom** | Thomson MO/TO | `theodore_libretro.so` |
 | **xmil** | Sharp X68000 | `x68k_libretro.so` |
-| **pico286** | DOS / PC (8086-286, standalone) | `pico286` + `freedos.img` (see below) |
+| **pico286** | DOS / PC (8086-286, standalone) | `pico286` + `x86BOOT.img` (see below) |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **prboom** | Doom / Heretic | `prboom_libretro.so` |
 | **wolf3d** | Wolfenstein 3D | `ecwolf_libretro.so` |
@@ -161,7 +161,7 @@ Arcade games are `.zip` files of a romset. **Keep them zipped** - the core reads
 |---|---|---|
 | `cps1` | FB Alpha 2012 | Capcom **CPS-1** games |
 | `cps2` | FB Alpha 2012 | Capcom **CPS-2** games |
-| `neogeo` | FB Alpha 2012 | **Neo Geo** games (also needs `neogeo.zip` BIOS in the folder) |
+| `neogeo` | FB Alpha 2012 | **Neo Geo** games (also needs `neogeo.zip` BIOS, see note below) |
 | `m2k` | MAME 2000 | misc arcade, **MAME 0.37b5** romset |
 
 > [!IMPORTANT]
@@ -169,8 +169,9 @@ Arcade games are `.zip` files of a romset. **Keep them zipped** - the core reads
 > the `cps1`/`cps2`/`neogeo` folders need a **FB Alpha 2012** romset, and `m2k`
 > needs a **MAME 0.37b5** romset. A zip from a different MAME/FBNeo version will
 > **fail to load** even if the game name matches - this is the #1 cause of arcade
-> ROMs not working. Neo Geo games also need the **`neogeo.zip`** BIOS placed in
-> **`cubegm/bios/`** (the system folder), **not** the rom folder.
+> ROMs not working. Neo Geo games also need the **`neogeo.zip`** BIOS. Put it in
+> **`roms/neogeo/`** (next to the games). Keeping a copy in **`cubegm/bios/`** too
+> does no harm if you are unsure.
 
 Pick the folder by hardware: Street Fighter II etc. → `cps1`, Marvel vs Capcom etc.
 → `cps2`, Metal Slug/KOF etc. → `neogeo`. For Neo Geo you can also use the dedicated
@@ -182,6 +183,8 @@ Pick the folder by hardware: Street Fighter II etc. → `cps1`, Marvel vs Capcom
 
 **Step 1 (do this once): give it FreeDOS.**
 A ready-made FreeDOS file already ships with TreeFrogUI at `cubegm/bios/x86BOOT.img`, so you usually do nothing. If it is missing: download the **FreeDOS 1.4 "Floppy Edition"** from [freedos.org/download](https://www.freedos.org/download/), open the zip, take the file **`144m/x86BOOT.img`**, and copy it to **`cubegm/bios/x86BOOT.img`** on the card. (FreeDOS is the little operating system the games run on top of. You only set this up once.)
+
+> The bundled boot image is **FreeDOS** + the **CuteMouse** driver, both GPLv2. Full credits, license, and source links: [freedos.org](https://www.freedos.org/) and `roms/pico286/CREDITS-FREEDOS.txt` in the release.
 
 **Step 2: add a game. The easy way (no tools, works on any computer):**
 1. Get the game as **floppy disk images** (files ending in `.img`).

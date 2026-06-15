@@ -15,7 +15,7 @@ Welcome to **TreeFrogUI** (v0.1.8) for the SF3000 and R36SX handheld consoles
 Your handheld now runs **MS-DOS PC games** and **Neo Geo arcade** games.
 
 - **MS-DOS PC (pico286).** Play classics like Prince of Persia, Oregon Trail, Doom-era DOS games, and more. Boots FreeDOS automatically, so most games just run. Built-in **on-screen keyboard**, **disk swap**, **mouse mode**, and **joystick** support. Drop games in a `pico286` folder.
-- **Neo Geo arcade.** Metal Slug, KOF, and the rest, via FB Alpha 2012. Put games in a `neogeo` folder with **`neogeo.zip` in that same folder** (`roms/neogeo/`). Romsets must match FB Alpha 2012 (0.2.97.30). Heavy games like Metal Slug may need **Frameskip 1** for full speed.
+- **Neo Geo arcade.** Metal Slug, KOF, and the rest, via FB Alpha 2012. Put games in a `neogeo` folder and the **`neogeo.zip` BIOS in `roms/neogeo/`** too (a copy in `cubegm/bios/` does no harm). Romsets must match FB Alpha 2012 (0.2.97.30). Heavy games like Metal Slug may need **Frameskip 1** for full speed.
 
 ---
 
