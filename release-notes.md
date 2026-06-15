@@ -10,10 +10,26 @@ Welcome to **TreeFrogUI** (v0.1.8) for the SF3000 and R36SX handheld consoles
 
 ## What's New in v0.1.8
 
-- **Arcade games now work.** CPS-1, CPS-2 and Neo Geo run via FB Alpha 2012. Put games in `cps1`, `cps2` or `neogeo` folders. **Neo Geo needs `neogeo.zip` in the same folder as the games** (`roms/neogeo/`), not just the BIOS folder. Romsets must match FB Alpha 2012 (0.2.97.30); newer or older sets will fail to load. Heavy games like Metal Slug may need **Frameskip 1** (in-game menu, `SELECT + START`, Emulator options) to hit full speed.
-- **Game Switcher.** A new recent-games view: full-screen box art (or the last screenshot of the game) plus how long you have played it. **On by default.** Press **Left/Right** to flip between games, **A** to jump back in. Turn it off in Settings if you prefer the plain list.
-- **Per-game screenshots.** Open the in-game menu once (`SELECT + START`) and TreeFrogUI snaps the current frame as that game's art for the switcher. No box art needed.
-- **Play-time tracking.** TreeFrogUI now records how long you play each game and shows it in the Game Switcher.
+**New systems**
+
+- **Arcade (CPS-1, CPS-2, Neo Geo).** Run via FB Alpha 2012. Use `cps1`, `cps2`, `neogeo` folders. **Neo Geo needs `neogeo.zip` in the same folder as the games** (`roms/neogeo/`). Romsets must match FB Alpha 2012 (0.2.97.30); other versions fail to load. Heavy games (Metal Slug) may need **Frameskip 1** to hit full speed.
+- **MS-DOS PC (pico286).** Play DOS games (Prince of Persia, Oregon Trail, and more). Boots FreeDOS automatically. Built-in **on-screen keyboard**, **disk swap**, **mouse mode**, and **joystick** support. Put games in a `pico286` folder.
+- **TIC-80 fantasy console.** Run `.tic` carts from a `tic80` folder.
+- **Sega CD, Sega 32X, Famicom Disk System.** New `segacd`, `32x`, `fds` folders. Sega CD needs its BIOS (`bios_CD_U/E/J.bin` in `cubegm/bios`), FDS needs `disksys.rom`.
+
+**Game library**
+
+- **Game Switcher.** New recent-games view: full-screen box art (or the game's last screenshot) plus how long you have played it. **On by default.** **Left/Right** flips games, **A** jumps back in. Toggle in Settings.
+- **Per-game screenshots.** Open the in-game menu once (`SELECT + START`) and TreeFrogUI snaps the current frame as that game's art. No box art needed.
+- **Play-time tracking.** Records time played per game, shown in the Game Switcher.
+- **Start in Recents.** Optional: boot straight into your recent games. Turn on in Settings.
+
+**Emulation quality of life**
+
+- **OnionOS-style hotkeys.** `SELECT + L2` load state, `SELECT + R2` save state, `SELECT + R1` fast-forward, `SELECT + START` menu.
+- **Per-core Fast Forward and Rewind.** Enable either one per system in the in-game menu; settings stick per core.
+- **Save states no longer freeze.** Fixed a hang when saving on some cores.
+- **PS1 buttons fixed.** Face buttons now map correctly (Cross/Circle/Square/Triangle).
 ---
 
 ## High-Level Overview
