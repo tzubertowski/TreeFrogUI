@@ -10,10 +10,18 @@ Welcome to **TreeFrogUI** (v0.1.8) for the SF3000 and R36SX handheld consoles
 
 ## What's New in v0.1.8
 
-**New systems**
+### 🕹️ The big ones: MS-DOS and Neo Geo
 
-- **Arcade (CPS-1, CPS-2, Neo Geo).** Run via FB Alpha 2012. Use `cps1`, `cps2`, `neogeo` folders. **Neo Geo needs `neogeo.zip` in the same folder as the games** (`roms/neogeo/`). Romsets must match FB Alpha 2012 (0.2.97.30); other versions fail to load. Heavy games (Metal Slug) may need **Frameskip 1** to hit full speed.
-- **MS-DOS PC (pico286).** Play DOS games (Prince of Persia, Oregon Trail, and more). Boots FreeDOS automatically. Built-in **on-screen keyboard**, **disk swap**, **mouse mode**, and **joystick** support. Put games in a `pico286` folder.
+Your handheld now runs **MS-DOS PC games** and **Neo Geo arcade** games.
+
+- **MS-DOS PC (pico286).** Play classics like Prince of Persia, Oregon Trail, Doom-era DOS games, and more. Boots FreeDOS automatically, so most games just run. Built-in **on-screen keyboard**, **disk swap**, **mouse mode**, and **joystick** support. Drop games in a `pico286` folder.
+- **Neo Geo arcade.** Metal Slug, KOF, and the rest, via FB Alpha 2012. Put games in a `neogeo` folder with **`neogeo.zip` in that same folder** (`roms/neogeo/`). Romsets must match FB Alpha 2012 (0.2.97.30). Heavy games like Metal Slug may need **Frameskip 1** for full speed.
+
+---
+
+**More new systems**
+
+- **Capcom arcade (CPS-1, CPS-2).** Street Fighter II, Marvel vs Capcom, and more. Use `cps1` / `cps2` folders. Romsets must match FB Alpha 2012 (0.2.97.30).
 - **TIC-80 fantasy console.** Run `.tic` carts from a `tic80` folder.
 - **Sega CD, Sega 32X, Famicom Disk System.** New `segacd`, `32x`, `fds` folders. Sega CD needs its BIOS (`bios_CD_U/E/J.bin` in `cubegm/bios`), FDS needs `disksys.rom`.
 
