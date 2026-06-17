@@ -251,6 +251,17 @@ CC_WRAP=fba _b fbalpha2012_cps1   fbalpha2012_cps1   ""
 CC_WRAP=fba _b fbalpha2012_cps2   fbalpha2012_cps2   ""
 CC_WRAP=fba _b fbalpha2012_neogeo fbalpha2012_neogeo ""
 
+echo "-- mame2003-plus make (modern MAME, much bigger library) --"
+# Makefile adds -shared via LDFLAGS+=; our command-line LDFLAGS would override
+# and kill it (links as exe → undefined `main`), so pass the -shared variant.
+_b mame2003_plus     mame2003-plus-libretro    "" "LDFLAGS=$LDFLAGS_S"
+
+echo "-- FBNeo make (modern CPS/NeoGeo, heavier; fba wrapper for signed-char) --"
+# Needs -lpthread (Cave CV1000 epic12 threaded blitter uses sem_*/pthread_*);
+# this sysroot's glibc keeps them in a separate libpthread. Our command-line
+# LDFLAGS overrides the Makefile's own += -lpthread, so re-add it here.
+CC_WRAP=fba _b fbneo FBNeo/src/burner/libretro  "" "LDFLAGS=$LDFLAGS_S -lpthread"
+
 echo "-- stella2014 make --"
 _b stella2014        stella2014                "" "LDFLAGS=$LDFLAGS_S"
 

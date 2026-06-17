@@ -43,6 +43,8 @@ clone mame2000         https://github.com/libretro/mame2000-libretro
 clone fbalpha2012_cps1   https://github.com/libretro/fbalpha2012_cps1
 clone fbalpha2012_cps2   https://github.com/libretro/fbalpha2012_cps2
 clone fbalpha2012_neogeo https://github.com/libretro/fbalpha2012_neogeo
+clone mame2003-plus-libretro https://github.com/libretro/mame2003-plus-libretro
+clone FBNeo            https://github.com/libretro/FBNeo
 clone stella2014       https://github.com/libretro/stella2014-libretro
 clone prosystem        https://github.com/libretro/prosystem-libretro
 clone nestopia         https://github.com/libretro/nestopia
