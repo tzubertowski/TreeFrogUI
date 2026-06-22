@@ -2,6 +2,12 @@
 
 This guide covers the installation of **TreeFrogUI** on the **Datafrog SF3000** and **R36SX** (firmware **v2.6** / **v2.7**) handhelds. The build auto-detects the device at boot.
 
+> [!NOTE]
+> **R36SX clones (R36HD, and likely SF3000HD — untested, worth checking):** these
+> use the same software stack but ship **different kernels / device trees** per HW
+> revision. Don't boot them on the generic v2.7 kernel — follow the
+> [R36SX clones](#r36sx-clones-r36hd-etc) section below instead.
+
 ---
 
 ## Before you start
@@ -28,6 +34,41 @@ This guide covers the installation of **TreeFrogUI** on the **Datafrog SF3000** 
    (R36SX users do nothing — the default is already correct.)
 4. **Boot:** Eject the SD card safely, insert it back into the device, and power it on. TreeFrogUI will launch automatically.
 5. **ROMs:** Put your game ROMs in the corresponding subfolders inside the `roms/` directory on the root of your SD card (e.g., `roms/GBA/` for GBA games, `roms/FC/` for NES games). See the folder mapping table in the [README.md](README.md) for the full list of folder names.
+
+---
+
+## R36SX clones (R36HD, etc.)
+
+Clones (e.g. **R36HD**, and possibly **SF3000HD** — untested, worth checking) run
+the same stock software but boot a **different kernel and device tree** for their
+hardware revision. If you flash the plain v2.7 backup they won't boot (black screen
+/ no display), because that kernel/DTB doesn't match the clone's hardware. The fix
+is to keep your clone's own boot files on top of the v2.7 setup:
+
+1. **Backup your clone's stock boot files first.** On your clone's **original**
+   stock SD card these live in the **`cubegm/`** folder at the SD root. Copy these
+   out and keep them safe (note the device tree is named `dtb.bin`, not `*.dtb`):
+   - `cubegm/vmlinux.uImage` — kernel
+   - `cubegm/avp.uImage` — secondary boot image
+   - `cubegm/dtb.bin` — device tree
+2. **Set up the v2.7 minimal backup.** Format/restore your SD card with the
+   **R36SX v2.7 Minimal Backup**:
+   [Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O).
+3. **Copy your clone's boot files over the v2.7 setup.** Drop the three files from
+   step 1 into the v2.7 SD's **`cubegm/`** folder (SD root → `cubegm/`), overwriting
+   the ones that came with it:
+   - `cubegm/vmlinux.uImage`
+   - `cubegm/avp.uImage`
+   - `cubegm/dtb.bin`
+
+   This pairs your clone's own kernel + device tree with the v2.7 userland.
+4. **Do the standard TreeFrogUI install** on top (the [Installation Steps](#installation-steps)
+   above). Treat the clone as an R36SX — do **not** run the SF3000 boot-logo fixer.
+
+> [!TIP]
+> If it still won't boot after this, your clone likely has yet another kernel/DTB
+> revision. Double-check you copied **your own device's** boot files (not someone
+> else's), and that all three files made it over.
 
 ---
 
