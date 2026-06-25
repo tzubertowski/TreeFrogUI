@@ -38,7 +38,7 @@ Your handheld now runs **MS-DOS PC games** and **Neo Geo arcade** games.
 
 **Emulation quality of life**
 
-- **OnionOS-style hotkeys.** `SELECT + L2` load state, `SELECT + R2` save state, `SELECT + R1` fast-forward, `SELECT + START` menu.
+- **OnionOS-style hotkeys.** `SELECT + L2` load state, `SELECT + R2` save state, `SELECT + R1` fast-forward, `SELECT + START` menu, `SELECT + L1` screenshot (saved to `screenshots/`).
 - **Per-core Fast Forward and Rewind.** Enable either one per system in the in-game menu; settings stick per core.
 - **Save states no longer freeze.** Fixed a hang when saving on some cores.
 - **No more random inputs.** Right analog-stick drift no longer fires phantom button presses while you navigate or play.
@@ -59,7 +59,7 @@ TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoa
 - **Auto-Resume on Boot**: Automatically launches you back into your last-played game or the system frontend menu when you boot up your device.
 - **Rich Theming Options**: Includes 30 built-in color themes (selectable in-app) and support for custom fonts and per-system/per-folder background images (`PNG`, `JPG`, `BMP`).
 - **Flexible Aspect Ratio Scaling**: Switch between Zoom, Aspect Ratio, and Integer Scaling display modes on the fly.
-- **Useful In-Game Shortcuts**: Use **`SELECT + START`** to open the in-game picoarch menu (all cores except PCSX4ALL), **`SELECT + L`** to open the emulator menu (PCSX4ALL only) or load a state (slot 0, default), **`SELECT + R`** to save a state (slot 0, default), **`SELECT + Y`** to cycle fast-forward (off → 2× → 3× → off, audio mutes), and hold **`SELECT + B`** to rewind.
+- **Useful In-Game Shortcuts**: Use **`SELECT + START`** to open the in-game picoarch menu (all cores except PCSX4ALL), **`SELECT + L`** to open the emulator menu (PCSX4ALL only) or load a state (slot 0, default), **`SELECT + R`** to save a state (slot 0, default), **`SELECT + Y`** to cycle fast-forward (off → 2× → 3× → off, audio mutes), hold **`SELECT + B`** to rewind, and **`SELECT + L`** to grab a screenshot (BMP saved to the `screenshots/` folder on your card).
 - **Custom Boot Logo**: Includes a custom-fit, top-down `xgame-logo.bmp` splash screen to replace the stock boot logo on your device.
 
 ---
