@@ -15,6 +15,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/types.h>
 
 #define LAUNCHER "/mnt/sdcard/cubegm/zhijack.sh"
 
@@ -26,10 +28,53 @@ static void hlog(const char *msg) {
     close(fd);
 }
 
+/* We run INSIDE rkgame's process — so the decrypted driver rkgame loaded for its
+ * menu is mapped here. Dump /proc/self/maps (shows the backing file = where it
+ * decrypted to) + open fds, so we can grab the plaintext driver. */
+static void dump_diag(void) {
+    int out = open("/mnt/sdcard/rkdiag.txt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (out < 0) return;
+    /* /proc/self/maps */
+    write(out, "=== /proc/self/maps ===\n", 24);
+    int m = open("/proc/self/maps", O_RDONLY);
+    if (m >= 0) { char b[4096]; int n; while ((n = read(m, b, sizeof b)) > 0) write(out, b, n); close(m); }
+    /* open fds (the decrypted temp may be an open fd / deleted file) */
+    write(out, "\n=== /proc/self/fd ===\n", 23);
+    DIR *d = opendir("/proc/self/fd");
+    if (d) {
+        struct dirent *e; char p[256], t[512], line[800];
+        while ((e = readdir(d))) {
+            if (e->d_name[0] == '.') continue;
+            snprintf(p, sizeof p, "/proc/self/fd/%s", e->d_name);
+            int n = readlink(p, t, sizeof t - 1);
+            if (n > 0) { t[n] = 0; int L = snprintf(line, sizeof line, "%s -> %s\n", e->d_name, t); write(out, line, L); }
+        }
+        closedir(d);
+    }
+    /* /tmp listing */
+    write(out, "\n=== /tmp ===\n", 13);
+    DIR *td = opendir("/tmp");
+    if (td) { struct dirent *e; char line[300]; while ((e = readdir(td))) { int L = snprintf(line, sizeof line, "%s\n", e->d_name); write(out, line, L); } closedir(td); }
+    fsync(out);
+    close(out);
+}
+
+/* FORK (not execl) the launcher: rkgame stays ALIVE running this "game", so it
+ * keeps the input pipeline up (cubevol→joy_key) which TreeFrogUI reads. The
+ * forked child runs zhijack→picoarch (owns the display via disp_frame). We must
+ * NOT replace rkgame (execl) — that kills input + makes icube respawn it. */
 static void tf_launch(void) {
-    hlog("launch: execl /bin/sh zhijack.sh\n");
-    execl("/bin/sh", "sh", LAUNCHER, (char *)NULL);
-    hlog("launch: execl FAILED\n");
+    static int launched = 0;
+    if (launched) return;
+    launched = 1;
+    hlog("launch: fork zhijack (keep rkgame alive for input)\n");
+    pid_t pid = fork();
+    if (pid == 0) {
+        execl("/bin/sh", "sh", LAUNCHER, (char *)NULL);
+        hlog("launch: child execl FAILED\n");
+        _exit(1);
+    }
+    if (pid < 0) hlog("launch: fork FAILED\n");
 }
 
 /* libretro ABI (self-declared; no header needed) */
@@ -69,9 +114,11 @@ void retro_get_system_av_info(struct retro_system_av_info *info) {
 void retro_init(void)   { hlog("init\n"); }
 void retro_deinit(void) {}
 
-unsigned char retro_load_game(const void *game) { (void)game; hlog("load_game\n"); tf_launch(); return 0; }
+unsigned char retro_load_game(const void *game) { (void)game; hlog("load_game\n"); tf_launch(); return 1; }
 unsigned char retro_load_game_special(unsigned t, const void *i, unsigned long n) { (void)t;(void)i;(void)n; return 0; }
-void retro_run(void) { hlog("run\n"); tf_launch(); }
+/* Idle: fork picoarch once, then do nothing (no video_cb) so rkgame stays in
+ * game-mode (not redrawing its menu); picoarch owns the screen via disp_frame. */
+void retro_run(void) { tf_launch(); usleep(33000); }
 
 void retro_reset(void)       {}
 void retro_unload_game(void) {}

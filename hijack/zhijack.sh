@@ -7,17 +7,27 @@
 # icube does on R36SX/SF3000: detect device, set perf, run the picoarch frogui
 # menu loop. We deliberately do NOT touch icube/rkgame so the SF3500 verifier
 # stays happy.
+# FORK approach: the hijack core forks us (does NOT execl), so rkgame stays ALIVE
+# running our "game" — keeping the input pipeline up (cubevol reads gpio → joy_key
+# shm, which picoarch reads). We must NOT kill rkgame here (that kills input) and
+# the core forks only once, so no stacking. Single-instance guard just in case.
+mkdir /tmp/zhijack.lock 2>/dev/null || exit 0
+
 LOG=/mnt/sdcard/log.txt
 [ -f "$LOG" ] && mv "$LOG" "$LOG.prev"
 > "$LOG"
 echo "=== zhijack boot $(date '+%H:%M:%S' 2>/dev/null) ===" >> "$LOG"
 sync   # flush to FAT now: proves zhijack ran even if a later step hangs
 
-# rkgame ran us in-process (execl), so there is usually no rkgame left to kill;
-# if the frontend forked a child for the core, the parent rkgame is killed here
-# to free the display/input. Killing "rkgame" never matches our own sh process.
-killall rkgame    2>/dev/null
-killall hcprojector 2>/dev/null
+# GRAB the firmware-decrypted plaintext driver/rkgame (the SF3500 stock driver.so
+# on the SD is encrypted; the boot decrypts it to /tmp/cubegm/). One-shot dump.
+[ -f /tmp/cubegm/driver.so ] && [ ! -f /mnt/sdcard/driver_sf3500_dec.so ] && \
+    cp /tmp/cubegm/driver.so /mnt/sdcard/driver_sf3500_dec.so && sync
+[ -f /tmp/cubegm/rkgame ] && [ ! -f /mnt/sdcard/rkgame_dec ] && \
+    cp /tmp/cubegm/rkgame /mnt/sdcard/rkgame_dec && sync
+
+# (rkgame kill + watchdog already started at top.)
+echo "processes after kill:" >> "$LOG"; ps >> "$LOG" 2>&1; sync
 
 export LD_LIBRARY_PATH=/mnt/sdcard/cubegm/lib:/mnt/sdcard/cubegm/usr/lib:$LD_LIBRARY_PATH
 
@@ -37,12 +47,11 @@ for c in /sys/devices/system/cpu/cpu*/cpufreq; do
     [ -n "$mx" ] && [ -w "$c/scaling_min_freq" ] && echo "$mx" > "$c/scaling_min_freq" 2>/dev/null
 done
 
-# cubevol owns the power button + the /tmp/joy_key input shmem picoarch reads.
-if ! pidof cubevol > /dev/null 2>&1; then
-    echo "starting cubevol" >> "$LOG"
-    [ -x /usr/bin/cubevol ] && /usr/bin/cubevol &
-    sleep 0.3
-fi
+# Input: cubevol (already running, reads gpio → /tmp/joy_key shm) provides input.
+# rkgame is alive (we forked), so the pipeline is intact. Don't restart cubevol —
+# just ensure it's up.
+pidof cubevol >/dev/null 2>&1 || { [ -x /usr/bin/cubevol ] && /usr/bin/cubevol & }
+sleep 0.5
 
 PICOARCH=/mnt/sdcard/cubegm/picoarch
 PICOARCH_HI=/mnt/sdcard/cubegm/picoarch_hi
