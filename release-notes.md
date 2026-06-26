@@ -1,53 +1,51 @@
-Welcome to **TreeFrogUI** (v0.1.8) for the SF3000 and R36SX handheld consoles
+Welcome to **TreeFrogUI** (v1.0.0) — one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to extend support for these devices:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Every supported device was bought out of pocket. Donations go straight toward the next device to port to, and toward keeping these ones updated.
 
 > [!IMPORTANT]
-> This is an **early release** of the project and should be considered a beta/preview version. Since I was the only person testing it during development, it is highly likely that you will encounter bugs, quirks, or compatibility issues. 
+> This is the **1.0 milestone** — the first build to support all six devices from one package. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v0.1.8
+## What's New in v1.0.0
 
-### 🕹️ The big ones: MS-DOS and Neo Geo
+### 🎉 One build, six handhelds
 
-Your handheld now runs **MS-DOS PC games** and **Neo Geo arcade** games.
+TreeFrogUI is now a **single package that auto-detects your device at boot** and
+runs on **R36SX** (v2.6 & v2.7), **SF3000**, **SF3000 HD**, **SF3100**, **SF3500**,
+and **GB350**. No more per-device builds — flash the same files everywhere, then
+drop in your device's small `install_first/` folder.
 
-- **MS-DOS PC (pico286).** Play classics like Prince of Persia, Oregon Trail, Doom-era DOS games, and more. Boots FreeDOS automatically, so most games just run. Built-in **on-screen keyboard**, **disk swap**, **mouse mode**, and **joystick** support. Drop games in a `pico286` folder.
-- **Neo Geo arcade.** Metal Slug, KOF, and the rest, via FB Alpha 2012. Put games in a `neogeo` folder and the **`neogeo.zip` BIOS in `roms/neogeo/`** too (a copy in `cubegm/bios/` does no harm). Romsets must match FB Alpha 2012 (0.2.97.30). Heavy games like Metal Slug may need **Frameskip 1** for full speed.
+- **Unified, safe boot.** Instead of replacing the stock menu, TreeFrogUI now hooks
+  the stock launcher's **own autorun**. The protected boot files (`icube`, `rkgame`)
+  are **never touched** — which fixes the dreaded "**sdcard is damaged**" error on
+  bootloader-protected devices (SF3500-class and R36SX v2.7).
+- **Four new devices.** **SF3000 HD** (HDMI-out variant), **SF3100**, and **SF3500**
+  all share the same 854×480 panel and driver; **GB350** is a 640×480 4:3 device.
+  Plus **R36SX v2.7** support.
+- **Per-device install guide.** Pick your device, grab its matching stock backup,
+  copy `cubegm/`+`frogui/`+`MAME/`, then your `install_first/<device>/` folder. The
+  [install guide](install.md) has a tab per device with the backup links.
 
----
+### 🕹️ New this release
 
-**More new systems**
+- **Screenshot hotkey.** **`SELECT + L1`** grabs whatever's on screen — game, menu,
+  pause screen — to a `.bmp` in the `screenshots/` folder on your card.
+- **Display fixes (854×480 devices).** Correct full-screen geometry, and the
+  in-game pause menu no longer duplicates/tiles across the screen.
+- **Cleaner input.** Phantom/missed presses from the two-writer input race are
+  filtered out, on top of the existing right-stick drift filtering.
 
-- **Capcom arcade (CPS-1, CPS-2).** Street Fighter II, Marvel vs Capcom, and more. Use `cps1` / `cps2` folders. Romsets must match FB Alpha 2012 (0.2.97.30).
-- **TIC-80 fantasy console.** Run `.tic` carts from a `tic80` folder.
-- **Sega CD, Sega 32X, Famicom Disk System.** New `segacd`, `32x`, `fds` folders. Sega CD needs its BIOS (`bios_CD_U/E/J.bin` in `cubegm/bios`), FDS needs `disksys.rom`.
-
-**Game library**
-
-- **Game Switcher.** New recent-games view: full-screen box art (or the game's last screenshot) plus how long you have played it. **On by default.** **Left/Right** flips games, **A** jumps back in. Toggle in Settings.
-- **Per-game screenshots.** Open the in-game menu once (`SELECT + START`) and TreeFrogUI snaps the current frame as that game's art. No box art needed.
-- **Play-time tracking.** Records time played per game, shown in the Game Switcher.
-- **Start in Recents.** Optional: boot straight into your recent games. Turn on in Settings.
-
-**Emulation quality of life**
-
-- **OnionOS-style hotkeys.** `SELECT + L2` load state, `SELECT + R2` save state, `SELECT + R1` fast-forward, `SELECT + START` menu, `SELECT + L1` screenshot (saved to `screenshots/`).
-- **Per-core Fast Forward and Rewind.** Enable either one per system in the in-game menu; settings stick per core.
-- **Save states no longer freeze.** Fixed a hang when saving on some cores.
-- **No more random inputs.** Right analog-stick drift no longer fires phantom button presses while you navigate or play.
-- **PS1 buttons fixed.** Face buttons now map correctly (Cross/Circle/Square/Triangle).
 ---
 
 ## High-Level Overview
 
-TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoarch` environment on the MIPS-based SF3000 handheld. It provides a clean, minimalistic emulation frontend while supporting a massive range of retro gaming platforms.
+TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoarch` environment on the MIPS-based Hichip handhelds (R36SX, SF3000, SF3000 HD, SF3100, SF3500, GB350). It provides a clean, minimalistic emulation frontend while supporting a massive range of retro gaming platforms.
 
 ### Key Features Included:
 
@@ -59,7 +57,7 @@ TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoa
 - **Auto-Resume on Boot**: Automatically launches you back into your last-played game or the system frontend menu when you boot up your device.
 - **Rich Theming Options**: Includes 30 built-in color themes (selectable in-app) and support for custom fonts and per-system/per-folder background images (`PNG`, `JPG`, `BMP`).
 - **Flexible Aspect Ratio Scaling**: Switch between Zoom, Aspect Ratio, and Integer Scaling display modes on the fly.
-- **Useful In-Game Shortcuts**: Use **`SELECT + START`** to open the in-game picoarch menu (all cores except PCSX4ALL), **`SELECT + L`** to open the emulator menu (PCSX4ALL only) or load a state (slot 0, default), **`SELECT + R`** to save a state (slot 0, default), **`SELECT + Y`** to cycle fast-forward (off → 2× → 3× → off, audio mutes), hold **`SELECT + B`** to rewind, and **`SELECT + L`** to grab a screenshot (BMP saved to the `screenshots/` folder on your card).
+- **Useful In-Game Shortcuts**: Use **`SELECT + START`** to open the in-game picoarch menu (all cores except PCSX4ALL), **`SELECT + L`** to open the emulator menu (PCSX4ALL only) or load a state (slot 0, default), **`SELECT + R`** to save a state (slot 0, default), **`SELECT + Y`** to cycle fast-forward (off → 2× → 3× → off, audio mutes), hold **`SELECT + B`** to rewind, and **`SELECT + L1`** to grab a screenshot (BMP saved to the `screenshots/` folder on your card).
 - **Custom Boot Logo**: Includes a custom-fit, top-down `xgame-logo.bmp` splash screen to replace the stock boot logo on your device.
 
 ---
@@ -68,7 +66,7 @@ TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoa
 
 For step-by-step setup instructions, please refer to the [Installation Guide](install.md).
 
-*Note: You must have the original **stock OS** installed on your SD card as a prerequisite. Clean backups: [SF3000](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z) · [R36SX v2.6](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD) · [R36SX v2.7](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O).*
+*Note: You must have the original **stock OS** for your device installed on your SD card as a prerequisite. Clean backups: [SF3000](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z) · [R36SX v2.6](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD) · [R36SX v2.7](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O) · [SF3000 HD / SF3100 / SF3500 / GB350](https://github.com/Q-ta-s/q-ta-s.github.io/releases). The [install guide](install.md) maps each device to its backup + `install_first/` folder.*
 
 ---
 
@@ -82,8 +80,9 @@ For step-by-step setup instructions, please refer to the [Installation Guide](in
 
 ## Want TreeFrogUI on another device?
 
-R36SX v2.7 (bootloader protection), SF3000 V3 (bootloader protection), SF3500,
-SF3100, GB350, HDMI-out clones, and more are all on the wishlist.
+SF3000 V3 (bootloader protection), the **SF3000 Pro** (different firmware — no
+rkgame stack, so the autorun hook doesn't apply), other HDMI-out clones, and more
+are all on the wishlist.
 
 The catch: porting needs the actual hardware in hand. Bootloaders differ, input
 and display wiring differ, the protected variants need live debugging. No way to

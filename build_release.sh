@@ -9,7 +9,7 @@
 #     -> retro_load_game() execl's zhijack.sh -> picoarch/frogui
 #
 # Layout:
-#   release/cubegm,frogui,MAME   universal payload (zero stock files) — copy to SD
+#   release/cubegm,frogui,roms,MD  universal payload (zero stock files) — copy to SD
 #   release/install_first/<dev>/ per-device rkgame xml (setting/config/filelist)
 #                                + the autorun trigger — user copies THEIR device's
 #   release/INSTALL.md           guide
@@ -19,8 +19,15 @@ cd "$(dirname "$0")"
 STAGE=sdcard
 HIJACK=hijack
 OUT=release
-CORE_FILE="libemu_tfhijack.so"
-ROM_REL="MAME/treefrogui.zip"
+# WORKING autoboot recipe (confirmed on SF3500 hardware, see project_sf3500_hijack):
+#   - autorun rom path must be ABSOLUTE (relative is silently ignored by rkgame)
+#   - driver="" → rkgame resolves the core by the rom's EXTENSION via config.xml
+#   - so we OVERRIDE the stock core for that extension with our hijack core.
+# .md → libemu_md.so (picodrive) on every stock config.xml → override that one.
+HIJACK_CORE="$HIJACK/libemu_tfhijack.so"  # built libretro stub that execl's zhijack
+OVERRIDE_CORE="libemu_md.so"              # stock MD core we replace (.md extension)
+DUMMY_REL="MD/dummy.md"                   # dummy rom (extension picks the core)
+DUMMY_ABS="/mnt/sdcard/$DUMMY_REL"        # rkgame needs the ABSOLUTE path
 
 PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
@@ -57,11 +64,10 @@ cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null
 
 rm -rf "$OUT"
-mkdir -p "$OUT/cubegm/cores" "$OUT/cubegm/lib" "$OUT/$(dirname "$ROM_REL")"
+mkdir -p "$OUT/cubegm/cores" "$OUT/cubegm/lib" "$OUT/$(dirname "$DUMMY_REL")"
 
 # 1) Universal payload — our files only, NO stock, NO icube.
 cp -a "$STAGE/cubegm/cores/." "$OUT/cubegm/cores/"
-cp "$HIJACK/$CORE_FILE" "$OUT/cubegm/cores/$CORE_FILE"
 for f in picoarch picoarch_hi driver_r36sx.so driver_sf3000.so driver_sf3500.so driver_gb350.so; do
     cp "$STAGE/cubegm/$f" "$OUT/cubegm/$f"
 done
@@ -73,6 +79,9 @@ cp "$HIJACK/zhijack.sh" "$OUT/cubegm/zhijack.sh"; chmod +x "$OUT/cubegm/zhijack.
 cp -L "$STAGE/cubegm/lib/libSDL-1.2.so.0" "$OUT/cubegm/lib/libSDL-1.2.so.0"
 cp    "$STAGE/cubegm/lib/libpng12.so.0"   "$OUT/cubegm/lib/libpng12.so.0"
 [ -d "$STAGE/frogui" ] && cp -a "$STAGE/frogui" "$OUT/frogui"
+# roms/ folder structure (the system subfolders FrogUI expects: gba, nes, snes…).
+# Ships empty folders + their .res/filelist scaffolding; users drop ROMs in.
+[ -d "$STAGE/roms" ] && cp -a "$STAGE/roms" "$OUT/roms"
 
 # 1b) Our extra assets the old release shipped (these are OURS, not stock OS):
 #     standalone frontends, BIOS, boot logos. NOT shipped: icube/icube_start
@@ -98,22 +107,27 @@ for x in picoarch.cfg fix_bootlogo_sf3000.sh fix_bootlogo_sf3000.bat; do
     [ -e "$STAGE/$x" ] && cp -a "$STAGE/$x" "$OUT/$x"
 done
 
-# dummy autorun rom (valid 22-byte empty zip; never read)
-printf 'PK\x05\x06\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00' > "$OUT/$ROM_REL"
+# Dummy autorun rom at the absolute path rkgame loads, + its folder catalog entry
+# (filename,Display Name,SHORTCODE). The .md extension makes rkgame pick libemu_md.so
+# — which install_first overrides with our hijack core.
+printf 'TF' > "$OUT/$DUMMY_REL"
+printf 'dummy.md,TreeFrogUI,MD\n' > "$OUT/$(dirname "$DUMMY_REL")/filelist.csv"
 
-# 2) Per-device rkgame xml (stock base + our autorun/core/rom patches).
+# 2) Per-device install_first — the WORKING hijack recipe:
+#   a) setting.xml autorun -> ABSOLUTE dummy path, driver="" (extension-resolved)
+#   b) cores/libemu_md.so OVERRIDDEN with our hijack core (so .md -> our core)
+# We do NOT touch config.xml/filelist.xml — stock already maps .md -> libemu_md.so,
+# and the override + driver="" is what actually boots (explicit driver=, relative
+# paths, and a new core name all silently failed on hardware).
 for dev in "${!STOCK[@]}"; do
     src="${STOCK[$dev]}"; dst="$OUT/install_first/$dev"
     [ -d "$src" ] || { echo "WARN: no stock for $dev ($src) — skipping"; continue; }
     mkdir -p "$dst/cubegm/cores"
-    cp "$src/setting.xml"        "$dst/cubegm/setting.xml"
-    cp "$src/cores/config.xml"   "$dst/cubegm/cores/config.xml"
-    cp "$src/cores/filelist.xml" "$dst/cubegm/cores/filelist.xml"
-    ST="$dst/cubegm/setting.xml"; CFG="$dst/cubegm/cores/config.xml"; FL="$dst/cubegm/cores/filelist.xml"
-    sed -i "s#<autorun file=\"[^\"]*\" driver=\"[^\"]*\" />#<autorun file=\"$ROM_REL\" driver=\"$CORE_FILE\" />#" "$ST"
-    grep -q "driver=\"$CORE_FILE\"" "$ST" || echo "  WARN[$dev]: autorun not patched"
-    grep -q "$CORE_FILE" "$CFG" || sed -i "0,/<core>/s##<core>\n<emucore name=\"$CORE_FILE\" file=\"$CORE_FILE\" />\n<supported_extensions>ZIP</supported_extensions>\n</core>\n\n<core>#" "$CFG"
-    grep -q "$ROM_REL"   "$FL"  || sed -i "1a <file name=\"$ROM_REL\" core=\"$CORE_FILE\" />" "$FL"
+    cp "$src/setting.xml" "$dst/cubegm/setting.xml"
+    ST="$dst/cubegm/setting.xml"
+    sed -i "s#<autorun file=\"[^\"]*\" driver=\"[^\"]*\" />#<autorun file=\"$DUMMY_ABS\" driver=\"\" />#" "$ST"
+    grep -q "file=\"$DUMMY_ABS\" driver=\"\"" "$ST" || echo "  WARN[$dev]: autorun not patched"
+    cp "$HIJACK_CORE" "$dst/cubegm/cores/$OVERRIDE_CORE"
     echo "  install_first/$dev ready"
 done
 
@@ -128,7 +142,7 @@ stays happy.
 ## Steps
 1. Start from a **stock card** for your device (if your card has an older TreeFrogUI
    that replaced `cubegm/icube`, restore the stock `icube` first).
-2. Copy `cubegm/`, `frogui/`, `MAME/` onto the SD root (merge/overwrite).
+2. Copy `cubegm/`, `frogui/`, `roms/`, `MD/` onto the SD root (merge/overwrite).
 3. Copy the contents of **`install_first/<your-device>/`** onto the SD root too:
    - `install_first/r36sx/`    → R36SX (v2.6 and v2.7 — same xml)
    - `install_first/sf3000/`   → SF3000

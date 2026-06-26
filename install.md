@@ -88,16 +88,18 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 2. Copy these onto the **root** of your (stock) SD card, merging/overwriting:
    - `cubegm/`
    - `frogui/`
-   - `MAME/`
+   - `roms/`
+   - `MD/`
    - the docs/README (optional)
 3. Copy the contents of **your device's** `install_first/<device>/` folder onto the
    SD root too (from Step 1). This sets the stock menu's autorun to launch
    TreeFrogUI and registers the boot hook for your device.
 
 > [!NOTE]
-> The `install_first/<device>/` step is what makes it boot. It only patches the
-> rkgame xml (`setting.xml` + `cores/config.xml` + `cores/filelist.xml`) — your
-> stock `icube`/`rkgame` are never touched.
+> The `install_first/<device>/` step is what makes it boot: it points the stock
+> menu's autorun at a dummy ROM (absolute path) and overrides one stock core
+> (`cores/libemu_md.so`) with the TreeFrogUI launcher. Your stock `icube`/`rkgame`
+> are never touched.
 
 ---
 
