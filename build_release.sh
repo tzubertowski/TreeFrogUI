@@ -56,6 +56,12 @@ declare -A STOCK=(
 )
 
 # 0) Refresh staging + build hijack core.
+# Guard: picoarch_hi (gpsp/pcsx dynarec build of the SAME source) must not be older
+# than picoarch — a stale hi carries old device detection → SF3500/HD mis-detect →
+# wrong driver → gpsp/pcsx audio crash. build_sf3000.sh builds ONLY picoarch.
+if [ "$PICOARCH" -nt "$PICOARCH_HI" ]; then
+    echo "WARN: picoarch is newer than picoarch_hi — rebuild it: (cd ../picoarch && sh build_picoarch_hi.sh)"
+fi
 cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$2"; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
