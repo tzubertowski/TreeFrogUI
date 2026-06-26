@@ -7,7 +7,11 @@
 #
 # Detection (matches sf3000_detect_device() in picoarch/plat_sdl.c):
 #   r63311 panel node present      -> R36SX  (640x480 landscape, fb-write)
-#   else /panel node present       -> SF3500 (480x854 portrait -> 854x480)
+#   else /panel node present:
+#       multiple_init OR uart@1     -> SF3500 (480x854 portrait -> 854x480)
+#                                      [SF3500/SF3100 have uart@1; SF3000HD has
+#                                       multiple_init — all 854x480, driver_sf3500]
+#       else                        -> GB350  (640x480 landscape, 4:3, plain driver)
 #   else (/hcrtos/lcd, no /panel)  -> SF3000 (480x854 portrait -> 854x480)
 #
 # All geometry below comes from the stock dtbs (de-engine timing-para / fb1).
@@ -18,8 +22,13 @@ if [ -d "$DT/hcrtos/lcd-dsi0-r63311" ]; then
     DEV=R36SX; PW=640; PH=480; ASPN=4;  ASPD=3; ROT=0;  PRESENT=fbwrite
     DRIVER=/mnt/sdcard/cubegm/driver_r36sx.so
 elif [ -d "$DT/panel" ]; then
-    DEV=SF3500; PW=854; PH=480; ASPN=16; ASPD=9; ROT=90; PRESENT=dispframe
-    DRIVER=/mnt/sdcard/cubegm/driver_sf3500.so
+    if [ -d "$DT/hcrtos/multiple_init" ] || [ -d "$DT/hcrtos/uart@1" ]; then
+        DEV=SF3500; PW=854; PH=480; ASPN=16; ASPD=9; ROT=90; PRESENT=dispframe
+        DRIVER=/mnt/sdcard/cubegm/driver_sf3500.so
+    else
+        DEV=GB350; PW=640; PH=480; ASPN=4; ASPD=3; ROT=0; PRESENT=dispframe
+        DRIVER=/mnt/sdcard/cubegm/driver_gb350.so
+    fi
 else
     DEV=SF3000; PW=854; PH=480; ASPN=16; ASPD=9; ROT=90; PRESENT=dispframe
     DRIVER=/mnt/sdcard/cubegm/driver_sf3000.so

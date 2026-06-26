@@ -402,18 +402,24 @@ treefrog-ui/
 > [!NOTE]
 > **Right analog stick.** The right stick **cannot** work as a real analog stick, and no software update can change that. On this console it's physically wired to act **exactly like the X / A / B / Y face buttons**: nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" info. The console never hands analog data to apps like TreeFrogUI. So the right stick simply **mirrors the face buttons** (tiny accidental movements are ignored, so it won't fire on its own). Hardware limitation, not a bug or missing feature.
 
-### SF3000
+### SF3000 family
 
 > [!NOTE]
-> Built primarily for the **SF3000**. It **might** also run on similar variants like the **SF3000HD**, **SF3100**, **SF3500**, and **GB350**. I don't own these to test, so compatibility is unverified. Try it and let me know if it works. Want one supported properly? ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**.
+> One package now supports **six devices**, auto-detected at boot from the device
+> tree: **R36SX** (v2.6 / v2.7), **SF3000**, **SF3000 HD**, **SF3100**, **SF3500**,
+> and **GB350**. SF3000 HD, SF3100 and SF3500 share the same 854×480 panel + driver
+> (HD/SF3100 report as "SF3500" in the log — expected). GB350 is a 640×480 4:3
+> device. See the [install guide](install.md) for the per-device stock backup and
+> the matching `install_first/<device>/` folder.
 
 ---
 
 ## Porting TreeFrogUI to other devices
 
-Want TreeFrogUI on a device that isn't supported yet? R36SX v2.7 (bootloader
-protection), SF3000 V3 (bootloader protection), SF3500, SF3100, GB350, HDMI-out
-clones, and others are all on the wishlist.
+Want TreeFrogUI on a device that isn't supported yet? SF3000 V3 (bootloader
+protection), the **SF3000 Pro** (different firmware entirely — no rkgame stack, so
+the autorun hijack doesn't apply), other HDMI-out clones, and more are on the
+wishlist.
 
 The catch: porting needs the actual hardware in hand. Bootloaders differ, input
 and display wiring differ, the protected variants need live debugging. There's
