@@ -1,8 +1,8 @@
 Welcome to **TreeFrogUI** (v1.0.0): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
-> **Consider donating to extend support for these devices:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
-> Every supported device was bought out of pocket. Donations go straight toward the next device to port to, and toward keeping these ones updated.
+> **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
+> Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
 > This is the **1.0 milestone**, the first build to support all six devices from one package. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
@@ -76,4 +76,4 @@ Six devices are supported today (R36SX v2.6/v2.7, SF3000, SF3000 HD, SF3100, SF3
 
 The catch: porting needs the actual hardware in hand. Bootloaders, input wiring, and displays all differ between clones, and the protected variants need live debugging. There's no way to do it blind.
 
-Every device supported so far was bought out of my own pocket, and there are far more clones out there than I can keep buying. If you want to see a port happen, chip in: ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**. Donations go straight toward the next device.
+Most devices supported so far were bought out of my own pocket (the SF3500 was funded by the community), and there are far more clones out there than I can keep buying. If you want to see a port happen, chip in: ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**. Tips go toward ongoing maintenance and buying the next clone to port to.
