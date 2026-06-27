@@ -1,11 +1,11 @@
-Welcome to **TreeFrogUI** (v1.0.0) — one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
+Welcome to **TreeFrogUI** (v1.0.0): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to extend support for these devices:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Every supported device was bought out of pocket. Donations go straight toward the next device to port to, and toward keeping these ones updated.
 
 > [!IMPORTANT]
-> This is the **1.0 milestone** — the first build to support all six devices from one package. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> This is the **1.0 milestone**, the first build to support all six devices from one package. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
@@ -16,30 +16,18 @@ Welcome to **TreeFrogUI** (v1.0.0) — one build for **six** handhelds: R36SX (v
 
 ### 🎉 One build, six handhelds
 
-TreeFrogUI is now a **single package that auto-detects your device at boot** and
-runs on **R36SX** (v2.6 & v2.7), **SF3000**, **SF3000 HD**, **SF3100**, **SF3500**,
-and **GB350**. No more per-device builds — flash the same files everywhere, then
-drop in your device's small `install_first/` folder.
+TreeFrogUI is now a **single package that auto-detects your device at boot** and runs on **R36SX** (v2.6 & v2.7), **SF3000**, **SF3000 HD**, **SF3100**, **SF3500**, and **GB350**. No more per-device builds: flash the same files everywhere, then drop in your device's small `install_first/` folder.
 
-- **Unified, safe boot.** Instead of replacing the stock menu, TreeFrogUI now hooks
-  the stock launcher's **own autorun**. The protected boot files (`icube`, `rkgame`)
-  are **never touched** — which fixes the dreaded "**sdcard is damaged**" error on
-  bootloader-protected devices (SF3500-class and R36SX v2.7).
-- **Four new devices.** **SF3000 HD** (HDMI-out variant), **SF3100**, and **SF3500**
-  all share the same 854×480 panel and driver; **GB350** is a 640×480 4:3 device.
-  Plus **R36SX v2.7** support.
-- **Per-device install guide.** Pick your device, grab its matching stock backup,
-  copy `cubegm/`+`frogui/`+`roms/`+`MD/`, then your `install_first/<device>/` folder. The
-  [install guide](install.md) has a tab per device with the backup links.
+- **"sdcard is damaged" is fixed.** Devices that previously showed the **"sdcard is damaged"** screen (the bootloader-protected ones: SF3500-class and R36SX v2.7) now boot TreeFrogUI correctly.
+- **Unified, safe boot.** Instead of replacing the stock menu, TreeFrogUI now hooks the stock launcher's **own autorun**. The protected boot files (`icube`, `rkgame`) are **never touched**, which is what makes the protected devices work.
+- **Four new devices.** **SF3000 HD** (HDMI-out variant), **SF3100**, and **SF3500** all share the same 854×480 panel and driver; **GB350** is a 640×480 4:3 device. Plus **R36SX v2.7** support.
+- **Per-device install guide.** Pick your device, grab its matching stock backup, copy `cubegm/`, `frogui/`, `roms/`, `MD/`, then your `install_first/<device>/` folder. The [install guide](install.md) has a tab per device with the backup links.
 
 ### 🕹️ New this release
 
-- **Screenshot hotkey.** **`SELECT + L1`** grabs whatever's on screen — game, menu,
-  pause screen — to a `.bmp` in the `screenshots/` folder on your card.
-- **Display fixes (854×480 devices).** Correct full-screen geometry, and the
-  in-game pause menu no longer duplicates/tiles across the screen.
-- **Cleaner input.** Phantom/missed presses from the two-writer input race are
-  filtered out, on top of the existing right-stick drift filtering.
+- **Screenshot hotkey.** **`SELECT + L1`** grabs whatever's on screen (game, menu, or pause screen) to a `.bmp` in the `screenshots/` folder on your card.
+- **Display fixes (854×480 devices).** Correct full-screen geometry, and the in-game pause menu no longer duplicates or tiles across the screen.
+- **Cleaner input.** Phantom and missed presses from the two-writer input race are filtered out, on top of the existing right-stick drift filtering.
 
 ---
 
@@ -52,7 +40,7 @@ TreeFrogUI is a heavily modified fork of FrogUI, ported to run within the `picoa
 - **Minimalist & Fast Interface**: A distraction-free ROM browser with vertical system list navigation and intuitive controls.
 - **57 Emulator Cores**: Upgraded from only 14 stock cores, adding compatibility for systems like **PICO-8** (via Fake08/Retro8, supports both `.p8` and `.p8.png` carts), **Quake** (via Tyrquake), **Cave Story** (via NXEngine), **Doom** (via PrBoom), and classic computers like Commodore Amiga and Atari ST.
 - **Highly Configurable Cores**: Full support for tweaking libretro core options directly, enabling retro features like system color palette swaps, LCD ghosting emulation, and key mappings.
-- **Proper PCSX4ALL Integration**: A configurable PlayStation 1 emulator core supporting `.iso`, `.bin`/`.cue`, `.pbp`, and other standard disc formats. **PS1 needs a real BIOS to save** — drop `scph1001.bin` in `cubegm/cores/.pcsx4all/` (PS1 folder). Without it the emulator runs on HLE, where memory-card saves are broken. See the [install guide](install.md#playstation-1-bios-strongly-recommended).
+- **Proper PCSX4ALL Integration**: A configurable PlayStation 1 emulator core supporting `.iso`, `.bin`/`.cue`, `.pbp`, and other standard disc formats. **PS1 needs a real BIOS to save**: drop `scph1001.bin` in `cubegm/cores/.pcsx4all/` (PS1 folder). Without it the emulator runs on HLE, where memory-card saves are broken. See the [install guide](install.md#playstation-1-bios-strongly-recommended).
 - **In-Game Save Support**: Battery saves and in-game saves are fully supported across all compatible cores.
 - **Auto-Resume on Boot**: Automatically launches you back into your last-played game or the system frontend menu when you boot up your device.
 - **Rich Theming Options**: Includes 30 built-in color themes (selectable in-app) and support for custom fonts and per-system/per-folder background images (`PNG`, `JPG`, `BMP`).
@@ -80,15 +68,10 @@ For step-by-step setup instructions, please refer to the [Installation Guide](in
 
 ## Want TreeFrogUI on another device?
 
-SF3000 V3 (bootloader protection), the **SF3000 Pro** (different firmware — no
-rkgame stack, so the autorun hook doesn't apply), other HDMI-out clones, and more
-are all on the wishlist.
+SF3000 V3 (bootloader protection), the **SF3000 Pro** (different firmware, no rkgame stack, so the autorun hook doesn't apply), other HDMI-out clones, and more are all on the wishlist.
 
-The catch: porting needs the actual hardware in hand. Bootloaders differ, input
-and display wiring differ, the protected variants need live debugging. No way to
-do it blind.
+The catch: porting needs the actual hardware in hand. Bootloaders differ, input and display wiring differ, the protected variants need live debugging. No way to do it blind.
 
-Every device supported so far was bought out of my own pocket, and there are far
-more clones than I can keep buying.
+Every device supported so far was bought out of my own pocket, and there are far more clones than I can keep buying.
 
 If you want to see a port happen, chip in: ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**. Donations go straight toward the next device to port to.
