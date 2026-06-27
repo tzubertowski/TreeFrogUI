@@ -25,7 +25,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 - 📦 [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD)
 - Install folder: **`install_first/r36sx/`**
-- Boot logo: R36SX (default — do **not** run the SF3000 fixer)
+- Boot logo: included in this folder (no action needed)
 </details>
 
 <details>
@@ -33,7 +33,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 - 📦 [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O)
 - Install folder: **`install_first/r36sx/`** (same xml as v2.6)
-- Boot logo: R36SX (default)
+- Boot logo: included in this folder (no action needed)
 - Clones (R36HD, etc.) run a different kernel/DTB — see [R36SX clones](#r36sx-clones-r36hd-etc).
 </details>
 
@@ -42,7 +42,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 - 📦 [SF3000 Stock Backup (7z)](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/sf3000/SF3000_sdcard.7z)
 - Install folder: **`install_first/sf3000/`**
-- Boot logo: run the SF3000 fixer (see Step 3)
+- Boot logo: included in this folder (no action needed)
 </details>
 
 <details>
@@ -50,7 +50,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 - 📦 Stock backup: [Q-ta-s releases](https://github.com/Q-ta-s/q-ta-s.github.io/releases) — grab the SF3000 HD / v1.1 backup
 - Install folder: **`install_first/sf3000hd/`**
-- Boot logo: run the SF3000 fixer (see Step 3)
+- Boot logo: included in this folder (no action needed)
 - Shares the SF3500 display + driver, so it reports as **SF3500** in `log.txt` — that's expected.
 </details>
 
@@ -59,7 +59,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 - 📦 Stock backup: [Q-ta-s releases](https://github.com/Q-ta-s/q-ta-s.github.io/releases)
 - Install folder: **`install_first/sf3100/`**
-- Boot logo: run the SF3000 fixer (see Step 3)
+- Boot logo: included in this folder (no action needed)
 - SF3500-class hardware (same panel + driver); reports as **SF3500** in `log.txt`.
 </details>
 
@@ -68,7 +68,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 - 📦 Stock backup: [Q-ta-s releases](https://github.com/Q-ta-s/q-ta-s.github.io/releases)
 - Install folder: **`install_first/sf3500/`**
-- Boot logo: run the SF3000 fixer (see Step 3)
+- Boot logo: included in this folder (no action needed)
 </details>
 
 <details>
@@ -76,7 +76,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 - 📦 Stock backup: [Q-ta-s releases](https://github.com/Q-ta-s/q-ta-s.github.io/releases)
 - Install folder: **`install_first/gb350/`**
-- Boot logo: GB350 is a 640×480 4:3 panel — keep the default R36SX logo, do **not** run the SF3000 fixer.
+- Boot logo: included in this folder (640×480 — no action needed)
 </details>
 
 ---
@@ -97,24 +97,13 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 > [!NOTE]
 > The `install_first/<device>/` step is what makes it boot: it points the stock
-> menu's autorun at a dummy ROM (absolute path) and overrides one stock core
-> (`cores/libemu_md.so`) with the TreeFrogUI launcher. Your stock `icube`/`rkgame`
-> are never touched.
+> menu's autorun at a dummy ROM (absolute path), overrides one stock core
+> (`cores/libemu_md.so`) with the TreeFrogUI launcher, and drops in the
+> device-correct boot logo. Your stock `icube`/`rkgame` are never touched.
 
 ---
 
-## Step 3 — Boot logo (854×480 devices only)
-
-TreeFrogUI ships the **R36SX** boot logo by default (correct for R36SX and GB350).
-On the **854×480** devices (SF3000, SF3000 HD, SF3100, SF3500) swap in the
-SF3000-format logo from the SD card root:
-
-- **Windows:** double-click `fix_bootlogo_sf3000.bat`
-- **Linux/macOS:** run `./fix_bootlogo_sf3000.sh`
-
----
-
-## Step 4 — Boot & add games
+## Step 3 — Boot & add games
 
 1. Eject the SD card safely, insert it back into the device, power on. The stock
    menu loads, then jumps straight into TreeFrogUI.
@@ -141,8 +130,8 @@ Keep your clone's own boot files on top of the v2.7 setup:
 2. **Restore the [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O).**
 3. **Copy your clone's 3 boot files** into the v2.7 SD's `cubegm/`, overwriting.
    This pairs your clone's kernel + DTB with the v2.7 userland.
-4. **Do the standard TreeFrogUI install** on top (Steps 2–4). Treat the clone as an
-   R36SX — do **not** run the SF3000 boot-logo fixer.
+4. **Do the standard TreeFrogUI install** on top (Steps 2–3). Treat the clone as an
+   R36SX — use the `install_first/r36sx/` folder.
 
 > [!TIP]
 > Still won't boot? Your clone likely has yet another kernel/DTB revision.
@@ -163,19 +152,20 @@ Keep your clone's own boot files on top of the v2.7 setup:
 
 ---
 
-## PlayStation 1 BIOS (recommended)
+## PlayStation 1 BIOS (strongly recommended)
 
-PCSX4ALL works best with a **real PS1 BIOS**. Copy `scph1001.bin` to:
+PS1 has **two cores**, each with its own BIOS location — without a real BIOS they
+fall back to **HLE**, which causes graphical glitches and **broken/hanging
+memory-card saves** (e.g. Harvest Moon). Drop a real `scph1001.bin` in **both** so
+either core works (filenames are case-insensitive — `SCPH1001.BIN` is fine):
 
-```
-/mnt/sdcard/cubegm/cores/.pcsx4all/scph1001.bin
-```
+| Core | ROM folder | BIOS path |
+|------|-----------|-----------|
+| **PCSX4ALL** | `PS` | `/mnt/sdcard/cubegm/cores/.pcsx4all/scph1001.bin` |
+| **pcsx_rearmed** (lightrec) | `ps1r` | `/mnt/sdcard/cubegm/bios/scph1001.bin` |
 
-(The filename is matched case-insensitively, so `SCPH1001.BIN` also works.) If the
-file is absent, PCSX4ALL falls back to an HLE BIOS that causes **graphical
-glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest
-Moon). With the real BIOS, memory cards (`.pcsx4all/memcards/`) and compatibility
-work correctly.
+(pcsx_rearmed also accepts `scph5501.bin` / `scph7001.bin` in `cubegm/bios/`.) With
+the real BIOS, memory cards and compatibility work correctly.
 
 **Speed toggles:** for heavy 3D games (e.g. Tekken 3) that don't run full speed,
 open the PCSX4ALL menu with **`SELECT + L`** and turn on **Pixel Skip** and/or
@@ -196,12 +186,12 @@ much slower; `.hex` only).
 
 - **Black screen / only battery icon after the boot logo:** you didn't start from a
   clean stock card, or copied the wrong device's `install_first/`. Restore the stock
-  backup for your device (Step 1), then redo Steps 2–4.
+  backup for your device (Step 1), then redo Steps 2–3.
 - **Right analog stick doesn't do analog (R36SX):** expected, **cannot be fixed in
   software**. The R36SX wires the right stick to the **X / A / B / Y buttons** —
   on/off only, no analog value exposed to apps. TreeFrogUI mirrors the face buttons
   and filters drift. Hardware limitation, not a bug.
-- **Distorted / sideways boot logo (854×480 devices):** run `fix_bootlogo_sf3000.bat`
-  / `.sh` from the SD root (Step 3).
+- **Distorted / sideways boot logo:** make sure you copied **your device's**
+  `install_first/<device>/` folder (it includes the correct logo) — not another device's.
 - **Submit feedback anonymously:** [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header).
 - **GitHub Issues:** [repository](https://github.com/tzubertowski/treefrog-ui/issues).

@@ -92,7 +92,9 @@ cp    "$STAGE/cubegm/lib/libpng12.so.0"   "$OUT/cubegm/lib/libpng12.so.0"
 # 1b) Our extra assets the old release shipped (these are OURS, not stock OS):
 #     standalone frontends, BIOS, boot logos. NOT shipped: icube/icube_start
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
-for x in lgpt lgpt.elf pcsx4all pico286 xgame-logo.bmp xgame-logo-sf3000.bmp; do
+# (boot logos are NOT shipped here — install_first/<dev>/ provides the device-correct
+#  xgame-logo.bmp, so no fix_bootlogo script is needed.)
+for x in lgpt lgpt.elf pcsx4all pico286; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 [ -d "$STAGE/cubegm/bios" ] && cp -a "$STAGE/cubegm/bios" "$OUT/cubegm/bios"
@@ -101,7 +103,7 @@ done
 #     install steps live in the generated INSTALL.md below; old install.md is
 #     dropped as it documents the retired icube method).
 # User-facing docs come from the REPO ROOT (canonical, maintained) — the sdcard/
-# copies are stale stubs. Assets (cfg, boot-logo fixers) come from staging.
+# copies are stale stubs. Assets (picoarch.cfg) come from staging.
 for x in README.md install.md theme.md LICENSE.md; do
     [ -f "$x" ] && cp "$x" "$OUT/$x"
 done
@@ -109,7 +111,7 @@ mkdir -p "$OUT/docs"
 for x in cores.md release-notes.md onionos_gap.md ARCADE_CORES.md; do
     [ -f "$x" ] && cp "$x" "$OUT/docs/$x"
 done
-for x in picoarch.cfg fix_bootlogo_sf3000.sh fix_bootlogo_sf3000.bat; do
+for x in picoarch.cfg; do
     [ -e "$STAGE/$x" ] && cp -a "$STAGE/$x" "$OUT/$x"
 done
 
@@ -134,6 +136,14 @@ for dev in "${!STOCK[@]}"; do
     sed -i "s#<autorun file=\"[^\"]*\" driver=\"[^\"]*\" />#<autorun file=\"$DUMMY_ABS\" driver=\"\" />#" "$ST"
     grep -q "file=\"$DUMMY_ABS\" driver=\"\"" "$ST" || echo "  WARN[$dev]: autorun not patched"
     cp "$HIJACK_CORE" "$dst/cubegm/cores/$OVERRIDE_CORE"
+    #   c) device-correct boot logo (cubegm/xgame-logo.bmp). 640x480 panels (R36SX,
+    #      GB350) use the original; 854x480 panels (SF3000/HD/SF3100/SF3500) use the
+    #      SF3000-format one. Shipping it here replaces the old fix_bootlogo script.
+    case "$dev" in
+        r36sx|gb350) logo="$STAGE/cubegm/xgame-logo.bmp" ;;
+        *)           logo="$STAGE/cubegm/xgame-logo-sf3000.bmp" ;;
+    esac
+    [ -f "$logo" ] && cp "$logo" "$dst/cubegm/xgame-logo.bmp"
     echo "  install_first/$dev ready"
 done
 
