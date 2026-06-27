@@ -29,7 +29,7 @@ drop in your device's small `install_first/` folder.
   all share the same 854×480 panel and driver; **GB350** is a 640×480 4:3 device.
   Plus **R36SX v2.7** support.
 - **Per-device install guide.** Pick your device, grab its matching stock backup,
-  copy `cubegm/`+`frogui/`+`MAME/`, then your `install_first/<device>/` folder. The
+  copy `cubegm/`+`frogui/`+`roms/`+`MD/`, then your `install_first/<device>/` folder. The
   [install guide](install.md) has a tab per device with the backup links.
 
 ### 🕹️ New this release
