@@ -26,8 +26,10 @@ sync   # flush to FAT now: proves zhijack ran even if a later step hangs
 [ -f /tmp/cubegm/rkgame ] && [ ! -f /mnt/sdcard/rkgame_dec ] && \
     cp /tmp/cubegm/rkgame /mnt/sdcard/rkgame_dec && sync
 
-# (rkgame kill + watchdog already started at top.)
-echo "processes after kill:" >> "$LOG"; ps >> "$LOG" 2>&1; sync
+# rkgame is left ALIVE (running our hijack core, idle, not drawing). Killing it
+# makes icube respawn a fresh rkgame that redraws its menu over our framebuffer —
+# on the R36SX fb-write path that corrupts/flickers the screen after a few seconds.
+echo "processes at boot:" >> "$LOG"; ps >> "$LOG" 2>&1; sync
 
 export LD_LIBRARY_PATH=/mnt/sdcard/cubegm/lib:/mnt/sdcard/cubegm/usr/lib:$LD_LIBRARY_PATH
 
@@ -37,6 +39,14 @@ export LD_LIBRARY_PATH=/mnt/sdcard/cubegm/lib:/mnt/sdcard/cubegm/usr/lib:$LD_LIB
 [ -f /tmp/tfdevice.env ] && . /tmp/tfdevice.env && export TF_DEVICE TF_PANEL_W TF_PANEL_H TF_UI_SCALE
 echo "detected: TF_DEVICE=$TF_DEVICE panel=${TF_PANEL_W}x${TF_PANEL_H} driver=$TF_DRIVER" >> "$LOG"
 sync
+
+# rkgame handling is PER-DEVICE:
+#   R36SX (fb-write path): keep rkgame ALIVE. Killing it makes icube respawn a
+#     fresh rkgame that redraws its menu over our framebuffer → flicker/corruption
+#     after a few seconds. It stays idle (running our hijack core), so no conflict.
+#   Everyone else (SF3500/SF3000/HD/SF3100/GB350, disp_frame): kill it as before
+#     (proven; cubevol keeps the input pipeline alive independently).
+maybe_kill_rkgame() { [ "$TF_DEVICE" = "R36SX" ] || killall rkgame 2>/dev/null; }
 
 # CPU: force max-performance governor (helps every emulator).
 for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
@@ -62,7 +72,7 @@ ITER=0
 while true; do
     ITER=$((ITER+1))
     rm -f "$LAUNCH"
-    killall rkgame 2>/dev/null
+    maybe_kill_rkgame
     echo "--- iter $ITER: frogui ---" >> "$LOG"
     "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> "$LOG" 2>&1
     echo "frogui exited rc=$?" >> "$LOG"
@@ -72,7 +82,7 @@ while true; do
         ROM_PATH=$(sed -n '2p' "$LAUNCH")
         rm -f "$LAUNCH"
         if [ -n "$CORE_PATH" ] && [ -n "$ROM_PATH" ]; then
-            killall rkgame 2>/dev/null; sleep 0.3
+            maybe_kill_rkgame; sleep 0.3
             BIN="$PICOARCH"
             case "$CORE_PATH" in
                 *gpsp*|*pcsx*|*ps1*) [ -f "$PICOARCH_HI" ] && BIN="$PICOARCH_HI" ;;
