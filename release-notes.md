@@ -1,33 +1,27 @@
-Welcome to **TreeFrogUI** (v1.0.0): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
+Welcome to **TreeFrogUI** (v1.0.1): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> This is the **1.0 milestone**, the first build to support all six devices from one package. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.1 is a stability release on top of the 1.0 milestone (the first build to support all six devices from one package). It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.0
+## What's New in v1.0.1
 
-### 🎉 One build, six handhelds
+### 🩹 Stability release: the screen-corruption fixes
 
-TreeFrogUI is now a **single package that auto-detects your device at boot** and runs on **R36SX** (v2.6 & v2.7), **SF3000**, **SF3000 HD**, **SF3100**, **SF3500**, and **GB350**. No more per-device builds: flash the same files everywhere, then drop in your device's small `install_first/` folder.
+- **Fixed: glitchy, flickering, or ghosted menu.** On R36SX and SF3000 the stock launcher could wake up and draw its own menu over TreeFrogUI, causing tiled corruption, flicker, "screen noise with only the battery icon visible", or glitches after leaving the pause menu. The boot now fully freezes the stock launcher chain, so nothing can draw over TreeFrogUI anymore.
+- **Fixed: pause menu opening inside TreeFrogUI.** `SELECT + START` (and the other hotkeys) now work **only in games**. Pressing them in the TreeFrogUI menu no longer opens the pause menu or corrupts the screen.
+- **More reliable boot.** Runtime device detection is gone: each `install_first/<device>/` folder now ships a launcher preconfigured for exactly that device. If your boot log shows the wrong device name in `=== zhijack boot [device] ===`, you copied the wrong `install_first/` folder.
+- **SF3000: menu now uses the hardware display path** (same as SF3500), for a cleaner and faster picture.
 
-- **"sdcard is damaged" is fixed.** Devices that previously showed the **"sdcard is damaged"** screen (the bootloader-protected ones: SF3500-class and R36SX v2.7) now boot TreeFrogUI correctly.
-- **Unified, safe boot.** Instead of replacing the stock menu, TreeFrogUI now hooks the stock launcher's **own autorun**. The protected boot files (`icube`, `rkgame`) are **never touched**, which is what makes the protected devices work.
-- **Four new devices.** **SF3000 HD** (HDMI-out variant), **SF3100**, and **SF3500** all share the same 854×480 panel and driver; **GB350** is a 640×480 4:3 device. Plus **R36SX v2.7** support.
-- **Per-device install guide.** Pick your device, grab its matching stock backup, copy `cubegm/`, `frogui/`, `roms/`, `MD/`, then your `install_first/<device>/` folder. The [install guide](install.md) has a tab per device with the backup links.
-
-### 🕹️ New this release
-
-- **Screenshot hotkey.** **`SELECT + L1`** grabs whatever's on screen (game, menu, or pause screen) to a `.bmp` in the `screenshots/` folder on your card.
-- **Display fixes (854×480 devices).** Correct full-screen geometry, and the in-game pause menu no longer duplicates or tiles across the screen.
-- **Cleaner input.** Phantom and missed presses from the two-writer input race are filtered out, on top of the existing right-stick drift filtering.
+**Updating from v1.0.0:** copy `cubegm/` from the new package over your card, then copy your device's `install_first/<device>/` folder again (it now contains the new launcher). Your ROMs, saves, and settings are untouched.
 
 ---
 

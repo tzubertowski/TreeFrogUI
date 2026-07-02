@@ -111,7 +111,8 @@ Click your device to expand. Restore this onto your SD card first (format + copy
    `roms/FC/`). See the folder→system table in the [README](README.md#rom-folder-setup).
 
 **Diagnostics:** if something's off, check `/mnt/sdcard/log.txt` — look for
-`=== zhijack boot` and the detected device line.
+`=== zhijack boot [your-device]`. If the device name in brackets is wrong, you
+copied the wrong `install_first/` folder.
 
 ---
 

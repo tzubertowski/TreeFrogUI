@@ -10,8 +10,10 @@
 #
 # Layout:
 #   release/cubegm,frogui,roms,MD  universal payload (zero stock files) — copy to SD
-#   release/install_first/<dev>/ per-device rkgame xml (setting/config/filelist)
-#                                + the autorun trigger — user copies THEIR device's
+#   release/install_first/<dev>/ per-device: rkgame setting.xml autorun, hijack
+#                                core override, boot logo, and the device's
+#                                GENERATED zhijack.sh (hardcoded device facts,
+#                                no runtime detection) — user copies THEIR device's
 #   release/INSTALL.md           guide
 set -e
 cd "$(dirname "$0")"
@@ -55,6 +57,22 @@ declare -A STOCK=(
   [gb350]=/home/tomaszz/sf3000-work/GB350_sdcard/cubegm
 )
 
+# Per-device zhijack.sh facts (generated from hijack/zhijack.tpl.sh — NO runtime
+# device detection on the SD). Geometry from the stock dtbs. RKGAME policy:
+#   kill = killall before frogui/game (proven on SF-class disp_frame devices)
+#   stop = SIGSTOP once at boot (R36SX: killing → icube respawns rkgame which
+#          redraws over fb-write = flicker; leaving it RUNNING → it reacts to
+#          SELECT+START (stock exit-game hotkey) and draws over the screen)
+#            TF_DEVICE W   H   ASPECT ROT PRESENT   DRIVER            RKGAME
+declare -A HJ=(
+  [r36sx]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
+  [sf3000]="  SF3000   854 480 16 9   90  dispframe driver_sf3000.so  kill"
+  [sf3500]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
+  [sf3000hd]="SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
+  [sf3100]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
+  [gb350]="   GB350    640 480 4  3   0   dispframe driver_gb350.so   kill"
+)
+
 # 0) Refresh staging + build hijack core.
 # Guard: picoarch_hi (gpsp/pcsx dynarec build of the SAME source) must not be older
 # than picoarch — a stale hi carries old device detection → SF3500/HD mis-detect →
@@ -77,8 +95,8 @@ cp -a "$STAGE/cubegm/cores/." "$OUT/cubegm/cores/"
 for f in picoarch picoarch_hi driver_r36sx.so driver_sf3000.so driver_sf3500.so driver_gb350.so; do
     cp "$STAGE/cubegm/$f" "$OUT/cubegm/$f"
 done
-cp "$HIJACK/tf_detect.sh" "$OUT/cubegm/tf_detect.sh"   # tracked source (sdcard/ is gitignored)
-cp "$HIJACK/zhijack.sh" "$OUT/cubegm/zhijack.sh"; chmod +x "$OUT/cubegm/zhijack.sh"
+# zhijack.sh is per-device (generated into install_first/<dev>/cubegm/ below) —
+# the universal payload deliberately ships NO launcher and NO device detection.
 # only libs no stock device ships (SDL, png12). SD is FAT32 → NO symlinks: ship a
 # REAL libSDL-1.2.so.0 (the soname the binaries link), cp -L dereferences the
 # staging symlink. The .0.11.4 target name is not needed by anything.
@@ -144,6 +162,24 @@ for dev in "${!STOCK[@]}"; do
         *)           logo="$STAGE/cubegm/xgame-logo-sf3000.bmp" ;;
     esac
     [ -f "$logo" ] && cp "$logo" "$dst/cubegm/xgame-logo.bmp"
+    #   d) the device's zhijack.sh, generated from the template with everything
+    #      hardcoded (device, panel, driver, rkgame-kill policy). No DT probing.
+    read -r DEV PW PH ASPN ASPD ROT PRESENT DRIVER KILL <<< "${HJ[$dev]}"
+    [ -n "$DEV" ] || { echo "  WARN[$dev]: no HJ entry — no zhijack generated"; continue; }
+    sed -e "s/@DEV_LABEL@/$dev/g" -e "s/@DEV@/$DEV/g" -e "s/@PW@/$PW/g" \
+        -e "s/@PH@/$PH/g" -e "s/@ASPN@/$ASPN/g" -e "s/@ASPD@/$ASPD/g" \
+        -e "s/@ROT@/$ROT/g" -e "s/@PRESENT@/$PRESENT/g" -e "s/@DRIVER@/$DRIVER/g" \
+        "$HIJACK/zhijack.tpl.sh" > "$dst/cubegm/zhijack.sh"
+    # Boot block (freeze icube + kill rkgame) is universal. Loop killalls stay
+    # only on kill-policy devices (harmless no-op belt on SF-class); r36sx runs
+    # the tested no-loop-kill config.
+    if [ "$KILL" = stop ]; then
+        sed -i '/#@KILL@/d' "$dst/cubegm/zhijack.sh"
+    else
+        sed -i 's/ #@KILL@//' "$dst/cubegm/zhijack.sh"
+    fi
+    grep -q '@' "$dst/cubegm/zhijack.sh" && grep -o '@[A-Z_]*@' "$dst/cubegm/zhijack.sh" | sort -u | sed "s/^/  WARN[$dev]: unfilled /"
+    chmod +x "$dst/cubegm/zhijack.sh"
     echo "  install_first/$dev ready"
 done
 
@@ -159,7 +195,8 @@ stays happy.
 1. Start from a **stock card** for your device (if your card has an older TreeFrogUI
    that replaced `cubegm/icube`, restore the stock `icube` first).
 2. Copy `cubegm/`, `frogui/`, `roms/`, `MD/` onto the SD root (merge/overwrite).
-3. Copy the contents of **`install_first/<your-device>/`** onto the SD root too:
+3. Copy the contents of **`install_first/<your-device>/`** onto the SD root too
+   (REQUIRED: it carries the launcher script and autorun setup for your device):
    - `install_first/r36sx/`    → R36SX (v2.6 and v2.7 — same xml)
    - `install_first/sf3000/`   → SF3000
    - `install_first/sf3500/`   → SF3500
@@ -176,7 +213,32 @@ EOF
 syms=$(find "$OUT" -type l)
 if [ -n "$syms" ]; then echo "ERROR: symlinks in release (FAT32 can't store these):"; echo "$syms"; exit 1; fi
 
+# 5) Release sanity checks — fail loudly instead of shipping a broken package.
+fail() { echo "ERROR: $1"; exit 1; }
+[ -f "$OUT/cubegm/zhijack.sh" ] && fail "payload must not ship a generic zhijack.sh"
+[ -f "$OUT/cubegm/tf_detect.sh" ] && fail "payload must not ship tf_detect.sh (detection retired)"
+# every device: boot block = freeze icube + kill rkgame (STOP no-ops without icube)
+for dev in "${!STOCK[@]}"; do
+    grep -q 'kill -STOP $(pidof icube)' "$OUT/install_first/$dev/cubegm/zhijack.sh" \
+        || fail "$dev zhijack must SIGSTOP icube at boot"
+done
+# r36sx: boot killall only, no loop kills (tested config)
+[ "$(grep -c 'killall rkgame' "$OUT/install_first/r36sx/cubegm/zhijack.sh")" = 1 ] \
+    || fail "r36sx zhijack must contain exactly 1 killall rkgame (boot block only)"
+for dev in sf3000 sf3500 sf3000hd sf3100 gb350; do
+    [ "$(grep -c 'killall rkgame' "$OUT/install_first/$dev/cubegm/zhijack.sh")" = 3 ] \
+        || fail "$dev zhijack must contain 3 killall rkgame (boot + 2 loop)"
+done
+for dev in "${!STOCK[@]}"; do
+    [ -x "$OUT/install_first/$dev/cubegm/zhijack.sh" ] || fail "missing zhijack for $dev"
+    [ -f "$OUT/install_first/$dev/cubegm/cores/$OVERRIDE_CORE" ] || fail "missing hijack core for $dev"
+done
+[ -f "$OUT/$DUMMY_REL" ] || fail "missing autorun dummy rom $DUMMY_REL"
+
 echo
-echo "=== $OUT ready (FAT32-safe, no symlinks) ==="
+echo "=== $OUT ready (FAT32-safe, no symlinks, sanity checks passed) ==="
 du -sh "$OUT"
 find "$OUT" -maxdepth 3 -type d | sort
+echo
+last=$(ls TreeFrogUI_v*_?.zip 2>/dev/null | sort | tail -1)
+echo "To package: zip -qr TreeFrogUI_vX.Y.Z_?.zip $OUT   (latest existing: ${last:-none})"
