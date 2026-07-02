@@ -181,6 +181,12 @@ for dev in "${!STOCK[@]}"; do
     else
         sed -i 's/ #@KILL@//' "$dst/cubegm/zhijack.sh"
     fi
+    # R36SX-only block (v2.7 boot-decrypted driver preference)
+    if [ "$dev" = r36sx ]; then
+        sed -i 's/ #@R36@//' "$dst/cubegm/zhijack.sh"
+    else
+        sed -i '/#@R36@/d' "$dst/cubegm/zhijack.sh"
+    fi
     grep -q '@' "$dst/cubegm/zhijack.sh" && grep -o '@[A-Z_]*@' "$dst/cubegm/zhijack.sh" | sort -u | sed "s/^/  WARN[$dev]: unfilled /"
     chmod +x "$dst/cubegm/zhijack.sh"
     echo "  install_first/$dev ready"

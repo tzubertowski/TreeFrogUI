@@ -39,6 +39,17 @@ TF_DRIVER=/mnt/sdcard/cubegm/@DRIVER@
 EOF
 export TF_DEVICE=@DEV@ TF_PANEL_W=@PW@ TF_PANEL_H=@PH@ TF_UI_SCALE=150
 
+# R36SX v2.7 ships an ENCRYPTED driver.so which the boot decrypts to /tmp/cubegm/. #@R36@
+# Prefer the device's OWN decrypted driver (kernel-matched) over the bundled v2.6 #@R36@
+# one: the v2.6 driver SIGBUSes in hcge_open on the v2.7 kernel (kseg pointer).   #@R36@
+# v2.6 has no decrypt step, so this is a no-op there. One-shot dump for bundling. #@R36@
+if [ -f /tmp/cubegm/driver.so ]; then #@R36@
+    sed -i 's|^TF_DRIVER=.*|TF_DRIVER=/tmp/cubegm/driver.so|' /tmp/tfdevice.env #@R36@
+    echo "using boot-decrypted /tmp/cubegm/driver.so (v2.7)" >> "$LOG" #@R36@
+    [ ! -f /mnt/sdcard/driver_r36sx27_dec.so ] && cp /tmp/cubegm/driver.so /mnt/sdcard/driver_r36sx27_dec.so #@R36@
+    sync #@R36@
+fi #@R36@
+
 echo "processes at boot:" >> "$LOG"; ps >> "$LOG" 2>&1; sync
 
 export LD_LIBRARY_PATH=/mnt/sdcard/cubegm/lib:/mnt/sdcard/cubegm/usr/lib:$LD_LIBRARY_PATH
