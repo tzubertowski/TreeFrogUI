@@ -102,6 +102,9 @@ done
 # staging symlink. The .0.11.4 target name is not needed by anything.
 cp -L "$STAGE/cubegm/lib/libSDL-1.2.so.0" "$OUT/cubegm/lib/libSDL-1.2.so.0"
 cp    "$STAGE/cubegm/lib/libpng12.so.0"   "$OUT/cubegm/lib/libpng12.so.0"
+# ppsspp_libretro.so links libpng16 (not the png12 the rest of the world uses);
+# its assets ride along automatically via the cubegm/bios/PPSSPP staging copy.
+cp    "$STAGE/cubegm/lib/libpng16.so.16"  "$OUT/cubegm/lib/libpng16.so.16"
 [ -d "$STAGE/frogui" ] && cp -a "$STAGE/frogui" "$OUT/frogui"
 # roms/ folder structure (the system subfolders FrogUI expects: gba, nes, snes…).
 # Ships empty folders + their .res/filelist scaffolding; users drop ROMs in.
