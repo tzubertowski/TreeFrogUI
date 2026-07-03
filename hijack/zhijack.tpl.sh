@@ -39,13 +39,17 @@ TF_DRIVER=/mnt/sdcard/cubegm/@DRIVER@
 EOF
 export TF_DEVICE=@DEV@ TF_PANEL_W=@PW@ TF_PANEL_H=@PH@ TF_UI_SCALE=150
 
-# R36SX v2.7 detection: its stock cubegm/driver.so is ENCRYPTED (no ELF magic;   #@R36@
-# v2.6's is a plain ELF). On the v2.7 kernel our bundled v2.6 driver SIGBUSes in  #@R36@
-# hcge_open (driver pool hands back a kseg pointer), so v2.7 gets a variant with  #@R36@
-# hcge_open stubbed to NULL: the driver treats the 2D engine as unavailable.      #@R36@
-if [ "$(head -c4 /mnt/sdcard/cubegm/driver.so 2>/dev/null)" != "$(printf '\177ELF')" ] && [ -f /mnt/sdcard/cubegm/driver_r36sx27.so ]; then #@R36@
-    sed -i 's|^TF_DRIVER=.*|TF_DRIVER=/mnt/sdcard/cubegm/driver_r36sx27.so|' /tmp/tfdevice.env #@R36@
-    echo "v2.7 detected (encrypted stock driver): using driver_r36sx27.so" >> "$LOG"; sync #@R36@
+# R36SX driver self-selection. Some kernels (v2.7-class, but firmware traits    #@R36@
+# vary WITHIN 2.6/2.7, so no offline identification works) make the full v2.6   #@R36@
+# driver SIGBUS in hcge_open. Measure instead of guessing: run the full driver; #@R36@
+# if frogui dies with SIGBUS twice, switch permanently (marker file on SD) to   #@R36@
+# driver_r36sx27.so, the variant with the crashing 2D engine stubbed out.       #@R36@
+DRV_SAFE=/mnt/sdcard/cubegm/driver_r36sx27.so #@R36@
+DRV_FLAG=/mnt/sdcard/cubegm/driver27.flag #@R36@
+SIGBUS_N=0 #@R36@
+if [ -f "$DRV_FLAG" ] && [ -f "$DRV_SAFE" ]; then #@R36@
+    sed -i "s|^TF_DRIVER=.*|TF_DRIVER=$DRV_SAFE|" /tmp/tfdevice.env #@R36@
+    echo "driver: SAFE variant (previous boots hit SIGBUS)" >> "$LOG" #@R36@
 fi #@R36@
 
 echo "processes at boot:" >> "$LOG"; ps >> "$LOG" 2>&1; sync
@@ -77,7 +81,19 @@ while true; do
     killall rkgame 2>/dev/null #@KILL@
     echo "--- iter $ITER: frogui ---" >> "$LOG"
     "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> "$LOG" 2>&1
-    echo "frogui exited rc=$?" >> "$LOG"
+    RC=$?
+    echo "frogui exited rc=$RC" >> "$LOG"
+    # SIGBUS in the menu with the full driver → count, and after 2 strikes    #@R36@
+    # flip to the safe driver for this and every future boot.                 #@R36@
+    if [ "$RC" = 138 ] && [ ! -f "$DRV_FLAG" ] && [ -f "$DRV_SAFE" ]; then #@R36@
+        SIGBUS_N=$((SIGBUS_N+1)) #@R36@
+        if [ "$SIGBUS_N" -ge 2 ]; then #@R36@
+            touch "$DRV_FLAG" #@R36@
+            sed -i "s|^TF_DRIVER=.*|TF_DRIVER=$DRV_SAFE|" /tmp/tfdevice.env #@R36@
+            echo "driver: 2x SIGBUS with full driver → switching to SAFE variant permanently" >> "$LOG" #@R36@
+            sync #@R36@
+        fi #@R36@
+    fi #@R36@
 
     if [ -f "$LAUNCH" ]; then
         CORE_PATH=$(sed -n '1p' "$LAUNCH")

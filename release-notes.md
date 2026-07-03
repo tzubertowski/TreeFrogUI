@@ -18,6 +18,7 @@ Welcome to **TreeFrogUI** (v1.0.3): one build for **six** handhelds: R36SX (v2.6
 
 - **Auto-resume can no longer soft-brick your boot.** If the last-played marker pointed at a ROM that no longer exists (or a game that dies instantly), every boot relaunched it forever: black screen, only fixable by editing the card on a PC. Auto-resume now validates that the game actually exists before resuming, and after two failed resume attempts in one boot it clears the marker and drops you safely into the menu.
 - **Menu no longer crash-loops when the `roms` folder is missing.** Cards without a `roms/` folder (or with it named `ROMS`, which some card formats treat as a different name) crashed before the game list could ever appear. The menu now accepts `roms/` or `ROMS/`, creates the folder if it is missing entirely, and always shows at least the Settings row.
+- **R36SX: display driver now selects itself.** Hardware revisions vary more than version numbers suggest (some 2.6 and 2.7 units share traits), so the previous v2.7 detection broke boot for some 2.7 owners (black screen with only the battery icon). TreeFrogUI now simply tries the full driver, and if it crashes twice, switches permanently to the safe driver on that card. Worst case you see two brief flickers on the very first boot, then every boot after is clean. Delete `cubegm/driver27.flag` if you ever want it to re-test the full driver.
 
 ### 🙏 Credits
 
