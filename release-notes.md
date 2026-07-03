@@ -1,29 +1,28 @@
-Welcome to **TreeFrogUI** (v1.0.2): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
+Welcome to **TreeFrogUI** (v1.0.3): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.2 polishes the UI (thumbnails, defaults) and continues the stability work of the 1.0 line. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.3 is a small stability release on top of the 1.0 line. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.2
-
-### 🖼️ Box art, finally done right
-
-- **Drop-in PNG/JPG thumbnails.** Put boxart in `roms/<system>/.res/<rom name>.png` (or `.jpg`) - no conversion, any resolution, auto-downscaled. **PNG transparency is fully supported**: die-cut art composites over your actual background instead of a gray card, and dark artwork no longer gets holes punched in it (the old renderer treated pure black as transparent). Preview area is bigger too (250×250). See [theme.md](theme.md#game-thumbnails).
-- **Core picker is now dynamic.** The per-game / per-folder core picker (SELECT) lists every core actually present in `cubegm/cores/`, so a newly dropped-in core is selectable immediately, no TreeFrogUI update needed.
-- **Cleaner browsing defaults.** UI animations and Hide Empty Folders now ship **on** (change them in Settings anytime), and play time is shown where it belongs: in **Recents**.
+## What's New in v1.0.3
 
 ### 🩹 Fixes
 
-- **R36SX: menu scroll shimmer fixed.** Fonts/pixels no longer flicker for a few frames while scrolling (the display engine could scan a frame that was still being drawn).
-- **R36SX v2.7: experimental crash fix.** v2.7 units could crash-loop at boot (the v2.6 display driver is incompatible with the v2.7 kernel's 2D engine). v2.7 is now auto-detected and gets a patched driver with the crashing subsystem disabled. Feedback from v2.7 owners very welcome.
+- **Auto-resume can no longer soft-brick your boot.** If the last-played marker pointed at a ROM that no longer exists (or a game that dies instantly), every boot relaunched it forever: black screen, only fixable by editing the card on a PC. Auto-resume now validates that the game actually exists before resuming, and after two failed resume attempts in one boot it clears the marker and drops you safely into the menu.
+- **Menu no longer crash-loops when the `roms` folder is missing.** Cards without a `roms/` folder (or with it named `ROMS`, which some card formats treat as a different name) crashed before the game list could ever appear. The menu now accepts `roms/` or `ROMS/`, creates the folder if it is missing entirely, and always shows at least the Settings row.
+
+### 🙏 Credits
+
+- **[@patrick-oliveira-ch](https://github.com/patrick-oliveira-ch)** for the excellent auto-resume soft-brick report, exact repro, log evidence, and the safeguard design.
+- **[@Jankosx7](https://github.com/Jankosx7)** for pinpointing the missing/`ROMS`-cased roms folder crash, including the exact functions at fault.
 
 **Updating from v1.0.x:** copy `cubegm/` and `frogui/` from the new package over your card, then copy your device's `install_first/<device>/` folder again. Your ROMs, saves, and settings are untouched.
 
