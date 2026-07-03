@@ -227,16 +227,12 @@ Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide]
 
 **Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it.
 
-**Game art / box art / cover / thumbnail** (the picture shown for each game) - put the image in a hidden `.res/` folder next to the ROM, named after the ROM with a `.rgb565` extension:
+**Game art / box art / cover / thumbnail** (the picture shown for each game) - drop a **PNG / JPG / BMP** in a hidden `.res/` folder next to the ROM, named after the ROM:
 ```
 roms/GBA/Advance Wars.gba
-roms/GBA/.res/Advance Wars.rgb565    ← the box art
+roms/GBA/.res/Advance Wars.png    ← the box art
 ```
-Convert any cover image with:
-```
-ffmpeg -i cover.png -vf scale=160:160 -f rawvideo -pix_fmt rgb565le "Advance Wars.rgb565"
-```
-(Rule: `<rom folder>/.res/<rom name without extension>.rgb565`.)
+No conversion needed - use **PNG or JPG**, any resolution, big images are downscaled automatically (max shown size 250×200), and PNG transparency is supported. Rule: `<rom folder>/.res/<rom name without extension>.png` (or `.jpg`). Old raw `.rgb565` thumbnail sets still work - see [theme.md](theme.md#game-thumbnails).
 
 **Background image** (per system / screen) - drop a `854×480` `.png`/`.jpg`/`.bmp` in **`frogui/`**, named after the screen or folder:
 ```
@@ -408,7 +404,7 @@ treefrog-ui/
 > One package now supports **six devices**, auto-detected at boot from the device
 > tree: **R36SX** (v2.6 / v2.7), **SF3000**, **SF3000 HD**, **SF3100**, **SF3500**,
 > and **GB350**. SF3000 HD, SF3100 and SF3500 share the same 854×480 panel + driver
-> (HD/SF3100 report as "SF3500" in the log — expected). GB350 is a 640×480 4:3
+> (HD/SF3100 report as "SF3500" in the log, expected). GB350 is a 640×480 4:3
 > device. See the [install guide](install.md) for the per-device stock backup and
 > the matching `install_first/<device>/` folder.
 
@@ -417,7 +413,7 @@ treefrog-ui/
 ## Porting TreeFrogUI to other devices
 
 Want TreeFrogUI on a device that isn't supported yet? SF3000 V3 (bootloader
-protection), the **SF3000 Pro** (different firmware entirely — no rkgame stack, so
+protection), the **SF3000 Pro** (different firmware entirely, no rkgame stack, so
 the autorun hijack doesn't apply), other HDMI-out clones, and more are on the
 wishlist.
 

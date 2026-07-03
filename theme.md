@@ -47,38 +47,30 @@ Place your image files in `/mnt/sdcard/frogui/` using the following naming conve
 
 ## Game Thumbnails
 
-TreeFrogUI shows a per-game preview image in the right-hand panel while you browse a ROM list. Thumbnails are opt-in — add an image for any game you like; games without one simply show no preview.
+TreeFrogUI shows a per-game preview image in the right-hand panel while you browse a ROM list. Thumbnails are opt-in: add an image for any game you like; games without one simply show no preview.
 
 ### Image Placement & Naming
 
-For each game, place its thumbnail in a hidden `.res/` folder **next to the ROM**, named after the ROM file with a `.rgb565` extension (no original file extension):
+For each game, place its thumbnail in a hidden `.res/` folder **next to the ROM**, named after the ROM file with the original extension replaced by the image's own:
 
 ```
-roms/GBA/Advance Wars.gba          ← the game
-roms/GBA/.res/Advance Wars.rgb565  ← its thumbnail
+roms/GBA/Advance Wars.gba        ← the game
+roms/GBA/.res/Advance Wars.png   ← its thumbnail
 ```
 
-So the rule is: `<rom folder>/.res/<rom filename without extension>.rgb565`.
+So the rule is: `<rom folder>/.res/<rom filename without extension>.<png|jpg|jpeg|bmp>`.
 
-### Format & Sizes
+### Formats & Sizes
 
-Thumbnails are stored as **headerless raw RGB565** (little-endian) — not PNG/JPG. The image dimensions are detected from the file size, which must be exactly `width × height × 2` bytes. Supported sizes:
+**Use a PNG or JPG** - no conversion needed. Any resolution works: images larger than 250×200 are downscaled automatically (aspect preserved), so boxart straight from a scraper works as-is. **PNG transparency is supported**: transparent areas blend into the preview card's background, so logo-style or die-cut boxart looks right.
 
-| Size | Notes |
-|---|---|
-| `160×160` | **Recommended** |
-| `64×64`, `128×128`, `200×200` | Square alternatives |
-| `250×200`, `200×250` | Landscape / portrait |
+Tips:
+- Keep files reasonably sized (a few hundred KB): they decode on the fly while you scroll.
+- The preview area tops out at 250×200, so anything much bigger than ~500px wide is wasted bytes.
 
-### Converting an image to `.rgb565`
+Also accepted: `.jpeg`, `.bmp`, and (for older thumbnail sets) headerless raw `.rgb565` files as a last-resort fallback - fixed sizes only (`64×64`, `128×128`, `160×160`, `200×200`, `250×200`, `200×250`), creatable with `ffmpeg -f rawvideo -pix_fmt rgb565le`.
 
-Use `ffmpeg` (simplest) to resize and convert artwork to the raw format:
-
-```sh
-ffmpeg -i cover.png -vf scale=160:160 -f rawvideo -pix_fmt rgb565le "Advance Wars.rgb565"
-```
-
-Then drop the result into the game's `.res/` folder. (In-game **savestate** thumbnails in the pause menu are captured automatically and need no setup — this section is only for ROM-browser previews.)
+(In-game **savestate** thumbnails in the pause menu are captured automatically and need no setup - this section is only for ROM-browser previews.)
 
 ---
 

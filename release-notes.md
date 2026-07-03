@@ -1,27 +1,31 @@
-Welcome to **TreeFrogUI** (v1.0.1): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
+Welcome to **TreeFrogUI** (v1.0.2): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.1 is a stability release on top of the 1.0 milestone (the first build to support all six devices from one package). It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.2 polishes the UI (thumbnails, defaults) and continues the stability work of the 1.0 line. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.1
+## What's New in v1.0.2
 
-### 🩹 Stability release: the screen-corruption fixes
+### 🖼️ Box art, finally done right
 
-- **Fixed: glitchy, flickering, or ghosted menu.** On R36SX and SF3000 the stock launcher could wake up and draw its own menu over TreeFrogUI, causing tiled corruption, flicker, "screen noise with only the battery icon visible", or glitches after leaving the pause menu. The boot now fully freezes the stock launcher chain, so nothing can draw over TreeFrogUI anymore.
-- **Fixed: pause menu opening inside TreeFrogUI.** `SELECT + START` (and the other hotkeys) now work **only in games**. Pressing them in the TreeFrogUI menu no longer opens the pause menu or corrupts the screen.
-- **More reliable boot.** Runtime device detection is gone: each `install_first/<device>/` folder now ships a launcher preconfigured for exactly that device. If your boot log shows the wrong device name in `=== zhijack boot [device] ===`, you copied the wrong `install_first/` folder.
-- **SF3000: menu now uses the hardware display path** (same as SF3500), for a cleaner and faster picture.
+- **Drop-in PNG/JPG thumbnails.** Put boxart in `roms/<system>/.res/<rom name>.png` (or `.jpg`) - no conversion, any resolution, auto-downscaled. **PNG transparency is fully supported**: die-cut art composites over your actual background instead of a gray card, and dark artwork no longer gets holes punched in it (the old renderer treated pure black as transparent). Preview area is bigger too (250×250). See [theme.md](theme.md#game-thumbnails).
+- **Core picker is now dynamic.** The per-game / per-folder core picker (SELECT) lists every core actually present in `cubegm/cores/`, so a newly dropped-in core is selectable immediately, no TreeFrogUI update needed.
+- **Cleaner browsing defaults.** UI animations and Hide Empty Folders now ship **on** (change them in Settings anytime), and play time is shown where it belongs: in **Recents**.
 
-**Updating from v1.0.0:** copy `cubegm/` from the new package over your card, then copy your device's `install_first/<device>/` folder again (it now contains the new launcher). Your ROMs, saves, and settings are untouched.
+### 🩹 Fixes
+
+- **R36SX: menu scroll shimmer fixed.** Fonts/pixels no longer flicker for a few frames while scrolling (the display engine could scan a frame that was still being drawn).
+- **R36SX v2.7: experimental crash fix.** v2.7 units could crash-loop at boot (the v2.6 display driver is incompatible with the v2.7 kernel's 2D engine). v2.7 is now auto-detected and gets a patched driver with the crashing subsystem disabled. Feedback from v2.7 owners very welcome.
+
+**Updating from v1.0.x:** copy `cubegm/` and `frogui/` from the new package over your card, then copy your device's `install_first/<device>/` folder again. Your ROMs, saves, and settings are untouched.
 
 ---
 
