@@ -39,15 +39,13 @@ TF_DRIVER=/mnt/sdcard/cubegm/@DRIVER@
 EOF
 export TF_DEVICE=@DEV@ TF_PANEL_W=@PW@ TF_PANEL_H=@PH@ TF_UI_SCALE=150
 
-# R36SX v2.7 ships an ENCRYPTED driver.so which the boot decrypts to /tmp/cubegm/. #@R36@
-# Prefer the device's OWN decrypted driver (kernel-matched) over the bundled v2.6 #@R36@
-# one: the v2.6 driver SIGBUSes in hcge_open on the v2.7 kernel (kseg pointer).   #@R36@
-# v2.6 has no decrypt step, so this is a no-op there. One-shot dump for bundling. #@R36@
-if [ -f /tmp/cubegm/driver.so ]; then #@R36@
-    sed -i 's|^TF_DRIVER=.*|TF_DRIVER=/tmp/cubegm/driver.so|' /tmp/tfdevice.env #@R36@
-    echo "using boot-decrypted /tmp/cubegm/driver.so (v2.7)" >> "$LOG" #@R36@
-    [ ! -f /mnt/sdcard/driver_r36sx27_dec.so ] && cp /tmp/cubegm/driver.so /mnt/sdcard/driver_r36sx27_dec.so #@R36@
-    sync #@R36@
+# R36SX v2.7 detection: its stock cubegm/driver.so is ENCRYPTED (no ELF magic;   #@R36@
+# v2.6's is a plain ELF). On the v2.7 kernel our bundled v2.6 driver SIGBUSes in  #@R36@
+# hcge_open (driver pool hands back a kseg pointer), so v2.7 gets a variant with  #@R36@
+# hcge_open stubbed to NULL: the driver treats the 2D engine as unavailable.      #@R36@
+if [ "$(head -c4 /mnt/sdcard/cubegm/driver.so 2>/dev/null)" != "$(printf '\177ELF')" ] && [ -f /mnt/sdcard/cubegm/driver_r36sx27.so ]; then #@R36@
+    sed -i 's|^TF_DRIVER=.*|TF_DRIVER=/mnt/sdcard/cubegm/driver_r36sx27.so|' /tmp/tfdevice.env #@R36@
+    echo "v2.7 detected (encrypted stock driver): using driver_r36sx27.so" >> "$LOG"; sync #@R36@
 fi #@R36@
 
 echo "processes at boot:" >> "$LOG"; ps >> "$LOG" 2>&1; sync

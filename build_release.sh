@@ -92,7 +92,7 @@ mkdir -p "$OUT/cubegm/cores" "$OUT/cubegm/lib" "$OUT/$(dirname "$DUMMY_REL")"
 
 # 1) Universal payload — our files only, NO stock, NO icube.
 cp -a "$STAGE/cubegm/cores/." "$OUT/cubegm/cores/"
-for f in picoarch picoarch_hi driver_r36sx.so driver_sf3000.so driver_sf3500.so driver_gb350.so; do
+for f in picoarch picoarch_hi driver_r36sx.so driver_r36sx27.so driver_sf3000.so driver_sf3500.so driver_gb350.so; do
     cp "$STAGE/cubegm/$f" "$OUT/cubegm/$f"
 done
 # zhijack.sh is per-device (generated into install_first/<dev>/cubegm/ below) —
