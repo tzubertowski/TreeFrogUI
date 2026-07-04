@@ -110,9 +110,12 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 2. Put ROMs in the matching subfolders under `roms/` (e.g. `roms/GBA/`,
    `roms/FC/`). See the folder→system table in the [README](README.md#rom-folder-setup).
 
-**Diagnostics:** if something's off, check `/mnt/sdcard/log.txt` — look for
-`=== zhijack boot [your-device]`. If the device name in brackets is wrong, you
-copied the wrong `install_first/` folder.
+**Diagnostics:** logging is **off by default** (to spare your SD card). To turn it
+on, create an empty file `log.txt` at the root of the card and reboot, then check
+`/mnt/sdcard/log.txt`: look for `=== zhijack boot [your-device]`. If the device
+name in brackets is wrong, you copied the wrong `install_first/` folder. Delete
+`log.txt` to turn logging back off. See the
+[Troubleshooting & logs](README.md#troubleshooting--logs) section for details.
 
 ---
 

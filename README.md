@@ -284,6 +284,25 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 
 ---
 
+## Troubleshooting & logs
+
+TreeFrogUI keeps **logging off by default** so it doesn't wear out your SD card. If something misbehaves and you want to capture what happened (or a maintainer asks for a log), turn logging on:
+
+1. Power off and take the SD card out, put it in your PC.
+2. At the **root of the card** (same level as `cubegm`, `roms`, `frogui`), create an **empty file named `log.txt`**.
+   - Windows: right-click → New → Text Document, name it exactly `log.txt` (make sure it's not `log.txt.txt`).
+   - Mac/Linux: `touch log.txt` at the card root.
+3. Put the card back, boot, and reproduce the problem.
+4. Power off, bring the card back to your PC, and read/share **`/log.txt`** (the previous boot is kept as `log.txt.prev`).
+
+The log records the boot sequence, which device was detected, the display path (`use_hw=1` hardware / `use_hw=0` software), and any crashes with their exit codes.
+
+**To turn logging back off:** just delete `log.txt` from the card. No file = no logging = no extra SD writes.
+
+> If you never create `log.txt`, nothing is written and there's zero logging overhead, which is how the release ships.
+
+---
+
 ## Building from source
 
 ### Requirements
