@@ -74,6 +74,30 @@ PICOARCH_HI=/mnt/sdcard/cubegm/picoarch_hi
 FROGUI_CORE=/mnt/sdcard/cubegm/cores/frogui_libretro.so
 LAUNCH=/tmp/frogui_launch.txt
 
+# Self-healing HW-render fallback (disp_frame devices, non-R36SX). A few units  #@HW@
+# can't drive the HW path and picoarch ABORTS on it (SIGABRT/SIGBUS) before it  #@HW@
+# ever renders a frame. Crash-only: count such crashes, and after 2 strikes in  #@HW@
+# one boot switch permanently to software (marker on SD). Crash-only cannot     #@HW@
+# false-trigger on a healthy unit (which never crashes). Once HW has proven     #@HW@
+# itself (/tmp/hw_rendered), later crashes are game bugs, not HW, so ignored.    #@HW@
+FORCE_SW_FLAG=/mnt/sdcard/cubegm/force_sw.flag #@HW@
+HW_CRASH_N=0 #@HW@
+if [ -f "$FORCE_SW_FLAG" ]; then export TF_FORCE_SW=1; echo "display: SW forced (marker present)" >> "$LOG"; fi #@HW@
+hw_crash_check() { #@HW@
+    [ -n "$FORCE_SW_FLAG" ] || return 0 #@HW@
+    [ -f "$FORCE_SW_FLAG" ] && return 0 #@HW@
+    [ -f /tmp/hw_rendered ] && return 0 #@HW@
+    [ "$1" -ge 129 ] 2>/dev/null || return 0 #@HW@
+    HW_CRASH_N=$((HW_CRASH_N+1)) #@HW@
+    echo "HW crash rc=$1 (strike $HW_CRASH_N, before any HW frame)" >> "$LOG" #@HW@
+    if [ "$HW_CRASH_N" -ge 2 ]; then #@HW@
+        touch "$FORCE_SW_FLAG"; export TF_FORCE_SW=1; sync #@HW@
+        echo "2x HW crash → forcing software rendering permanently" >> "$LOG" #@HW@
+    fi #@HW@
+} #@HW@
+# R36SX (no FORCE_SW_FLAG): make hw_crash_check a harmless no-op.
+[ -n "$FORCE_SW_FLAG" ] || hw_crash_check() { :; }
+
 ITER=0
 while true; do
     ITER=$((ITER+1))
@@ -83,6 +107,7 @@ while true; do
     "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> "$LOG" 2>&1
     RC=$?
     echo "frogui exited rc=$RC" >> "$LOG"
+    hw_crash_check "$RC"
     # SIGBUS in the menu with the full driver → count, and after 2 strikes    #@R36@
     # flip to the safe driver for this and every future boot.                 #@R36@
     if [ "$RC" = 138 ] && [ ! -f "$DRV_FLAG" ] && [ -f "$DRV_SAFE" ]; then #@R36@
@@ -108,7 +133,9 @@ while true; do
             esac
             echo "--- iter $ITER: game [$CORE_PATH] via $BIN ---" >> "$LOG"
             "$BIN" "$CORE_PATH" "$ROM_PATH" >> "$LOG" 2>&1
-            echo "game exited rc=$?" >> "$LOG"
+            GRC=$?
+            echo "game exited rc=$GRC" >> "$LOG"
+            hw_crash_check "$GRC"
         fi
     fi
     sleep 0.2

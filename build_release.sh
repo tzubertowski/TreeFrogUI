@@ -181,11 +181,13 @@ for dev in "${!STOCK[@]}"; do
     else
         sed -i 's/ #@KILL@//' "$dst/cubegm/zhijack.sh"
     fi
-    # R36SX-only block (v2.7 boot-decrypted driver preference)
+    # R36SX-only block (@R36@: driver self-selection). Non-R36SX-only block
+    # (@HW@: HW-render watchdog → force SW). R36SX renders via fb-write and has
+    # no SW-transpose fallback tuned for its panel, so it never force-SWs.
     if [ "$dev" = r36sx ]; then
-        sed -i 's/ #@R36@//' "$dst/cubegm/zhijack.sh"
+        sed -i -e 's/ #@R36@//' -e '/#@HW@/d' "$dst/cubegm/zhijack.sh"
     else
-        sed -i '/#@R36@/d' "$dst/cubegm/zhijack.sh"
+        sed -i -e '/#@R36@/d' -e 's/ #@HW@//' "$dst/cubegm/zhijack.sh"
     fi
     grep -q '@' "$dst/cubegm/zhijack.sh" && grep -o '@[A-Z_]*@' "$dst/cubegm/zhijack.sh" | sort -u | sed "s/^/  WARN[$dev]: unfilled /"
     chmod +x "$dst/cubegm/zhijack.sh"
