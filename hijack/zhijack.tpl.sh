@@ -47,6 +47,21 @@ TF_DRIVER=/mnt/sdcard/cubegm/@DRIVER@
 EOF
 export TF_DEVICE=@DEV@ TF_PANEL_W=@PW@ TF_PANEL_H=@PH@ TF_UI_SCALE=150
 
+# Some "SF3000"-branded units are really SF3500-class hardware (the "v3" / HDMI
+# variant): same 854x480 panel geometry, but the SF3500 audio+display driver. The
+# reliable tell is the stock driver.so format: classic SF3000 ships a PLAIN ELF
+# driver, SF3500-class ships an ENCRYPTED one. If we're booting as SF3000 but the
+# stock driver is encrypted, switch to driver_sf3500.so. Otherwise the classic
+# SF3000 driver's audio (AUDDEC/I2SO) init fails on this hardware and picoarch
+# SIGSEGVs on the NULL sound handle (+0x270) → black-screen boot loop.
+if [ "$TF_DEVICE" = SF3000 ] && [ -f /mnt/sdcard/cubegm/driver_sf3500.so ] && \
+   [ "$(head -c4 /mnt/sdcard/cubegm/driver.so 2>/dev/null)" != "$(printf '\177ELF')" ]; then
+    sed -i -e 's/^TF_DEVICE=.*/TF_DEVICE=SF3500/' \
+           -e 's|^TF_DRIVER=.*|TF_DRIVER=/mnt/sdcard/cubegm/driver_sf3500.so|' /tmp/tfdevice.env
+    export TF_DEVICE=SF3500
+    echo "SF3000 with encrypted (SF3500-class) driver detected → using driver_sf3500.so" >> "$LOG"
+fi
+
 # R36SX driver self-selection. Some kernels (v2.7-class, but firmware traits    #@R36@
 # vary WITHIN 2.6/2.7, so no offline identification works) make the full v2.6   #@R36@
 # driver SIGBUS in hcge_open. Measure instead of guessing: run the full driver; #@R36@
