@@ -10,11 +10,19 @@
 # pico286) read it.
 mkdir /tmp/zhijack.lock 2>/dev/null || exit 0
 
-LOG=/mnt/sdcard/log.txt
-[ -f "$LOG" ] && mv "$LOG" "$LOG.prev"
-> "$LOG"
-echo "=== zhijack boot [@DEV_LABEL@] $(date '+%H:%M:%S' 2>/dev/null) ===" >> "$LOG"
-sync   # flush to FAT now: proves zhijack ran even if a later step hangs
+# Diagnostics are OPT-IN so we don't chew the SD card in normal use: logging is
+# ON only if the user pre-created /mnt/sdcard/log.txt. Otherwise LOG=/dev/null and
+# every write below is a no-op (and picoarch's own dbg_log is gated the same way,
+# on log.txt existing). To debug: drop an empty log.txt on the card and reboot.
+if [ -f /mnt/sdcard/log.txt ]; then
+    LOG=/mnt/sdcard/log.txt
+    mv "$LOG" "$LOG.prev" 2>/dev/null
+    : > "$LOG"
+    echo "=== zhijack boot [@DEV_LABEL@] $(date '+%H:%M:%S' 2>/dev/null) ===" >> "$LOG"
+    sync
+else
+    LOG=/dev/null
+fi
 
 # Freeze icube (the respawner), THEN kill rkgame. Devices that boot through
 # icube (R36SX, SF3000, GB350) respawn any killed rkgame, and the fresh
@@ -52,7 +60,7 @@ if [ -f "$DRV_FLAG" ] && [ -f "$DRV_SAFE" ]; then #@R36@
     echo "driver: SAFE variant (previous boots hit SIGBUS)" >> "$LOG" #@R36@
 fi #@R36@
 
-echo "processes at boot:" >> "$LOG"; ps >> "$LOG" 2>&1; sync
+echo "processes at boot:" >> "$LOG"; ps >> "$LOG" 2>&1; [ "$LOG" = /dev/null ] || sync
 
 export LD_LIBRARY_PATH=/mnt/sdcard/cubegm/lib:/mnt/sdcard/cubegm/usr/lib:$LD_LIBRARY_PATH
 
