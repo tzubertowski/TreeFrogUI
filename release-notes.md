@@ -1,11 +1,11 @@
-Welcome to **TreeFrogUI** (v1.0.3): one build for **six** handhelds: R36SX (v2.6 & v2.7), SF3000, SF3000 HD, SF3100, SF3500, and GB350
+Welcome to **TreeFrogUI** (v1.0.3): one build for **seven** handhelds: R36SX (v2.6 & v2.7), R36 HD, SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.3 is a small stability release on top of the 1.0 line. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.3 is the biggest update yet: a full **Rockbox** music player, **Quake 2**, R36 HD clone support, and the 1.0 stability fixes. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
@@ -16,9 +16,16 @@ Welcome to **TreeFrogUI** (v1.0.3): one build for **six** handhelds: R36SX (v2.6
 
 ### ✨ New
 
-- **Rockbox music player.** The full Rockbox jukebox now runs as a standalone app on TreeFrogUI (currently R36SX). Browse and play your music (MP3, FLAC, OGG, and the rest of Rockbox's codecs), with real playback controls, themes, and fonts. Drop your music under `roms/rockbox/` and launch it from the menu. Controls in the now-playing screen: **A** play/pause (hold to stop), **LEFT/RIGHT** previous/next (hold to seek), **UP/DOWN** volume, **B** back to browser, **START** menu, **SELECT+START** quit back to TreeFrogUI. Ships with the minimalist *OneBit VFD* theme. Audio is resampled and paced on-device so it plays smoothly at the right speed.
+- **🎵 Rockbox music player.** The full [Rockbox](https://www.rockbox.org/) jukebox now runs as a standalone app on TreeFrogUI (currently **R36SX**). Play your music — MP3, FLAC, OGG Vorbis, and the rest of Rockbox's codecs — with playlists, a proper now-playing screen, and full playback control. Drop your music under `roms/rockbox/` and a **rockbox** entry appears in the menu.
+  - **Controls (now-playing):** **A** play/pause (hold = stop), **LEFT/RIGHT** previous/next (hold = seek), **UP/DOWN** volume, **B** back to browser, **START** menu, **SELECT+START** quit to TreeFrogUI.
+  - **Themes:** renders at native 320×240 and fills the panel, so standard Rockbox themes look right. Ships with **7 bundled themes** (Snappy — the default — plus iVideo, crowPod, CrazyBitMono, OneBit VFD, SNAZZPKT, cabbiev2). Add more from **[themes.rockbox.org](https://themes.rockbox.org/index.php?target=ipodvideo)** (the iPod Video 320×240 target matches our screen) — unzip into `roms/rockbox/.rockbox/`, apply via **Settings → Theme Settings**.
+  - Audio is resampled and clock-paced on-device, so it plays smoothly at the correct speed.
+
+- **🔫 Quake 2.** Play Quake II via the vitaquake2 core (software renderer, currently **R36SX**). Put your retail or shareware pak at **`roms/quake2/baseq2/pak0.pak`** and launch it. D-pad moves (forward/back + turn), so it's playable without an analog stick. Runs ~25-40fps at 320×240 — heavy for the hardware, but it plays.
 
 ### 🩹 Fixes
+
+- **R36 HD (R36S-H) clone support.** The R36 HD ran fine on 1.0.1 but 1.0.2's R36SX driver self-select swapped its (working) display driver for the 2.7-stubbed variant, killing the panel (no UI, buzzing). There's now a dedicated **`install_first/r36hd/`** that stays on the proven `driver_r36sx.so` and never swaps. R36 HD owners: copy the universal payload, then **`install_first/r36hd/`** (instead of `r36sx/`).
 
 - **Auto-resume can no longer soft-brick your boot.** If the last-played marker pointed at a ROM that no longer exists (or a game that dies instantly), every boot relaunched it forever: black screen, only fixable by editing the card on a PC. Auto-resume now validates that the game actually exists before resuming, and after two failed resume attempts in one boot it clears the marker and drops you safely into the menu.
 - **Menu no longer crash-loops when the `roms` folder is missing.** Cards without a `roms/` folder (or with it named `ROMS`, which some card formats treat as a different name) crashed before the game list could ever appear. The menu now accepts `roms/` or `ROMS/`, creates the folder if it is missing entirely, and always shows at least the Settings row.

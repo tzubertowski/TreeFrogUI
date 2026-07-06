@@ -39,6 +39,12 @@ TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
 # device name -> stock cubegm path (for generating per-device xml)
 declare -A STOCK=(
   [r36sx]=/home/tomaszz/sf3000-work/R36SX_sdcard/cubegm
+  # R36 HD (R36S-H) = clone-of-a-clone. Ran the R36SX build fine on 1.0.1 with the
+  # pristine driver_r36sx.so; 1.0.2's driver27 self-select swapped it to the
+  # 2.7-stubbed driver_r36sx27.so and killed its panel. This variant is R36SX with
+  # the @R36@ self-select STRIPPED (non-r36sx dev → else-branch), so it stays on
+  # the proven driver_r36sx.so and never swaps. Reuses the R36SX stock xml/boot.
+  [r36hd]=/home/tomaszz/sf3000-work/R36SX_sdcard/cubegm
   [sf3000]=/home/tomaszz/sf3000-work/SF3000_sdcard/SF3000_sdcard/cubegm
   [sf3500]=/home/tomaszz/sf3000-work/SF3500_sdcard_v1.1/cubegm
   # SF3000_HD = HDMI-out variant. Same SoC/panel(854x480)/disp_frame as SF3500,
@@ -66,6 +72,7 @@ declare -A STOCK=(
 #            TF_DEVICE W   H   ASPECT ROT PRESENT   DRIVER            RKGAME
 declare -A HJ=(
   [r36sx]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
+  [r36hd]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
   [sf3000]="  SF3000   854 480 16 9   90  dispframe driver_sf3000.so  kill"
   [sf3500]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
   [sf3000hd]="SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
@@ -161,7 +168,7 @@ for dev in "${!STOCK[@]}"; do
     #      GB350) use the original; 854x480 panels (SF3000/HD/SF3100/SF3500) use the
     #      SF3000-format one. Shipping it here replaces the old fix_bootlogo script.
     case "$dev" in
-        r36sx|gb350) logo="$STAGE/cubegm/xgame-logo.bmp" ;;
+        r36sx|r36hd|gb350) logo="$STAGE/cubegm/xgame-logo.bmp" ;;
         *)           logo="$STAGE/cubegm/xgame-logo-sf3000.bmp" ;;
     esac
     [ -f "$logo" ] && cp "$logo" "$dst/cubegm/xgame-logo.bmp"
