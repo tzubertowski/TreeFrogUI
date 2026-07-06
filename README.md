@@ -146,6 +146,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **gme** | Game Music Emu | `gme_libretro.so` |
 | **gong** | Pong clone | `gong_libretro.so` |
 | **vapor** | VaporSpec | `vaporspec_libretro.so` |
+| **rockbox** | Music player (MP3/FLAC/OGG…, standalone) | `rockbox` (see below) |
 
 See [cores.md](cores.md) for detailed build status and source repositories of TreeFrogUI external cores.
 
@@ -216,6 +217,22 @@ Drop the resulting `oregon.img` into `roms/pico286/oregon/` and launch it.
 - **L + R** - quick on-screen keyboard (D-pad moves, A presses, B closes) for typing DOS commands.
 - **Mouse mode** (toggle in the menu): D-pad moves the cursor, A = left click, B = right click. Needs a mouse driver, which the bundled FreeDOS loads automatically (CTMOUSE).
 - In-game buttons: A=Enter, B=Esc, X=Space, Y=Ctrl, L=Shift, R=Alt.
+
+---
+
+### Music player (Rockbox)
+
+`rockbox` runs the full [Rockbox](https://www.rockbox.org/) jukebox as a standalone app (currently **R36SX**). It plays MP3, FLAC, OGG Vorbis, and the rest of Rockbox's codecs, with themes, fonts, playlists, and a proper now-playing screen.
+
+Put your music under `roms/rockbox/` (a `rockbox` entry then appears in the menu). It renders at native 320×240 and is upscaled to the panel, so standard Rockbox themes look correct. The minimalist **OneBit VFD** theme ships by default; add more via **Settings → Theme Settings → Browse Theme Files**.
+
+**Controls (now-playing screen):**
+- **A** - play / pause (**hold** to stop)
+- **LEFT / RIGHT** - previous / next track (**hold** to seek within a track)
+- **UP / DOWN** - volume
+- **B** - back to the file browser (keeps playing)
+- **START** - main menu (**hold** for the context menu)
+- **SELECT + START** - quit back to TreeFrogUI
 
 ---
 

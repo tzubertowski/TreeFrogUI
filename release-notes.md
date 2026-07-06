@@ -14,6 +14,10 @@ Welcome to **TreeFrogUI** (v1.0.3): one build for **six** handhelds: R36SX (v2.6
 
 ## What's New in v1.0.3
 
+### ✨ New
+
+- **Rockbox music player.** The full Rockbox jukebox now runs as a standalone app on TreeFrogUI (currently R36SX). Browse and play your music (MP3, FLAC, OGG, and the rest of Rockbox's codecs), with real playback controls, themes, and fonts. Drop your music under `roms/rockbox/` and launch it from the menu. Controls in the now-playing screen: **A** play/pause (hold to stop), **LEFT/RIGHT** previous/next (hold to seek), **UP/DOWN** volume, **B** back to browser, **START** menu, **SELECT+START** quit back to TreeFrogUI. Ships with the minimalist *OneBit VFD* theme. Audio is resampled and paced on-device so it plays smoothly at the right speed.
+
 ### 🩹 Fixes
 
 - **Auto-resume can no longer soft-brick your boot.** If the last-played marker pointed at a ROM that no longer exists (or a game that dies instantly), every boot relaunched it forever: black screen, only fixable by editing the card on a PC. Auto-resume now validates that the game actually exists before resuming, and after two failed resume attempts in one boot it clears the marker and drops you safely into the menu.
