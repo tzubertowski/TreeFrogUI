@@ -134,8 +134,14 @@ Keep your clone's own boot files on top of the v2.7 setup:
 2. **Restore the [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O).**
 3. **Copy your clone's 3 boot files** into the v2.7 SD's `cubegm/`, overwriting.
    This pairs your clone's kernel + DTB with the v2.7 userland.
-4. **Do the standard TreeFrogUI install** on top (Steps 2–3). Treat the clone as an
-   R36SX - use the `install_first/r36sx/` folder.
+4. **Do the standard TreeFrogUI install** on top (Steps 2–3), but use the
+   clone-specific **`install_first/r36hd/`** folder (**not** `r36sx/`).
+
+> [!IMPORTANT]
+> **Use `install_first/r36hd/`, not `r36sx/`.** The R36SX folder ships a display-driver
+> self-select that, after two crashes, swaps to a stubbed driver variant. On clones
+> that swap kills the panel (no UI, buzzing) even though the normal driver works fine.
+> The `r36hd/` folder keeps the proven `driver_r36sx.so` and never swaps.
 
 > [!TIP]
 > Still won't boot? Your clone likely has yet another kernel/DTB revision.
