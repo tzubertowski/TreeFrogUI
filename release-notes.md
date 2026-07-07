@@ -1,43 +1,32 @@
-Welcome to **TreeFrogUI** (v1.0.3): one build for **seven** handhelds: R36SX (v2.6 & v2.7), R36 HD, SF3000, SF3000 HD, SF3100, SF3500, and GB350
+Welcome to **TreeFrogUI** (v1.0.4): one build for **seven** handhelds: R36SX (v2.6 & v2.7), R36 HD, SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.3 is the biggest update yet: a full **Rockbox** music player, **Quake 2**, R36 HD clone support, and the 1.0 stability fixes. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.4 fixes the Amiga core (was unplayable - hard-hung on load) and Wolfenstein 3D (failed to launch entirely), plus two menu readability bugs. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.3
-
-### ✨ New
-
-- **🎵 Rockbox music player.** The full [Rockbox](https://www.rockbox.org/) jukebox now runs as a standalone app on TreeFrogUI (currently **R36SX**). Play your music — MP3, FLAC, OGG Vorbis, and the rest of Rockbox's codecs — with playlists, a proper now-playing screen, and full playback control. Drop your music under `roms/rockbox/` and a **rockbox** entry appears in the menu.
-  - **Controls (now-playing):** **A** play/pause (hold = stop), **LEFT/RIGHT** previous/next (hold = seek), **UP/DOWN** volume, **B** back to browser, **START** menu, **SELECT+START** quit to TreeFrogUI.
-  - **Themes:** renders at native 320×240 and fills the panel, so standard Rockbox themes look right. Ships with **7 bundled themes** (Snappy — the default — plus iVideo, crowPod, CrazyBitMono, OneBit VFD, SNAZZPKT, cabbiev2). Add more from **[themes.rockbox.org](https://themes.rockbox.org/index.php?target=ipodvideo)** (the iPod Video 320×240 target matches our screen) — unzip into `roms/rockbox/.rockbox/`, apply via **Settings → Theme Settings**.
-  - Audio is resampled and clock-paced on-device, so it plays smoothly at the correct speed.
-
-- **🔫 Quake 2.** Play Quake II via the vitaquake2 core (software renderer, currently **R36SX**). Put your retail or shareware pak at **`roms/quake2/baseq2/pak0.pak`** and launch it. D-pad moves (forward/back + turn), so it's playable without an analog stick. Runs ~25-40fps at 320×240 — heavy for the hardware, but it plays.
+## What's New in v1.0.4
 
 ### 🩹 Fixes
 
-- **R36 HD (R36S-H) clone support.** The R36 HD ran fine on 1.0.1 but 1.0.2's R36SX driver self-select swapped its (working) display driver for the 2.7-stubbed variant, killing the panel (no UI, buzzing). There's now a dedicated **`install_first/r36hd/`** that stays on the proven `driver_r36sx.so` and never swaps. R36 HD owners: copy the universal payload, then **`install_first/r36hd/`** (instead of `r36sx/`).
+- **Amiga (UAE): fixed a hard hang on launching any game.** Any Amiga game would freeze solid (black screen, no audio, needed a power cycle) a few seconds after launch. Root cause was in **picoarch**, not the core: the hardware audio driver gets re-initialized with each game's own native sample rate, but it only actually supports a fixed 48kHz - Amiga reports 44.1kHz (the first core we ship that doesn't report 48kHz), so the driver silently hung forever. Every other core happened to report 48kHz already, so this bug was invisible until now. Also fixed: `.zip` files dropped in `roms/amiga/` were fed straight to the core instead of being unzipped first (the core claimed zip support it never actually had), and restored the core's own crash/debug logging, which was silently compiled out - so future Amiga issues are now actually diagnosable from `log.txt`.
 
-- **Auto-resume can no longer soft-brick your boot.** If the last-played marker pointed at a ROM that no longer exists (or a game that dies instantly), every boot relaunched it forever: black screen, only fixable by editing the card on a PC. Auto-resume now validates that the game actually exists before resuming, and after two failed resume attempts in one boot it clears the marker and drops you safely into the menu.
-- **Menu no longer crash-loops when the `roms` folder is missing.** Cards without a `roms/` folder (or with it named `ROMS`, which some card formats treat as a different name) crashed before the game list could ever appear. The menu now accepts `roms/` or `ROMS/`, creates the folder if it is missing entirely, and always shows at least the Settings row.
-- **R36SX: display driver now selects itself.** Hardware revisions vary more than version numbers suggest (some 2.6 and 2.7 units share traits), so the previous v2.7 detection broke boot for some 2.7 owners (black screen with only the battery icon). TreeFrogUI now simply tries the full driver, and if it crashes twice, switches permanently to the safe driver on that card. Worst case you see two brief flickers on the very first boot, then every boot after is clean. Delete `cubegm/driver27.flag` if you ever want it to re-test the full driver.
-- **In-game (battery) saves are no longer lost on power-off.** Saves like Game Boy / Pokemon / Harvest Moon are written to the card periodically while you play (every ~10s when they change), instead of only when you open the pause menu or exit. Power off straight from a game and your save survives.
-- **SF3000: menu renders in hardware from a cold boot.** The main menu could come up squished (wrong aspect) until you'd launched a game once. It now uses the hardware display path from the first frame, correct aspect every boot. Units that genuinely can't do hardware fall back to software automatically.
-- **Fixed: save states froze the console on Mega Drive / Genesis (picodrive).** Saving a state on Sega cores hard-locked the device. The picodrive core's internal save routine shares a function name with TreeFrogUI's own, and the two got crossed, sending the save into an infinite loop. Save and load states now work on Sega cores. (Also hardened the save/load hotkeys so a flaky button press can't trigger a save storm.)
+- **Wolfenstein 3D: fixed "Could not open ecwolf.pk3!" - the game failed to launch at all.** ecwolf needs its own engine resource pack (fonts/menus for the source port itself, separate from the original game data) that was never built or shipped. It's now built automatically and ships in `cubegm/bios/ecwolf.pk3`. See the new [setup guide](docs/cores/wolf3d.md) - Wolf3D needs **both** this file and your own game data.
 
-### 🙏 Credits
+- **In-game menu: selection highlight no longer corrupts text in the row above it.** The white selection pill was drawn 2px too high, bleeding into the bottom of the previous row and wiping out thin letter strokes (most visibly the "I" in "BIOS") depending on which row was selected.
+- **Controls / key-bind screen: selected row is no longer invisible.** It drew every row in the same white text regardless of selection, so the highlighted row (white text on the white selection pill) was unreadable. Now matches the rest of the menu system and shows dark text on the pill.
 
-- **[@patrick-oliveira-ch](https://github.com/patrick-oliveira-ch)** for the excellent auto-resume soft-brick report, exact repro, log evidence, and the safeguard design.
-- **[@Jankosx7](https://github.com/Jankosx7)** for pinpointing the missing/`ROMS`-cased roms folder crash, including the exact functions at fault.
+### 📖 Docs
+
+- **Per-system setup guides split out of the README** into `docs/cores/` (Arcade, DOS/pico286, Rockbox, Amiga, Wolfenstein 3D, PlayStation 1) and linked from the ROM folder table, instead of one long wall of text.
+- Fixed a couple of stale entries in `cores.md` (wrong Atari Lynx core name, leftover notes claiming Amiga/Atari ST folder mappings still needed wiring up - they didn't) and a missing custom-font note in `theme.md`.
 
 **Updating from v1.0.x:** copy `cubegm/` and `frogui/` from the new package over your card, then copy your device's `install_first/<device>/` folder again. Your ROMs, saves, and settings are untouched.
 

@@ -164,22 +164,9 @@ Keep your clone's own boot files on top of the v2.7 setup:
 
 ## PlayStation 1 BIOS (strongly recommended)
 
-PS1 has **two cores**, each with its own BIOS location - without a real BIOS they
-fall back to **HLE**, which causes graphical glitches and **broken/hanging
-memory-card saves** (e.g. Harvest Moon). Drop a real `scph1001.bin` in **both** so
-either core works (filenames are case-insensitive - `SCPH1001.BIN` is fine):
-
-| Core | ROM folder | BIOS path |
-|------|-----------|-----------|
-| **PCSX4ALL** | `PS` | `/mnt/sdcard/cubegm/cores/.pcsx4all/scph1001.bin` |
-| **pcsx_rearmed** (lightrec) | `ps1r` | `/mnt/sdcard/cubegm/bios/scph1001.bin` |
-
-(pcsx_rearmed also accepts `scph5501.bin` / `scph7001.bin` in `cubegm/bios/`.) With
-the real BIOS, memory cards and compatibility work correctly.
-
-**Speed toggles:** for heavy 3D games (e.g. Tekken 3) that don't run full speed,
-open the PCSX4ALL menu with **`SELECT + L`** and turn on **Pixel Skip** and/or
-**Interlace** - they trade a little image quality for a real speed boost.
+PS1 has two cores, each with its own BIOS location - without a real BIOS they
+fall back to HLE, which causes graphical glitches and broken/hanging memory-card
+saves. Full setup, BIOS paths, and speed toggles: 📖 **[docs/cores/ps1.md](docs/cores/ps1.md)**.
 
 ---
 

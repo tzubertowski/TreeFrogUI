@@ -291,6 +291,23 @@ echo "-- ecwolf make --"
 git -C "$CORES/ecwolf" submodule update --init --depth=1 src/libretro/libretro-common 2>/dev/null || true
 _b ecwolf            ecwolf/src/libretro       "" "LDFLAGS=$LDFLAGS_S"
 
+# ecwolf needs its own engine resource pack (fonts/UI, not id Software's game
+# data) at runtime or it fails with "Could not open ecwolf.pk3!". It's just
+# wadsrc/static zipped with a .pk3 extension - build it here instead of
+# needing ecwolf's full CMake build.
+if [ -d "$CORES/ecwolf/wadsrc/static" ]; then
+    python3 -c "
+import zipfile, os
+os.chdir('$CORES/ecwolf/wadsrc/static')
+with zipfile.ZipFile('$OUT/ecwolf.pk3', 'w', zipfile.ZIP_DEFLATED) as zf:
+    for root, dirs, files in os.walk('.'):
+        for f in files:
+            full = os.path.join(root, f)
+            zf.write(full, os.path.relpath(full, '.'))
+"
+    [ -f "$OUT/ecwolf.pk3" ] && echo "→ $OUT/ecwolf.pk3"
+fi
+
 echo "-- pocketcdg make --"
 _b pocketcdg         libretro-pocketcdg        ""
 

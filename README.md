@@ -89,7 +89,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **GG**, **gg** | Game Gear | `gearsystem_libretro.so` |
 | **gpgx** | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
 | **segacd** | Sega CD / Mega CD | `genesis_plus_gx_libretro.so` |
-| **PS**, **ps1**, **psx** | PlayStation | `pcsx_rearmed_libretro.so` |
+| **PS**, **ps1**, **psx** | PlayStation - 📖 [setup guide](docs/cores/ps1.md) | `pcsx_rearmed_libretro.so` |
 | **pce** | PC Engine / TurboGrafx-16 | `mednafen_pce_fast_libretro.so` |
 | **pcesgx** | PC Engine SuperGrafx | `mednafen_supergrafx_libretro.so` |
 | **pcfx** | PC-FX | `mednafen_pcfx_libretro.so` |
@@ -105,7 +105,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **a800** | Atari 800 | `atari800_libretro.so` |
 | **lnx** | Atari Lynx | `handy_libretro.so` |
 | **atari-st** | Atari ST | `castaway_libretro.so` |
-| **amiga** | Commodore Amiga | `uae_libretro.so` |
+| **amiga** | Commodore Amiga - 📖 [setup guide](docs/cores/amiga.md) | `uae_libretro.so` |
 | **c64** | Commodore 64 | `vice_x64_libretro.so` |
 | **c64sc** | Commodore 64 (accurate) | `vice_x64sc_libretro.so` |
 | **c64f**, **c64fc** | Commodore 64 (Frodo) | `frodo_libretro.so` |
@@ -118,10 +118,10 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **amstradb** | Amstrad CPC (CPC+) | `cap32_libretro.so` |
 | **thom** | Thomson MO/TO | `theodore_libretro.so` |
 | **xmil** | Sharp X68000 | `x68k_libretro.so` |
-| **pico286** | DOS / PC (8086-286, standalone) | `pico286` + `x86BOOT.img` (see below) |
+| **pico286** | DOS / PC (8086-286, standalone) - 📖 [setup guide](docs/cores/pico286.md) | `pico286` + `x86BOOT.img` |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **prboom** | Doom / Heretic | `prboom_libretro.so` |
-| **wolf3d** | Wolfenstein 3D | `ecwolf_libretro.so` |
+| **wolf3d** | Wolfenstein 3D - 📖 [setup guide](docs/cores/wolf3d.md) | `ecwolf_libretro.so` |
 | **outrun** | Out Run | `cannonball_libretro.so` |
 | **cavestory** | Cave Story | `nxengine_libretro.so` |
 | **flashback** | Flashback | `reminiscence_libretro.so` |
@@ -148,7 +148,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **gme** | Game Music Emu | `gme_libretro.so` |
 | **gong** | Pong clone | `gong_libretro.so` |
 | **vapor** | VaporSpec | `vaporspec_libretro.so` |
-| **rockbox** | Music player (MP3/FLAC/OGG…, standalone) | `rockbox` (see below) |
+| **rockbox** | Music player (MP3/FLAC/OGG…, standalone) - 📖 [setup guide](docs/cores/rockbox.md) | `rockbox` |
 
 See [cores.md](cores.md) for detailed build status and source repositories of TreeFrogUI external cores.
 
@@ -156,89 +156,18 @@ See [cores.md](cores.md) for detailed build status and source repositories of Tr
 
 **Arduboy:** the `arduboy` folder uses the **Ardens** core (a fast custom AVR emulator) and accepts both `.hex` and `.arduboy` files. The `arduous` folder runs the older simavr-based **arduous** core (cycle-accurate but much slower; `.hex` only) - use it only if a game misbehaves under Ardens.
 
-### Arcade (MAME / FB Alpha / Neo Geo)
+### Systems that need extra setup
 
-Arcade games are `.zip` files of a romset. **Keep them zipped** - the core reads the zip directly, do not extract.
+A few systems need more than "drop the ROM in the folder" - either extra companion files or a bit of one-time setup. Full instructions live in their own guide:
 
-| Folder | Core | Romset it needs |
+| System | What's different | Guide |
 |---|---|---|
-| `cps1` | FB Alpha 2012 | Capcom **CPS-1** games |
-| `cps2` | FB Alpha 2012 | Capcom **CPS-2** games |
-| `neogeo` | FB Alpha 2012 | **Neo Geo** games (also needs `neogeo.zip` BIOS, see note below) |
-| `m2k` | MAME 2000 | misc arcade, **MAME 0.37b5** romset |
-
-> [!IMPORTANT]
-> **Romsets are version-locked.** Each core only loads ROMs from the matching set:
-> the `cps1`/`cps2`/`neogeo` folders need a **FB Alpha 2012** romset, and `m2k`
-> needs a **MAME 0.37b5** romset. A zip from a different MAME/FBNeo version will
-> **fail to load** even if the game name matches - this is the #1 cause of arcade
-> ROMs not working. Neo Geo games also need the **`neogeo.zip`** BIOS. Put it in
-> **`roms/neogeo/`** (next to the games). Keeping a copy in **`cubegm/bios/`** too
-> does no harm if you are unsure.
-
-Pick the folder by hardware: Street Fighter II etc. → `cps1`, Marvel vs Capcom etc.
-→ `cps2`, Metal Slug/KOF etc. → `neogeo`. For Neo Geo you can also use the dedicated
-`geolith` core. Heavy CPS-2/Neo Geo titles may run slow on this CPU.
-
-### DOS / PC games (pico286)
-
-`pico286` runs old DOS / PC games (the 8086 to 286 era: Prince of Persia, Digger, Oregon Trail, etc). Games go in `roms/pico286/`.
-
-**Step 1 (do this once): give it FreeDOS.**
-A ready-made FreeDOS file already ships with TreeFrogUI at `cubegm/bios/x86BOOT.img`, so you usually do nothing. If it is missing: download the **FreeDOS 1.4 "Floppy Edition"** from [freedos.org/download](https://www.freedos.org/download/), open the zip, take the file **`144m/x86BOOT.img`**, and copy it to **`cubegm/bios/x86BOOT.img`** on the card. (FreeDOS is the little operating system the games run on top of. You only set this up once.)
-
-> The bundled boot image is **FreeDOS** + the **CuteMouse** driver, both GPLv2. Full credits, license, and source links: [freedos.org](https://www.freedos.org/) and `roms/pico286/CREDITS-FREEDOS.txt` in the release.
-
-**Step 2: add a game. The easy way (no tools, works on any computer):**
-1. Get the game as **floppy disk images** (files ending in `.img`).
-2. Make a folder for it, like `roms/pico286/prince/`.
-3. Copy the `.img` files into that folder.
-4. Launch it from the menu. It boots FreeDOS and starts the game by itself.
-
-That's it. Most DOS games come as one or a few floppy `.img` files and just work this way.
-
-**Multi-disk games:** if a game asks to "insert disk 2", press **SELECT + START** for the menu, choose **Disk swap**, pick disk 2, press A. Then continue in the game.
-
-**Big games that need a "hard disk" (optional, advanced):**
-Some bigger games come as loose files (an `OREGON.EXE` and friends), not floppies. For those you pack the files into one hard-disk image. Make a folder with all the game files, add a text file named `RUN.BAT` inside it containing the command to start the game (for example one line: `OREGON`), then build the image:
-
-- **Linux / macOS:** run the included script (needs `mtools` installed):
-  ```
-  ./make_dos_img.sh  <game_folder>  oregon.img  16
-  ```
-- **Windows:** the script does not run on Windows directly. Easiest options:
-  1. **WSL** (Windows Subsystem for Linux): install it, `sudo apt install mtools`, then run the same `./make_dos_img.sh` command above. Recommended.
-  2. **DOSBox** (works everywhere): `imgmake oregon.img -t hd -size 16`, then mount it and copy the game files in. See DOSBox docs for `imgmake`/`mount`.
-  3. Any tool that can **make a FAT16 disk image** and copy files into it (e.g. WinImage: New image, 16 MB, format FAT16, drag the files in, Save As `.img`).
-
-Drop the resulting `oregon.img` into `roms/pico286/oregon/` and launch it.
-
-**Controls / menu:**
-- **SELECT + START** - open the pico286 **main menu**: Resume, Keyboard, Disk swap, Mouse mode, Mouse speed, Joystick mode, CPU speed, Frame skip, Reset, Exit to menu. (D-pad navigates, A selects, Left/Right adjusts the speed/skip rows, B closes.)
-- **Joystick mode** (menu toggle): D-pad → game-port axes, A/B → joystick buttons 1/2.
-- **L + R** - quick on-screen keyboard (D-pad moves, A presses, B closes) for typing DOS commands.
-- **Mouse mode** (toggle in the menu): D-pad moves the cursor, A = left click, B = right click. Needs a mouse driver, which the bundled FreeDOS loads automatically (CTMOUSE).
-- In-game buttons: A=Enter, B=Esc, X=Space, Y=Ctrl, L=Shift, R=Alt.
-
----
-
-### Music player (Rockbox)
-
-`rockbox` runs the full [Rockbox](https://www.rockbox.org/) jukebox as a standalone app (currently **R36SX**). It plays MP3, FLAC, OGG Vorbis, and the rest of Rockbox's codecs, with themes, fonts, playlists, and a proper now-playing screen.
-
-Put your music under `roms/rockbox/` (a `rockbox` entry then appears in the menu). It renders at native 320×240 and the driver scales it to fill the panel, so standard Rockbox themes look correct.
-
-**Bundled themes** (apply via **Settings → Theme Settings → Browse Theme Files**): **OneBit VFD**, **iVideo**, **crowPod**, **CrazyBitMono**, **Snappy**, **SNAZZPKT**, plus stock **cabbiev2**.
-
-**More themes:** grab any **iPod Video (320×240)** theme from **[themes.rockbox.org](https://themes.rockbox.org/index.php?target=ipodvideo)** (our screen matches that target exactly). Unzip the theme's `.rockbox/` contents into `roms/rockbox/.rockbox/` — the standard Rockbox folder (so `themes/`, `wps/`, `fonts/`, `icons/` land in `roms/rockbox/.rockbox/themes/` etc.) — then apply it via **Settings → Theme Settings**.
-
-**Controls (now-playing screen):**
-- **A** - play / pause (**hold** to stop)
-- **LEFT / RIGHT** - previous / next track (**hold** to seek within a track)
-- **UP / DOWN** - volume
-- **B** - back to the file browser (keeps playing)
-- **START** - main menu (**hold** for the context menu)
-- **SELECT + START** - quit back to TreeFrogUI
+| Arcade (`cps1`/`cps2`/`neogeo`/`m2k`) | Romsets are version-locked per core, Neo Geo needs a BIOS | 📖 [docs/cores/arcade.md](docs/cores/arcade.md) |
+| DOS / PC (`pico286`) | Needs FreeDOS (bundled), floppy vs hard-disk images | 📖 [docs/cores/pico286.md](docs/cores/pico286.md) |
+| Rockbox music player (`rockbox`) | Standalone app, themes | 📖 [docs/cores/rockbox.md](docs/cores/rockbox.md) |
+| Commodore Amiga (`amiga`) | Needs your own Kickstart ROM | 📖 [docs/cores/amiga.md](docs/cores/amiga.md) |
+| Wolfenstein 3D (`wolf3d`) | Needs the game data **and** the engine's own resource pack | 📖 [docs/cores/wolf3d.md](docs/cores/wolf3d.md) |
+| PlayStation 1 (`PS`/`ps1`/`psx`/`ps1r`) | Two cores, BIOS strongly recommended | 📖 [docs/cores/ps1.md](docs/cores/ps1.md) |
 
 ---
 
@@ -289,16 +218,15 @@ PCSX4ALL (PS1) is a standalone emulator with its own menu and hotkeys.
 
 ## BIOS files required
 
-Some cores need BIOS/firmware files. Place them in the system folder the core expects (check individual core docs), typically alongside the ROMs or in a `bios/` subfolder.
-
-> **PlayStation 1 - use a real BIOS.** Drop `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/`. PCSX4ALL falls back to an HLE BIOS when it's missing, but the HLE path causes **graphical glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest Moon). With the real BIOS, saving and compatibility work correctly.
+Some cores need BIOS/firmware files. Place them in the system folder the core expects (check individual core docs), typically alongside the ROMs or in a `bios/` subfolder. PS1, Amiga, and Wolfenstein 3D have more involved setup - see their guides in the [table above](#systems-that-need-extra-setup).
 
 | System | File needed |
 |--------|-------------|
-| PlayStation 1 (PCSX4ALL) | `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (**strongly recommended** - without it: graphics/perf/save issues) |
+| PlayStation 1 | `scph1001.bin` - 📖 [full guide](docs/cores/ps1.md), **strongly recommended** without it |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
-| Amiga (UAE) | `kick13.rom` (Kickstart 1.3, best compat) or `kick20.rom` in `cubegm/bios/` |
+| Amiga (UAE) | Kickstart ROM - 📖 [full guide](docs/cores/amiga.md) |
 | Atari ST (castaway) | TOS ROM image |
+| Wolfenstein 3D (ecwolf) | Game data + `ecwolf.pk3` - 📖 [full guide](docs/cores/wolf3d.md) |
 | Famicom Disk System (fds) | `disksys.rom` in **`cubegm/bios/`** |
 | Neo Geo (geolith / neogeo) | `neogeo.zip` BIOS in **`cubegm/bios/`** |
 | Sega CD / Mega CD (segacd) | `bios_CD_U.bin` / `bios_CD_E.bin` / `bios_CD_J.bin` (region BIOS) in **`cubegm/bios/`** |
