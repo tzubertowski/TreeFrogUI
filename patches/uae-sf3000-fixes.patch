@@ -1,0 +1,75 @@
+diff --git a/Makefile.libretro b/Makefile.libretro
+index 7dfd42f..109a091 100644
+--- a/Makefile.libretro
++++ b/Makefile.libretro
+@@ -89,7 +89,7 @@ MORE_CFLAGS+= -DFAME_INTERRUPTS_PATCH
+ #MORE_CFLAGS+= -DERROR_WHEN_MEMORY_OVERRUN
+ 
+ MORE_CFLAGS+= -DDEBUG_UAE4ALL
+-#MORE_CFLAGS+= -DDEBUG_UAE4ALL_FFLUSH
++MORE_CFLAGS+= -DDEBUG_UAE4ALL_FFLUSH
+ #MORE_CFLAGS+= -DDEBUG_M68K
+ #MORE_CFLAGS+= -DDEBUG_INTERRUPTS
+ #MORE_CFLAGS+= -DDEBUG_CYCLES
+diff --git a/libretro/core/libretro-core.cpp b/libretro/core/libretro-core.cpp
+index a58bd46..f8a9710 100644
+--- a/libretro/core/libretro-core.cpp
++++ b/libretro/core/libretro-core.cpp
+@@ -631,7 +631,7 @@ void retro_get_system_info(struct retro_system_info *info)
+    memset(info, 0, sizeof(*info));
+    info->library_name     = "uae4all";
+    info->library_version  = UAE_VERSION;
+-   info->valid_extensions = "adf|adz|zip";
++   info->valid_extensions = "adf|adz";
+    info->need_fullpath    = true;
+    info->block_extract    = false;
+ }
+diff --git a/src/sf2000_diag.h b/src/sf2000_diag.h
+index a677043..3318387 100644
+--- a/src/sf2000_diag.h
++++ b/src/sf2000_diag.h
+@@ -41,11 +41,40 @@ static inline void diag_add(const char *msg) {
+ }
+ #endif
+ 
+-#else /* not SF2000 */
++#else /* not SF2000 - picoarch/libretro build: append to the standard
++       * /mnt/sdcard/log.txt, gated on the file already existing (same
++       * on/off convention as the rest of TreeFrogUI's logging) */
+ 
+-#define xlog(...) ((void)0)
+-#define DIAG(msg)
+-#define DIAG_FATAL(msg)
++#include <stdio.h>
++#include <stdarg.h>
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++static inline void xlog(const char *fmt, ...) {
++    FILE *f = fopen("/mnt/sdcard/log.txt", "r");
++    if (!f) return;
++    fclose(f);
++
++    f = fopen("/mnt/sdcard/log.txt", "a");
++    if (!f) return;
++
++    va_list ap;
++    va_start(ap, fmt);
++    vfprintf(f, fmt, ap);
++    va_end(ap);
++
++    fflush(f);
++    fclose(f);
++}
++
++#ifdef __cplusplus
++}
++#endif
++
++#define DIAG(msg) xlog("UAE4ALL: %s\n", msg)
++#define DIAG_FATAL(msg) xlog("UAE4ALL FATAL: %s\n", msg)
+ 
+ #endif /* SF2000 */
+ 

@@ -26,6 +26,7 @@ _apply_patch() {
 }
 _apply_patch geolith-no-lto.patch      libretro-geolith
 _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
+_apply_patch uae-sf3000-fixes.patch    sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
@@ -529,12 +530,14 @@ _b_angree() {
 }
 
 echo "-- uae amiga make --"
-# fs_posix.c shim provides POSIX fs_* implementations; needs -lz for zlib
+# fs_posix.c shim provides POSIX fs_* implementations; needs -lz for zlib.
+# Makefile.libretro links the final .so with $(CC) not $(CXX), so the C++
+# object files (disk.cpp etc, std::string) need -lstdc++ added explicitly.
 make -C "$CORES/sf2000-uae-amiga-emulator" -f Makefile.libretro clean 2>/dev/null || true
 make -C "$CORES/sf2000-uae-amiga-emulator" -f Makefile.libretro \
     CC="$WRAP/mips-gcc" CXX="$WRAP/mips-g++" \
     AR="$AR" RANLIB="$RANLIB" LD="$WRAP/mips-g++" \
-    LDFLAGS="$LDFLAGS_SC -lz" -j$(nproc) 2>&1
+    LDFLAGS="$LDFLAGS_SC -lz -lstdc++" -j$(nproc) 2>&1
 [ -f "$CORES/sf2000-uae-amiga-emulator/uae4all_libretro.so" ] && \
     cp "$CORES/sf2000-uae-amiga-emulator/uae4all_libretro.so" "$OUT/uae_libretro.so" && \
     "$STRIP" "$OUT/uae_libretro.so" && echo "→ $OUT/uae_libretro.so"

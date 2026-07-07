@@ -47,7 +47,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `a5200` | Atari 5200 | `a5200_libretro.so` | [libretro/a5200](https://github.com/libretro/a5200) |
 | `a78` | Atari 7800 | `prosystem_libretro.so` | [libretro/prosystem-libretro](https://github.com/libretro/prosystem-libretro) |
 | `a800` | Atari 800/XL/XE | `atari800_libretro.so` | [libretro/libretro-atari800](https://github.com/libretro/libretro-atari800) |
-| `lnx` | Atari Lynx | `mednafen_lynx_libretro.so` | [libretro/beetle-lynx-libretro](https://github.com/libretro/beetle-lynx-libretro) |
+| `lnx` | Atari Lynx | `handy_libretro.so` | [libretro/libretro-handy](https://github.com/libretro/libretro-handy) |
 | `atari-st` | Atari ST | `castaway_libretro.so` | [angree/sf2000-atarist-emulator](https://github.com/angree/sf2000-atarist-emulator) |
 
 ---
@@ -155,7 +155,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | Core .so | System | Source |
 |----------|--------|--------|
 | `snes9x2005_libretro.so` | SNES (alt build) | same as snes9x2005_plus |
-| `mednafen_lynx_libretro.so` | Atari Lynx | via `lnx` folder |
+| `mednafen_lynx_libretro.so` | Atari Lynx (alt, unused) | built but `lnx` folder uses `handy_libretro.so` instead |
 
 ---
 
@@ -164,5 +164,3 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 - Folders are case-sensitive on picoarch - match exactly
 - Multiple folders can map to same core (e.g. `nes` and `FC` both → fceumm)
 - ❌ cores not in `build/` - either missing dependency or not cloned
-- `uae_libretro.so` - add `amiga` folder mapping to frogui_libretro.c to use it
-- `castaway_libretro.so` - add `atari-st` folder mapping to use it

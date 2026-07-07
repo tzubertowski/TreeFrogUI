@@ -297,7 +297,7 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 |--------|-------------|
 | PlayStation 1 (PCSX4ALL) | `scph1001.bin` in `/mnt/sdcard/cubegm/cores/.pcsx4all/` (**strongly recommended** - without it: graphics/perf/save issues) |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
-| Amiga (UAE) | `kick.rom` (Amiga Kickstart ROM) |
+| Amiga (UAE) | `kick13.rom` (Kickstart 1.3, best compat) or `kick20.rom` in `cubegm/bios/` |
 | Atari ST (castaway) | TOS ROM image |
 | Famicom Disk System (fds) | `disksys.rom` in **`cubegm/bios/`** |
 | Neo Geo (geolith / neogeo) | `neogeo.zip` BIOS in **`cubegm/bios/`** |
@@ -377,24 +377,33 @@ cp frogui_libretro.so /mnt/sdcard/cubegm/cores/
 
 ## How it works
 
+The stock boot is never touched or replaced. Instead TreeFrogUI hooks the stock
+menu's own autorun feature to launch itself:
+
 ```
-[boot] icube  (/mnt/sdcard/cubegm/icube)
+[boot] stock rkgame (verified, untouched)
     │
-    └─► picoarch frogui_libretro.so    ← TreeFrogUI is a libretro core
-              │
-              │  user selects ROM
-              │
-              └─► fork()
-                     │
-                [parent]            [child]
-                waitpid()           picoarch <game_core.so> <rom>
-                (blocks)                │
-                   │              game runs
-                   │              user exits
-                   │                  │
-                resumes ◄──── child exits
-                TreeFrogUI menu
+    └─► autorun → our hijacked core forks cubegm/zhijack.sh
+                       │
+                       └─► picoarch frogui_libretro.so   ← TreeFrogUI is a libretro core
+                                 │
+                                 │  user selects ROM
+                                 │
+                                 └─► fork()
+                                        │
+                                   [parent]            [child]
+                                   waitpid()           picoarch <game_core.so> <rom>
+                                   (blocks)                │
+                                      │              game runs
+                                      │              user exits
+                                      │                  │
+                                   resumes ◄──── child exits
+                                   TreeFrogUI menu
 ```
+
+This "hijack" approach exists because newer devices (SF3500-class) verify
+`icube` and `rkgame` at boot - replacing those files outright shows a "sdcard is
+damaged" error. Hooking the autorun instead works on every supported device.
 
 **picoarch** handles display (`/dev/dis` + framebuffer), audio (ALSA), and the libretro core lifecycle. TreeFrogUI is just another `.so` loaded by picoarch - it renders the file browser UI and uses `fork+waitpid` to launch games without losing the display connection.
 

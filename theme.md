@@ -119,3 +119,5 @@ The following fonts are embedded directly in the frontend binaries and can be co
 
 1. **`GamePocket`**: Bold, blocky pixel font optimized for readability on handheld displays.
 2. **`Monogram`**: A classic, compact pixel script font suitable for listing longer ROM names.
+
+**Using your own font:** drop a `.ttf` or `.otf` file into `/mnt/sdcard/frogui/fonts/`, then pick it from Settings → Font like any built-in font.
