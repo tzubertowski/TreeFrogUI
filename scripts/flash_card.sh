@@ -13,8 +13,12 @@
 set -e
 
 DEV="${2:-/dev/sda}"
-WORK="${WORK:-$HOME/sf3000-work}"
-REL="$WORK/sf3000_treefrogui/release"
+# Resolve paths from the script's own location (survives sudo, where $HOME=/root):
+# scripts/ -> repo root -> workspace root.
+SELF=$(readlink -f "$0")
+REPO=$(dirname "$(dirname "$SELF")")
+WORK="${WORK:-$(dirname "$REPO")}"
+REL="$REPO/release"
 
 case "$1" in
   r36sx)  BK="$WORK/R36SX_sdcard";                INST=r36sx;  LABEL=R36SX  ;;
