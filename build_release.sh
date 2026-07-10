@@ -80,6 +80,19 @@ declare -A HJ=(
   [gb350]="   GB350    640 480 4  3   0   dispframe driver_gb350.so   kill"
 )
 
+# Per-device cubevol sleep-arm text addresses for the nosleep live-patcher
+# (opt-in via FrogUI Settings -> "Disable Sleep"). NOPed in RAM so the on-disk
+# cubevol stays pristine (SF3500 boot-verifies it). Empty = not supported/tested
+# on that device (sleep lives elsewhere, or cubevol differs). Addresses are the
+# stores that ARM sleep: tap, idle-timeout, set_sleep_mode_state, msg-269 send.
+declare -A NOSLEEP_ADDRS=(
+  [r36sx]="0x406d24 0x40701c 0x406b50"
+  [r36hd]="0x406d24 0x40701c 0x406b50"
+  [sf3500]="0x406d44 0x40703c 0x406b70 0x406d8c"
+  [sf3000hd]="0x406d44 0x40703c 0x406b70 0x406d8c"
+  [sf3100]="0x406d44 0x40703c 0x406b70 0x406d8c"
+)
+
 # 0) Refresh staging + build hijack core.
 # Guard: picoarch_hi (gpsp/pcsx dynarec build of the SAME source) must not be older
 # than picoarch — a stale hi carries old device detection → SF3500/HD mis-detect →
@@ -93,13 +106,14 @@ cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null
+cp_if_diff "$HIJACK/nosleep" "$STAGE/cubegm/nosleep"
 
 rm -rf "$OUT"
 mkdir -p "$OUT/cubegm/cores" "$OUT/cubegm/lib" "$OUT/$(dirname "$DUMMY_REL")"
 
 # 1) Universal payload — our files only, NO stock, NO icube.
 cp -a "$STAGE/cubegm/cores/." "$OUT/cubegm/cores/"
-for f in picoarch picoarch_hi driver_r36sx.so driver_r36sx27.so driver_sf3000.so driver_sf3500.so driver_gb350.so; do
+for f in picoarch picoarch_hi nosleep driver_r36sx.so driver_r36sx27.so driver_sf3000.so driver_sf3500.so driver_gb350.so; do
     cp "$STAGE/cubegm/$f" "$OUT/cubegm/$f"
 done
 # zhijack.sh is per-device (generated into install_first/<dev>/cubegm/ below) —
@@ -179,6 +193,7 @@ for dev in "${!STOCK[@]}"; do
     sed -e "s/@DEV_LABEL@/$dev/g" -e "s/@DEV@/$DEV/g" -e "s/@PW@/$PW/g" \
         -e "s/@PH@/$PH/g" -e "s/@ASPN@/$ASPN/g" -e "s/@ASPD@/$ASPD/g" \
         -e "s/@ROT@/$ROT/g" -e "s/@PRESENT@/$PRESENT/g" -e "s/@DRIVER@/$DRIVER/g" \
+        -e "s#@NOSLEEP@#${NOSLEEP_ADDRS[$dev]:-}#g" \
         "$HIJACK/zhijack.tpl.sh" > "$dst/cubegm/zhijack.sh"
     # Boot block (freeze icube + kill rkgame) is universal. Loop killalls stay
     # only on kill-policy devices (harmless no-op belt on SF-class); r36sx runs

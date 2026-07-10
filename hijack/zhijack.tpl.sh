@@ -92,6 +92,18 @@ done
 pidof cubevol >/dev/null 2>&1 || { [ -x /usr/bin/cubevol ] && /usr/bin/cubevol & }
 sleep 0.5
 
+# Optional: disable the power-button sleep (FrogUI Settings -> "Disable Sleep",
+# default off, applies after restart). Live-patch every cubevol instance in RAM
+# so the on-disk binary stays byte-identical -> passes SF3500 boot verification.
+# The watcher re-patches each cubevol respawn (FrogUI restarts it for the OSD).
+# @NOSLEEP@ is the per-device set of sleep-arm text addresses (empty = device
+# not supported). Long-press power-off is a separate path, untouched.
+TF_NOSLEEP_ADDRS="@NOSLEEP@"
+if [ -n "$TF_NOSLEEP_ADDRS" ] && grep -q '^disable_sleep=on' /mnt/sdcard/frogui/settings.txt 2>/dev/null; then
+    echo 0 > /proc/sys/kernel/yama/ptrace_scope 2>/dev/null
+    [ -f /mnt/sdcard/cubegm/nosleep ] && /mnt/sdcard/cubegm/nosleep -w $TF_NOSLEEP_ADDRS >/dev/null 2>&1 &
+fi
+
 PICOARCH=/mnt/sdcard/cubegm/picoarch
 PICOARCH_HI=/mnt/sdcard/cubegm/picoarch_hi
 FROGUI_CORE=/mnt/sdcard/cubegm/cores/frogui_libretro.so

@@ -20,6 +20,12 @@ $CC $CFLAGS -shared -Wl,--gc-sections -EL --sysroot="$SYSROOT" \
 "${MIPS}strip" libemu_tfhijack.so 2>/dev/null || true
 ls -la libemu_tfhijack.so
 file libemu_tfhijack.so
+
+# nosleep — ptrace live-patcher that NOPs cubevol's sleep-arm stores in RAM
+# (opt-in "Disable Sleep"). Dynamic + stripped (libc is on-device); watcher mode.
+$CC -mips32r2 -EL -O2 --sysroot="$SYSROOT" -o nosleep nosleep.c
+"${MIPS}strip" nosleep 2>/dev/null || true
+echo "built nosleep: $(ls -la nosleep | awk '{print $5}') bytes"
 echo "=== exported retro_* symbols ==="
 "${MIPS}readelf" --dyn-syms libemu_tfhijack.so 2>/dev/null \
     | awk '$4=="FUNC"{print $8}' | grep '^retro_' | sort | tr '\n' ' '; echo
