@@ -12,7 +12,7 @@ index 7dfd42f..109a091 100644
  #MORE_CFLAGS+= -DDEBUG_INTERRUPTS
  #MORE_CFLAGS+= -DDEBUG_CYCLES
 diff --git a/libretro/core/libretro-core.cpp b/libretro/core/libretro-core.cpp
-index a58bd46..f8a9710 100644
+index a58bd46..da7457d 100644
 --- a/libretro/core/libretro-core.cpp
 +++ b/libretro/core/libretro-core.cpp
 @@ -631,7 +631,7 @@ void retro_get_system_info(struct retro_system_info *info)
@@ -24,6 +24,28 @@ index a58bd46..f8a9710 100644
     info->need_fullpath    = true;
     info->block_extract    = false;
  }
+@@ -640,7 +640,7 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
+ {
+    //FIXME handle vice PAL/NTSC
+    struct retro_game_geometry geom = { retrow, retroh, retrow, retroh,4.0 / 3.0 };
+-   struct retro_system_timing timing = { 50.0, 44100.0 };
++   struct retro_system_timing timing = { 50.0, 48000.0 };   /* match DEFAULT_SOUND_FREQ (hw audio driver needs 48kHz) */
+ 
+    info->geometry = geom;
+    info->timing   = timing;
+diff --git a/src/include/sound.h b/src/include/sound.h
+index 5c77fe1..3886943 100644
+--- a/src/include/sound.h
++++ b/src/include/sound.h
+@@ -21,7 +21,7 @@ extern void finish_sound_buffer (void);
+ #ifdef DINGOO
+ #define DEFAULT_SOUND_FREQ 16000
+ #else
+-#define DEFAULT_SOUND_FREQ 44100
++#define DEFAULT_SOUND_FREQ 48000   /* 48k: the SF3000 hw audio driver hangs on non-48kHz init; match it here so no frontend special-casing is needed */
+ #endif
+ #endif
+ 
 diff --git a/src/sf2000_diag.h b/src/sf2000_diag.h
 index a677043..3318387 100644
 --- a/src/sf2000_diag.h
