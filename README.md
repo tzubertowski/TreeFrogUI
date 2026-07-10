@@ -120,6 +120,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **xmil** | Sharp X68000 | `x68k_libretro.so` |
 | **pico286** | DOS / PC (8086-286, standalone) - 📖 [setup guide](docs/cores/pico286.md) | `pico286` + `x86BOOT.img` |
 | **Quake** | Quake | `tyrquake_libretro.so` |
+| **quake2** | Quake II (heavy) - 📖 [setup guide](docs/cores/quake2.md) | `vitaquake2_libretro.so` |
 | **prboom** | Doom / Heretic | `prboom_libretro.so` |
 | **wolf3d** | Wolfenstein 3D - 📖 [setup guide](docs/cores/wolf3d.md) | `ecwolf_libretro.so` |
 | **outrun** | Out Run | `cannonball_libretro.so` |
@@ -136,6 +137,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **m2k** | MAME 2000 (MAME 0.37b5 romset) | `mame2000_libretro.so` |
 | **cps1** | Capcom CPS-1 arcade | `fbalpha2012_cps1_libretro.so` |
 | **cps2** | Capcom CPS-2 arcade | `fbalpha2012_cps2_libretro.so` |
+| **cps3** | Capcom CPS-3 arcade (experimental, slow) | `fbalpha2012_cps3_libretro.so` |
 | **neogeo** | Neo Geo arcade | `fbalpha2012_neogeo_libretro.so` |
 | **int** | Mattel Intellivision | `freeintv_libretro.so` |
 | **fcf** | Fairchild Channel F | `freechaf_libretro.so` |
@@ -167,6 +169,7 @@ A few systems need more than "drop the ROM in the folder" - either extra compani
 | Rockbox music player (`rockbox`) | Standalone app, themes | 📖 [docs/cores/rockbox.md](docs/cores/rockbox.md) |
 | Commodore Amiga (`amiga`) | Needs your own Kickstart ROM | 📖 [docs/cores/amiga.md](docs/cores/amiga.md) |
 | Wolfenstein 3D (`wolf3d`) | Needs the game data **and** the engine's own resource pack | 📖 [docs/cores/wolf3d.md](docs/cores/wolf3d.md) |
+| Quake II (`quake2`) | Game data goes in a required `baseq2/` subfolder | 📖 [docs/cores/quake2.md](docs/cores/quake2.md) |
 | PlayStation 1 (`PS`/`ps1`/`psx`/`ps1r`) | Two cores, BIOS strongly recommended | 📖 [docs/cores/ps1.md](docs/cores/ps1.md) |
 
 ---

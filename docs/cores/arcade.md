@@ -8,6 +8,7 @@ Arcade games are `.zip` files of a romset. **Keep them zipped** - the core reads
 |---|---|---|
 | `cps1` | FB Alpha 2012 | Capcom **CPS-1** games |
 | `cps2` | FB Alpha 2012 | Capcom **CPS-2** games |
+| `cps3` | FB Alpha 2012 | Capcom **CPS-3** games (experimental - CPS-3 emulation is heavy, expect low fps) |
 | `neogeo` | FB Alpha 2012 | **Neo Geo** games (also needs `neogeo.zip` BIOS, see note below) |
 | `m2k` | MAME 2000 | misc arcade, **MAME 0.37b5** romset |
 

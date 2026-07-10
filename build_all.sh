@@ -250,6 +250,9 @@ echo "-- FB Alpha 2012 arcade (CPS-1 / CPS-2 / Neo Geo) make --"
 # CC_WRAP=fba → -fsigned-char + -fno-strict-aliasing (else segfault at game load)
 CC_WRAP=fba _b fbalpha2012_cps1   fbalpha2012_cps1   ""
 CC_WRAP=fba _b fbalpha2012_cps2   fbalpha2012_cps2   ""
+# CPS-3 is experimental on this CPU: SH-2 interpreter, expect low fps on heavy titles.
+# Repo layout differs from the other splits: source in svn-current/trunk, explicit makefile.
+CC_WRAP=fba _b fbalpha2012_cps3   fbalpha2012_cps3/svn-current/trunk   "-f makefile.libretro"
 CC_WRAP=fba _b fbalpha2012_neogeo fbalpha2012_neogeo ""
 
 echo "-- mame2003-plus make (modern MAME, much bigger library) --"

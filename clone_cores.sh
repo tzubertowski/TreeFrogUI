@@ -42,6 +42,7 @@ clone libretro-prboom  https://github.com/libretro/libretro-prboom
 clone mame2000         https://github.com/libretro/mame2000-libretro
 clone fbalpha2012_cps1   https://github.com/libretro/fbalpha2012_cps1
 clone fbalpha2012_cps2   https://github.com/libretro/fbalpha2012_cps2
+clone fbalpha2012_cps3   https://github.com/libretro/fbalpha2012_cps3
 clone fbalpha2012_neogeo https://github.com/libretro/fbalpha2012_neogeo
 clone mame2003-plus-libretro https://github.com/libretro/mame2003-plus-libretro
 clone FBNeo            https://github.com/libretro/FBNeo
