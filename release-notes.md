@@ -1,38 +1,23 @@
-Welcome to **TreeFrogUI** (v1.0.4): one build for **seven** handhelds: R36SX (v2.6 & v2.7), R36 HD, SF3000, SF3000 HD, SF3100, SF3500, and GB350
+Welcome to **TreeFrogUI** (v1.0.5): one build for **seven** handhelds: R36SX (v2.6 & v2.7), R36 HD, SF3000, SF3000 HD, SF3100, SF3500, and GB350
 
 > [!TIP]
 > **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.4 fixes a **game-speed regression** (arcade / Wolfenstein 3D ran too fast), the Amiga core (was unplayable - hard-hung on load), and Wolfenstein 3D (failed to launch entirely), plus adds a **Disable Sleep** option, a **Quake II** setup, and the core name shown in the pause menu. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.5 fixes **Amiga games crashing to a black screen on launch** and **noticeably improves audio quality across most systems** (Genesis, SNES, PS1, GBA, arcade - anything that isn't natively 48kHz no longer goes through the hardware driver's poor resampler). It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.4
-
-### ✨ New
-
-- **😴 Disable Sleep option.** A short press of the power button used to sleep the device (and on some units wake to a black screen). There's now a **Settings → Disable Sleep** toggle (default off). Turn it on and **restart** — the power button no longer sleeps, but a long press still powers off normally. Works by live-patching the sleep code in memory, so nothing on the card is modified (safe even on the boot-verified SF3500-class devices). Currently effective on R36SX and SF3500-class; SF3000/GB350 have a different sleep path.
-- **🔫 Quake II.** Play Quake II via the vitaquake2 core (software renderer, heavy — ~25-40fps). Game data goes in a **required `baseq2/` subfolder**: `roms/quake2/baseq2/pak0.pak`. D-pad moves (no analog stick needed). See the [setup guide](docs/cores/quake2.md).
-- **🕹️ Core name in the pause menu.** The in-game menu now shows the emulator core's name and version (e.g. `mame4all 0.37b5`) under the thumbnail, so you always know exactly which core is running.
-- **🥊 CPS-3 arcade** (`cps3` folder, FB Alpha 2012) — experimental and heavy (Street Fighter III etc. emulate an SH-2 CPU; expect low fps), for the curious.
+## What's New in v1.0.5
 
 ### 🩹 Fixes
 
-- **Fixed games running too fast (arcade / Wolfenstein 3D / anything not exactly 60fps).** Two bugs compounded: the frame pacer was hardcoded to 60fps (so cores with a different native rate — Wolf3D at 35fps, various arcade games — ran fast), and it only paced *displayed* frames, so cores that skip frames (MAME) ran their skipped frames unthrottled. Pacing now follows each core's true frame rate and runs once per emulated frame. Also: MAME (`m2k`) now ships with frame-skipping **off** so it renders every frame. This also clears up the audio desync those games had.
-- **Amiga (UAE): fixed a hard hang on launching any game.** Any Amiga game froze solid (black screen, no audio) a few seconds after launch — the hardware audio driver hangs when asked to init at Amiga's 44.1kHz. The core now emits **48kHz** natively so the driver is happy, with no frontend hacks (which had side-effects on other cores' audio). Also fixed: `.zip` files in `roms/amiga/` weren't being unzipped, and the core's crash/debug logging (silently compiled out) is restored for diagnosability.
-- **Wolfenstein 3D: fixed "Could not open ecwolf.pk3!" - the game failed to launch at all.** ecwolf needs its own engine resource pack (separate from the game data) that was never built or shipped. It's now built automatically and ships in `cubegm/bios/ecwolf.pk3`. See the [setup guide](docs/cores/wolf3d.md) - Wolf3D needs **both** this file and your own game data.
-- **In-game menu: selection highlight no longer corrupts text in the row above it** (the white pill bled 2px into the previous row, eating thin letter strokes like the "I" in "BIOS").
-- **Controls / key-bind screen: selected row is no longer invisible** (it drew white-on-white; now dark text on the pill like the rest of the menu).
-
-### 📖 Docs
-
-- **Per-system setup guides** now live in `docs/cores/` (Arcade, DOS/pico286, Rockbox, Amiga, Wolfenstein 3D, PlayStation 1, **Quake II**) and are linked from the ROM folder table, instead of one long wall of text.
-- Fixed stale `cores.md` entries (wrong Atari Lynx core name; leftover "needs wiring up" notes for Amiga/Atari ST) and a missing custom-font note in `theme.md`.
+- **Amiga (UAE): fixed games crashing to a black screen on launch.** Launching any Amiga game killed the frontend right after the core finished loading: the audio driver was being re-initialized from the emulator thread while the audio thread was still playing (Amiga's load-time warmup made that overlap a certainty). The driver is now initialized once, on the audio thread only, and never touched again mid-session.
+- **🔊 Better audio on most systems (Genesis, SNES, PS1, GBA, arcade...).** The hardware audio driver was previously re-initialized at each emulator's native sample rate and left to do the rate conversion itself - and its internal resampler is poor (crackle, rough pitch). The DAC now always runs at 48kHz and TreeFrogUI does the resampling, so every core gets the same clean output path. Systems that are natively 48kHz (e.g. NES) were always fine and are unchanged.
 
 **Updating from v1.0.x:** copy `cubegm/` and `frogui/` from the new package over your card, then copy your device's `install_first/<device>/` folder again. Your ROMs, saves, and settings are untouched.
 
