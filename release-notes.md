@@ -14,6 +14,10 @@ Welcome to **TreeFrogUI** (v1.0.5): one build for **seven** handhelds: R36SX (v2
 
 ## What's New in v1.0.5
 
+### ✨ New
+
+- **🧙 Heretic & Hexen.** The Doom core (`prboom` folder) was updated to the latest upstream, which now includes full Heretic and Hexen game logic - drop `heretic.wad` / `hexen.wad` (or the shareware `heretic1.wad`) next to your Doom WADs in `roms/prboom/`.
+
 ### 🩹 Fixes
 
 - **Amiga (UAE): fixed games crashing to a black screen on launch.** Launching any Amiga game killed the frontend right after the core finished loading: the audio driver was being re-initialized from the emulator thread while the audio thread was still playing (Amiga's load-time warmup made that overlap a certainty). The driver is now initialized once, on the audio thread only, and never touched again mid-session.

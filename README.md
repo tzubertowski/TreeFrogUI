@@ -121,7 +121,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **pico286** | DOS / PC (8086-286, standalone) - 📖 [setup guide](docs/cores/pico286.md) | `pico286` + `x86BOOT.img` |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **quake2** | Quake II (heavy) - 📖 [setup guide](docs/cores/quake2.md) | `vitaquake2_libretro.so` |
-| **prboom** | Doom / Heretic | `prboom_libretro.so` |
+| **prboom** | Doom / Doom II / Final Doom / Heretic / Hexen | `prboom_libretro.so` |
 | **wolf3d** | Wolfenstein 3D - 📖 [setup guide](docs/cores/wolf3d.md) | `ecwolf_libretro.so` |
 | **outrun** | Out Run | `cannonball_libretro.so` |
 | **cavestory** | Cave Story | `nxengine_libretro.so` |

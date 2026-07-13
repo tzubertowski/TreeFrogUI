@@ -107,7 +107,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `Quake` | Quake | `tyrquake_libretro.so` | [libretro/tyrquake](https://github.com/libretro/tyrquake) |
 | `quake2` | Quake II (software renderer, heavy; data in `baseq2/`) | `vitaquake2_libretro.so` | [tzubertowski/treefrogui_vitaquake2](https://github.com/tzubertowski/treefrogui_vitaquake2) |
 | `wolf3d` | Wolfenstein 3D | `ecwolf_libretro.so` | [libretro/ecwolf](https://github.com/libretro/ecwolf) |
-| `prboom` | Doom / Doom II / Final Doom (no Heretic - the core rejects it) | `prboom_libretro.so` | [libretro/libretro-prboom](https://github.com/libretro/libretro-prboom) |
+| `prboom` | Doom / Doom II / Final Doom / Heretic / Hexen | `prboom_libretro.so` | [libretro/libretro-prboom](https://github.com/libretro/libretro-prboom) |
 | `outrun` | Out Run (arcade) | `cannonball_libretro.so` | [libretro/cannonball](https://github.com/libretro/cannonball) |
 | `m2k` | MAME 2000 (MAME 0.37b5 romset) | `mame2000_libretro.so` | [libretro/mame2000-libretro](https://github.com/libretro/mame2000-libretro) |
 | `cps1` | Capcom CPS-1 (FB Alpha 2012) | `fbalpha2012_cps1_libretro.so` | [libretro/fbalpha2012_cps1](https://github.com/libretro/fbalpha2012_cps1) |
