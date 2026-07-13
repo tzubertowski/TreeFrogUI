@@ -5,7 +5,7 @@ Welcome to **TreeFrogUI** (v1.0.5): one build for **seven** handhelds: R36SX (v2
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.5 fixes **Amiga games crashing to a black screen on launch** and **noticeably improves audio quality across most systems** (Genesis, SNES, PS1, GBA, arcade - anything that isn't natively 48kHz no longer goes through the hardware driver's poor resampler). It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.5 overhauls the **audio pipeline** (cleaner sound on Genesis, SNES, PS1, GBA, arcade - anything not natively 48kHz - plus a fix for sound cutting out until reboot), fixes **Amiga games crashing on launch**, adds **Heretic & Hexen** support and the **snes9x2010** SNES core. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
 > 
 > Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
@@ -22,7 +22,8 @@ Welcome to **TreeFrogUI** (v1.0.5): one build for **seven** handhelds: R36SX (v2
 ### 🩹 Fixes
 
 - **Amiga (UAE): fixed games crashing to a black screen on launch.** Launching any Amiga game killed the frontend right after the core finished loading: the audio driver was being re-initialized from the emulator thread while the audio thread was still playing (Amiga's load-time warmup made that overlap a certainty). The driver is now initialized once, on the audio thread only, and never touched again mid-session.
-- **🔊 Better audio on most systems (Genesis, SNES, PS1, GBA, arcade...).** The hardware audio driver was previously re-initialized at each emulator's native sample rate and left to do the rate conversion itself - and its internal resampler is poor (crackle, rough pitch). The DAC now always runs at 48kHz and TreeFrogUI does the resampling, so every core gets the same clean output path. Systems that are natively 48kHz (e.g. NES) were always fine and are unchanged.
+- **🔊 Better audio on most systems (Genesis, SNES, PS1, GBA, Doom, arcade...).** The hardware audio driver was previously re-initialized at each emulator's native sample rate and left to do the rate conversion itself - and its internal resampler is poor (crackle, rough pitch). The DAC now always runs at 48kHz and TreeFrogUI does the conversion with a proper linear resampler, so every core gets the same clean output path. Systems that are natively 48kHz (NES, Game Boy) were always fine and are unchanged.
+- **🔇 Fixed sound sometimes cutting out entirely** (no audio in any game until a reboot). Starting a game could catch the audio daemon while it was still tearing down the previous session; a failed first init was treated as permanent. The DAC init now retries for up to 2 seconds.
 
 **Updating from v1.0.x:** copy `cubegm/` and `frogui/` from the new package over your card, then copy your device's `install_first/<device>/` folder again. Your ROMs, saves, and settings are untouched.
 
