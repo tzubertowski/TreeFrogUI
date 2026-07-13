@@ -149,6 +149,9 @@ _b snes9x2005_plus   snes9x2005                "" "CC=$WRAP/mips-gcc-O3 CXX=$WRA
 echo "-- snes9x2002 make --"
 _b snes9x2002        snes9x2002                ""
 
+echo "-- snes9x2010 make (accurate SNES, per-game picker only; LTO objects not PIC-safe for this linker) --"
+_b snes9x2010        snes9x2010                "-f Makefile.libretro" "LTO="
+
 echo "-- gambatte make --"
 _b gambatte          libretro-gambatte         "-f Makefile.libretro"
 

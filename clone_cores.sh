@@ -25,6 +25,7 @@ clone fceumm          https://github.com/tzubertowski/libretro-fceumm
 clone QuickNES_Core   https://github.com/libretro/QuickNES_Core
 clone snes9x2005      https://github.com/tzubertowski/snes9x2005
 clone snes9x2002      https://github.com/tzubertowski/snes9x2002
+clone snes9x2010      https://github.com/libretro/snes9x2010
 clone libretro-gambatte https://github.com/tzubertowski/libretro-gambatte
 clone gpsp            https://github.com/tzubertowski/gpsp_multicore
 clone gpsp_upstream   https://github.com/libretro/gpsp

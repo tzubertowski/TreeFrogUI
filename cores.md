@@ -157,6 +157,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | Core .so | System | Source |
 |----------|--------|--------|
 | `snes9x2005_libretro.so` | SNES (alt build) | same as snes9x2005_plus |
+| `snes9x2010_libretro.so` | SNES (accurate, heavier) - selectable in the per-game core picker | [libretro/snes9x2010](https://github.com/libretro/snes9x2010) |
 | `mednafen_lynx_libretro.so` | Atari Lynx (alt, unused) | built but `lnx` folder uses `handy_libretro.so` instead |
 
 ---

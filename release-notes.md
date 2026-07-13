@@ -17,6 +17,7 @@ Welcome to **TreeFrogUI** (v1.0.5): one build for **seven** handhelds: R36SX (v2
 ### ✨ New
 
 - **🧙 Heretic & Hexen.** The Doom core (`prboom` folder) was updated to the latest upstream, which now includes full Heretic and Hexen game logic - drop `heretic.wad` / `hexen.wad` (or the shareware `heretic1.wad`) next to your Doom WADs in `roms/prboom/`.
+- **🎮 snes9x2010 core.** A more accurate (but heavier) SNES core, selectable per game via the core picker in the game options - try it on games where the default core glitches.
 
 ### 🩹 Fixes
 
