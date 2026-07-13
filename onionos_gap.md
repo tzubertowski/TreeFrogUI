@@ -44,7 +44,7 @@ LowRes NX, GME, Cave Story, Flashback, plus the full home-computer set
 | Save states + slots | Yes | Yes | slots + screenshot thumbnails |
 | Auto-resume on boot | Yes | Yes | reserved slot, restores last game |
 | In-game menu | Yes | Yes | picoarch menu, frozen-frame bg at correct aspect |
-| Fast-forward | Yes | Yes | SELECT+Y cycle |
+| Fast-forward | Yes | Yes | SELECT+R1 cycle |
 | Rewind | Yes | Yes | hold SELECT+B (disabled on cores with unreliable state size) |
 | Cheats | Yes | Yes | picoarch cheat support |
 | Favorites | Yes | Yes | FrogUI favorites |
