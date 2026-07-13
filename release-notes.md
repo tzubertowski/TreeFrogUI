@@ -1,5 +1,3 @@
-Welcome to **TreeFrogUI** (v1.0.5): one build for **seven** handhelds: R36SX (v2.6 & v2.7), R36 HD, SF3000, SF3000 HD, SF3100, SF3500, and GB350
-
 > [!TIP]
 > **Consider donating to keep this going:** ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
