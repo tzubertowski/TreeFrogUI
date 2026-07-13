@@ -34,6 +34,14 @@ if [ -z "$SD" ]; then
     done
 fi
 
+# Staging mirrors the R36SX dev card. Mirroring it onto an SF3500-class card
+# once tripped the bootloader's "sdcard is damaged" verification — those cards
+# get the release payload + install_first/<dev> instead, never this mirror.
+case "$(basename "$SD" 2>/dev/null)" in
+    *R36*|*r36*) : ;;
+    *) [ -n "$SD" ] && { echo "refusing: $SD is not the R36SX dev card (release payload for other devices)"; exit 1; } ;;
+esac
+
 if [ -z "$SD" ]; then
     echo "No card with cubegm/ mounted under /run/media/$USER — staging updated only."
     echo "(fresh card? run: $0 /run/media/$USER/<card>)"
