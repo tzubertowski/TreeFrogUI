@@ -32,6 +32,7 @@ _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
 _apply_patch ardens-sf3000.patch       Ardens
 _apply_patch pico286-sf3000.patch      pico-286
+_apply_patch gw-sf3000-no-zoom.patch   libretro-gw
 
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"

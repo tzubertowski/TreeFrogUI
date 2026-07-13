@@ -1,0 +1,22 @@
+diff --git a/src/libretro.c b/src/libretro.c
+index 9ca1d5e..0ba1f44 100644
+--- a/src/libretro.c
++++ b/src/libretro.c
+@@ -138,7 +138,16 @@ int gwlua_set_fb( unsigned width, unsigned height )
+ void gwlua_zoom( gwlua_t* state, int x0, int y0, int width, int height )
+ {
+   struct retro_game_geometry geometry;
+-  
++
++  /* SF3000: never zoom into a sub-screen. Multi Screen games zoom to the
++   * active screen on Game A, which flaps the frame size and shows blank on
++   * this display driver; the full artwork (both screens, like the real
++   * clamshell unit) is what we present instead. */
++  fprintf( stderr, "gw: zoom request x0=%d y0=%d w=%d h=%d -> forcing full view %dx%d\n",
++           x0, y0, width, height, state->width, state->height );
++  fflush( stderr );
++  x0 = -1;
++
+   if ( x0 >= 0 )
+   {
+     geometry.base_width  = width;
