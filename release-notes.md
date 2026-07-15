@@ -12,6 +12,7 @@
 ## What's New in v1.0.6
 
 - **🚀 Much faster scaling.** Full & Aspect now scale in hardware (no more CPU stretch), and Integer is roughly 2x faster. Big FPS gain, especially on R36SX.
+- **⚡ Faster GBA.** Both GBA cores (`gba` and `gbac`) now run with the MIPS dynarec (JIT) instead of the C interpreter - noticeably higher frame rates.
 - **🩹 GBA saves from ZIP ROMs fixed.** In-game saves in `gpsp_multicore` now persist for zipped ROMs. (Saves made before this update won't be found.)
 - **⏩ Uncapped fast-forward.** SELECT+R1 now cycles off → 2x → 3x → uncapped.
 
