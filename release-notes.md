@@ -3,29 +3,19 @@
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.5 overhauls the **audio pipeline** (cleaner sound on Genesis, SNES, PS1, GBA, arcade - anything not natively 48kHz - plus a fix for sound cutting out until reboot), fixes **Amiga games crashing on launch**, adds **Heretic & Hexen** support and the **snes9x2010** SNES core. It's been tested mostly by one person, so depending on your exact hardware revision you may still hit bugs, quirks, or compatibility issues.
+> v1.0.6 is a **performance** release: **Full**, **Aspect**, and **Integer** scaling are all much faster (big FPS jump, especially on R36SX). Also fixes GBA saves from ZIP ROMs and adds an uncapped fast-forward.
 > 
-> Please help improve the project by leaving your feedback, bug reports, and suggestions here:
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.5
+## What's New in v1.0.6
 
-### ✨ New
+- **🚀 Much faster scaling.** Full & Aspect now scale in hardware (no more CPU stretch), and Integer is roughly 2x faster. Big FPS gain, especially on R36SX.
+- **🩹 GBA saves from ZIP ROMs fixed.** In-game saves in `gpsp_multicore` now persist for zipped ROMs. (Saves made before this update won't be found.)
+- **⏩ Uncapped fast-forward.** SELECT+R1 now cycles off → 2x → 3x → uncapped.
 
-- **🧙 Heretic & Hexen.** The Doom core (`prboom` folder) was updated to the latest upstream, which now includes full Heretic and Hexen game logic - drop `heretic.wad` / `hexen.wad` (or the shareware `heretic1.wad`) next to your Doom WADs in `roms/prboom/`.
-- **🎮 snes9x2010 core.** A more accurate (but heavier) SNES core, selectable per game via the core picker in the game options - try it on games where the default core glitches.
-
-### 🩹 Fixes
-
-- **Amiga (UAE): fixed games crashing to a black screen on launch.** Launching any Amiga game killed the frontend right after the core finished loading: the audio driver was being re-initialized from the emulator thread while the audio thread was still playing (Amiga's load-time warmup made that overlap a certainty). The driver is now initialized once, on the audio thread only, and never touched again mid-session.
-- **🔊 Better audio on most systems (Genesis, SNES, PS1, GBA, Doom, arcade...).** The hardware audio driver was previously re-initialized at each emulator's native sample rate and left to do the rate conversion itself - and its internal resampler is poor (crackle, rough pitch). The DAC now always runs at 48kHz and TreeFrogUI does the conversion with a proper linear resampler, so every core gets the same clean output path. Systems that are natively 48kHz (NES, Game Boy) were always fine and are unchanged.
-- **🔇 Fixed sound sometimes cutting out entirely** (no audio in any game until a reboot). Starting a game could catch the audio daemon while it was still tearing down the previous session; a failed first init was treated as permanent. The DAC init now retries for up to 2 seconds.
-- **🕹️ Game & Watch: fixed the black screen.** G&W games (`gw` folder, `.mgw` files) ran with sound but never displayed - their artwork frames are larger than the display driver accepts, and the driver silently drew nothing. Frames are now scaled to fit automatically. Multi Screen games show both screens at once (like the real clamshell). Reminder: Game A = **L1**, Game B = **R1**, Time = **L2**.
-- **Fast-forward menu label corrected** - the hotkey is **SELECT+R1** (the menu wrongly said SELECT+Y). Fast-forward and rewind are per-game toggles, off by default; enable them in the pause menu.
-
-**Updating from v1.0.x:** copy `cubegm/` and `frogui/` from the new package over your card, then copy your device's `install_first/<device>/` folder again. Your ROMs, saves, and settings are untouched.
+**Updating:** copy `cubegm/` and `frogui/` over your card, then copy your device's `install_first/<device>/` folder again. ROMs, saves, and settings are untouched.
 
 ---
 
