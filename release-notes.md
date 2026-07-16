@@ -13,7 +13,9 @@
 
 - **🚀 Much faster scaling.** Full & Aspect now scale in hardware (no more CPU stretch), and Integer is roughly 2x faster. Big FPS gain, especially on R36SX.
 - **⚡ Faster GBA.** Both GBA cores (`gba` and `gbac`) now run with the MIPS dynarec (JIT) instead of the C interpreter - noticeably higher frame rates.
+- **🔍 Pick your scaling filter.** In the in-game menu (Video options → Filter): **Bilinear** (hardware, fast, soft), **Nearest** (sharpest, software - can lower FPS), or **Sharp** (near-nearest at close to hardware speed). Plus a **Sharpness** slider for the hardware filters.
 - **🩹 GBA saves from ZIP ROMs fixed.** In-game saves in `gpsp_multicore` now persist for zipped ROMs. (Saves made before this update won't be found.)
+- **🩹 Fixed menu text dropping out.** Letters in the pause menu could randomly disappear while scrolling; the menu is also dimmed a little more for readability.
 - **⏩ Uncapped fast-forward.** SELECT+R1 now cycles off → 2x → 3x → uncapped.
 
 **Updating:** copy `cubegm/` and `frogui/` over your card, then copy your device's `install_first/<device>/` folder again. ROMs, saves, and settings are untouched.
