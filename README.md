@@ -261,7 +261,11 @@ The log records the boot sequence, which device was detected, the display path (
 
 ### Requirements
 
-- SF3000 cross-toolchain at `~/sf3000-work/sf3000toolchain/`
+- **SF3000 cross-toolchain** (MIPS32r2, little-endian, hard-float) extracted to
+  `~/sf3000-work/sf3000toolchain/`. Download it here:
+  **[game-de-it/sf3000 · sf3000_toolchain_v0.1](https://github.com/game-de-it/sf3000/releases/tag/sf3000_toolchain_v0.1)**
+  The build scripts expect
+  `~/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/opt/ext-toolchain/bin/mips-mti-linux-gnu-*`.
 - `git`, `make`, `nproc`
 - `cmake` (only for the cmake-based cores: TIC-80; a static build from
   [Kitware](https://github.com/Kitware/CMake/releases) works, no root needed).
