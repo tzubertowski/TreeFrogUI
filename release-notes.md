@@ -3,20 +3,20 @@
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.6 is a **performance** release: **Full**, **Aspect**, and **Integer** scaling are all much faster (big FPS jump, especially on R36SX). Also fixes GBA saves from ZIP ROMs and adds an uncapped fast-forward.
+> v1.0.7 builds on v1.0.6's performance work: it fixes **PlayStation games that freeze** when they change resolution (e.g. Colin McRae Rally after the intro video), makes the **scaling filter save per game**, and fixes a couple of display bugs (SF3500 miniature picture, pause-menu text).
 > 
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.6
+## What's New in v1.0.7
 
-- **🚀 Much faster scaling.** Full & Aspect now scale in hardware (no more CPU stretch), and Integer is roughly 2x faster. Big FPS gain, especially on R36SX.
-- **⚡ Faster GBA.** Both GBA cores (`gba` and `gbac`) now run with the MIPS dynarec (JIT) instead of the C interpreter - noticeably higher frame rates.
-- **🔍 Pick your scaling filter.** In the in-game menu (Video options → Filter): **Bilinear** (hardware, fast, soft), **Nearest** (sharpest, software - can lower FPS), or **Sharp** (near-nearest at close to hardware speed). Plus a **Sharpness** slider for the hardware filters.
-- **🩹 GBA saves from ZIP ROMs fixed.** In-game saves in `gpsp_multicore` now persist for zipped ROMs. (Saves made before this update won't be found.)
-- **🩹 Fixed menu text dropping out.** Letters in the pause menu could randomly disappear while scrolling; the menu is also dimmed a little more for readability.
-- **⏩ Uncapped fast-forward.** SELECT+R1 now cycles off → 2x → 3x → uncapped.
+- **🩹 PlayStation freeze fixed.** PS1 games that switch internal resolution (menus, FMVs, hi-res modes - Colin McRae Rally, etc.) could black out or freeze. pcsx4all now presents at a fixed size, so a resolution change never wedges the display driver.
+- **💾 Scaling filter now saves.** Your Filter / Screen size / Sharpness choice is remembered per game (change it in Video options and it sticks across relaunches). Includes the **Sharp** filter (near-nearest at close to hardware speed).
+- **🩹 SF3500 miniature picture fixed.** On SF3500 the image could shrink to a small box - it now fills the screen correctly again.
+- **🩹 Pause menu text.** Letters no longer randomly disappear while scrolling, the menu stays crisp, and it's dimmed a touch more for readability on bright scenes.
+
+*Also in the v1.0.6 line: hardware Full/Aspect/Integer scaling (big FPS gain), GBA MIPS dynarec, the Bilinear/Nearest/Sharp filter picker, GBA ZIP-ROM saves, and uncapped fast-forward.*
 
 **Updating:** copy `cubegm/` and `frogui/` over your card, then copy your device's `install_first/<device>/` folder again. ROMs, saves, and settings are untouched.
 
