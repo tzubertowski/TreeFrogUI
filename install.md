@@ -192,9 +192,10 @@ much slower; `.hex` only).
   `install_first/<device>/` folder (it includes the correct logo) - not another device's.
 - **Sleep mode / power button standby (R36SX, SF3500-class):** not supported by
   TreeFrogUI, can hang the display on wake. **Disable Sleep is on by default**
-  (Settings → Disable Sleep) to prevent this. Use **Auto-Resume** (Settings →
-  Auto-Resume) instead - it puts you back in your last game or the frontend on
-  next boot, which covers the same use case as real hibernation.
+  (Settings → Disable Sleep) to prevent this. Use **Quick Resume** (Settings →
+  Quick Resume) instead - it puts you back in your last game on next boot;
+  add **Auto-Save/Auto-Load** to also restore your mid-game state, which
+  covers the same use case as real hibernation.
 - **PC Engine (`pce`) crashes or resets when returning from the in-game menu**
   (seen on some devices, e.g. SF3000 HD - not universal): turn on **Disable
   Soft Reset** in the core's options (SELECT+START → Core Options). The stock

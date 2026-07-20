@@ -42,7 +42,7 @@ LowRes NX, GME, Cave Story, Flashback, plus the full home-computer set
 | Per-folder backgrounds / box art | Yes | Yes (manual) | per-system/per-folder images; game thumbnails (.res/*.rgb565) |
 | Box-art scraper | Yes | No | needs WiFi, our devices have none. Manual art only |
 | Save states + slots | Yes | Yes | slots + screenshot thumbnails |
-| Auto-resume on boot | Yes | Yes | reserved slot, restores last game |
+| Auto-resume on boot | Yes | Yes | Quick Resume boots into last game; Auto-Save/Auto-Load restores state (reserved slot), independent toggles |
 | In-game menu | Yes | Yes | picoarch menu, frozen-frame bg at correct aspect |
 | Fast-forward | Yes | Yes | SELECT+R1 cycle |
 | Rewind | Yes | Yes | hold SELECT+B (disabled on cores with unreliable state size) |

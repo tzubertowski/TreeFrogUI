@@ -50,7 +50,8 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **57 emulator cores** - Now supports 57 emulator cores compared to only 14 in the stock OS. This includes standout additions such as **PICO-8** (via Fake08/Retro8), **Quake** (via Tyrquake), **Cave Story** (via NXEngine), **Doom** (via PrBoom), **PlayStation 1** (via PCSX ReArmed), plus classic computer systems like Commodore Amiga and Atari ST.
 - **Highly configurable cores** - Configurable settings for all cores, allowing for retro features like console palette swaps, LCD ghosting emulation, and more.
 - **In-game saves** - Fully supported across all compatible cores for seamless session saving and loading.
-- **Auto-resume on boot** - Automatically boots back into the last played game or frontend view upon device boot.
+- **Quick Resume** - Automatically boots back into the last played game upon device boot, skipping the frontend.
+- **Auto-Save/Auto-Load** - Auto-saves state on pause/quit and auto-loads it on any game launch (Quick Resume boot or a manual pick from the frontend). Independent of Quick Resume - turn it on to always pick up mid-game, however you launch.
 - **Clean, configurable menu** - Smooth iPhone-style background crossfades (instant selection), an optional **Hide Empty Folders** setting, and right-stick drift filtering so accidental touches don't trigger phantom presses while navigating.
 - **Rich theming options** - Custom background images, fonts, and 30 built-in color themes to fit your style.
 - **Game switcher** - Optional OnionOS-style recents carousel: big box art, or a screenshot of where you left off (every game is auto-screenshotted on exit), resumes the game. Turn it on in Settings (Game Switcher), it replaces the recents list.
@@ -385,7 +386,7 @@ treefrog-ui/
 > **Right analog stick.** The right stick **cannot** work as a real analog stick, and no software update can change that. On this console it's physically wired to act **exactly like the X / A / B / Y face buttons**: nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" info. The console never hands analog data to apps like TreeFrogUI. So the right stick simply **mirrors the face buttons** (tiny accidental movements are ignored, so it won't fire on its own). Hardware limitation, not a bug or missing feature.
 
 > [!WARNING]
-> **Sleep mode is not supported.** On R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100), the stock power-button sleep/standby is **not supported** by TreeFrogUI and can leave the display hung after wake. **Disable Sleep is on by default** (Settings → Disable Sleep) to avoid this. Instead, use **Auto-Resume** (Settings → Auto-Resume) — it saves your place and drops you right back into your last game or the frontend on next boot, which covers the same "put it down, pick it back up" use case as real hibernation.
+> **Sleep mode is not supported.** On R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100), the stock power-button sleep/standby is **not supported** by TreeFrogUI and can leave the display hung after wake. **Disable Sleep is on by default** (Settings → Disable Sleep) to avoid this. Instead, use **Quick Resume** (Settings → Quick Resume) to drop right back into your last game on next boot — pair it with **Auto-Save/Auto-Load** to also restore your exact mid-game state, which covers the same "put it down, pick it back up" use case as real hibernation.
 
 ### SF3000 family
 
