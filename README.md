@@ -90,7 +90,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **gpgx** | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
 | **segacd** | Sega CD / Mega CD | `genesis_plus_gx_libretro.so` |
 | **PS**, **ps1**, **psx** | PlayStation - 📖 [setup guide](docs/cores/ps1.md) | `pcsx_rearmed_libretro.so` |
-| **pce** | PC Engine / TurboGrafx-16 | `mednafen_pce_fast_libretro.so` |
+| **pce** | PC Engine / TurboGrafx-16 - 📖 [notes](docs/cores/pce.md) | `mednafen_pce_fast_libretro.so` |
 | **pcesgx** | PC Engine SuperGrafx | `mednafen_supergrafx_libretro.so` |
 | **pcfx** | PC-FX | `mednafen_pcfx_libretro.so` |
 | **pc8800** | NEC PC-8800 | `quasi88_libretro.so` |
@@ -383,6 +383,9 @@ treefrog-ui/
 
 > [!NOTE]
 > **Right analog stick.** The right stick **cannot** work as a real analog stick, and no software update can change that. On this console it's physically wired to act **exactly like the X / A / B / Y face buttons**: nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" info. The console never hands analog data to apps like TreeFrogUI. So the right stick simply **mirrors the face buttons** (tiny accidental movements are ignored, so it won't fire on its own). Hardware limitation, not a bug or missing feature.
+
+> [!WARNING]
+> **Sleep mode is not supported.** On R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100), the stock power-button sleep/standby is **not supported** by TreeFrogUI and can leave the display hung after wake. **Disable Sleep is on by default** (Settings → Disable Sleep) to avoid this. Instead, use **Auto-Resume** (Settings → Auto-Resume) — it saves your place and drops you right back into your last game or the frontend on next boot, which covers the same "put it down, pick it back up" use case as real hibernation.
 
 ### SF3000 family
 

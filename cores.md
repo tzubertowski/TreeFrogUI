@@ -61,6 +61,12 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `pcfx` | PC-FX | `mednafen_pcfx_libretro.so` | [libretro/beetle-pcfx-libretro](https://github.com/libretro/beetle-pcfx-libretro) |
 | `pc8800` | NEC PC-88 | `quasi88_libretro.so` | [libretro/quasi88-libretro](https://github.com/libretro/quasi88-libretro) |
 
+> **PCE core (`pce`) resets or crashes on returning from the in-game menu?**
+> Only seen on **some devices** (e.g. SF3000 HD), not universal. Turn on
+> **Disable Soft Reset** in the core's options (`pce_fast_disable_softreset`,
+> SELECT+START → Core Options). The default soft-reset button combo (RUN+SELECT)
+> can fire spuriously on menu return and reset/crash the core; disabling it fixes this.
+
 ---
 
 ## SNK

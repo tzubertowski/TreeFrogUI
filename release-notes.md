@@ -15,6 +15,7 @@
 - **💾 Scaling filter now saves.** Your Filter / Screen size / Sharpness choice is remembered per game (change it in Video options and it sticks across relaunches). Includes the **Sharp** filter (near-nearest at close to hardware speed).
 - **🩹 SF3500 miniature picture fixed.** On SF3500 the image could shrink to a small box - it now fills the screen correctly again.
 - **🩹 Pause menu text.** Letters no longer randomly disappear while scrolling, the menu stays crisp, and it's dimmed a touch more for readability on bright scenes.
+- **😴 Disable Sleep is now on by default.** Power-button sleep/standby isn't supported by TreeFrogUI on R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100) and could hang the display on wake. Shipping with Disable Sleep on avoids that; use **Auto-Resume** instead to get the same "pick up where you left off" behavior.
 
 *Also in the v1.0.6 line: hardware Full/Aspect/Integer scaling (big FPS gain), GBA MIPS dynarec, the Bilinear/Nearest/Sharp filter picker, GBA ZIP-ROM saves, and uncapped fast-forward.*
 
@@ -55,6 +56,7 @@ For step-by-step setup instructions, please refer to the [Installation Guide](in
 - **Black screen / only battery icon after the boot logo:** you didn't start from a clean **stock OS** card for your device, or you copied the wrong device's `install_first/` folder. Restore the stock backup ([links in the install guide](install.md)), then copy the TreeFrogUI files and your device's `install_first/` folder again.
 - **"sdcard is damaged":** make sure you copied **your** device's `install_first/` folder and did not modify the stock `icube` / `rkgame`. The unified boot leaves those untouched precisely so this error doesn't happen.
 - **PS1 won't save:** you're running on the HLE BIOS. Drop a real `scph1001.bin` in the BIOS folder (see the [PS1 BIOS section](install.md#playstation-1-bios-strongly-recommended)).
+- **Sleep mode / power button standby (R36SX, SF3500-class):** not supported by TreeFrogUI, can hang the display on wake. Disable Sleep is on by default to prevent this. Use **Auto-Resume** instead - it covers the same use case as real hibernation.
 - **Give feedback / report a bug:** please do, it is the fastest way to get your device's quirks fixed.
   - 📋 [Anonymous Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)
   - 🐛 [GitHub Issues](https://github.com/tzubertowski/treefrog-ui/issues)

@@ -190,5 +190,14 @@ much slower; `.hex` only).
   and filters drift. Hardware limitation, not a bug.
 - **Distorted / sideways boot logo:** make sure you copied **your device's**
   `install_first/<device>/` folder (it includes the correct logo) - not another device's.
+- **Sleep mode / power button standby (R36SX, SF3500-class):** not supported by
+  TreeFrogUI, can hang the display on wake. **Disable Sleep is on by default**
+  (Settings → Disable Sleep) to prevent this. Use **Auto-Resume** (Settings →
+  Auto-Resume) instead - it puts you back in your last game or the frontend on
+  next boot, which covers the same use case as real hibernation.
+- **PC Engine (`pce`) crashes or resets when returning from the in-game menu**
+  (seen on some devices, e.g. SF3000 HD - not universal): turn on **Disable
+  Soft Reset** in the core's options (SELECT+START → Core Options). The stock
+  soft-reset combo can fire spuriously on menu return.
 - **Submit feedback anonymously:** [Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header).
 - **GitHub Issues:** [repository](https://github.com/tzubertowski/treefrog-ui/issues).
