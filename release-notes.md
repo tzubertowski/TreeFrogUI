@@ -3,22 +3,18 @@
 > Most supported devices were bought out of pocket (the SF3500 was funded by the community). These days tips go toward ongoing maintenance and buying new clones to port to.
 
 > [!IMPORTANT]
-> v1.0.7 builds on v1.0.6's performance work: it fixes **PlayStation games that freeze** when they change resolution (e.g. Colin McRae Rally after the intro video), makes the **scaling filter save per game**, and fixes a couple of display bugs (SF3500 miniature picture, pause-menu text).
+> v1.0.8 fixes the **SF3500 pause-menu text glitch** (letters jumping a row out of place) and adds support for **newer SF3500 hardware revisions** that can't boot the standard stock backup.
 > 
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.7
+## What's New in v1.0.8
 
-- **🩹 PlayStation freeze fixed.** PS1 games that switch internal resolution (menus, FMVs, hi-res modes - Colin McRae Rally, etc.) could black out or freeze. pcsx4all now presents at a fixed size, so a resolution change never wedges the display driver.
-- **💾 Scaling filter now saves.** Your Filter / Screen size / Sharpness choice is remembered per game (change it in Video options and it sticks across relaunches). Includes the **Sharp** filter (near-nearest at close to hardware speed).
-- **🩹 SF3500 miniature picture fixed.** On SF3500 the image could shrink to a small box - it now fills the screen correctly again.
-- **🩹 Pause menu text.** Letters no longer randomly disappear while scrolling, the menu stays crisp, and it's dimmed a touch more for readability on bright scenes.
-- **😴 Disable Sleep is now on by default.** Power-button sleep/standby isn't supported by TreeFrogUI on R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100) and could hang the display on wake. Shipping with Disable Sleep on avoids that; use **Quick Resume** (+ **Auto-Save/Auto-Load** for exact mid-game state) instead to get the same "pick up where you left off" behavior.
-- **🔀 Auto-Resume split into two settings.** What used to be one "Auto-Resume" toggle is now **Quick Resume** (boots straight into your last game, skipping the frontend) and **Auto-Save/Auto-Load** (auto-saves on pause/quit, auto-loads on any launch - Quick Resume boot or a manual pick). Turn on both for the old combined behavior, or mix and match.
+- **🩹 SF3500 pause-menu text fixed.** In the in-game menu, letters could randomly jump half a row out of place (the "T" of EXIT sitting above its line, etc.) and heal themselves as you navigated. The menu re-rasterized every letter every frame, and on tight-memory firmware that occasionally produced a garbled glyph; each character is now rasterized once and cached, so the text stays put. Menus are also a touch faster as a result. No visible change on other devices.
+- **📦 Newer SF3500 revisions supported.** Some later SF3500 units won't boot the standard stock backup. A new **[SF3500 v1.1 stock backup](https://github.com/Q-ta-s/q-ta-s.github.io/releases/tag/sf3500_1)** boots on those; restore it instead of the standard one (same `install_first/sf3500/` folder, everything else identical). See the [install guide](install.md).
 
-*Also in the v1.0.6 line: hardware Full/Aspect/Integer scaling (big FPS gain), GBA MIPS dynarec, the Bilinear/Nearest/Sharp filter picker, GBA ZIP-ROM saves, and uncapped fast-forward.*
+*Also in the v1.0.7 line: PlayStation resolution-change freeze fixed, per-game scaling-filter save, SF3500 miniature-picture fix, Disable Sleep on by default, and Auto-Resume split into Quick Resume + Auto-Save/Auto-Load.*
 
 **Updating:** copy `cubegm/` and `frogui/` over your card, then copy your device's `install_first/<device>/` folder again. ROMs, saves, and settings are untouched.
 
