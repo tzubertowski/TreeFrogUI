@@ -66,7 +66,7 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 <details>
 <summary><b>SF3500</b></summary>
 
-- 📦 Stock backup: [Q-ta-s releases](https://github.com/Q-ta-s/q-ta-s.github.io/releases)
+- 📦 [SF3500 Stock Backup](https://github.com/Q-ta-s/q-ta-s.github.io/releases/tag/sf3500)
 - Install folder: **`install_first/sf3500/`**
 - Boot logo: included in this folder (no action needed)
 </details>
