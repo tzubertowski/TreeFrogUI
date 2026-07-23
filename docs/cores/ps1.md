@@ -13,6 +13,21 @@ PS1 has **two cores**. `PS`/`ps1`/`psx` folders prefer the standalone **PCSX4ALL
 
 (pcsx_rearmed also accepts `scph5501.bin` / `scph7001.bin` in `cubegm/bios/`.)
 
+### Enabling the BIOS in PCSX4ALL (must disable HLE first)
+
+Dropping the BIOS file in place is not enough — PCSX4ALL boots with **HLE on by
+default**, which ignores the real BIOS. You have to turn HLE off and point it at
+the file, once:
+
+1. Open the menu with **`SELECT + L1`**.
+2. Go to **PCSX Settings**.
+3. Go to **Core Settings**.
+4. Set **"HLE emulated BIOS"** to **off**.
+5. Set **"Set BIOS file"** to your BIOS, e.g. `cubegm/bios/scph1001.bin` (the
+   file picker shows the card as `/media/mmc/...` or `/mnt/sdcard/...` depending
+   on the device).
+6. **Restart the emulator** for it to take effect.
+
 **Speed toggles:** for heavy 3D games (e.g. Tekken 3) that don't run full speed, open the PCSX4ALL menu with **`SELECT + L`** and turn on **Pixel Skip** and/or **Interlace** - they trade a little image quality for a real speed boost.
 
 PCSX4ALL is a standalone emulator with its own menu and hotkeys, separate from the shared in-game shortcuts.
