@@ -1,8 +1,8 @@
 ![TreeFrogUI Logo](logo-readme.png)
 
-# TreeFrogUI for SF3000
+# TreeFrogUI
 
-A free, custom game-menu (frontend) for the SF3000 and R36SX handhelds. It replaces the stock menu and runs hundreds of retro systems.
+A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds - R36SX, SF3000, SF3500, GB350 and more (full list below). It replaces the stock menu and runs hundreds of retro systems.
 
 **Supported devices:** R36SX (v2.6 & v2.7), **R36 HD** (and R36SX clones — see [install guide](install.md#r36sx-clones-r36hd-etc)), SF3000, SF3000 HD, SF3100, SF3500, and GB350.
 
