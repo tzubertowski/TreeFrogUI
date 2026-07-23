@@ -135,7 +135,7 @@ Keep your clone's own boot files on top of the v2.7 setup:
 2. **Restore the [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O).**
 3. **Copy your clone's 3 boot files** into the v2.7 SD's `cubegm/`, overwriting.
    This pairs your clone's kernel + DTB with the v2.7 userland.
-4. **Do the standard TreeFrogUI install** on top (Steps 2–3), but use the
+4. **Do the standard TreeFrogUI install** on top (Steps 2-3), but use the
    clone-specific **`install_first/r36hd/`** folder (**not** `r36sx/`).
 
 > [!IMPORTANT]
@@ -184,7 +184,7 @@ much slower; `.hex` only).
 
 - **Black screen / only battery icon after the boot logo:** you didn't start from a
   clean stock card, or copied the wrong device's `install_first/`. Restore the stock
-  backup for your device (Step 1), then redo Steps 2–3.
+  backup for your device (Step 1), then redo Steps 2-3.
 - **Right analog stick doesn't do analog (R36SX):** expected, **cannot be fixed in
   software**. The R36SX wires the right stick to the **X / A / B / Y buttons**
   on/off only, no analog value exposed to apps. TreeFrogUI mirrors the face buttons

@@ -21,7 +21,7 @@ PS1 has **two cores**. `PS`/`ps1`/`psx` folders prefer the standalone **PCSX4ALL
 
 ### Enabling the BIOS in PCSX4ALL (must disable HLE first)
 
-Dropping the BIOS file in place is not enough — PCSX4ALL boots with **HLE on by
+Dropping the BIOS file in place is not enough - PCSX4ALL boots with **HLE on by
 default**, which ignores the real BIOS. You have to turn HLE off and point it at
 the file, once:
 

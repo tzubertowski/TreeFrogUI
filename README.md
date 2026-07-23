@@ -4,7 +4,7 @@
 
 A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds - R36SX, SF3000, SF3500, GB350 and more (full list below). It replaces the stock menu and runs hundreds of retro systems.
 
-**Supported devices:** R36SX (v2.6 & v2.7), **R36 HD** (and R36SX clones — see [install guide](install.md#r36sx-clones-r36hd-etc)), SF3000, SF3000 HD, SF3100, SF3500, and GB350.
+**Supported devices:** R36SX (v2.6 & v2.7), **R36 HD** (and R36SX clones - see [install guide](install.md#r36sx-clones-r36hd-etc)), SF3000, SF3000 HD, SF3100, SF3500, and GB350.
 
 ![UI Preview on SF3000 Console](console.jpg)
 
@@ -386,7 +386,7 @@ treefrog-ui/
 > **Right analog stick.** The right stick **cannot** work as a real analog stick, and no software update can change that. On this console it's physically wired to act **exactly like the X / A / B / Y face buttons**: nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" info. The console never hands analog data to apps like TreeFrogUI. So the right stick simply **mirrors the face buttons** (tiny accidental movements are ignored, so it won't fire on its own). Hardware limitation, not a bug or missing feature.
 
 > [!WARNING]
-> **Sleep mode is not supported.** On R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100), the stock power-button sleep/standby is **not supported** by TreeFrogUI and can leave the display hung after wake. **Disable Sleep is on by default** (Settings → Disable Sleep) to avoid this. Instead, use **Quick Resume** (Settings → Quick Resume) to drop right back into your last game on next boot — pair it with **Auto-Save/Auto-Load** to also restore your exact mid-game state, which covers the same "put it down, pick it back up" use case as real hibernation.
+> **Sleep mode is not supported.** On R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100), the stock power-button sleep/standby is **not supported** by TreeFrogUI and can leave the display hung after wake. **Disable Sleep is on by default** (Settings → Disable Sleep) to avoid this. Instead, use **Quick Resume** (Settings → Quick Resume) to drop right back into your last game on next boot - pair it with **Auto-Save/Auto-Load** to also restore your exact mid-game state, which covers the same "put it down, pick it back up" use case as real hibernation.
 
 ### SF3000 family
 

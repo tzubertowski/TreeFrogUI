@@ -1,7 +1,7 @@
 # Standalone apps in TreeFrogUI
 
 Most "systems" in TreeFrogUI are **libretro cores** (`.so`) run inside picoarch.
-A few entries are **standalone binaries** run directly instead — pcsx4all (PS1)
+A few entries are **standalone binaries** run directly instead - pcsx4all (PS1)
 and pico286 (DOS/PC). This doc explains how that path works and how to add a new
 standalone app.
 
@@ -17,21 +17,21 @@ Current standalone apps:
 | Folder(s)        | Binary             | What it is                         |
 |------------------|--------------------|------------------------------------|
 | `ps1` `psx` `PS` | `cubegm/pcsx4all`  | PlayStation (preferred over pcsx_rearmed `.so`) |
-| `pico286`        | `cubegm/pico286`   | DOS / PC (8086–286), boots FreeDOS |
+| `pico286`        | `cubegm/pico286`   | DOS / PC (8086-286), boots FreeDOS |
 
 ## The launch contract
 
 Everything hinges on one file: `/tmp/frogui_launch.txt`, written by FrogUI when
 the user picks a game, then read by picoarch after FrogUI shuts down.
 
-**libretro core launch** — 2 lines:
+**libretro core launch** - 2 lines:
 
 ```
 <core_path>
 <rom_path>
 ```
 
-**standalone launch** — 3 lines, first line is the literal word `standalone`:
+**standalone launch** - 3 lines, first line is the literal word `standalone`:
 
 ```
 standalone
@@ -61,13 +61,13 @@ icube  (loop)                FrogUI core               picoarch
 - **icube** (`sdcard/cubegm/icube`) only ever loops `picoarch frogui`. It does
   **not** parse the launch file and needs **no** change for standalone apps.
 - **FrogUI** (`frogui_libretro.c`) decides core-vs-standalone and writes the file.
-- **picoarch** (`main.c`, ~line 1023–1069) reads the file on quit and `execl`s
+- **picoarch** (`main.c`, ~line 1023-1069) reads the file on quit and `execl`s
   the next process. Standalone path:
-  `execl(bin_path, bin_path, rom_path, NULL)` — replaces picoarch with the
+  `execl(bin_path, bin_path, rom_path, NULL)` - replaces picoarch with the
   binary. When the binary exits, control returns to the icube loop, which
   relaunches FrogUI.
 
-picoarch's standalone dispatch is **generic** — it execs whatever binary the
+picoarch's standalone dispatch is **generic** - it execs whatever binary the
 launch file names. So adding a new standalone app is purely a FrogUI + binary
 job; picoarch and icube are untouched.
 
@@ -102,7 +102,7 @@ built binary in staging.
    }
    ```
 
-4. **Route the launch.** There are **three** dispatch sites — update all three or
+4. **Route the launch.** There are **three** dispatch sites - update all three or
    the app only launches from some entry points:
    - main A-button handler (browser)
    - favorites / recent-games handler
@@ -123,7 +123,7 @@ built binary in staging.
 
 5. **Drop the binary** in `sdcard/cubegm/<name>` (and any config/BIOS dirs it
    needs, e.g. pcsx4all's `cubegm/.pcsx4all/`). `deploy.sh` does not auto-copy
-   standalone binaries — they live committed in staging.
+   standalone binaries - they live committed in staging.
 
 6. Rebuild FrogUI (`frogui/make -f Makefile.sf3000 frogui_libretro.so`), deploy.
 
@@ -131,11 +131,11 @@ built binary in staging.
 
 picoarch hands the binary one argv: the ROM/project path. The binary owns:
 
-- **Display** — open `/dev/fb0` directly (see pcsx4all `src/port/sf3000/hwdisp.c`)
+- **Display** - open `/dev/fb0` directly (see pcsx4all `src/port/sf3000/hwdisp.c`)
   or use the sysroot's SDL 1.2 (`libSDL-1.2`, fbcon driver).
-- **Input** — the gamepad. picoarch/FrogUI read cubevol's `/tmp/joy_key` shared
+- **Input** - the gamepad. picoarch/FrogUI read cubevol's `/tmp/joy_key` shared
   memory; an SDL app can instead use SDL's joystick/keyboard. `hcprojector`
   (stock evdev owner) is not running. See `stock_r36sx.md`.
-- **Audio** — ALSA (`libasound`) directly, or SDL_audio.
-- **Return cleanly** — exit when the user quits so the icube loop returns to
+- **Audio** - ALSA (`libasound`) directly, or SDL_audio.
+- **Return cleanly** - exit when the user quits so the icube loop returns to
   FrogUI.
