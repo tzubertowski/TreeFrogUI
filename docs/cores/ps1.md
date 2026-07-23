@@ -13,6 +13,12 @@ PS1 has **two cores**. `PS`/`ps1`/`psx` folders prefer the standalone **PCSX4ALL
 
 (pcsx_rearmed also accepts `scph5501.bin` / `scph7001.bin` in `cubegm/bios/`.)
 
+> [!IMPORTANT]
+> **For PCSX4ALL, copying the BIOS file is NOT enough** - it boots with HLE on
+> and ignores the BIOS until you turn HLE off in the menu. You **must** follow
+> the steps below, or you're still running HLE (glitches + broken saves) even
+> with the file in place.
+
 ### Enabling the BIOS in PCSX4ALL (must disable HLE first)
 
 Dropping the BIOS file in place is not enough — PCSX4ALL boots with **HLE on by
