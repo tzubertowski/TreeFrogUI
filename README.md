@@ -1,6 +1,6 @@
 ![TreeFrogUI Logo](logo-readme.png)
 
-# TreeFrogUI
+# TreeFrogUI - Retro Emulation Frontend
 
 A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds - R36SX, SF3000, SF3500, GB350 and more (full list below). It replaces the stock menu and runs hundreds of retro systems.
 
