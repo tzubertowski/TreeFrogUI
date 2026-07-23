@@ -191,12 +191,13 @@ much slower; `.hex` only).
   and filters drift. Hardware limitation, not a bug.
 - **Distorted / sideways boot logo:** make sure you copied **your device's**
   `install_first/<device>/` folder (it includes the correct logo) - not another device's.
-- **Sleep mode / power button standby (R36SX, SF3500-class):** not supported by
-  TreeFrogUI, can hang the display on wake. **Disable Sleep is on by default**
-  (Settings → Disable Sleep) to prevent this. Use **Quick Resume** (Settings →
-  Quick Resume) instead - it puts you back in your last game on next boot;
-  add **Auto-Save/Auto-Load** to also restore your mid-game state, which
-  covers the same use case as real hibernation.
+- **Sleep / power-button standby:** TreeFrogUI gives you **true hibernation**
+  instead. Turn on **Quick Resume** + **Auto-Save/Auto-Load** (Settings) and the
+  device boots straight back into your game exactly where you left off, surviving
+  a full power-off with zero battery drain - better than sleep. Stock sleep/
+  standby is **not supported and won't be** (it can hang the display on wake on
+  R36SX and SF3500-class), so **Disable Sleep is on by default**. You're not
+  missing anything.
 - **PC Engine (`pce`) crashes or resets when returning from the in-game menu**
   (seen on some devices, e.g. SF3000 HD - not universal): turn on **Disable
   Soft Reset** in the core's options (SELECT+START → Core Options). The stock

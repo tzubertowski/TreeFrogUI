@@ -379,14 +379,11 @@ treefrog-ui/
 
 ### R36SX
 
-> [!CAUTION]
-> **v2.7 owners read this first.** There are **many different v2.7 hardware revisions**, and I don't have access to all of them. Some run TreeFrogUI perfectly (like mine); others get stuck on a **"damaged SD card"** screen. **Your particular v2.7 may or may not work, I can't guarantee it.** I don't currently own one of the newer v2.7 units to test against. Want me to track one down and add support? ☕ **[ko-fi.com/proszty](https://ko-fi.com/proszty)**.
-
 > [!NOTE]
 > **Right analog stick.** The right stick **cannot** work as a real analog stick, and no software update can change that. On this console it's physically wired to act **exactly like the X / A / B / Y face buttons**: nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" info. The console never hands analog data to apps like TreeFrogUI. So the right stick simply **mirrors the face buttons** (tiny accidental movements are ignored, so it won't fire on its own). Hardware limitation, not a bug or missing feature.
 
-> [!WARNING]
-> **Sleep mode is not supported.** On R36SX and SF3500-class devices (SF3500, SF3000 HD, SF3100), the stock power-button sleep/standby is **not supported** by TreeFrogUI and can leave the display hung after wake. **Disable Sleep is on by default** (Settings → Disable Sleep) to avoid this. Instead, use **Quick Resume** (Settings → Quick Resume) to drop right back into your last game on next boot - pair it with **Auto-Save/Auto-Load** to also restore your exact mid-game state, which covers the same "put it down, pick it back up" use case as real hibernation.
+> [!NOTE]
+> **TreeFrogUI gives you true hibernation instead of sleep.** Turn on **Quick Resume** (Settings → Quick Resume) with **Auto-Save/Auto-Load** and the device boots straight back into your game at the exact moment you left off - pick up mid-race, mid-battle, anywhere. It survives a full power-off, so it's better than sleep: zero battery drain while it's off. Stock power-button sleep/standby itself is **not supported and won't be** (it can hang the display on wake on R36SX and SF3500-class devices), so **Disable Sleep is on by default** - you're not missing anything, hibernation covers the "put it down, pick it back up" use case completely.
 
 ### SF3000 family
 
