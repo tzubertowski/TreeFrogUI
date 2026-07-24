@@ -100,9 +100,18 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `xmil` | Sharp X68000 | `x68k_libretro.so` | [libretro/xmil-libretro](https://github.com/libretro/xmil-libretro) |
 | `amiga` | Amiga | `uae_libretro.so` | [angree/sf2000-uae-amiga-emulator](https://github.com/angree/sf2000-uae-amiga-emulator) |
 | `msx` | MSX | ❌ `bluemsx_libretro.so` | [tzubertowski/libretro-blueMSX](https://github.com/tzubertowski/libretro-blueMSX) |
-| `c64`, `c64sc` | Commodore 64 | ❌ `vice_x64_libretro.so` | [libretro/vice-libretro](https://github.com/libretro/vice-libretro) |
-| `c64f`, `c64fc` | Commodore 64 (Frodo) | `frodo_libretro.so` | [tzubertowski/libretro-frodo](https://github.com/tzubertowski/libretro-frodo) |
+| `c64`, `c64sc` | Commodore 64 (VICE, needs ROMs - see below) | `vice_x64_libretro.so` | [libretro/vice-libretro](https://github.com/libretro/vice-libretro) |
+| `c64f`, `c64fc` | Commodore 64 (Frodo, no ROMs needed) | `frodo_libretro.so` | [tzubertowski/libretro-frodo](https://github.com/tzubertowski/libretro-frodo) |
 | `vic20` | Commodore VIC-20 | ❌ `vice_xvic_libretro.so` | [libretro/vice-libretro](https://github.com/libretro/vice-libretro) |
+
+> **Commodore 64 needs system ROMs.** The `c64`/`c64sc` folders use VICE, which is
+> accurate but requires the Commodore ROMs (kernal, basic, chargen, and the drive
+> ROMs for `.d64` disk games). Put them in **`cubegm/bios/vice/`** (they are
+> Commodore copyright, so you supply your own). Without them VICE shows a black
+> screen. If you don't have the ROMs, use the **`c64f`** / **`c64fc`** folders
+> instead - those run **Frodo**, which needs no ROMs (slightly less accurate).
+> Both `c64` and `c64sc` currently run the standard VICE x64 core (the separate
+> cycle-exact x64sc build isn't compiled yet).
 
 ---
 
@@ -155,6 +164,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `vec` | Vectrex | ❌ `vecx_libretro.so` | [libretro/libretro-vecx](https://github.com/libretro/libretro-vecx) - needs OpenGL |
 | `cdg` | CD+G Karaoke | `pocketcdg_libretro.so` | [libretro/libretro-pocketcdg](https://github.com/libretro/libretro-pocketcdg) |
 | `gme` | Game Music Emu | `gme_libretro.so` | [libretro/libretro-gme](https://github.com/libretro/libretro-gme) |
+| `Ebook` | Ebook / document reader (EPUB/MOBI/PDF/CBZ/FB2) - **standalone** binary, MuPDF - 📖 [guide](docs/cores/ebook.md) | `cubegm/ebook` | [tzubertowski/TreeFrogUI_ebook_reader](https://github.com/tzubertowski/TreeFrogUI_ebook_reader) |
 
 ---
 

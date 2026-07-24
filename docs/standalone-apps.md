@@ -18,6 +18,9 @@ Current standalone apps:
 |------------------|--------------------|------------------------------------|
 | `ps1` `psx` `PS` | `cubegm/pcsx4all`  | PlayStation (preferred over pcsx_rearmed `.so`) |
 | `pico286`        | `cubegm/pico286`   | DOS / PC (8086-286), boots FreeDOS |
+| `lgpt`           | `cubegm/lgpt`      | LittleGPTracker (music tracker)    |
+| `rockbox`        | `cubegm/rockbox.sh`| Rockbox music player               |
+| `Ebook`          | `cubegm/ebook`     | Ebook/document reader (MuPDF - EPUB/MOBI/PDF) - [guide](cores/ebook.md) |
 
 ## The launch contract
 
