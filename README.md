@@ -227,7 +227,7 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 
 | System | File needed |
 |--------|-------------|
-| PlayStation 1 | `scph1001.bin` - 📖 [full guide](docs/cores/ps1.md), **strongly recommended** without it |
+| PlayStation 1 | any PS1 BIOS (`scph*.bin`) in **`cubegm/bios/`** - auto-detected, no exact name needed. 📖 [full guide](docs/cores/ps1.md), **strongly recommended** |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | Kickstart ROM - 📖 [full guide](docs/cores/amiga.md) |
 | Atari ST (castaway) | TOS ROM image |

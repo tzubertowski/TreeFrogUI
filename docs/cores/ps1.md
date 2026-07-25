@@ -4,35 +4,20 @@
 
 PS1 has **two cores**. `PS`/`ps1`/`psx` folders prefer the standalone **PCSX4ALL** if its binary is present, falling back to the libretro **pcsx_rearmed** core otherwise; the `ps1r` folder always uses pcsx_rearmed directly (lightrec JIT).
 
-**Use a real BIOS.** Without one, both cores fall back to HLE, which causes **graphical glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest Moon). Each core has its own BIOS location - without a real BIOS things degrade, they don't refuse to run, so it's easy to miss. Drop a real `scph1001.bin` in **both** locations so either core works (filenames are case-insensitive):
+**Use a real BIOS.** Without one, both cores fall back to HLE, which causes **graphical glitches, worse performance, and broken/hanging memory-card saves** (e.g. Harvest Moon). Drop **any** PS1 BIOS in **`cubegm/bios/`** and both cores find it:
 
-| Core | ROM folder | BIOS path |
-|------|-----------|-----------|
-| **PCSX4ALL** | `PS` | `/mnt/sdcard/cubegm/cores/.pcsx4all/scph1001.bin` |
-| **pcsx_rearmed** (lightrec) | `ps1r` | `/mnt/sdcard/cubegm/bios/scph1001.bin` |
+| Core | ROM folder | BIOS |
+|------|-----------|------|
+| **PCSX4ALL** | `PS` | auto-detects any `scph*.bin` in `cubegm/bios/` (legacy `cubegm/cores/.pcsx4all/` still works) |
+| **pcsx_rearmed** (lightrec) | `ps1r` | any `scph*.bin` in `cubegm/bios/` |
 
-(pcsx_rearmed also accepts `scph5501.bin` / `scph7001.bin` in `cubegm/bios/`.)
+Filenames are case-insensitive; `scph1001.bin`, `scph5501.bin`, `scph7001.bin`, etc. all work. One file in `cubegm/bios/` covers both cores.
 
-> [!IMPORTANT]
-> **For PCSX4ALL, copying the BIOS file is NOT enough** - it boots with HLE on
-> and ignores the BIOS until you turn HLE off in the menu. You **must** follow
-> the steps below, or you're still running HLE (glitches + broken saves) even
-> with the file in place.
-
-### Enabling the BIOS in PCSX4ALL (must disable HLE first)
-
-Dropping the BIOS file in place is not enough - PCSX4ALL boots with **HLE on by
-default**, which ignores the real BIOS. You have to turn HLE off and point it at
-the file, once:
-
-1. Open the menu with **`SELECT + L1`**.
-2. Go to **PCSX Settings**.
-3. Go to **Core Settings**.
-4. Set **"HLE emulated BIOS"** to **off**.
-5. Set **"Set BIOS file"** to your BIOS, e.g. `cubegm/bios/scph1001.bin` (the
-   file picker shows the card as `/media/mmc/...` or `/mnt/sdcard/...` depending
-   on the device).
-6. **Restart the emulator** for it to take effect.
+> [!NOTE]
+> **PCSX4ALL now uses the BIOS automatically.** If a valid BIOS is present it
+> switches HLE off on its own at launch - no menu steps. The old "turn HLE off
+> in Core Settings" dance is gone; it was only needed because the file wasn't
+> being found. If you ever want to force HLE, delete the BIOS from `cubegm/bios/`.
 
 **Speed toggles:** for heavy 3D games (e.g. Tekken 3) that don't run full speed, open the PCSX4ALL menu with **`SELECT + L`** and turn on **Pixel Skip** and/or **Interlace** - they trade a little image quality for a real speed boost.
 
