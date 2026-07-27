@@ -1,4 +1,4 @@
-name: Release 0.1.0 Feedback
+name: Release Feedback
 description: Share your feedback, report bugs, or suggest features for the 0.1.0 release.
 title: "[v0.1.0 Feedback]: "
 labels: ["feedback", "v0.1.0"]
@@ -21,6 +21,15 @@ body:
         - SF3500
         - GB350
         - Other (please specify in your feedback)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: TreeFrogUI Version
+      description: Which version of TreeFrogUI are you using? (e.g. v0.1.0, v0.1.1)
+      placeholder: "v0.1.0"
     validations:
       required: true
 
