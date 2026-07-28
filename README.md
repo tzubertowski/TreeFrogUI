@@ -182,7 +182,11 @@ Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide]
 
 **Theme (colors)** - in TreeFrogUI: Settings → Theme, press Left/Right. 30 built-in color themes. (The in-game emulator menu picks up the same theme colors automatically.)
 
-**Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it.
+**Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it. The default is **BPreplayBold** (the bold font used by MinUI/NextUI).
+
+**Wallpaper** (one image for every screen) - Settings → Appearance → **Wallpaper**. Drop images in **`frogui/wallpapers/`** (`.png`/`.jpg`/`.bmp`) and pick one; it replaces the per-system art everywhere. **Wallpaper Fit** sets how it's placed: **Fill** (cover, cropped), **Fit** (letterboxed), **Stretch**, **Center**, or **Tile**. Choose **None** to go back to per-system backgrounds.
+
+**Hide extensions / backgrounds** - Settings → Appearance: **Hide Extensions** drops the `.gb`/`.gba` from names; **Background Images** off gives a plain themed background.
 
 **Game art / box art / cover / thumbnail** (the picture shown for each game) - drop a **PNG / JPG / BMP** in a hidden `.res/` folder next to the ROM, named after the ROM:
 ```
