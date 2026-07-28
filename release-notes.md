@@ -1,14 +1,16 @@
 > [!IMPORTANT]
-> v1.0.10 adds an **aspect-ratio picker**, keeps **volume control working in games**, and fixes **PS1 hi-res freezing/blacking out** (Colin McRae, Worms Armageddon), **positional PS1 buttons**, **automatic PS1 BIOS**, and the **lingering battery icon**.
+> v1.0.11 makes **big ROM folders load fast**, reworks the **Settings menu** (categories, hide extensions, disable backgrounds), adds an **aspect-ratio picker**, keeps **volume control working in games**, and fixes **PS1 hi-res freezing/blacking out** (Colin McRae, Worms Armageddon), **positional PS1 buttons**, **automatic PS1 BIOS**, and the **lingering battery icon**.
 > 
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.10
+## What's New in v1.0.11
 
-Six things. That's the version.
+Some of it is even good.
 
+- **⚡ Big ROM folders load fast.** Folders with thousands of games used to crawl when opening and scrolling. The listing is sorted properly now (not the old slow way) and cached between visits, so a folder you've seen before opens instantly. Add or remove a game and it refreshes on its own. There's a Folder Cache toggle in Settings if you ever want it off. More time to not decide what to play.
+- **🗂️ Settings menu, reorganized.** Options are grouped under headers (Appearance, Library, Gameplay, System) and indented so you can actually find things. New toggles: **Hide Extensions** (drop the `.gb`/`.gba` clutter from names) and **Background Images** (turn off the per-system art for a plain background). Same settings, less squinting.
 - **📐 Aspect ratio picker.** New single control in the in-game Video menu: Integer, Native (what the core wants), 4:3, 16:9, 3:2, 5:4, 8:7, 16:10, or Fill. Replaces the old Screen size toggle - one list, per game. Integer and Native stay exact and free; a forced ratio reshapes in a single pass only when you pick one. Now you can get the picture wrong in more precise ways. (PS1's non-square modes like 256-wide games are aspect-corrected too, no longer squished.)
 - **🔊 Volume control survives games.** The frontend used to kill and restart the volume daemon to redraw its little on-screen icon, which quietly took your volume buttons with it. It's left alone now - the icon comes back on its own, and the buttons keep working. Turn it down; it won't help.
 - **🩹 PS1 hi-res games stop freezing and blacking out.** Colin McRae Rally, Worms Armageddon and friends flip into a tall 480-line video mode that the display driver quietly chokes on - black screen or a frozen picture while the game plays on underneath. Those frames are scaled back down to something the driver can actually show now, on every device. The cars still understeer into the scenery, but you get to watch.
