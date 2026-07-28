@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> v1.0.10_b gives the UI a **fresh look** (bigger bold font, custom wallpaper), makes **big ROM folders load fast**, reworks the **Settings menu**, adds an **aspect-ratio picker** and a PS1 **Hi-Res Fix**, keeps **volume control working in games**, and fixes **PS1 hi-res freezing/blacking out**, **positional PS1 buttons**, **automatic PS1 BIOS**, and the **lingering battery icon**.
+> v1.0.10_b gives the UI a **fresh look** (bigger bold font, custom wallpaper, a proper battery icon), makes **big ROM folders load fast**, reworks the **Settings menu**, adds an **aspect-ratio picker** and a PS1 **Hi-Res Fix**, keeps **volume control working in games**, and fixes **PS1 hi-res freezing/blacking out**, **positional PS1 buttons**, **automatic PS1 BIOS**, and the **lingering battery icon**.
 > 
 > 📋 **[Submit Anonymous Feedback (Google Forms)](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
@@ -10,6 +10,7 @@
 Now it's pretty, too.
 
 - **🎨 New look.** Bigger, bolder text (the same clean font MinUI/NextUI use) with more breathing room, so the menus are easier to read on the little screen. Same layout, less squinting.
+- **🔋 A real battery icon.** The frontend and the in-game menu now show a proper battery indicator (with a charging bolt) in place of the stock one - reads the actual charge level, turns red when it's nearly time to plug in. It draining is still your problem.
 - **🖼️ Custom wallpaper.** Settings → Appearance → **Wallpaper**: drop images in `frogui/wallpapers/` and pick one to use across every screen, instead of the per-system art. **Wallpaper Fit** offers Windows-style Fill / Fit / Stretch / Center / Tile. Make it yours; play nothing, beautifully.
 - **⚡ Big ROM folders load fast.** Folders with thousands of games used to crawl when opening and scrolling. The listing is sorted properly now (not the old slow way) and cached between visits, so a folder you've seen before opens instantly. Add or remove a game and it refreshes on its own. There's a Folder Cache toggle in Settings if you ever want it off. More time to not decide what to play.
 - **🗂️ Settings menu, reorganized.** Options are grouped under headers (Appearance, Library, Gameplay, System) and indented so you can actually find things. New toggles: **Hide Extensions** (drop the `.gb`/`.gba` clutter from names) and **Background Images** (turn off the per-system art for a plain background). Same settings, less squinting.
