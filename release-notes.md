@@ -9,7 +9,8 @@
 
 Now it's pretty, too.
 
-- **🎨 New look.** Bigger, bolder text (the same clean font MinUI/NextUI use) with more breathing room, so the menus are easier to read on the little screen. Same layout, less squinting.
+- **🎨 New look.** Bigger, bolder text (the same clean font MinUI/NextUI use) with more breathing room, so the menus are easier to read on the little screen. The PCSX4ALL (PS1) menus now match too - same font, theme colours, and rounded selection, rendered crisply at full resolution. Same layout, less squinting.
+- **🎨 Battery Colour Mode.** New Settings → Appearance toggle: instead of a fill bar, the battery shows a single colour dot - green (70-100%), blue (30-70%), red (0-30%). Minimal, at a glance.
 - **🔋 A real battery icon.** The frontend and the in-game menu now show a proper battery indicator (with a charging bolt) in place of the stock one - reads the actual charge level, turns red when it's nearly time to plug in. It draining is still your problem.
 - **🖼️ Custom wallpaper.** Settings → Appearance → **Wallpaper**: drop images in `frogui/wallpapers/` and pick one to use across every screen, instead of the per-system art. **Wallpaper Fit** offers Windows-style Fill / Fit / Stretch / Center / Tile. Make it yours; play nothing, beautifully.
 - **⚡ Big ROM folders load fast.** Folders with thousands of games used to crawl when opening and scrolling. The listing is sorted properly now (not the old slow way) and cached between visits, so a folder you've seen before opens instantly. Add or remove a game and it refreshes on its own. There's a Folder Cache toggle in Settings if you ever want it off. More time to not decide what to play.
