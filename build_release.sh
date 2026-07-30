@@ -146,7 +146,7 @@ done
 #     dropped as it documents the retired icube method).
 # User-facing docs come from the REPO ROOT (canonical, maintained) — the sdcard/
 # copies are stale stubs. Assets (picoarch.cfg) come from staging.
-for x in README.md install.md theme.md LICENSE.md; do
+for x in README.md theme.md LICENSE.md; do
     [ -f "$x" ] && cp "$x" "$OUT/$x"
 done
 mkdir -p "$OUT/docs"
