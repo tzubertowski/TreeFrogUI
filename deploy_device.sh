@@ -8,7 +8,8 @@
 #
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
-#   release, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config
+#   release, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
+#   mame-test
 #
 # This script never formats a card and never uses rsync --delete.
 set -euo pipefail
@@ -28,7 +29,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config
+payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame-test
 default:  release
 EOF
     exit 2
@@ -68,15 +69,15 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config) ;;
+        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame-test) ;;
         *) usage ;;
     esac
 done
 
 [ "$EUID" -eq 0 ] || die "run through pkexec"
 
-for tool in blkid dirname findmnt fsck.vfat grep lsblk mkdir mount mountpoint \
-    readlink rm rsync sed sha256sum sync umount; do
+for tool in blkid dirname findmnt fsck.vfat grep lsblk mkdir mktemp mount \
+    mountpoint readlink rm rsync sed sha256sum sync umount; do
     command -v "$tool" >/dev/null || die "required command is missing: $tool"
 done
 
@@ -328,9 +329,114 @@ deploy_one() {
     echo "$name deployed: $dst_hash"
 }
 
+deploy_mame_test() {
+    local rom_src bios_src core_overrides override_tmp game bios dir
+    local src_hash dst_hash hash_line copied=0
+    local -a games=(
+        pacman.zip
+        galaga.zip
+        frogger.zip
+        1942.zip
+        dkong3.zip
+        sf2.zip
+        ffightu.zip
+        outrunb.zip
+        mk.zip
+        nbajam.zip
+    )
+    local -a bios_files=(
+        bios.gg
+        bios_E.sms
+        bios_J.sms
+        bios_MD.bin
+        bios_U.sms
+        disksys.rom
+        gb_bios.bin
+        gba_bios.bin
+        gbc_bios.bin
+        neogeo.zip
+        scph5501.bin
+    )
+
+    rom_src="$WORK/../Roms/ARCADE/tiny-best-set-go-arcade-update-onion/Roms/ARCADE"
+    bios_src="$WORK/../Roms/BIOS"
+    [ -d "$rom_src" ] || die "MAME test ROM source is missing: $rom_src"
+    [ -d "$bios_src" ] || die "BIOS source is missing: $bios_src"
+    [ -f "$MOUNT/cubegm/cores/mame2000_libretro.so" ] ||
+        die "MAME 2000 core is missing from the card"
+    [ -f "$MOUNT/cubegm/cores/mame2003_plus_libretro.so" ] ||
+        die "MAME 2003 Plus core is missing from the card"
+
+    echo "Installing the controlled MAME 2000 / MAME 2003 Plus test set..."
+    mkdir -p "$MOUNT/roms/m2k" "$MOUNT/roms/m3p" "$MOUNT/cubegm/bios"
+
+    # The source package declares itself as MAME 2003 Plus. Duplicate the same
+    # small batch so m2k shows version-mismatch behavior while m3p is the
+    # matching-core control.
+    for game in "${games[@]}"; do
+        [ -f "$rom_src/$game" ] || die "test ROM is missing: $game"
+        for dir in m2k m3p; do
+            rsync -tc "$rom_src/$game" "$MOUNT/roms/$dir/$game"
+            hash_line="$(sha256sum "$rom_src/$game")"
+            src_hash="${hash_line%% *}"
+            hash_line="$(sha256sum "$MOUNT/roms/$dir/$game")"
+            dst_hash="${hash_line%% *}"
+            [ "$src_hash" = "$dst_hash" ] ||
+                die "$dir/$game verification failed"
+            copied=$((copied + 1))
+        done
+    done
+
+    # Install the user's general firmware files. MAME machine BIOS zips belong
+    # beside their ROMs; keep neogeo.zip there as well as in the system folder.
+    for bios in "${bios_files[@]}"; do
+        [ -f "$bios_src/$bios" ] || die "BIOS file is missing: $bios"
+        rsync -tc "$bios_src/$bios" "$MOUNT/cubegm/bios/$bios"
+        hash_line="$(sha256sum "$bios_src/$bios")"
+        src_hash="${hash_line%% *}"
+        hash_line="$(sha256sum "$MOUNT/cubegm/bios/$bios")"
+        dst_hash="${hash_line%% *}"
+        [ "$src_hash" = "$dst_hash" ] ||
+            die "BIOS verification failed: $bios"
+    done
+    rsync -tc "$bios_src/neogeo.zip" "$MOUNT/roms/m2k/neogeo.zip"
+    rsync -tc "$bios_src/neogeo.zip" "$MOUNT/roms/m3p/neogeo.zip"
+
+    if [ -f "$bios_src/mame2003-plus/hiscore.dat" ]; then
+        rsync -tc "$bios_src/mame2003-plus/hiscore.dat" \
+            "$MOUNT/cubegm/bios/hiscore.dat"
+    fi
+
+    # Give the control folder the same artwork as m2k.
+    if [ -f "$MOUNT/frogui/m2k.jpg" ]; then
+        rsync -tc "$MOUNT/frogui/m2k.jpg" "$MOUNT/frogui/m3p.jpg"
+    fi
+
+    # Preserve every existing override except this test folder's exact entry.
+    core_overrides="$MOUNT/frogui/core_overrides.txt"
+    override_tmp="$(mktemp /tmp/treefrog-core-overrides.XXXXXX)"
+    if [ -f "$core_overrides" ]; then
+        grep -vF '/mnt/sdcard/roms/m3p|' "$core_overrides" \
+            > "$override_tmp" || true
+    fi
+    printf '%s\n' \
+        '/mnt/sdcard/roms/m3p|/mnt/sdcard/cubegm/cores/mame2003_plus_libretro.so' \
+        >> "$override_tmp"
+    rsync -tc "$override_tmp" "$core_overrides"
+    rm -f -- "$override_tmp"
+
+    sync
+    grep -qF \
+        '/mnt/sdcard/roms/m3p|/mnt/sdcard/cubegm/cores/mame2003_plus_libretro.so' \
+        "$core_overrides" || die "MAME 2003 Plus folder override was not saved"
+
+    echo "MAME test ready: $copied verified ROM copies across m2k and m3p."
+}
+
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
         release) deploy_release ;;
+        mame-test) deploy_mame_test ;;
         *) deploy_one "$payload" ;;
     esac
 done
