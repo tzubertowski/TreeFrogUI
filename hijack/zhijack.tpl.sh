@@ -87,6 +87,12 @@ for c in /sys/devices/system/cpu/cpu*/cpufreq; do
     mx=$(cat "$c/cpuinfo_max_freq" 2>/dev/null)
     [ -n "$mx" ] && [ -w "$c/scaling_min_freq" ] && echo "$mx" > "$c/scaling_min_freq" 2>/dev/null
 done
+if [ "$LOG" != /dev/null ]; then
+    echo "CPU frequency policy after performance request:" >> "$LOG"
+    for c in /sys/devices/system/cpu/cpu*/cpufreq; do
+        echo "$c governor=$(cat "$c/scaling_governor" 2>/dev/null) cur=$(cat "$c/scaling_cur_freq" 2>/dev/null) min=$(cat "$c/scaling_min_freq" 2>/dev/null) max=$(cat "$c/scaling_max_freq" 2>/dev/null) hwmax=$(cat "$c/cpuinfo_max_freq" 2>/dev/null)" >> "$LOG"
+    done
+fi
 
 # Input: cubevol (reads gpio -> /tmp/joy_key shm) must be up; picoarch reads the shm.
 pidof cubevol >/dev/null 2>&1 || { [ -x /usr/bin/cubevol ] && /usr/bin/cubevol & }
