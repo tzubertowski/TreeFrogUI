@@ -1,12 +1,14 @@
 > [!IMPORTANT]
-> v1.0.10_f improves menu response, PS1 performance and display reliability. It also refreshes the UI and fixes several battery, volume and control issues.
+> v1.0.11 fixes SF3500 menu crashes and ebook reader lockups. It also includes the menu, PS1, display and interface improvements from v1.0.10_f.
 > 
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.10_f
+## What's New in v1.0.11
 
+- **SF3500 stability.** Menu frames are staged before display DMA. The screen no longer repeatedly blanks and resets the cursor to the first item.
+- **Ebook reader fix.** EPUB books no longer freeze after turning several pages. Exiting with SELECT + START remains responsive.
 - **Faster menus.** Browsing, scrolling and Settings no longer pause after each input. Holding a direction repeats normally.
 - **Faster PS1 emulation.** PCSX4ALL has a new optimized MIPS build and lower-overhead audio settings. Tekken 3 improved from about 26.6 to 29.7 displayed FPS in the same R36SX fight test. Full lighting and blending remain enabled. Results vary by game.
 - **Large libraries load faster.** ROM folders are sorted and cached. Changes to folder contents refresh the cache automatically.
