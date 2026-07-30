@@ -184,9 +184,9 @@ Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide]
 
 **Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it. The default is **BPreplayBold** (the bold font used by MinUI/NextUI).
 
-**Wallpaper** (one image for every screen) - Settings → Appearance → **Wallpaper**. Drop images in **`frogui/wallpapers/`** (`.png`/`.jpg`/`.bmp`) and pick one; it replaces the per-system art everywhere. **Wallpaper Fit** sets how it's placed: **Fill** (cover, cropped), **Fit** (letterboxed), **Stretch**, **Center**, or **Tile**. Choose **None** to go back to per-system backgrounds.
+**Wallpaper** (one image for every screen) - drop a `.png`, `.jpg`, `.jpeg`, or `.bmp` into **`frogui/wallpapers/`**, restart TreeFrogUI, then select it under Settings → Appearance → **Wallpaper**. **Wallpaper Fit** controls its placement: **Fill** covers the display and crops the excess, **Fit** shows the whole image with bars, **Stretch** fills the display without cropping, **Center** keeps the original size, and **Tile** repeats it. Choose **None** to use per-system backgrounds again.
 
-**Hide extensions / backgrounds** - Settings → Appearance: **Hide Extensions** drops the `.gb`/`.gba` from names; **Background Images** off gives a plain themed background.
+**Hide extensions / backgrounds** - Settings → Appearance: **Hide Extensions** drops the `.gb`/`.gba` from names. **Background Images** must be on for wallpapers or per-system art to appear; turn it off for a plain themed background.
 
 **Game art / box art / cover / thumbnail** (the picture shown for each game) - drop a **PNG / JPG / BMP** in a hidden `.res/` folder next to the ROM, named after the ROM:
 ```
@@ -195,14 +195,14 @@ roms/GBA/.res/Advance Wars.png    ← the box art
 ```
 No conversion needed - use **PNG or JPG**, any resolution, big images are downscaled automatically (max shown size 250×200), and PNG transparency is supported. Rule: `<rom folder>/.res/<rom name without extension>.png` (or `.jpg`). Old raw `.rgb565` thumbnail sets still work - see [theme.md](theme.md#game-thumbnails).
 
-**Background image** (per system / screen) - drop a `854×480` `.png`/`.jpg`/`.bmp` in **`frogui/`**, named after the screen or folder:
+**Background image** (per system / screen) - drop a `.png`, `.jpg`, `.jpeg`, or `.bmp` in **`frogui/`**, named after the screen or folder:
 ```
 frogui/main.png          ← main systems list
 frogui/recents.png       ← recent games
 frogui/favourites.png    ← favorites
 frogui/FC.png            ← the FC (NES) folder (name must match the roms folder)
 ```
-Use dark/muted images so menu text stays readable.
+Use the native panel size for the cleanest result: **640×480** on R36SX, R36 HD and GB350; **854×480** on the SF3000 family. Per-system backgrounds stretch to the panel. Use dark, muted images so menu text stays readable.
 
 See the [Customisation Guide](theme.md) for exact sizes, naming, theme list, and fonts.
 

@@ -12,6 +12,7 @@
 - **Large libraries load faster.** ROM folders are sorted and cached. Changes to folder contents refresh the cache automatically.
 - **Updated interface.** Larger bold text, cleaner spacing and matching PCSX4ALL menus.
 - **Custom wallpapers.** Add images to `frogui/wallpapers/` and choose Fill, Fit, Stretch, Center or Tile.
+- **Recents screenshots.** Gameplay captures now fill the game switcher. PS1 modes no longer appear as squashed wide strips.
 - **Reworked Settings.** Options are grouped by category. New controls include Hide Extensions, Background Images and Folder Cache.
 - **More aspect ratios.** Choose Integer, Native, 4:3, 16:9, 3:2, 5:4, 8:7, 16:10 or Fill from the in-game Video menu.
 - **PS1 display fixes.** Hi-res modes used by games such as Colin McRae Rally and Worms Armageddon no longer freeze or black out the display.
