@@ -11,7 +11,9 @@
 - **Ebook reader fix.** EPUB books no longer freeze after turning several pages. Exiting with SELECT + START remains responsive.
 - **Ebook page fit and clean library.** MuPDF reserves space for the status bar so the final line is not cut off. Reading positions now live under a hidden `.positions/` folder instead of appearing beside every book.
 - **MAME 2000 ROM loading.** Wrong or incomplete MAME 0.37b5 sets return to the menu instead of crashing after a failed load.
-- **Horizontal layout.** A separate Appearance toggle makes the system list scroll left and right with animated names and background crossfades while retaining the selected theme colours. Other menus stay vertical.
+- **Horizontal style.** Style can be switched between Vertical and Horizontal independently of the selected theme. Horizontal scrolls the system list left and right with animated names and background crossfades.
+- **Friendly system names.** An independent toggle expands folder codes such as `ps` and `gba` in both Vertical and Horizontal styles.
+- **Game Switcher header.** The title, battery indicator and game-information bars now use the selected colour theme.
 - **File cache control.** File caching is off by default. Settings now includes a rebuild action for clearing stale entries and regenerating the library index.
 - **PCSX4ALL BIOS detection.** The recommended `cubegm/bios/` path takes priority. Old `.pcsx4all` locations work again, including their `bios/` subfolders.
 - **Loose BIOS naming.** PCSX4ALL accepts any 512 KiB PS1 BIOS, matches names without case sensitivity and prefers `scph*` files.

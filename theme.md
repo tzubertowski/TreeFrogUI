@@ -11,7 +11,8 @@ Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to sel
 | Setting | What it changes |
 |---|---|
 | **Theme** | Interface colours |
-| **Horizontal Layout** | Uses a left/right carousel for the main system list |
+| **Style** | Chooses the Vertical list or Horizontal carousel |
+| **Friendly System Names** | Expands folder codes such as `ps` and `gba` |
 | **Font** | Menu typeface |
 | **Brightness** | Screen brightness |
 | **Animations** | Background crossfades and other UI motion |
@@ -38,12 +39,16 @@ A selected wallpaper overrides per-system art. Turning **Background Images** off
 
 ## Horizontal system picker
 
-Turn on Settings → Appearance → **Horizontal Layout**. Choose colours separately
-with **Theme**; the carousel uses the selected theme.
+Set Settings → Appearance → **Style** to **Horizontal**. Choose colours
+separately with **Theme**; the carousel uses the selected theme.
 
 The main system screen changes to a left/right carousel. System names slide with the selection, wrap at both ends, and the background crossfades to the selected system. Game lists, Recents, Favourites and Settings keep the standard vertical layout.
 
 The carousel uses the same per-system background files described below. It also supports `recents.*`, `favourites.*`, `settings.*` and the `main.*` fallback. Turn **Animations** off for instant movement and background changes.
+
+**Friendly System Names** works in both styles. Turn it on to show names such
+as **PlayStation** and **Game Boy Advance** instead of the actual `ps` and `gba`
+folder names.
 
 ---
 
