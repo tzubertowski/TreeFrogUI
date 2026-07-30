@@ -8,10 +8,25 @@ PS1 has **two cores**. `PS`/`ps1`/`psx` folders prefer the standalone **PCSX4ALL
 
 | Core | ROM folder | BIOS |
 |------|-----------|------|
-| **PCSX4ALL** | `PS` | auto-detects any `scph*.bin` in `cubegm/bios/` (legacy `cubegm/cores/.pcsx4all/` still works) |
+| **PCSX4ALL** | `PS` | auto-detects any 512 KiB PS1 BIOS in `cubegm/bios/` |
 | **pcsx_rearmed** (lightrec) | `ps1r` | any `scph*.bin` in `cubegm/bios/` |
 
-Filenames are case-insensitive; `scph1001.bin`, `scph5501.bin`, `scph7001.bin`, etc. all work. One file in `cubegm/bios/` covers both cores.
+PCSX4ALL filename matching is case-insensitive. `scph1001.bin`,
+`SCPH5501.BIN`, `scph7001.bin` and other regional PS1 BIOS dumps work. Its
+auto-detection accepts any regular file that is exactly 512 KiB, regardless of
+extension, and prefers a filename beginning with `scph` when a folder contains
+multiple candidates.
+
+Old cards are also supported. PCSX4ALL checks these legacy locations after
+`cubegm/bios/`:
+
+- `cubegm/cores/.pcsx4all/`
+- `cubegm/cores/.pcsx4all/bios/`
+- `cubegm/.pcsx4all/`
+- `cubegm/.pcsx4all/bios/`
+
+Use `cubegm/bios/` for new installs. One correctly named `scph*.bin` there
+covers both PS1 emulators.
 
 > [!NOTE]
 > **PCSX4ALL now uses the BIOS automatically.** If a valid BIOS is present it

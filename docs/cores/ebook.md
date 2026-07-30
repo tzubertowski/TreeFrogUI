@@ -52,7 +52,7 @@ your device has, so it works the same on R36SX / SF3000 / SF3500 / GB350.
 - **Font selection** - built-in **Serif** (default), **Sans**, and **Mono**,
   **plus any custom fonts you supply** (see below).
 - **Saved progress** - your page, text size, and font choice are remembered
-  **per book** (stored in a small `<book>.pos` file next to it), so reopening
+  **per book** (stored under the hidden `.positions/` subdirectory), so reopening
   resumes exactly where you left off.
 - **Full-screen, correct aspect** on every supported device (one render path,
   no per-device settings).

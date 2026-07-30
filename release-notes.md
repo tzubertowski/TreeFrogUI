@@ -1,14 +1,21 @@
 > [!IMPORTANT]
-> v1.0.11_b fixes MAME 2000 ROM-load crashes.
+> v1.0.11_e fixes SF3500 menu crashes, ebook reader lockups and page clipping, MAME 2000 ROM-load crashes and the battery indicator never reaching full. It also adds the Horizontal layout and broader PCSX4ALL BIOS detection.
 > 
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.11_b
+## What's New in v1.0.11_e
 
-- **Clean ROM rejection.** Wrong or incomplete MAME 2000 sets return to the menu instead of crashing after the core reports a successful load with no video output.
-- **SF hardware build.** MAME 2000 is rebuilt for the device's MIPS 74Kc CPU with DSP2 enabled. It still requires the MAME 0.37b5 romset.
+- **SF3500 stability.** Menu frames are staged before display DMA. The screen no longer repeatedly blanks and resets the cursor to the first item.
+- **Ebook reader fix.** EPUB books no longer freeze after turning several pages. Exiting with SELECT + START remains responsive.
+- **Ebook page fit and clean library.** MuPDF reserves space for the status bar so the final line is not cut off. Reading positions now live under a hidden `.positions/` folder instead of appearing beside every book.
+- **MAME 2000 ROM loading.** Wrong or incomplete MAME 0.37b5 sets return to the menu instead of crashing after a failed load.
+- **Horizontal layout.** A separate Appearance toggle makes the system list scroll left and right with animated names and background crossfades while retaining the selected theme colours. Other menus stay vertical.
+- **File cache control.** File caching is off by default. Settings now includes a rebuild action for clearing stale entries and regenerating the library index.
+- **PCSX4ALL BIOS detection.** The recommended `cubegm/bios/` path takes priority. Old `.pcsx4all` locations work again, including their `bios/` subfolders.
+- **Loose BIOS naming.** PCSX4ALL accepts any 512 KiB PS1 BIOS, matches names without case sensitivity and prefers `scph*` files.
+- **Correct full-charge reading.** FrogUI, the pause menu and PCSX4ALL now show 100% at the battery ADC's real full-charge level instead of waiting for an unreachable maximum value.
 
 **Updating:** copy `cubegm/` and `frogui/` over your card, then copy your device's `install_first/<device>/` folder again. ROMs, saves, and settings are untouched.
 

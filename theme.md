@@ -10,7 +10,8 @@ Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to sel
 
 | Setting | What it changes |
 |---|---|
-| **Theme** | Interface colours, including the in-game menu |
+| **Theme** | Interface colours |
+| **Horizontal Layout** | Uses a left/right carousel for the main system list |
 | **Font** | Menu typeface |
 | **Brightness** | Screen brightness |
 | **Animations** | Background crossfades and other UI motion |
@@ -32,6 +33,26 @@ Settings are stored in `/mnt/sdcard/frogui/settings.txt`.
 | On | An image | That wallpaper on every screen |
 
 A selected wallpaper overrides per-system art. Turning **Background Images** off only hides the images; it does not forget your wallpaper choice.
+
+---
+
+## Horizontal system picker
+
+Turn on Settings → Appearance → **Horizontal Layout**. Choose colours separately
+with **Theme**; the carousel uses the selected theme.
+
+The main system screen changes to a left/right carousel. System names slide with the selection, wrap at both ends, and the background crossfades to the selected system. Game lists, Recents, Favourites and Settings keep the standard vertical layout.
+
+The carousel uses the same per-system background files described below. It also supports `recents.*`, `favourites.*`, `settings.*` and the `main.*` fallback. Turn **Animations** off for instant movement and background changes.
+
+---
+
+## File cache
+
+**File Cache** is off by default. Turn it on only if repeated library scans are
+slow. **Rebuild File Cache** clears old entries, enables the cache and rebuilds
+the main library index immediately. Individual system folders refresh when
+opened.
 
 ---
 
@@ -114,7 +135,7 @@ In-game savestate and last-screen images are captured automatically and need no 
 
 ## Built-in colour themes
 
-TreeFrogUI includes 30 colour themes:
+TreeFrogUI includes 30 built-in themes:
 
 | Theme | Style |
 |---|---|

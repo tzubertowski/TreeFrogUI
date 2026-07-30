@@ -52,8 +52,8 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **In-game saves** - Fully supported across all compatible cores for seamless session saving and loading.
 - **Quick Resume** - Automatically boots back into the last played game upon device boot, skipping the frontend.
 - **Auto-Save/Auto-Load** - Auto-saves state on pause/quit and auto-loads it on any game launch (Quick Resume boot or a manual pick from the frontend). Independent of Quick Resume - turn it on to always pick up mid-game, however you launch.
-- **Clean, configurable menu** - Smooth iPhone-style background crossfades (instant selection), an optional **Hide Empty Folders** setting, and right-stick drift filtering so accidental touches don't trigger phantom presses while navigating.
-- **Rich theming options** - Custom background images, fonts, and 30 built-in color themes to fit your style.
+- **Clean, configurable menu** - Smooth background crossfades, an optional horizontal system carousel, an optional **Hide Empty Folders** setting, and right-stick drift filtering so accidental touches don't trigger phantom presses while navigating.
+- **Rich theming options** - Custom background images, fonts, and 30 built-in themes.
 - **Game switcher** - Optional OnionOS-style recents carousel: big box art, or a screenshot of where you left off (every game is auto-screenshotted on exit), resumes the game. Turn it on in Settings (Game Switcher), it replaces the recents list.
 - **Start in Recents** - Optional: boot straight into your recents (list or switcher) every time, in Settings.
 - **Play-time stats** - Tracks how long you play each game, shown in the browser.
@@ -180,7 +180,7 @@ A few systems need more than "drop the ROM in the folder" - either extra compani
 
 Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide](theme.md)**. The quick version:
 
-**Theme (colors)** - in TreeFrogUI: Settings → Theme, press Left/Right. 30 built-in color themes. (The in-game emulator menu picks up the same theme colors automatically.)
+**Theme** - in TreeFrogUI: Settings → Theme, press Left/Right. There are 30 built-in colour themes. Turn on **Horizontal Layout** separately to make the main system list an animated left/right carousel using the selected theme; game lists and other screens stay vertical.
 
 **Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it. The default is **BPreplayBold** (the bold font used by MinUI/NextUI).
 
@@ -231,7 +231,7 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 
 | System | File needed |
 |--------|-------------|
-| PlayStation 1 | any PS1 BIOS (`scph*.bin`) in **`cubegm/bios/`** - auto-detected, no exact name needed. 📖 [full guide](docs/cores/ps1.md), **strongly recommended** |
+| PlayStation 1 | any 512 KiB PS1 BIOS in **`cubegm/bios/`** - PCSX4ALL matching is case-insensitive and prefers `scph*`. 📖 [full guide](docs/cores/ps1.md), **strongly recommended** |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
 | Amiga (UAE) | Kickstart ROM - 📖 [full guide](docs/cores/amiga.md) |
 | Atari ST (castaway) | TOS ROM image |

@@ -9,7 +9,7 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
-#   mame2000, mame-test
+#   mame2000, mame2000-mslug, mame-test
 #
 # This script never formats a card and never uses rsync --delete.
 set -euo pipefail
@@ -29,7 +29,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame2000 mame-test
+payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame2000 mame2000-mslug mame-test
 default:  release
 EOF
     exit 2
@@ -69,7 +69,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame2000|mame-test) ;;
+        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame2000|mame2000-mslug|mame-test) ;;
         *) usage ;;
     esac
 done
@@ -333,6 +333,42 @@ deploy_one() {
     echo "$name deployed: $dst_hash"
 }
 
+deploy_mame2000_mslug() {
+    local game_src bios_src game_dst bios_dst
+    local game_hash bios_hash hash_line
+    readonly game_hash=7ec7824bc018f7aaed7bf9b5964bc468c3ebd70962328426f4d0ca165a2a28bb
+    readonly bios_hash=25c7e3892f1d7f9f82d5bdc08bc61b3ad23862d8f60fd1f68041cd76a81f892a
+
+    game_src="$WORK/../Roms/ARCADE/mslug.zip"
+    bios_src="$WORK/SF3000_Pro_sdcard/emus/mame/neogeo.zip"
+    game_dst="$MOUNT/roms/m2k/mslug.zip"
+    bios_dst="$MOUNT/roms/m2k/neogeo.zip"
+
+    [ -f "$game_src" ] || die "Metal Slug ROM is missing: $game_src"
+    [ -f "$bios_src" ] || die "MAME 2000 Neo Geo BIOS is missing: $bios_src"
+    [ -f "$MOUNT/cubegm/cores/mame2000_libretro.so" ] ||
+        die "MAME 2000 core is missing from the card"
+    hash_line="$(sha256sum "$game_src")"
+    [ "${hash_line%% *}" = "$game_hash" ] ||
+        die "Metal Slug ROM no longer matches the verified MAME 0.37b5 set"
+    hash_line="$(sha256sum "$bios_src")"
+    [ "${hash_line%% *}" = "$bios_hash" ] ||
+        die "Neo Geo BIOS no longer matches the verified MAME 0.37b5 set"
+
+    mkdir -p "$MOUNT/roms/m2k"
+    rsync -tc "$game_src" "$game_dst"
+    rsync -tc "$bios_src" "$bios_dst"
+    sync
+
+    hash_line="$(sha256sum "$game_dst")"
+    [ "${hash_line%% *}" = "$game_hash" ] ||
+        die "m2k/mslug.zip verification failed"
+    hash_line="$(sha256sum "$bios_dst")"
+    [ "${hash_line%% *}" = "$bios_hash" ] ||
+        die "m2k/neogeo.zip verification failed"
+    echo "MAME 2000 Metal Slug and Neo Geo BIOS deployed and verified."
+}
+
 deploy_mame_test() {
     local rom_src bios_src core_overrides override_tmp game bios dir
     local src_hash dst_hash hash_line copied=0
@@ -440,6 +476,7 @@ deploy_mame_test() {
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
         release) deploy_release ;;
+        mame2000-mslug) deploy_mame2000_mslug ;;
         mame-test) deploy_mame_test ;;
         *) deploy_one "$payload" ;;
     esac

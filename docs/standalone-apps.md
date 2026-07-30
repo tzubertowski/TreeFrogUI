@@ -125,7 +125,8 @@ built binary in staging.
    ```
 
 5. **Drop the binary** in `sdcard/cubegm/<name>` (and any config/BIOS dirs it
-   needs, e.g. pcsx4all's `cubegm/.pcsx4all/`). Rebuild `release/`; a full
+   needs; PCSX4ALL uses `cubegm/cores/.pcsx4all/`, while
+   `cubegm/.pcsx4all/` remains supported for old cards). Rebuild `release/`; a full
    `deploy.sh <device>` copies standalone binaries included by
    `build_release.sh`. For quick iteration, use a named payload when available,
    such as `deploy.sh r36sx pcsx4all`.
