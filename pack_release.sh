@@ -1,20 +1,25 @@
 #!/bin/sh
 # Pack release/ into a versioned zip: ./pack_release.sh v1.0.4_b
-# Uses zip(1) when present; otherwise Python (which must explicitly add empty
-# directories — the roms/ skeleton is mostly empty placeholder folders and a
-# naive file-walk zipper silently drops them all).
+# Uses 7-Zip at maximum compression when available, then zip -9, then Python
+# at level 9. The fallback must explicitly add empty directories because the
+# roms/ skeleton is mostly empty placeholder folders.
 set -e
 cd "$(dirname "$0")"
 [ -n "$1" ] || { echo "usage: $0 <version>  (e.g. v1.0.4_b)"; exit 1; }
 OUT="TreeFrogUI_$1.zip"
 
-if command -v zip >/dev/null 2>&1; then
+if command -v 7z >/dev/null 2>&1; then
     rm -f "$OUT"
-    zip -qr "$OUT" release
+    7z a -tzip -mx=9 -mfb=258 -mpass=15 "$OUT" release >/dev/null
+elif command -v zip >/dev/null 2>&1; then
+    rm -f "$OUT"
+    zip -9qr "$OUT" release
 else
     python3 - "$OUT" <<'EOF'
 import zipfile, os, sys
-with zipfile.ZipFile(sys.argv[1], 'w', zipfile.ZIP_DEFLATED) as zf:
+with zipfile.ZipFile(
+    sys.argv[1], 'w', zipfile.ZIP_DEFLATED, compresslevel=9
+) as zf:
     for root, dirs, files in os.walk('release'):
         for d in dirs:
             full = os.path.join(root, d)
