@@ -125,8 +125,10 @@ built binary in staging.
    ```
 
 5. **Drop the binary** in `sdcard/cubegm/<name>` (and any config/BIOS dirs it
-   needs, e.g. pcsx4all's `cubegm/.pcsx4all/`). `deploy.sh` does not auto-copy
-   standalone binaries - they live committed in staging.
+   needs, e.g. pcsx4all's `cubegm/.pcsx4all/`). Rebuild `release/`; a full
+   `deploy.sh <device>` copies standalone binaries included by
+   `build_release.sh`. For quick iteration, use a named payload when available,
+   such as `deploy.sh r36sx pcsx4all`.
 
 6. Rebuild FrogUI (`frogui/make -f Makefile.sf3000 frogui_libretro.so`), deploy.
 
