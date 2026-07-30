@@ -1,0 +1,73 @@
+diff --git a/src/libretro/libretro.c b/src/libretro/libretro.c
+index 48f079a..f893853 100644
+--- a/src/libretro/libretro.c
++++ b/src/libretro/libretro.c
+@@ -73,2 +73,3 @@ unsigned short *gp2x_screen15;
+ int thread_done = 0;
++static int run_result = -1;
+ extern int gfx_xoffset;
+@@ -516,3 +517,4 @@ void run_thread_proc(void)
+ {
+-   run_game(game_index);
++   run_result = run_game(game_index);
++   thread_done = 1;
+    hook_audio_done();
+@@ -555,3 +557,3 @@ void *run_thread_proc(void *v)
+-
++
+-   run_game(game_index);
++   run_result = run_game(game_index);
+    thread_done = 1;
+@@ -565,3 +567,3 @@ void run_thread_proc(void *v)
+ {
+-   run_game(game_index);
++   run_result = run_game(game_index);
+    thread_done = 1;
+@@ -1042,7 +1044,25 @@ bool retro_load_game(const struct retro_game_info *info)
+    mame_sleep = 1;
++   thread_done = 0;
++   run_result = -1;
+-
++
+ #ifdef WANT_LIBCO
++   libco_quit = 0;
+    main_thread = co_active();
+    core_thread = co_create(0x10000, run_thread_proc);
++   if (!core_thread)
++   {
++      printf("MAME2000: failed to create core thread\n");
++      return false;
++   }
+    co_switch(core_thread);
++   /* A valid game yields its first frame through libco. ROM validation and
++    * machine-init failures return before that first frame. Propagate the
++    * failure instead of exposing 0x0 geometry and crashing in retro_run(). */
++   if (thread_done && run_result != 0)
++   {
++      printf("MAME2000: content initialization failed\n");
++      co_delete(core_thread);
++      core_thread = NULL;
++      return false;
++   }
+ #else
+@@ -1058,9 +1078,14 @@ void retro_unload_game(void)
+ #ifdef WANT_LIBCO
+-if(libco_quit==0){
+-   printf("ask for quit!\n");
+-   libco_quit=1;
+-   co_switch(core_thread);
+-}
+-else printf("esc pressed quit!\n");
++   if (!core_thread)
++      return;
++   if (libco_quit == 0)
++   {
++      printf("ask for quit!\n");
++      libco_quit = 1;
++      co_switch(core_thread);
++   }
++   else
++      printf("esc pressed quit!\n");
+    co_delete(core_thread);
++   core_thread = NULL;
+ #else

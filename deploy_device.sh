@@ -9,7 +9,7 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
-#   mame-test
+#   mame2000, mame-test
 #
 # This script never formats a card and never uses rsync --delete.
 set -euo pipefail
@@ -29,7 +29,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame-test
+payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame2000 mame-test
 default:  release
 EOF
     exit 2
@@ -69,7 +69,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame-test) ;;
+        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame2000|mame-test) ;;
         *) usage ;;
     esac
 done
@@ -303,6 +303,10 @@ deploy_one() {
         pcsx4all-config)
             src="$STAGE/cubegm/cores/.pcsx4all/pcsx4all.cfg"
             dst="$MOUNT/cubegm/cores/.pcsx4all/pcsx4all.cfg"
+            ;;
+        mame2000)
+            src="$STAGE/cubegm/cores/mame2000_libretro.so"
+            dst="$MOUNT/cubegm/cores/mame2000_libretro.so"
             ;;
         *) usage ;;
     esac

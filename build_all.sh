@@ -25,6 +25,7 @@ _apply_patch() {
     fi
 }
 _apply_patch geolith-no-lto.patch      libretro-geolith
+_apply_patch mame2000-load-failure.patch mame2000
 _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch uae-sf3000-fixes.patch    sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
