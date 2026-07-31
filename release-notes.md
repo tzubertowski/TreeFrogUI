@@ -13,7 +13,7 @@
 - **MAME 2000 ROM loading.** Wrong or incomplete MAME 0.37b5 sets return to the menu instead of crashing after a failed load.
 - **Horizontal style.** Style can be switched between Vertical and Horizontal independently of the selected theme. Horizontal scrolls the system list left and right with animated names and background crossfades.
 - **Friendly system names.** An independent toggle expands folder codes such as `ps` and `gba` in both Vertical and Horizontal styles.
-- **Themed Game Switcher.** The header and battery use the theme's subdued colours. The selected game's name and play information use the active accent.
+- **Themed Game Switcher.** The header and battery use the theme's subdued colours. The selected game's name and play information use the active accent. Screenshots keep their full geometry beneath the overlays; press Y to toggle a minimal fullscreen view.
 - **File cache control.** File caching is off by default. Settings now includes a rebuild action for clearing stale entries and regenerating the library index.
 - **PCSX4ALL BIOS detection.** The recommended `cubegm/bios/` path takes priority. Old `.pcsx4all` locations work again, including their `bios/` subfolders.
 - **Loose BIOS naming.** PCSX4ALL accepts any 512 KiB PS1 BIOS, matches names without case sensitivity and prefers `scph*` files.
