@@ -32,8 +32,9 @@ Theme packs live in `/mnt/sdcard/frogui/theme-packs/<pack>/`. Select one in
 Settings → Appearance → **Background Theme Pack**. Packs use the same filenames
 as per-system backgrounds: `main.jpg`, `settings.jpg`, `recents.jpg`,
 `favourites.jpg`, or a ROM folder name such as `gba.jpg`. The shipped
-`Art_Book_Next` pack preserves the original artwork; Aura, Catppuccin, Iconic
-and PlayStation X are included as small visual test packs.
+`Art_Book_Next` pack preserves the original artwork. The test packs include
+per-system artwork adapted from **Elementerial**, **Iconic** and
+**PlayStation-X**.
 
 ### Which background is used
 
