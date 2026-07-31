@@ -200,13 +200,19 @@ esac
 [ -d "$MOUNT/cubegm" ] ||
     die "not a $EXPECTED_LABEL system card: cubegm/ is missing"
 
-# Every supported stock image has these boot files. TreeFrogUI must never alter
-# them; only setting.xml, the hijack core, logo, and our own files are replaced.
-readonly -a STOCK_FILES=(
-    cubegm/icube
+# TreeFrogUI must never alter stock boot files. SF3500 boots rkgame directly and
+# some already-installed cards omit the unused legacy icube file; protect it
+# when present, but only require it on devices whose boot chain uses it.
+declare -a STOCK_FILES=(
     cubegm/rkgame
     cubegm/driver.so
 )
+if [ "$PROFILE" != sf3500 ] || [ -f "$MOUNT/cubegm/icube" ]; then
+    STOCK_FILES=(cubegm/icube "${STOCK_FILES[@]}")
+else
+    echo "SF3500 legacy cubegm/icube is absent (unused by its direct rkgame boot)."
+fi
+readonly -a STOCK_FILES
 declare -A stock_hashes=()
 for rel in "${STOCK_FILES[@]}"; do
     [ -f "$MOUNT/$rel" ] || die "stock file is missing: $rel"

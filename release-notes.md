@@ -18,6 +18,7 @@
 - **PCSX4ALL BIOS detection.** The recommended `cubegm/bios/` path takes priority. Old `.pcsx4all` locations work again, including their `bios/` subfolders.
 - **Loose BIOS naming.** PCSX4ALL accepts any 512 KiB PS1 BIOS, matches names without case sensitivity and prefers `scph*` files.
 - **Correct full-charge reading.** FrogUI, the pause menu and PCSX4ALL now show 100% at the battery ADC's real full-charge level instead of waiting for an unreachable maximum value.
+- **Charging indicator cleanup.** The stock battery glyph stays hidden when charging, including on rotated and double-buffered SF3500-class displays.
 
 **Updating:** copy `cubegm/` and `frogui/` over your card, then copy your device's `install_first/<device>/` folder again. ROMs, saves, and settings are untouched.
 

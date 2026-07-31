@@ -35,8 +35,11 @@ Reverse-engineered from cubevol:
 
 **Shipped:** FrogUI draws its own NextUI-style battery icon in the header
 (`render_battery`), and picoarch draws one in the pause menu. cubevol's own
-battery glyph is hidden by zeroing just the **top-right corner** of fb1 each
-frame — leaving cubevol's centered volume popup intact.
+battery glyph is hidden by zeroing the **four memory corners on every virtual
+fb1 page** — leaving cubevol's centered volume popup intact. Clearing all four
+corners is intentional: SF3500-class devices rotate this overlay, so physical
+top-right is not necessarily memory top-right, and charging can repaint a
+different virtual page.
 
 ## Volume (RE'd, but custom popup ABANDONED)
 
