@@ -11,6 +11,7 @@
 - **TIC-80 startup fix.** Static Lua runtime is now included, fixing first-frame crashes.
 - **Vectrex display fix.** Native portrait frames no longer get expanded into an oversized 16:9 buffer.
 - **R36SX battery gauge.** Battery display now uses three broad states: low, mid and full, with a wider full range.
+- **Folder navigation.** Exiting a system folder returns to that system in the parent list instead of resetting to the first item.
 
 - **SF3500 stability.** Menu frames are staged before display DMA. The screen no longer repeatedly blanks and resets the cursor to the first item.
 - **Ebook reader fix.** EPUB books no longer freeze after turning several pages. Exiting with SELECT + START remains responsive.
