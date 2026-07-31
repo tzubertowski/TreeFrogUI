@@ -116,7 +116,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **spec** | ZX Spectrum | `fuse_libretro.so` |
 | **zx81** | ZX81 | `81_libretro.so` |
 | **col** | ColecoVision | `gearcoleco_libretro.so` |
-| **amstrad** | Amstrad CPC | `crocods_libretro.so` |
+| **amstrad** | Amstrad CPC | `cap32_libretro.so` |
 | **amstradb** | Amstrad CPC (CPC+) | `cap32_libretro.so` |
 | **thom** | Thomson MO/TO | `theodore_libretro.so` |
 | **xmil** | Sharp X68000 | `x68k_libretro.so` |

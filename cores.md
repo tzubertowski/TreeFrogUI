@@ -93,7 +93,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 |--------|--------|----------|--------|
 | `spec` | ZX Spectrum | `fuse_libretro.so` | [libretro/fuse-libretro](https://github.com/libretro/fuse-libretro) |
 | `zx81` | ZX81 | `81_libretro.so` | [libretro/81-libretro](https://github.com/libretro/81-libretro) |
-| `amstrad` | Amstrad CPC | `crocods_libretro.so` | [libretro/crocods-core](https://github.com/libretro/crocods-core) |
+| `amstrad` | Amstrad CPC | `cap32_libretro.so` | [libretro/libretro-cap32](https://github.com/libretro/libretro-cap32) |
 | `amstradb` | Amstrad CPC (CPC+) | `cap32_libretro.so` | [libretro/libretro-cap32](https://github.com/libretro/libretro-cap32) |
 | `col` | ColecoVision | `gearcoleco_libretro.so` | [drhelius/Gearcoleco](https://github.com/drhelius/Gearcoleco) |
 | `thom` | Thomson MO/TO | `theodore_libretro.so` | [Zlika/theodore](https://github.com/Zlika/theodore) |

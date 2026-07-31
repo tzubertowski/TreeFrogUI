@@ -9,7 +9,7 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
-#   mame2000, mame2000-mslug, mame-test
+#   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
 # This script never formats a card and never uses rsync --delete.
 set -euo pipefail
@@ -29,7 +29,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame2000 mame2000-mslug mame-test
+payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -69,7 +69,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame2000|mame2000-mslug|mame-test) ;;
+        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -479,11 +479,39 @@ deploy_mame_test() {
     echo "MAME test ready: $copied verified ROM copies across m2k and m3p."
 }
 
+deploy_amstrad_cap32_test() {
+    local game core_overrides override_tmp
+    game="/mnt/sdcard/roms/amstrad/Caves of Doom (1985)(Mastertronic).dsk"
+    core_overrides="$MOUNT/frogui/core_overrides.txt"
+
+    [ -f "$MOUNT/roms/amstrad/Caves of Doom (1985)(Mastertronic).dsk" ] ||
+        die "Amstrad test disk is missing"
+    [ -f "$MOUNT/cubegm/cores/cap32_libretro.so" ] ||
+        die "Cap32 core is missing from the card"
+
+    override_tmp="$(mktemp /tmp/treefrog-core-overrides.XXXXXX)"
+    if [ -f "$core_overrides" ]; then
+        grep -vF "$game|" "$core_overrides" > "$override_tmp" || true
+    fi
+    printf '%s|%s\n' "$game" \
+        "/mnt/sdcard/cubegm/cores/cap32_libretro.so" >> "$override_tmp"
+    rsync -tc "$override_tmp" "$core_overrides"
+    rm -f -- "$override_tmp"
+
+    # zhijack enables verbose logging when this marker exists.
+    : > "$MOUNT/log.txt"
+    sync
+    grep -qF "$game|/mnt/sdcard/cubegm/cores/cap32_libretro.so" \
+        "$core_overrides" || die "Cap32 test override was not saved"
+    echo "Amstrad test ready: Caves of Doom will launch through Cap32."
+}
+
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
         release) deploy_release ;;
         mame2000-mslug) deploy_mame2000_mslug ;;
         mame-test) deploy_mame_test ;;
+        amstrad-cap32-test) deploy_amstrad_cap32_test ;;
         *) deploy_one "$payload" ;;
     esac
 done
