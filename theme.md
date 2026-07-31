@@ -18,12 +18,22 @@ Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to sel
 | **Animations** | Background crossfades and other UI motion |
 | **Battery Colour Mode** | Uses a green, blue or red battery status light |
 | **Background Images** | Enables wallpapers and per-system backgrounds |
+| **Background Theme Pack** | Selects a folder of themed background artwork |
 | **Wallpaper** | Selects one image for every TreeFrogUI screen |
 | **Wallpaper Fit** | Controls how the selected wallpaper fills the display |
 | **Hide Extensions** | Hides file extensions in game lists |
 | **Hide Empty Folders** | Hides system folders with no games |
 
 Settings are stored in `/mnt/sdcard/frogui/settings.txt`.
+
+### Background theme packs
+
+Theme packs live in `/mnt/sdcard/frogui/theme-packs/<pack>/`. Select one in
+Settings → Appearance → **Background Theme Pack**. Packs use the same filenames
+as per-system backgrounds: `main.jpg`, `settings.jpg`, `recents.jpg`,
+`favourites.jpg`, or a ROM folder name such as `gba.jpg`. The shipped
+`Art_Book_Next` pack preserves the original artwork; Aura, Catppuccin, Iconic
+and PlayStation X are included as small visual test packs.
 
 ### Which background is used
 
