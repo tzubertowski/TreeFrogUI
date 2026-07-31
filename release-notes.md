@@ -1,11 +1,16 @@
 > [!IMPORTANT]
-> v1.0.11_f fixes SF3500 menu crashes, ebook reader lockups and page clipping, MAME 2000 ROM-load crashes and the battery indicator never reaching full. It also adds the Horizontal layout and broader PCSX4ALL BIOS detection.
+> v1.0.11_h adds software VecX support, fixes TIC-80 startup crashes, and simplifies the R36SX battery gauge.
 > 
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.11_f
+## What's New in v1.0.11_h
+
+- **Vectrex support.** Added a software VecX core for `.vec` games. No 3D GPU is required.
+- **TIC-80 startup fix.** Static Lua runtime is now included, fixing first-frame crashes.
+- **Vectrex display fix.** Native portrait frames no longer get expanded into an oversized 16:9 buffer.
+- **R36SX battery gauge.** Battery display now uses three broad states: low, mid and full, with a wider full range.
 
 - **SF3500 stability.** Menu frames are staged before display DMA. The screen no longer repeatedly blanks and resets the cursor to the first item.
 - **Ebook reader fix.** EPUB books no longer freeze after turning several pages. Exiting with SELECT + START remains responsive.
