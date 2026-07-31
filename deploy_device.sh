@@ -9,6 +9,7 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
+#   tic80,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
 # This script never formats a card and never uses rsync --delete.
@@ -29,7 +30,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config mame2000 mame2000-mslug mame-test amstrad-cap32-test
+payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -69,7 +70,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -309,6 +310,10 @@ deploy_one() {
         pcsx4all-config)
             src="$STAGE/cubegm/cores/.pcsx4all/pcsx4all.cfg"
             dst="$MOUNT/cubegm/cores/.pcsx4all/pcsx4all.cfg"
+            ;;
+        tic80)
+            src="$STAGE/cubegm/cores/tic80_libretro.so"
+            dst="$MOUNT/cubegm/cores/tic80_libretro.so"
             ;;
         mame2000)
             src="$STAGE/cubegm/cores/mame2000_libretro.so"

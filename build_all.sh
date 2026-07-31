@@ -227,7 +227,7 @@ set(CMAKE_SYSTEM_PROCESSOR mips)
 set(CMAKE_C_COMPILER   ${MIPS}gcc)
 set(CMAKE_CXX_COMPILER ${MIPS}g++)
 set(CMAKE_SYSROOT ${SYSROOT})
-set(FL "-mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -mlong-calls -EL")
+set(FL "-mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -mlong-calls -EL -DTIC80_FFT_UNSUPPORTED")
 set(CMAKE_C_FLAGS_INIT   "\${FL}")
 set(CMAKE_CXX_FLAGS_INIT "\${FL}")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -238,7 +238,7 @@ EOF
         "$CMAKE" -S "$CORES/TIC-80" -B /tmp/tic80_build \
             -DCMAKE_TOOLCHAIN_FILE=/tmp/tic80_mips.cmake -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_LIBRETRO=ON -DBUILD_SDL=OFF -DBUILD_PLAYER=OFF -DBUILD_EDITORS=OFF \
-            -DBUILD_PRO=OFF -DBUILD_WITH_ALL=OFF >/dev/null 2>&1
+            -DBUILD_PRO=OFF -DBUILD_WITH_ALL=OFF -DBUILD_STATIC=ON -DBUILD_WITH_LUA=ON >/dev/null 2>&1
         "$CMAKE" --build /tmp/tic80_build --target tic80_libretro -j$(nproc) 2>&1 | tail -1
         [ -f /tmp/tic80_build/bin/tic80_libretro.so ] && \
             cp /tmp/tic80_build/bin/tic80_libretro.so "$OUT/tic80_libretro.so" && \
