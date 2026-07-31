@@ -8,7 +8,7 @@
 #
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
-#   release, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
+#   release, clean-themes, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
 #   tic80, vecx,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
@@ -30,7 +30,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 vecx mame2000 mame2000-mslug mame-test amstrad-cap32-test
+payloads: release clean-themes picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 vecx mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -70,7 +70,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|vecx|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|clean-themes|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|vecx|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -200,6 +200,15 @@ esac
 
 [ -d "$MOUNT/cubegm" ] ||
     die "not a $EXPECTED_LABEL system card: cubegm/ is missing"
+
+if [ "${PAYLOADS[*]}" = "clean-themes" ]; then
+    for retired in Aura Catppuccin Elementerial Iconic PlayStation_X; do
+        rm -rf "$MOUNT/frogui/theme-packs/$retired"
+    done
+    echo "Retired theme packs removed from $EXPECTED_LABEL."
+    find "$MOUNT/frogui/theme-packs" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+    exit 0
+fi
 
 # TreeFrogUI must never alter stock boot files. SF3500 boots rkgame directly and
 # some already-installed cards omit the unused legacy icube file; protect it
