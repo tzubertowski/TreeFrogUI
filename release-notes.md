@@ -1,11 +1,11 @@
 > [!IMPORTANT]
-> v1.0.11_h adds software VecX support, fixes TIC-80 startup crashes, and simplifies the R36SX battery gauge.
+> v1.0.11_j adds software VecX support, fixes TIC-80 startup crashes, simplifies the R36SX battery gauge, and restores folder selection on return.
 > 
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.11_h
+## What's New in v1.0.11_j
 
 - **Vectrex support.** Added a software VecX core for `.vec` games. No 3D GPU is required.
 - **TIC-80 startup fix.** Static Lua runtime is now included, fixing first-frame crashes.
