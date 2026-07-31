@@ -161,7 +161,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `int` | Mattel Intellivision | `freeintv_libretro.so` | [libretro/FreeIntv](https://github.com/libretro/FreeIntv) |
 | `fcf` | Fairchild Channel F | `freechaf_libretro.so` | [libretro/FreeChaF](https://github.com/libretro/FreeChaF) |
 | `o2em` | Odyssey² / Videopac | ❌ `o2em_libretro.so` | [libretro/o2em-libretro](https://github.com/libretro/o2em-libretro) |
-| `vec` | Vectrex | ❌ `vecx_libretro.so` | [libretro/libretro-vecx](https://github.com/libretro/libretro-vecx) - needs OpenGL |
+| `vec` | Vectrex | `vecx_libretro.so` | [libretro/libretro-vecx](https://github.com/libretro/libretro-vecx) - software framebuffer build |
 | `cdg` | CD+G Karaoke | `pocketcdg_libretro.so` | [libretro/libretro-pocketcdg](https://github.com/libretro/libretro-pocketcdg) |
 | `gme` | Game Music Emu | `gme_libretro.so` | [libretro/libretro-gme](https://github.com/libretro/libretro-gme) |
 | `Ebook` | Ebook / document reader (EPUB/MOBI/PDF/CBZ/FB2) - **standalone** binary, MuPDF - 📖 [guide](docs/cores/ebook.md) | `cubegm/ebook` | [tzubertowski/TreeFrogUI_ebook_reader](https://github.com/tzubertowski/TreeFrogUI_ebook_reader) |

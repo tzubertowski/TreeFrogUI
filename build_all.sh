@@ -352,8 +352,8 @@ _b 81                libretro-81               ""
 echo "-- fuse make --"
 _b fuse              libretro-fuse             ""
 
-# vecx needs OpenGL — skip on SF3000
-# _b vecx              libretro-vecx             ""
+# VecX software framebuffer build; the hardware has no usable GL context.
+_b vecx              libretro-vecx             "" "HAS_GPU=0"
 
 echo "-- potator make --"
 _b potator           potator/platform/libretro ""
