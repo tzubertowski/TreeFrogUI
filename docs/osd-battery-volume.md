@@ -25,8 +25,8 @@ Reverse-engineered from cubevol:
   + `_map` tables.
 - **Battery level** = **1 raw byte read from `/dev/check_adc1`** (0..255).
   cubevol scales it (`raw * 0x10FE0762 >> 32` ≈ `raw/15`) and maps through
-  hysteresis thresholds. Real packs top out around raw `224`, so our display
-  curve uses `{64,153,224}` piecewise to `{0,50,100}`. Treating the byte maximum
+  hysteresis thresholds. R36SX packs top out around raw `180`, so our display
+  curve uses `{64,153,180}` piecewise to `{0,50,100}`. Treating the byte maximum
   (`255`) as full left a charged device permanently below 100%.
 - **Charging** = **1 raw byte from `/dev/check_adc5`** (NOT `check_adc2`, which
   doesn't exist on R36SX). Value is **~0 idle, ~140 charging** — threshold `>=64`.
