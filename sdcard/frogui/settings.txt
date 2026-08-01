@@ -1,0 +1,12 @@
+theme=Red
+font=GamePocket
+brightness=75
+filter=bilinear
+wallpaper_fit=Fill
+auto_resume=off
+autosave_autoload=off
+game_switcher=on
+load_recents=off
+animations=on
+hide_empty=on
+disable_sleep=on
