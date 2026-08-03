@@ -131,6 +131,22 @@ cp    "$STAGE/cubegm/lib/libpng16.so.16"  "$OUT/cubegm/lib/libpng16.so.16"
 # Ships empty folders + their .res/filelist scaffolding; users drop ROMs in.
 [ -d "$STAGE/roms" ] && cp -a "$STAGE/roms" "$OUT/roms"
 
+# Canvas ships hundreds of ES-DE targets and a second high-resolution mirror.
+# FrogUI requests only exact ROM-folder names plus its four built-in screens.
+# Keep the source pack intact for future mappings, but do not ship unreachable
+# artwork on these small FAT32 cards.
+CANVAS_OUT="$OUT/frogui/theme-packs/Canvas_Pastel"
+if [ -d "$CANVAS_OUT" ]; then
+    rm -rf "$CANVAS_OUT/Canvas_Pastel-hi"
+    while IFS= read -r image; do
+        name="$(basename "$image" .jpg)"
+        case "$name" in
+            main|recents|favourites|settings) continue ;;
+        esac
+        [ -d "$OUT/roms/$name" ] || rm -f -- "$image"
+    done < <(find "$CANVAS_OUT" -maxdepth 1 -type f -name '*.jpg' -print)
+fi
+
 # 1b) Our extra assets the old release shipped (these are OURS, not stock OS):
 #     standalone frontends, BIOS, boot logos. NOT shipped: icube/icube_start
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
