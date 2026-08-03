@@ -3,6 +3,7 @@ font=GamePocket
 brightness=75
 filter=bilinear
 wallpaper_fit=Fill
+background_dim=0
 auto_resume=off
 autosave_autoload=off
 game_switcher=on
