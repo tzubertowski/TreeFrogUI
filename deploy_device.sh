@@ -9,7 +9,7 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, clean-themes, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
-#   tic80, vecx,
+#   tic80, vecx, o2em,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
 # This script never formats a card and never uses rsync --delete.
@@ -30,7 +30,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release clean-themes picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 vecx mame2000 mame2000-mslug mame-test amstrad-cap32-test
+payloads: release clean-themes picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 vecx o2em mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -70,7 +70,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|clean-themes|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|vecx|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|clean-themes|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|vecx|o2em|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -327,6 +327,10 @@ deploy_one() {
         vecx)
             src="$STAGE/cubegm/cores/vecx_libretro.so"
             dst="$MOUNT/cubegm/cores/vecx_libretro.so"
+            ;;
+        o2em)
+            src="$STAGE/cubegm/cores/o2em_libretro.so"
+            dst="$MOUNT/cubegm/cores/o2em_libretro.so"
             ;;
         mame2000)
             src="$STAGE/cubegm/cores/mame2000_libretro.so"

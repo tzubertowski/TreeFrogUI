@@ -450,8 +450,17 @@ _b xrick             libretro-xrick            ""
 echo "-- reminiscence make --"
 _b reminiscence      REminiscence              ""
 
-# o2em not included (clone skipped)
-# _b o2em              libretro-o2em             ""
+echo "-- o2em make --"
+# O2EM's unix target adds -shared only to its own LDFLAGS. Command-line
+# LDFLAGS override that append, so give it the complete shared-link flags here.
+make -C "$CORES/libretro-o2em" clean 2>/dev/null || true
+make -C "$CORES/libretro-o2em" platform=unix \
+    CC="$WRAP/mips-gcc" CXX="$WRAP/mips-g++" \
+    AR="$AR" RANLIB="$RANLIB" LD="$WRAP/mips-gcc" \
+    LDFLAGS="$LDFLAGS_SC -Wl,--version-script=link.T" -j$(nproc) 2>&1
+[ -f "$CORES/libretro-o2em/o2em_libretro.so" ] && \
+    cp "$CORES/libretro-o2em/o2em_libretro.so" "$OUT/o2em_libretro.so" && \
+    "$STRIP" "$OUT/o2em_libretro.so" && echo "→ $OUT/o2em_libretro.so"
 
 echo "-- nxengine make --"
 _b nxengine          libretro-nxengine         ""

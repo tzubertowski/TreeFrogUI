@@ -84,7 +84,7 @@ clone libretro-gw      https://github.com/libretro/gw-libretro
 clone libretro-xrick   https://github.com/libretro/xrick-libretro
 clone REminiscence     https://github.com/libretro/REminiscence
 clone libretro-prboom  https://github.com/libretro/libretro-prboom
-clone libretro-o2em    https://github.com/libretro/o2em-libretro
+clone libretro-o2em    https://github.com/libretro/libretro-o2em
 clone libretro-nxengine https://github.com/libretro/nxengine-libretro
 clone libretro-jumpnbump https://github.com/libretro/jumpnbump-libretro
 clone lowres-nx        https://github.com/timoinutilis/lowres-nx

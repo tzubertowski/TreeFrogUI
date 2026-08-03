@@ -233,6 +233,7 @@ Some cores need BIOS/firmware files. Place them in the system folder the core ex
 |--------|-------------|
 | PlayStation 1 | any 512 KiB PS1 BIOS in **`cubegm/bios/`** - PCSX4ALL matching is case-insensitive and prefers `scph*`. 📖 [full guide](docs/cores/ps1.md), **strongly recommended** |
 | GBA (gpsp) | `gba_bios.bin` (official Nintendo GBA BIOS) |
+| Odyssey² / Videopac (o2em) | `o2rom.bin` in **`cubegm/bios/`** (exact filename; MD5 `562d5ebf9e030a40d6fabfc2f33139fd`) |
 | Amiga (UAE) | Kickstart ROM - 📖 [full guide](docs/cores/amiga.md) |
 | Atari ST (castaway) | TOS ROM image |
 | Wolfenstein 3D (ecwolf) | Game data + `ecwolf.pk3` - 📖 [full guide](docs/cores/wolf3d.md) |
@@ -374,7 +375,7 @@ treefrog-ui/
 | `vecx` (Vectrex) | ❌ needs OpenGL - not available on SF3000 |
 | `ardens` (Arduboy, default) | ✅ built directly (no cmake); C++14 libretro target |
 | `arduous` (Arduboy, alt) | ✅ simavr-based, built directly (cycle-accurate, slow) |
-| `o2em` (Odyssey²) | ❌ not yet cloned |
+| `o2em` (Odyssey²) | ✅ included; requires your own `cubegm/bios/o2rom.bin` |
 | `vice` (C64) | commented out - large build, enable manually in build_all.sh |
 | picoarch binary | not included - obtain from SF3000 multicore project |
 
