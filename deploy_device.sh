@@ -9,7 +9,7 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, clean-themes, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
-#   tic80, vecx, o2em,
+#   tic80, vecx, o2em, o2em-test, c64-test,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
 # This script never formats a card and never uses rsync --delete.
@@ -30,7 +30,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release clean-themes picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 vecx o2em mame2000 mame2000-mslug mame-test amstrad-cap32-test
+payloads: release clean-themes picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 vecx o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -70,7 +70,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|clean-themes|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|vecx|o2em|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|clean-themes|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|vecx|o2em|o2em-test|c64-test|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -528,12 +528,68 @@ deploy_amstrad_cap32_test() {
     echo "Amstrad test ready: Caves of Doom will launch through Cap32."
 }
 
+deploy_o2em_test() {
+    local src_dir bios_src game_src bios_dst game_dst hash_line
+    readonly src_dir="$WORK/o2em-test"
+    readonly bios_src="$src_dir/o2rom.bin"
+    readonly game_src="$src_dir/Atlantis.bin"
+    readonly bios_dst="$MOUNT/cubegm/bios/o2rom.bin"
+    readonly game_dst="$MOUNT/roms/o2em/Atlantis.bin"
+
+    [ -f "$MOUNT/cubegm/cores/o2em_libretro.so" ] ||
+        die "O2EM core is missing from the card"
+    [ -f "$bios_src" ] || die "O2EM test BIOS is missing: $bios_src"
+    [ -f "$game_src" ] || die "O2EM test game is missing: $game_src"
+
+    hash_line="$(sha256sum "$bios_src")"
+    [ "${hash_line%% *}" = cb0c5d9ed64f7c1d8870333451832638885b9aa3d7013f0c05fd2a20a5e5bfef ] ||
+        die "O2EM BIOS checksum is wrong"
+    hash_line="$(sha256sum "$game_src")"
+    [ "${hash_line%% *}" = 79a265135c6805311ce9a325f168b5ace770a5f52d71f91d305465ede2722fd3 ] ||
+        die "Atlantis test ROM checksum is wrong"
+
+    mkdir -p "$(dirname "$bios_dst")" "$(dirname "$game_dst")"
+    rsync -tc "$bios_src" "$bios_dst"
+    rsync -tc "$game_src" "$game_dst"
+    sync
+
+    verify_tree "$bios_src" "$bios_dst" "O2EM BIOS"
+    verify_tree "$game_src" "$game_dst" "Atlantis test ROM"
+    echo "O2EM test ready: Atlantis.bin with verified o2rom.bin."
+}
+
+deploy_c64_test() {
+    local core_src core_dst game_src game_dst hash_line
+    readonly core_src="$STAGE/cubegm/cores/vice_x64_libretro.so"
+    readonly core_dst="$MOUNT/cubegm/cores/vice_x64_libretro.so"
+    readonly game_src="$WORK/c64-test/Bruce Lee.d64"
+    readonly game_dst="$MOUNT/roms/c64/Bruce Lee.d64"
+
+    [ -f "$core_src" ] || die "VICE x64 core is missing: $core_src"
+    [ -f "$game_src" ] || die "C64 test disk is missing: $game_src"
+    hash_line="$(sha256sum "$game_src")"
+    [ "${hash_line%% *}" = d883005ab7bba6f0e3bb5f3e397181a576a09862fe1f1f0d1cc989adfade1de7 ] ||
+        die "Bruce Lee test disk checksum is wrong"
+
+    mkdir -p "$(dirname "$core_dst")" "$(dirname "$game_dst")"
+    rsync -tc "$core_src" "$core_dst"
+    rsync -tc "$game_src" "$game_dst"
+    : > "$MOUNT/log.txt"
+    sync
+
+    verify_tree "$core_src" "$core_dst" "VICE x64 core"
+    verify_tree "$game_src" "$game_dst" "Bruce Lee test disk"
+    echo "C64 test ready: Bruce Lee.d64 through VICE x64."
+}
+
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
         release) deploy_release ;;
         mame2000-mslug) deploy_mame2000_mslug ;;
         mame-test) deploy_mame_test ;;
         amstrad-cap32-test) deploy_amstrad_cap32_test ;;
+        o2em-test) deploy_o2em_test ;;
+        c64-test) deploy_c64_test ;;
         *) deploy_one "$payload" ;;
     esac
 done
