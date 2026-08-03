@@ -1,11 +1,18 @@
 > [!IMPORTANT]
-> v1.0.11_j adds software VecX support, fixes TIC-80 startup crashes, simplifies the R36SX battery gauge, and restores folder selection on return.
+> v1.0.11_k adds Odyssey² support, background dimming and complete theme artwork, with cleaner shutdown and battery overlays.
 > 
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.11_j
+## What's New in v1.0.11_k
+
+- **Odyssey² / Videopac support.** The missing O2EM core is now included. Put `o2rom.bin` in `cubegm/bios/` and `.bin` games in `roms/o2em/`.
+- **Background controls.** Background Image Fit now defaults to Stretch. Background Dim defaults to 15% and can be adjusted from 0-100% under theming options.
+- **Complete theme artwork.** Art Book Next and Canvas Pastel include polished artwork for every supported system instead of falling back to generic images.
+- **Shutdown screen cleanup.** TreeFrogUI no longer remains visible around the shutdown logo corners.
+- **Battery overlay cleanup.** The stock battery icon is covered only around TreeFrogUI's custom indicator, without affecting the rest of the top-right corner.
+- **C64 setup clarified.** VICE already includes its standard C64 and drive ROM data. Games in `roms/c64/` do not need a separate BIOS pack.
 
 - **Vectrex support.** Added a software VecX core for `.vec` games. No 3D GPU is required.
 - **TIC-80 startup fix.** Static Lua runtime is now included, fixing first-frame crashes.
