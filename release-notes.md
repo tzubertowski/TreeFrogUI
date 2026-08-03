@@ -9,7 +9,8 @@
 
 - **Odyssey² / Videopac support.** The missing O2EM core is now included. Put `o2rom.bin` in `cubegm/bios/` and `.bin` games in `roms/o2em/`.
 - **Background controls.** Background Image Fit now defaults to Stretch. Background Dim defaults to 15% and can be adjusted from 0-100% under theming options.
-- **Complete theme artwork.** Art Book Next and Canvas Pastel include polished artwork for every supported system instead of falling back to generic images.
+- **Complete theme artwork.** The default Art Book artwork and Canvas Pastel include polished backgrounds for every supported system instead of generic fallbacks.
+- **Smaller download.** Canvas Pastel now ships only the backgrounds TreeFrogUI uses. Unused ES-DE systems and duplicate high-resolution files have been removed.
 - **Shutdown screen cleanup.** TreeFrogUI no longer remains visible around the shutdown logo corners.
 - **Battery overlay cleanup.** The stock battery icon is covered only around TreeFrogUI's custom indicator, without affecting the rest of the top-right corner.
 - **C64 setup clarified.** VICE already includes its standard C64 and drive ROM data. Games in `roms/c64/` do not need a separate BIOS pack.
