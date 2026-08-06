@@ -101,9 +101,9 @@ sleep 0.5
 # Optional: disable the power-button sleep (FrogUI Settings -> "Disable Sleep",
 # default off, applies after restart). Live-patch every cubevol instance in RAM
 # so the on-disk binary stays byte-identical -> passes SF3500 boot verification.
-# The watcher re-patches each cubevol respawn (FrogUI restarts it for the OSD).
-# @NOSLEEP@ is the per-device set of sleep-arm text addresses (empty = device
-# not supported). Long-press power-off is a separate path, untouched.
+# The watcher also handles a genuine daemon crash/respawn. @NOSLEEP@ is the
+# per-device set of validated sleep-arm text addresses (empty = device not
+# supported). Long-press power-off is a separate path, untouched.
 TF_NOSLEEP_ADDRS="@NOSLEEP@"
 if [ -n "$TF_NOSLEEP_ADDRS" ] && grep -q '^disable_sleep=on' /mnt/sdcard/frogui/settings.txt 2>/dev/null; then
     echo 0 > /proc/sys/kernel/yama/ptrace_scope 2>/dev/null

@@ -80,17 +80,23 @@ declare -A HJ=(
   [gb350]="   GB350    640 480 4  3   0   dispframe driver_gb350.so   kill"
 )
 
-# Per-device cubevol sleep-arm text addresses for the nosleep live-patcher
+# Per-device cubevol sleep-arm text addresses for the nosleep live-patcher.
+# Each address includes the expected original MIPS instruction; nosleep refuses
+# to patch when it does not match. This is essential because compatible devices
+# ship several different cubevol ELFs at the same /usr/bin/cubevol path.
 # (opt-in via FrogUI Settings -> "Disable Sleep"). NOPed in RAM so the on-disk
 # cubevol stays pristine (SF3500 boot-verifies it). Empty = not supported/tested
 # on that device (sleep lives elsewhere, or cubevol differs). Addresses are the
 # stores that ARM sleep: tap, idle-timeout, set_sleep_mode_state, msg-269 send.
 declare -A NOSLEEP_ADDRS=(
-  [r36sx]="0x406d24 0x40701c 0x406b50"
-  [r36hd]="0x406d24 0x40701c 0x406b50"
-  [sf3500]="0x406d44 0x40703c 0x406b70 0x406d8c"
-  [sf3000hd]="0x406d44 0x40703c 0x406b70 0x406d8c"
-  [sf3100]="0x406d44 0x40703c 0x406b70 0x406d8c"
+  # Original R36SX plus the newer R36SX v2.7/R36HD cubevol variant. Only the
+  # three instructions matching the running ELF are touched.
+  [r36sx]="0x406d24:0xac62bb18 0x40701c:0xae02bb18 0x406b50:0xac44bb18 0x406d84:0xac62bcc8 0x407088:0xae02bcc8 0x406bb0:0xac44bcc8"
+  [r36hd]="0x406d84:0xac62bcc8 0x407088:0xae02bcc8 0x406bb0:0xac44bcc8"
+  [sf3500]="0x406d44:0xac62bb78 0x40703c:0xae02bb78 0x406b70:0xac44bb78 0x406d8c:0x0c10162b"
+  [sf3000hd]="0x406d44:0xac62bb78 0x40703c:0xae02bb78 0x406b70:0xac44bb78 0x406d8c:0x0c10162b"
+  [sf3100]="0x406d84:0xac62bcc8 0x407088:0xae02bcc8 0x406bb0:0xac44bcc8"
+  [gb350]="0x406bd4:0xac62b758 0x406ecc:0xae02b758 0x406a00:0xac44b758"
 )
 
 # 0) Refresh staging + build hijack core.

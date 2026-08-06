@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 #include <dirent.h>
 #include <sys/ptrace.h>
@@ -32,20 +33,38 @@ static int patch_pid(pid_t pid, int naddr, char **addrs)
     int status;
     if (waitpid(pid, &status, 0) < 0) { ptrace(PTRACE_DETACH, pid, 0, 0); return -1; }
 
-    int rc = 0;
+    int patched = 0;
     for (int i = 0; i < naddr; i++) {
-        unsigned long addr = strtoul(addrs[i], NULL, 0);
+        char *end = NULL;
+        unsigned long addr = strtoul(addrs[i], &end, 0);
+        unsigned long expected = 0;
+        int validate = end && *end == ':';
+        if (validate) expected = strtoul(end + 1, NULL, 0);
+
+        /* cubevol differs between otherwise compatible device/firmware builds.
+         * Never NOP a borrowed absolute address unless the instruction there is
+         * exactly the one we reverse-engineered. A mismatch is a harmless
+         * unsupported variant, not permission to corrupt unrelated code. */
+        if (validate) {
+            errno = 0;
+            unsigned long original = (unsigned long)ptrace(
+                PTRACE_PEEKTEXT, pid, (void *)addr, 0);
+            if (errno || (original & 0xfffffffful) != expected) continue;
+        }
         /* POKETEXT writes one word (4 bytes on MIPS32); NOP = 0x00000000 */
         if (ptrace(PTRACE_POKETEXT, pid, (void *)addr, (void *)0) < 0) {
             fprintf(stderr, "nosleep: POKETEXT @0x%lx failed\n", addr);
-            rc = -1;
         } else {
             printf("nosleep: NOP @0x%lx (pid %d)\n", addr, (int)pid);
+            patched++;
         }
     }
     ptrace(PTRACE_DETACH, pid, 0, 0);
     fflush(stdout);
-    return rc;
+    /* 0 = patched, 1 = valid process but unsupported cubevol build, -1 = the
+     * attach/write itself failed. Watch mode must remember both 0 and 1 so an
+     * unknown firmware is not ptrace-paused again every two seconds. */
+    return patched > 0 ? 0 : 1;
 }
 
 /* Collect all pids whose comm == name (/proc/<pid>/comm). Returns count. */
@@ -92,8 +111,11 @@ int main(int argc, char **argv)
             for (int j = 0; j < n; j++) {
                 int seen = 0;
                 for (int i = 0; i < npatched; i++) if (patched[i] == pids[j]) { seen = 1; break; }
-                if (!seen && patch_pid(pids[j], argc - 2, &argv[2]) == 0 && npatched < MAXPIDS)
-                    patched[npatched++] = pids[j];
+                if (!seen) {
+                    int rc = patch_pid(pids[j], argc - 2, &argv[2]);
+                    if (rc >= 0 && npatched < MAXPIDS)
+                        patched[npatched++] = pids[j];
+                }
             }
             sleep(2);
         }
@@ -106,6 +128,6 @@ int main(int argc, char **argv)
         return patch_pid(pid, argc - 2, &argv[2]) == 0 ? 0 : 1;
     }
 
-    fprintf(stderr, "usage: %s -w <hexaddr>...   |   %s <pid> <hexaddr>...\n", argv[0], argv[0]);
+    fprintf(stderr, "usage: %s -w <addr[:expected-word]>...   |   %s <pid> <addr[:expected-word]>...\n", argv[0], argv[0]);
     return 2;
 }
