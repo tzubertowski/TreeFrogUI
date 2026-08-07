@@ -133,6 +133,16 @@ cp    "$STAGE/cubegm/lib/libpng12.so.0"   "$OUT/cubegm/lib/libpng12.so.0"
 # its assets ride along automatically via the cubegm/bios/PPSSPP staging copy.
 cp    "$STAGE/cubegm/lib/libpng16.so.16"  "$OUT/cubegm/lib/libpng16.so.16"
 [ -d "$STAGE/frogui" ] && cp -a "$STAGE/frogui" "$OUT/frogui"
+# System View uses a small shared logo pack. Keep it outside ignored staging so
+# the exact release assets are versioned and reproducible.
+if [ -d "assets/system-icons" ]; then
+    mkdir -p "$OUT/frogui/system-icons"
+    cp -a assets/system-icons/. "$OUT/frogui/system-icons/"
+fi
+if [ -d "assets/icon-packs" ]; then
+    mkdir -p "$OUT/frogui/icon-packs"
+    cp -a assets/icon-packs/. "$OUT/frogui/icon-packs/"
+fi
 # roms/ folder structure (the system subfolders FrogUI expects: gba, nes, snes…).
 # Ships empty folders + their .res/filelist scaffolding; users drop ROMs in.
 [ -d "$STAGE/roms" ] && cp -a "$STAGE/roms" "$OUT/roms"

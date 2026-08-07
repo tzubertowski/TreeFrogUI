@@ -180,7 +180,7 @@ A few systems need more than "drop the ROM in the folder" - either extra compani
 
 Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide](theme.md)**. The quick version:
 
-**Theme** - in TreeFrogUI: Settings → Theme, press Left/Right. There are 30 built-in colour themes. Set **Style** to **Horizontal** for an animated left/right system carousel using the selected theme. **Friendly System Names** expands folder codes such as `ps` and `gba` in either style.
+**Theme** - in TreeFrogUI: Settings → Theme, press Left/Right. There are 30 built-in colour themes. **Style** offers the standard Vertical list, an animated Horizontal carousel, or an Onion-style System View with a paged console-icon grid. **Icon Pack** changes System View artwork without changing its background or colours. **Friendly System Names** expands folder codes such as `ps` and `gba` in every style.
 
 **Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it. The default is **BPreplayBold** (the bold font used by MinUI/NextUI).
 

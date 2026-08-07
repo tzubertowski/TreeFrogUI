@@ -1,9 +1,12 @@
 theme=Red
+style=system
+icon_pack=Pixel_by_Jeltron
+friendly_system_names=on
 font=GamePocket
 brightness=75
 filter=bilinear
 wallpaper_fit=Stretch
-background_dim=15
+background_dim=20
 auto_resume=off
 autosave_autoload=off
 game_switcher=on

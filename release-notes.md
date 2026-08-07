@@ -8,7 +8,10 @@
 ## What's New in v1.0.12
 
 - **Top-level tabs.** Recents, Games and Settings are now tabs instead of entries in the system list.
-- **Simple controls.** Use L1/R1 to change tabs everywhere. Left/Right also changes tabs in the vertical Games view. Horizontal keeps Left/Right for scrolling systems.
+- **System View.** A third system-list style adds a paged console-icon grid. The background follows the highlighted system and falls back to the pack's main image when needed.
+- **Icon packs.** System View artwork is selectable independently from backgrounds, with ten credited Onion community packs included. Bright icons automatically use a contrasting selection tile.
+- **New defaults.** Fresh installs use System View, the Pixel icon pack, Red colours, friendly system names and 20% background dimming.
+- **Simple controls.** Use L1/R1 to change tabs everywhere. Left/Right also changes tabs in Vertical; Horizontal and System View keep the D-pad for systems.
 - **Faster Recents.** GameSwitcher screenshots are decoded once and kept in memory. Entering Recents no longer reloads the same image on every transition frame.
 - **Faster return to Games.** The system list and selected background stay in memory instead of rescanning the SD card or decoding the same image after leaving Recents.
 - **Cleaner navigation.** Tabs use one short crossfade instead of a slow panel slide. The active tab uses brighter theme text, inactive tabs are muted and bottom controls remain separate pillboxes.

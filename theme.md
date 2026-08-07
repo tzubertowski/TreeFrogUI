@@ -11,7 +11,8 @@ Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to sel
 | Setting | What it changes |
 |---|---|
 | **Theme** | Interface colours |
-| **Style** | Chooses the Vertical list or Horizontal carousel |
+| **Style** | Chooses Vertical, Horizontal or System View |
+| **Icon Pack** | Chooses System View artwork independently from backgrounds |
 | **Friendly System Names** | Expands folder codes such as `ps` and `gba` |
 | **Font** | Menu typeface |
 | **Brightness** | Screen brightness |
@@ -52,7 +53,24 @@ A selected wallpaper overrides per-system art. Turning **Background Images** off
 
 ---
 
-## Horizontal system picker
+## System list styles
+
+**Vertical** is the standard text list. **Horizontal** is the animated
+left/right system carousel. **System View** is a four-column, two-row console
+grid inspired by OnionOS. It uses the selected theme colours and L1/R1 for the
+top-level tabs. Its background follows the highlighted
+system and uses `main.*` as the fallback. Use the D-pad to move between systems;
+pages follow the selection automatically.
+
+System View icons live in `/mnt/sdcard/frogui/system-icons/` and are named after
+ROM folders, for example `gba.png` and `ps1.png`. Custom folders without an icon
+fall back to initials. Extra sets live in
+`/mnt/sdcard/frogui/icon-packs/<pack>/`; select them with **Icon Pack** without
+changing the colour theme or background pack. Transparent colour PNGs are
+supported. The supplied collection credits every Onion pack and creator in
+`frogui/icon-packs/README.md`.
+
+### Horizontal system picker
 
 Set Settings → Appearance → **Style** to **Horizontal**. Choose colours
 separately with **Theme**; the carousel uses the selected theme.
@@ -61,7 +79,7 @@ The main system screen changes to a left/right carousel. System names slide with
 
 The carousel uses the same per-system background files described below. It also supports `recents.*`, `favourites.*`, `settings.*` and the `main.*` fallback. Turn **Animations** off for instant movement and background changes.
 
-**Friendly System Names** works in both styles. Turn it on to show names such
+**Friendly System Names** works in every style. Turn it on to show names such
 as **PlayStation** and **Game Boy Advance** instead of the actual `ps` and `gba`
 folder names.
 
