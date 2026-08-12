@@ -22,6 +22,7 @@ Current standalone apps:
 | `rockbox`        | `cubegm/rockbox.sh`| Rockbox music player               |
 | `Ebook`          | `cubegm/ebook`     | Ebook/document reader (MuPDF - EPUB/MOBI/PDF) - [guide](cores/ebook.md) |
 | `videos`         | `cubegm/video_player` | Hardware-decoded MP4/MKV/AVI/MOV video player |
+| `images`         | `cubegm/image_viewer` | Native hardware-decoded JPG/PNG/BMP/GIF/WebP/TIFF image viewer |
 
 ## The launch contract
 
@@ -138,8 +139,9 @@ built binary in staging.
 
 picoarch hands the binary one argv: the ROM/project path. The binary owns:
 
-- **Display** - open `/dev/fb0` directly (see pcsx4all `src/port/sf3000/hwdisp.c`)
-  or use the sysroot's SDL 1.2 (`libSDL-1.2`, fbcon driver).
+- **Display** - use the hardware display driver, the firmware media plane (as
+  the video/image viewers do), or the sysroot's SDL 1.2 (`libSDL-1.2`). Do not
+  assume `/dev/fb0` reports the panel's logical geometry on these devices.
 - **Input** - the gamepad. picoarch/FrogUI read cubevol's `/tmp/joy_key` shared
   memory; an SDL app can instead use SDL's joystick/keyboard. `hcprojector`
   (stock evdev owner) is not running. See `stock_r36sx.md`.
@@ -157,3 +159,14 @@ is determined by the firmware decoder.
 Its MinUI-style controls are drawn as a transparent overlay and inherit the
 active TreeFrogUI theme colors. A/Start pauses, Left/Right seeks 10 seconds,
 L/R seeks 60 seconds, and B/Select returns to TreeFrogUI.
+
+## Image viewer
+
+Drop JPG/JPEG, PNG, BMP, GIF, TGA, ICO, WebP or TIFF images into
+`roms/images/`. The viewer passes the files directly to `libffplayer`'s native
+picture decoder and hardware video plane; no conversion or bundled software
+image codec is used.
+
+Left/Right or L1/R1 browses adjacent images, A switches between Fit and Fill,
+X rotates clockwise, Y toggles the themed controls, and B/Select returns to
+TreeFrogUI.

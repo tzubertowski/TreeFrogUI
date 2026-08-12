@@ -107,6 +107,7 @@ if [ "$PICOARCH" -nt "$PICOARCH_HI" ]; then
     echo "WARN: picoarch is newer than picoarch_hi — rebuild it: (cd ../picoarch && sh build_picoarch_hi.sh)"
 fi
 make -C apps/video_player >/dev/null
+make -C apps/image_viewer >/dev/null
 cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$2"; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
@@ -147,6 +148,7 @@ fi
 # roms/ folder structure (the system subfolders FrogUI expects: gba, nes, snes…).
 # Ships empty folders + their .res/filelist scaffolding; users drop ROMs in.
 [ -d "$STAGE/roms" ] && cp -a "$STAGE/roms" "$OUT/roms"
+mkdir -p "$OUT/roms/images"
 
 # Canvas ships hundreds of ES-DE targets and a second high-resolution mirror.
 # FrogUI requests only exact ROM-folder names plus its four built-in screens.
@@ -169,7 +171,7 @@ fi
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
 # (boot logos are NOT shipped here — install_first/<dev>/ provides the device-correct
 #  xgame-logo.bmp, so no fix_bootlogo script is needed.)
-for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player; do
+for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 [ -d "$STAGE/cubegm/bios" ] && cp -a "$STAGE/cubegm/bios" "$OUT/cubegm/bios"

@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> v1.0.13 adds native hardware-decoded video playback and polishes navigation, scaling and emulator menus across supported devices.
+> v1.0.13 adds native hardware-decoded video and image playback and polishes navigation, scaling and emulator menus across supported devices.
 >
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
@@ -8,6 +8,7 @@
 ## What's New in v1.0.13
 
 - **Native video player.** Put normal MP4, MKV, AVI, MOV, MPEG, TS or WebM files in `roms/videos/`. Playback uses the stock hardware decoder, needs no conversion, and has MinUI-style controls colored by the active TreeFrogUI theme.
+- **Native image viewer.** Put JPG, PNG, BMP, GIF, TGA, ICO, WebP or TIFF files in `roms/images/`. The stock picture decoder provides Fit/Fill and rotation, with themed controls and sibling-image browsing.
 - **Smoother Integer scaling.** Cached scaling maps remove the v1.0.12 performance regression, while more tolerant audio buffering prevents the associated sound stutter.
 - **Vectrex restored.** Games once again use the correct native display envelope instead of opening to a black screen.
 - **VICE controls restored.** Keyboard and joystick modes now receive RetroPad input in the VICE x64 core.
