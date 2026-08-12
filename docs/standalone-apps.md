@@ -21,6 +21,7 @@ Current standalone apps:
 | `lgpt`           | `cubegm/lgpt`      | LittleGPTracker (music tracker)    |
 | `rockbox`        | `cubegm/rockbox.sh`| Rockbox music player               |
 | `Ebook`          | `cubegm/ebook`     | Ebook/document reader (MuPDF - EPUB/MOBI/PDF) - [guide](cores/ebook.md) |
+| `videos`         | `cubegm/video_player` | Hardware-decoded MP4/MKV/AVI/MOV video player |
 
 ## The launch contract
 
@@ -145,3 +146,14 @@ picoarch hands the binary one argv: the ROM/project path. The binary owns:
 - **Audio** - ALSA (`libasound`) directly, or SDL_audio.
 - **Return cleanly** - exit when the user quits so the icube loop returns to
   FrogUI.
+
+## Video player
+
+Drop ordinary video files into `roms/videos/`; no conversion step is required.
+The player uses the stock firmware's `libffplayer` hardware decoder and accepts
+MP4, MKV, AVI, MOV/M4V, MPEG/MPG, TS and WebM containers. Actual codec support
+is determined by the firmware decoder.
+
+Its MinUI-style controls are drawn as a transparent overlay and inherit the
+active TreeFrogUI theme colors. A/Start pauses, Left/Right seeks 10 seconds,
+L/R seeks 60 seconds, and B/Select returns to TreeFrogUI.

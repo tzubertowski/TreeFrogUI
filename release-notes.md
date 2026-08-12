@@ -1,23 +1,19 @@
 > [!IMPORTANT]
-> v1.0.12 changes the main navigation and fixes aspect-ratio scaling across supported devices.
+> v1.0.13 adds native hardware-decoded video playback and polishes navigation, scaling and emulator menus across supported devices.
 >
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
 ---
 
-## What's New in v1.0.12
+## What's New in v1.0.13
 
-- **Top-level tabs.** Recents, Games and Settings are now tabs instead of entries in the system list.
-- **System View.** A third system-list style adds a paged console-icon grid. The background follows the highlighted system and falls back to the pack's main image when needed.
-- **Icon packs.** System View artwork is selectable independently from backgrounds, with ten credited Onion community packs included. Bright icons automatically use a contrasting selection tile.
-- **New defaults.** Fresh installs use System View, the Pixel icon pack, Red colours, friendly system names and 20% background dimming.
-- **Simple controls.** Use L1/R1 to change tabs everywhere. Left/Right also changes tabs in Vertical; Horizontal and System View keep the D-pad for systems.
-- **Faster Recents.** GameSwitcher screenshots are decoded once and kept in memory. Entering Recents no longer reloads the same image on every transition frame.
-- **Faster return to Games.** The system list and selected background stay in memory instead of rescanning the SD card or decoding the same image after leaving Recents.
-- **Cleaner navigation.** Tabs use one short crossfade instead of a slow panel slide. The active tab uses brighter theme text, inactive tabs are muted and bottom controls remain separate pillboxes.
-- **Hardware aspect-ratio fixes.** Native, Integer, Fill and forced ratios account for both 640x480 and 854x480 panels. Fixed ratios reshape only the small core frame and leave final scaling to the hardware driver.
-- **Volume control fix.** TreeFrogUI no longer restarts cubevol on launch, fixing Volume Down requiring repeated presses.
-- **Small UI feedback.** Long lists have a scroll indicator. Saved actions show short confirmation messages.
+- **Native video player.** Put normal MP4, MKV, AVI, MOV, MPEG, TS or WebM files in `roms/videos/`. Playback uses the stock hardware decoder, needs no conversion, and has MinUI-style controls colored by the active TreeFrogUI theme.
+- **Smoother Integer scaling.** Cached scaling maps remove the v1.0.12 performance regression, while more tolerant audio buffering prevents the associated sound stutter.
+- **Vectrex restored.** Games once again use the correct native display envelope instead of opening to a black screen.
+- **VICE controls restored.** Keyboard and joystick modes now receive RetroPad input in the VICE x64 core.
+- **Safer list navigation.** Scrolling through games no longer opens Search accidentally, and Left/Right stays within the Vertical view instead of changing tabs. Use L1/R1 for tabs.
+- **Readable emulator menus.** Selected values that are wider than the screen now scroll so the complete text can be read.
+- **Clean menu return.** Select+Start is held back until released after closing the emulator menu, preventing the shortcut from leaking into games and triggering actions such as PCE soft reset.
 
 **Updating:** copy `cubegm/` and `frogui/` over the card, then copy `install_first/<device>/` again. ROMs, saves and settings are untouched.
 

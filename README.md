@@ -58,6 +58,7 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Start in Recents** - Optional: boot straight into your recents (list or switcher) every time, in Settings.
 - **Play-time stats** - Tracks how long you play each game, shown in the browser.
 - **Ebook reader** - Read **EPUB / MOBI / PDF / CBZ / FB2** on the go (MuPDF-powered): put files in `roms/Ebook/`, adjustable text size + font (custom TTFs supported), progress saved per book. See the [ebook guide](docs/cores/ebook.md).
+- **Video player** - Drop ordinary **MP4 / MKV / AVI / MOV** files into `roms/videos/`. Playback uses the firmware hardware decoder; its MinUI-style controls inherit your active theme colors. No conversion required.
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
 - **Flexible display scaling** - Easily adjust display scaling modes (Zoom, Aspect Ratio, and Integer Scaling) to suit your preference.
 
@@ -153,6 +154,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **gong** | Pong clone | `gong_libretro.so` |
 | **vapor** | VaporSpec | `vaporspec_libretro.so` |
 | **rockbox** | Music player (MP3/FLAC/OGG…, standalone) - 📖 [setup guide](docs/cores/rockbox.md) | `rockbox` |
+| **videos** | Hardware video player (MP4/MKV/AVI/MOV/MPEG/TS/WebM, standalone) | `video_player` |
 
 See [cores.md](cores.md) for detailed build status and source repositories of TreeFrogUI external cores.
 
