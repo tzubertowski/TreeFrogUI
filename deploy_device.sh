@@ -559,27 +559,32 @@ deploy_o2em_test() {
 }
 
 deploy_c64_test() {
-    local core_src core_dst game_src game_dst hash_line
+    local core_src core_dst game_src game_dst config_src config_dst hash_line
     readonly core_src="$STAGE/cubegm/cores/vice_x64_libretro.so"
     readonly core_dst="$MOUNT/cubegm/cores/vice_x64_libretro.so"
     readonly game_src="$WORK/c64-test/Bruce Lee.d64"
     readonly game_dst="$MOUNT/roms/c64/Bruce Lee.d64"
+    readonly config_src="$REPO/test-configs/c64/Bruce Lee.cfg"
+    readonly config_dst="$MOUNT/picoarch/c64/Bruce Lee.cfg"
 
     [ -f "$core_src" ] || die "VICE x64 core is missing: $core_src"
     [ -f "$game_src" ] || die "C64 test disk is missing: $game_src"
+    [ -f "$config_src" ] || die "C64 test config is missing: $config_src"
     hash_line="$(sha256sum "$game_src")"
     [ "${hash_line%% *}" = d883005ab7bba6f0e3bb5f3e397181a576a09862fe1f1f0d1cc989adfade1de7 ] ||
         die "Bruce Lee test disk checksum is wrong"
 
-    mkdir -p "$(dirname "$core_dst")" "$(dirname "$game_dst")"
+    mkdir -p "$(dirname "$core_dst")" "$(dirname "$game_dst")" "$(dirname "$config_dst")"
     rsync -tc "$core_src" "$core_dst"
     rsync -tc "$game_src" "$game_dst"
+    rsync -tc "$config_src" "$config_dst"
     : > "$MOUNT/log.txt"
     sync
 
     verify_tree "$core_src" "$core_dst" "VICE x64 core"
     verify_tree "$game_src" "$game_dst" "Bruce Lee test disk"
-    echo "C64 test ready: Bruce Lee.d64 through VICE x64."
+    verify_tree "$config_src" "$config_dst" "Bruce Lee warp-autostart config"
+    echo "C64 test ready: Bruce Lee.d64 through VICE x64 with warp autostart."
 }
 
 for payload in "${PAYLOADS[@]}"; do
