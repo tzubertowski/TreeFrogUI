@@ -5,6 +5,17 @@
 
 ---
 
+## Offline update packages
+
+- **Automatic offline updates.** Releases now ship both the existing full-install ZIP and a differential `update.zip` built against the preceding numeric release line (for example, `13_b` compares with the newest `12`, not `13_a`). Copy `update.zip` directly to the SD-card root and reboot; TreeFrogUI verifies and installs it, then removes it only after success.
+- **Configuration migrations included.** Update packages intentionally refresh FrogUI and emulator configuration so breaking changes and new required options take effect. The previous configs are backed up on the card.
+- **Safe recovery behavior.** Updates are checksum-verified, use atomic per-file replacement, retain interrupted or invalid packages for retry, and never delete personal ROMs, BIOS files, saves, screenshots or media.
+- **Kudos to devdeve1oper**, who suggested the automatic console-update workflow. 💚
+
+Maintainers keep comparison ZIPs under `release/artifact/`; current staging and both publishable files live under `release/latest/`. Follow [`docs/RELEASING.md`](docs/RELEASING.md) for the complete build, validation, and publishing procedure.
+
+---
+
 ## What's New in v1.0.13
 
 - **Native video player.** Put normal MP4, MKV, AVI, MOV, MPEG, TS or WebM files in `roms/videos/`. Playback uses the stock hardware decoder, needs no conversion, and has MinUI-style controls colored by the active TreeFrogUI theme.
@@ -16,7 +27,7 @@
 - **Readable emulator menus.** Selected values that are wider than the screen now scroll so the complete text can be read.
 - **Clean menu return.** Select+Start is held back until released after closing the emulator menu, preventing the shortcut from leaking into games and triggering actions such as PCE soft reset.
 
-**Updating:** copy `cubegm/` and `frogui/` over the card, then copy `install_first/<device>/` again. ROMs, saves and settings are untouched.
+**Updating from an older build:** copy `cubegm/` and `frogui/` over the card, then copy `install_first/<device>/` again. This one-time manual update installs the offline updater; later releases need only `update.zip` copied to the SD-card root.
 
 ---
 

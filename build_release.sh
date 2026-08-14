@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build the unified TreeFrogUI release: release/
+# Build the unified TreeFrogUI release: release/latest/release/
 #
 # ONE package for R36SX / SF3000 / SF3500. Boot is unified on the rkgame autorun
 # hijack — the stock boot chain (icube + rkgame, both verified on SF3500) is
@@ -9,18 +9,19 @@
 #     -> retro_load_game() execl's zhijack.sh -> picoarch/frogui
 #
 # Layout:
-#   release/cubegm,frogui,roms,MD  universal payload (zero stock files) — copy to SD
-#   release/install_first/<dev>/ per-device: rkgame setting.xml autorun, hijack
+#   release/latest/release/cubegm,frogui,roms,MD  universal payload — copy to SD
+#   release/latest/release/install_first/<dev>/ per-device setup
 #                                core override, boot logo, and the device's
 #                                GENERATED zhijack.sh (hardcoded device facts,
 #                                no runtime detection) — user copies THEIR device's
-#   release/INSTALL.md           guide
+#   release/latest/release/INSTALL.md           guide
 set -e
 cd "$(dirname "$0")"
 
 STAGE=sdcard
 HIJACK=hijack
-OUT=release
+RELEASE_ROOT=release
+OUT="$RELEASE_ROOT/latest/release"
 # WORKING autoboot recipe (confirmed on SF3500 hardware, see project_sf3500_hijack):
 #   - autorun rom path must be ABSOLUTE (relative is silently ignored by rkgame)
 #   - driver="" → rkgame resolves the core by the rom's EXTENSION via config.xml
@@ -116,6 +117,7 @@ cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null
 cp_if_diff "$HIJACK/nosleep" "$STAGE/cubegm/nosleep"
 
+mkdir -p "$RELEASE_ROOT/artifact" "$RELEASE_ROOT/latest"
 rm -rf "$OUT"
 mkdir -p "$OUT/cubegm/cores" "$OUT/cubegm/lib" "$OUT/$(dirname "$DUMMY_REL")"
 
@@ -124,6 +126,8 @@ cp -a "$STAGE/cubegm/cores/." "$OUT/cubegm/cores/"
 for f in picoarch picoarch_hi nosleep driver_r36sx.so driver_r36sx27.so driver_sf3000.so driver_sf3500.so driver_gb350.so; do
     cp "$STAGE/cubegm/$f" "$OUT/cubegm/$f"
 done
+cp "$HIJACK/tfupdate.sh" "$OUT/cubegm/tfupdate.sh"
+chmod +x "$OUT/cubegm/tfupdate.sh"
 # zhijack.sh is per-device (generated into install_first/<dev>/cubegm/ below) —
 # the universal payload deliberately ships NO launcher and NO device detection.
 # only libs no stock device ships (SDL, png12). SD is FAT32 → NO symlinks: ship a
@@ -181,13 +185,14 @@ done
 #     dropped as it documents the retired icube method).
 # User-facing docs come from the REPO ROOT (canonical, maintained) — the sdcard/
 # copies are stale stubs. Assets (picoarch.cfg) come from staging.
-for x in README.md theme.md LICENSE.md; do
+for x in README.md install.md theme.md LICENSE.md; do
     [ -f "$x" ] && cp "$x" "$OUT/$x"
 done
 mkdir -p "$OUT/docs"
 for x in cores.md release-notes.md onionos_gap.md ARCADE_CORES.md; do
     [ -f "$x" ] && cp "$x" "$OUT/docs/$x"
 done
+[ -f "docs/RELEASING.md" ] && cp "docs/RELEASING.md" "$OUT/docs/RELEASING.md"
 for x in picoarch.cfg; do
     [ -e "$STAGE/$x" ] && cp -a "$STAGE/$x" "$OUT/$x"
 done
@@ -275,6 +280,14 @@ stays happy.
 4. Eject, boot. The stock menu loads, then jumps straight into TreeFrogUI.
 
 Diagnostics: `/mnt/sdcard/log.txt` (look for `=== zhijack boot`).
+
+## Offline updates
+
+Future releases include `update.zip`. Copy it directly to the SD-card root and
+reboot. It is verified,
+applied for this device and deleted only after success. Configs are refreshed
+and their previous versions are backed up under `.treefrog-update/backup-<version>/`;
+personal ROMs, BIOS files, saves, screenshots and media are not deleted.
 EOF
 
 # 4) FAT32 guard — the SD has no symlink support; fail loudly if any slipped in.
@@ -302,11 +315,15 @@ for dev in "${!STOCK[@]}"; do
     [ -f "$OUT/install_first/$dev/cubegm/cores/$OVERRIDE_CORE" ] || fail "missing hijack core for $dev"
 done
 [ -f "$OUT/$DUMMY_REL" ] || fail "missing autorun dummy rom $DUMMY_REL"
+[ -x "$OUT/cubegm/tfupdate.sh" ] || fail "missing offline updater"
+grep -q 'sh /tmp/tfupdate.sh' "$OUT/install_first/sf3000/cubegm/zhijack.sh" \
+    || fail "generated launchers do not invoke offline updater"
 
 echo
 echo "=== $OUT ready (FAT32-safe, no symlinks, sanity checks passed) ==="
 du -sh "$OUT"
 find "$OUT" -maxdepth 3 -type d | sort
 echo
-last=$(ls TreeFrogUI_v*_?.zip 2>/dev/null | sort | tail -1)
-echo "To package: zip -qr TreeFrogUI_vX.Y.Z_?.zip $OUT   (latest existing: ${last:-none})"
+last=$(find "$RELEASE_ROOT/artifact" -maxdepth 1 -type f -name 'TreeFrogUI_v*.zip' \
+    -printf '%f\n' 2>/dev/null | sort -V | tail -1)
+echo "To package: ./pack_release.sh vX.Y.Z_?   (comparison artifact: ${last:-none})"

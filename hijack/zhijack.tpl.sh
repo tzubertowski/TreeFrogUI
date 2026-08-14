@@ -24,6 +24,26 @@ else
     LOG=/dev/null
 fi
 
+# Offline updates: users drop the official update.zip into the SD-card root.
+# Run a /tmp copy so the updater can atomically replace its own
+# installed file. Status 10 means success: restart through the newly installed
+# device launcher. Failures keep both the current installation and update ZIP.
+if [ -f /mnt/sdcard/cubegm/tfupdate.sh ]; then
+    cp /mnt/sdcard/cubegm/tfupdate.sh /tmp/tfupdate.sh 2>/dev/null
+    if [ -f /tmp/tfupdate.sh ]; then
+        sh /tmp/tfupdate.sh @DEV_LABEL@
+        UPDATE_RC=$?
+        if [ "$UPDATE_RC" = 10 ]; then
+            echo "offline update installed; restarting launcher" >> "$LOG"
+            rm -rf /tmp/zhijack.lock
+            exec /mnt/sdcard/cubegm/zhijack.sh
+            exit 1
+        elif [ "$UPDATE_RC" != 0 ]; then
+            echo "offline update failed rc=$UPDATE_RC; continuing current version" >> "$LOG"
+        fi
+    fi
+fi
+
 # Freeze icube (the respawner), THEN kill rkgame. Devices that boot through
 # icube (R36SX, SF3000, GB350) respawn any killed rkgame, and the fresh
 # instance redraws the stock menu over our frames (flicker/ghosting); a merely

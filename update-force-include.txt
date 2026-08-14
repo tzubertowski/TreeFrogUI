@@ -1,0 +1,7 @@
+# Release configs are authoritative. Keep these in every delta even when their
+# bytes match the previous release, so migrations can reset stale user values.
+frogui/settings.txt
+frogui/keymap.txt
+picoarch.cfg
+cubegm/cores/.pcsx4all/pcsx4all.cfg
+cubegm/.pcsx4all/pcsx4all.cfg

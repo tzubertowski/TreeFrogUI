@@ -118,6 +118,35 @@ name in brackets is wrong, you copied the wrong `install_first/` folder. Delete
 `log.txt` to turn logging back off. See the
 [Troubleshooting & logs](README.md#troubleshooting--logs) section for details.
 
+## Offline updates
+
+Releases provide two downloads:
+
+- `TreeFrogUI_<version>.zip` is the complete clean-card installation.
+- `update.zip` is the automatic offline update.
+
+To update, copy the official `update.zip` directly to the SD-card root, safely
+eject and boot. TreeFrogUI verifies
+every file, applies the universal payload plus the correct device launcher, and
+deletes `update.zip` only after success. Failures retain it for another boot and
+are recorded in `update.log` at the SD-card root.
+
+Each `update.zip` is a delta from the preceding numeric release line, ignoring
+letter/suffix rebuilds. For example, every `v1.0.13_*` package is compared with
+the newest retained `v1.0.12*` full release, never another `v1.0.13_*` build.
+The installed base version is checked before anything changes; otherwise use
+the current full ZIP.
+
+The update replaces FrogUI settings, keymaps and emulator configuration so new
+required options and migrations take effect. Previous configs are saved under
+`.treefrog-update/backup-<version>/`. ROMs, BIOS files, saves, save states,
+screenshots, favourites, recents, play-time data and personal media are not
+deleted.
+
+Versions released before the offline updater must be upgraded manually once,
+including `install_first/<device>/`. Automatic update ZIPs work after that
+one-time bootstrap.
+
 ---
 
 ## R36SX clones (R36HD, etc.)

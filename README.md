@@ -60,6 +60,7 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Ebook reader** - Read **EPUB / MOBI / PDF / CBZ / FB2** on the go (MuPDF-powered): put files in `roms/Ebook/`, adjustable text size + font (custom TTFs supported), progress saved per book. See the [ebook guide](docs/cores/ebook.md).
 - **Video player** - Drop ordinary **MP4 / MKV / AVI / MOV** files into `roms/videos/`. Playback uses the firmware hardware decoder; its MinUI-style controls inherit your active theme colors. No conversion required.
 - **Image viewer** - Browse **JPG / PNG / BMP / GIF / WebP / TIFF** files from `roms/images/` using the firmware's native picture decoder, with Fit/Fill, rotation and themed controls.
+- **Offline updates** - Copy the official `update.zip` directly to the SD-card root and reboot. It is checksum-verified, applied for the correct device, and deleted only after success. See the [installation guide](install.md#offline-updates).
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
 - **Flexible display scaling** - Easily adjust display scaling modes (Zoom, Aspect Ratio, and Integer Scaling) to suit your preference.
 
@@ -310,6 +311,11 @@ Repos: **treefrog-ui** (this), **FrogUI** (launcher core), **TreeFrogUI_picoarch
 is reconstructed from `patches/pico286-sf3000.patch` onto the upstream `xrip/pico-286`
 clone, so it needs no separate repo. BIOS, romsets, and the FreeDOS `x86BOOT.img`
 are user-supplied (see the BIOS section).
+
+Release maintainers and automation agents should follow the canonical
+[release process](docs/RELEASING.md). It documents numeric-line delta selection,
+the `release/artifact/` and `release/latest/` layout, validation, and publishing
+the full ZIP together with the root-ready `update.zip`.
 
 ### Build FrogUI only
 
