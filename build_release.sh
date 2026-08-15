@@ -193,6 +193,12 @@ for x in cores.md release-notes.md onionos_gap.md ARCADE_CORES.md; do
     [ -f "$x" ] && cp "$x" "$OUT/docs/$x"
 done
 [ -f "docs/RELEASING.md" ] && cp "docs/RELEASING.md" "$OUT/docs/RELEASING.md"
+# README setup links point into docs/cores/. Ship the maintained guides with
+# the release instead of leaving those links valid only in the source tree.
+if [ -d "docs/cores" ]; then
+    mkdir -p "$OUT/docs/cores"
+    cp -a docs/cores/. "$OUT/docs/cores/"
+fi
 for x in picoarch.cfg; do
     [ -e "$STAGE/$x" ] && cp -a "$STAGE/$x" "$OUT/$x"
 done

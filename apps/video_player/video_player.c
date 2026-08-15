@@ -38,7 +38,7 @@ typedef struct {
     int fb_w, fb_h, pitch, bytespp;
     struct fb_var_screeninfo vi;
     int logical_w, logical_h;
-    bool rotated;
+    int rotation;
     uint32_t *canvas;
 } Overlay;
 
@@ -96,20 +96,23 @@ static void on_signal(int sig) {
     quit_requested = 1;
 }
 
-static void read_device_geometry(int *w, int *h) {
+static void read_device_geometry(int *w, int *h, int *rotation) {
     FILE *f = fopen(DEVICE_FILE, "r");
     char line[128], key[64], value[64];
     *w = 640;
     *h = 480;
+    *rotation = 0;
     if (!f) return;
     while (fgets(line, sizeof(line), f)) {
         if (sscanf(line, "%63[^=]=%63s", key, value) != 2) continue;
         if (!strcmp(key, "TF_PANEL_W")) *w = atoi(value);
         else if (!strcmp(key, "TF_PANEL_H")) *h = atoi(value);
+        else if (!strcmp(key, "TF_ROTATE")) *rotation = atoi(value);
     }
     fclose(f);
     if (*w < 320 || *w > 1920) *w = 640;
     if (*h < 240 || *h > 1080) *h = 480;
+    if (*rotation != 90 && *rotation != 180 && *rotation != 270) *rotation = 0;
 }
 
 static uint32_t parse_rgb(const char *s, uint32_t fallback) {
@@ -166,7 +169,7 @@ static uint32_t logical_keys(volatile uint32_t *raw) {
 static int overlay_open(Overlay *o) {
     memset(o, 0, sizeof(*o));
     o->fd = -1;
-    read_device_geometry(&o->logical_w, &o->logical_h);
+    read_device_geometry(&o->logical_w, &o->logical_h, &o->rotation);
     o->fd = open("/dev/fb1", O_RDWR);
     if (o->fd < 0) return -1;
     struct fb_fix_screeninfo fi;
@@ -182,7 +185,10 @@ static int overlay_open(Overlay *o) {
     if (o->mem == MAP_FAILED) { o->mem = NULL; goto fail; }
     o->canvas = calloc((size_t)o->logical_w * o->logical_h, sizeof(*o->canvas));
     if (!o->canvas) goto fail;
-    o->rotated = o->fb_w < o->fb_h && o->logical_w > o->logical_h;
+    /* fb1 is portrait-shaped on the portrait-mounted SF panels. Its memory
+     * must receive the same clockwise transform as the decoded MAIN layer.
+     * Trust the boot profile, but only rotate when the fb geometry agrees. */
+    if (!(o->fb_w < o->fb_h && o->logical_w > o->logical_h)) o->rotation = 0;
     return 0;
 fail:
     if (o->mem) munmap(o->mem, o->mem_len);
@@ -225,7 +231,13 @@ static void overlay_present(Overlay *o) {
         unsigned char *row = o->mem + (size_t)(fy + o->vi.yoffset) * o->pitch;
         for (int fx = 0; fx < o->fb_w; fx++) {
             int lx, ly;
-            if (o->rotated) {
+            if (o->rotation == 90) {
+                lx = fy * o->logical_w / o->fb_h;
+                ly = o->logical_h - 1 - fx * o->logical_h / o->fb_w;
+            } else if (o->rotation == 180) {
+                lx = o->logical_w - 1 - fx * o->logical_w / o->fb_w;
+                ly = o->logical_h - 1 - fy * o->logical_h / o->fb_h;
+            } else if (o->rotation == 270) {
                 lx = o->logical_w - 1 - fy * o->logical_w / o->fb_h;
                 ly = fx * o->logical_h / o->fb_w;
             } else {
@@ -358,6 +370,14 @@ int main(int argc, char **argv) {
     volatile uint32_t *raw_keys = open_keys();
     Overlay overlay;
     bool have_overlay = overlay_open(&overlay) == 0;
+    int panel_rotation = 0, panel_w = 0, panel_h = 0;
+    read_device_geometry(&panel_w, &panel_h, &panel_rotation);
+    char geometry_log[128];
+    snprintf(geometry_log, sizeof(geometry_log),
+             "panel=%dx%d rotate=%d fb1=%dx%d",
+             panel_w, panel_h, panel_rotation,
+             have_overlay ? overlay.fb_w : 0, have_overlay ? overlay.fb_h : 0);
+    log_step(geometry_log);
     log_step(have_overlay ? "fb1 overlay ready" : "fb1 overlay unavailable");
     if (have_overlay) overlay_clear(&overlay);
 
@@ -386,6 +406,10 @@ int main(int argc, char **argv) {
     args->uri = argv[1];
     args->msg_id = msg_id;
     args->sync_type = HCPLAYER_AUDIO_MASTER;
+    if (panel_rotation) {
+        args->rotate_enable = true;
+        args->rotate_type = (rotate_type_e)(panel_rotation / 90);
+    }
     /* Match the stock hcprojector player setup. quick_mode and audsink are
      * intentionally left disabled; the firmware's audio-master path owns the
      * decoder/I2SO devices directly. */

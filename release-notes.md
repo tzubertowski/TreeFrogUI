@@ -19,6 +19,7 @@ Maintainers keep comparison ZIPs under `release/artifact/`; current staging and 
 ## What's New in v1.0.13
 
 - **Native video player.** Put normal MP4, MKV, AVI, MOV, MPEG, TS or WebM files in `roms/videos/`. Playback uses the stock hardware decoder, needs no conversion, and has MinUI-style controls colored by the active TreeFrogUI theme.
+- **Correct SF video orientation.** Video and its controls now follow the device profile's panel rotation, fixing 90-degree counter-clockwise playback and reversed/top-aligned controls on SF3000 and SF3500.
 - **Native image viewer.** Put JPG, PNG, BMP, GIF, TGA, ICO, WebP or TIFF files in `roms/images/`. The stock picture decoder provides Fit/Fill and rotation, with themed controls and sibling-image browsing.
 - **Smoother Integer scaling.** Cached scaling maps remove the v1.0.12 performance regression, while more tolerant audio buffering prevents the associated sound stutter.
 - **Vectrex restored.** Games once again use the correct native display envelope instead of opening to a black screen.
@@ -26,6 +27,7 @@ Maintainers keep comparison ZIPs under `release/artifact/`; current staging and 
 - **Safer list navigation.** Scrolling through games no longer opens Search accidentally, and Left/Right stays within the Vertical view instead of changing tabs. Use L1/R1 for tabs.
 - **Readable emulator menus.** Selected values that are wider than the screen now scroll so the complete text can be read.
 - **Clean menu return.** Select+Start is held back until released after closing the emulator menu, preventing the shortcut from leaking into games and triggering actions such as PCE soft reset.
+- **Clearer classic-FPS setup.** The Wolfenstein guide now covers Wolf3D (`.wl1`/`.wl6`) and Spear of Destiny (`.sdm`/`.sod`) data sets. The bundled PrBoom core supports Doom, Heretic and Hexen IWADs from `roms/prboom/`; game data is not bundled.
 
 **Updating from an older build:** copy `cubegm/` and `frogui/` over the card, then copy `install_first/<device>/` again. This one-time manual update installs the offline updater; later releases need only `update.zip` copied to the SD-card root.
 

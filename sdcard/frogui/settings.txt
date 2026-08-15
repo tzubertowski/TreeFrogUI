@@ -1,5 +1,5 @@
 theme=Red
-style=system
+style=vertical
 icon_pack=Pixel_by_Jeltron
 friendly_system_names=on
 font=GamePocket
