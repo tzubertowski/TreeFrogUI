@@ -1,24 +1,35 @@
 # TreeFrogUI Installation Guide
 
 One TreeFrogUI package supports **six devices** - it auto-detects which one it is
-at boot. Pick your device below, grab its stock backup, then follow the same
+at boot. Pick your device below, grab its required backup, then follow the same
 install steps for everyone.
 
 Supported: **R36SX** (v2.6 / v2.7) · **SF3000** · **SF3000 HD** · **SF3100** ·
 **SF3500** · **GB350**.
 
-> [!IMPORTANT]
-> **You must start from a clean STOCK OS card for your device.** TreeFrogUI runs
-> on top of the stock system - it never replaces the protected boot files
-> (`icube`, `rkgame`), it hooks the stock menu's autorun instead. That's why it
-> works even on bootloader-protected devices (R36SX v2.7, SF3500-class).
+> [!CAUTION]
+> # 🔴 **STOP — DO NOT USE THE FACTORY/PREINSTALLED STOCK OS** 🔴
+>
+> ## **MANDATORY: FORMAT THE SD CARD AND SET IT UP FRESH WITH THE EXACT BACKUP LINKED BELOW FOR YOUR DEVICE.**
+>
+> **THIS IS NOT OPTIONAL. DO NOT COPY TREEFROGUI OVER THE STOCK SD CARD. DO NOT
+> REUSE OR MERGE WITH THE OS THAT CAME WITH THE HANDHELD.** The factory stock SD
+> card/OS is **not supported**, even if its folders look identical. Using it causes
+> **missing audio, broken controls, a black/incorrect display, crashes, or failure
+> to boot**. These are stock-OS compatibility failures, not valid TreeFrogUI test
+> results. Only continue after formatting the card and performing a clean restore
+> of the exact backup linked in Step 1. If a download is named “Stock Backup,”
+> that exact provided image is required—it does **not** mean “use whatever stock
+> OS came on the device.”
 
 ---
 
-## Step 1: Get the stock backup for YOUR device
+## Step 1: Get the REQUIRED PROVIDED backup for YOUR device
 
-Click your device to expand. Restore this onto your SD card first (format + copy),
-**before** the TreeFrogUI files.
+Click your device to expand. Download the exact backup from the link in this
+guide, **format the SD card**, and set it up fresh from that backup before adding
+any TreeFrogUI files. Do not install in place, retain old OS files, merge with the
+factory card, or substitute a different backup.
 
 <details>
 <summary><b>R36SX (v2.6)</b></summary>
@@ -86,7 +97,8 @@ Click your device to expand. Restore this onto your SD card first (format + copy
 
 1. **Download** the latest TreeFrogUI release archive from the
    [Releases](https://github.com/tzubertowski/treefrog-ui/releases) page and extract it.
-2. Copy these onto the **root** of your (stock) SD card, merging/overwriting:
+2. Copy these onto the **root** of the SD card restored from the provided backup,
+   merging/overwriting:
    - `cubegm/`
    - `frogui/`
    - `roms/`
@@ -212,8 +224,8 @@ much slower; `.hex` only).
 ## Troubleshooting & Feedback
 
 - **Black screen / only battery icon after the boot logo:** you didn't start from a
-  clean stock card, or copied the wrong device's `install_first/`. Restore the stock
-  backup for your device (Step 1), then redo Steps 2-3.
+  required provided backup, or copied the wrong device's `install_first/`.
+  Restore the exact linked backup for your device (Step 1), then redo Steps 2-3.
 - **Right analog stick doesn't do analog (R36SX):** expected, **cannot be fixed in
   software**. The R36SX wires the right stick to the **X / A / B / Y buttons**
   on/off only, no analog value exposed to apps. TreeFrogUI mirrors the face buttons

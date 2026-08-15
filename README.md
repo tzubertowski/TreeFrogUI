@@ -16,7 +16,7 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 > ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
 
 ### New here? Start with these
-- 📦 **[How to install it](install.md)** - start here, step by step
+- 🛑 **[How to install it](install.md)** - **MANDATORY: format the SD card and set it up fresh with the exact linked device backup; the factory stock SD/OS is unsupported**
 - 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
 - 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
 - ⬇️ **[Download the latest version](https://github.com/tzubertowski/treefrog-ui/releases)**

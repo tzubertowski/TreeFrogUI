@@ -264,9 +264,22 @@ Unified boot: the stock menu (rkgame) auto-launches TreeFrogUI via a hijack core
 The stock boot files (icube, rkgame) are never modified, so SF3500's boot verifier
 stays happy.
 
+> [!CAUTION]
+> # 🔴 **STOP — DO NOT USE THE FACTORY/PREINSTALLED STOCK OS** 🔴
+>
+> ## **MANDATORY: FORMAT THE SD CARD AND SET IT UP FRESH WITH THE EXACT BACKUP LINKED IN `install.md` FOR YOUR DEVICE.**
+>
+> **THIS IS NOT OPTIONAL. DO NOT COPY TREEFROGUI OVER THE STOCK SD CARD OR MERGE
+> IT WITH THE FACTORY OS.** The stock SD card/OS is unsupported and commonly
+> produces missing audio, broken controls, black/incorrect display output,
+> crashes, or boot failures. A download called “Stock Backup” in the guide means
+> that exact tested image—not the arbitrary factory OS on the card.
+
 ## Steps
-1. Start from a **stock card** for your device (if your card has an older TreeFrogUI
-   that replaced `cubegm/icube`, restore the stock `icube` first).
+1. **Format the SD card and perform a clean setup using the exact backup linked
+   in `install.md` for your device.** Do not install over, reuse, or merge with
+   the factory/preinstalled stock OS. If your card has an older TreeFrogUI that
+   replaced `cubegm/icube`, the clean backup setup restores it.
 2. Copy `cubegm/`, `frogui/`, `roms/`, `MD/` onto the SD root (merge/overwrite).
 3. Copy the contents of **`install_first/<your-device>/`** onto the SD root too
    (REQUIRED: it carries the launcher script and autorun setup for your device):
