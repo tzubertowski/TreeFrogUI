@@ -8,7 +8,7 @@ abandoned.
 
 The battery + volume indicators are **not files or assets**. They're drawn by
 **`cubevol`** (the stock GPIO/volume daemon, `rootfs/usr/bin/cubevol`, started by
-zhijack at boot) directly onto **`/dev/fb1`** — a hardware ARGB **overlay layer**
+zhijack at boot) directly onto **`/dev/fb1`** - a hardware ARGB **overlay layer**
 that the display controller composites on top of the main framebuffer (`/dev/fb0`)
 continuously, independent of what we render.
 
@@ -29,14 +29,14 @@ Reverse-engineered from cubevol:
   curve uses `{64,153,180}` piecewise to `{0,50,100}`. Treating the byte maximum
   (`255`) as full left a charged device permanently below 100%.
 - **Charging** = **1 raw byte from `/dev/check_adc5`** (NOT `check_adc2`, which
-  doesn't exist on R36SX). Value is **~0 idle, ~140 charging** — threshold `>=64`.
+  doesn't exist on R36SX). Value is **~0 idle, ~140 charging** - threshold `>=64`.
 - Both ADC nodes are **flaky when re-opened per poll**; open once **O_RDWR** and
   keep the fd (cubevol does the same).
 
 **Shipped:** FrogUI draws its own NextUI-style battery icon in the header
 (`render_battery`), and picoarch draws one in the pause menu. cubevol's own
 battery glyph is hidden by zeroing the **four memory corners on every virtual
-fb1 page** — leaving cubevol's centered volume popup intact. Clearing all four
+fb1 page** - leaving cubevol's centered volume popup intact. Clearing all four
 corners is intentional: SF3500-class devices rotate this overlay, so physical
 top-right is not necessarily memory top-right, and charging can repaint a
 different virtual page.
@@ -61,7 +61,7 @@ polled for changes, and drew our own bar on fb0.
 ### Why it was abandoned: the fb1 blink
 
 To show our own popup we had to hide cubevol's. But cubevol writes its popup to
-the **fb1 overlay**, which the **hardware composites continuously** — asynchronous
+the **fb1 overlay**, which the **hardware composites continuously** - asynchronous
 to our render loop. On a volume press cubevol draws its popup; our per-frame
 `memset(fb1, 0)` removes it, but the compositor shows it for the **sub-frame gap**
 between cubevol's write and our next clear → a **one-frame blink** on every press.
@@ -69,10 +69,10 @@ between cubevol's write and our next clear → a **one-frame blink** on every pr
 Tried, none sufficient:
 
 - Per-frame clear of the whole fb1 (persistent mmap, cleared at end of
-  `retro_run`). Blink persists — it's a compositing race, not a clear-cadence
+  `retro_run`). Blink persists - it's a compositing race, not a clear-cadence
   problem.
 - `FBIOBLANK(FB_BLANK_POWERDOWN)` on `/dev/fb1` to disable the layer. **No
-  effect** — the OSD layer stays composited.
+  effect** - the OSD layer stays composited.
 
 **The only real fix** is disabling the fb1 OSD layer at the display-controller
 level (a `/dev/dis` or GMA layer-enable ioctl we have **not** cracked), so

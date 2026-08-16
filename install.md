@@ -8,19 +8,11 @@ Supported: **R36SX** (v2.6 / v2.7) · **SF3000** · **SF3000 HD** · **SF3100** 
 **SF3500** · **GB350**.
 
 > [!CAUTION]
-> # 🔴 **STOP — DO NOT USE THE FACTORY/PREINSTALLED STOCK OS** 🔴
+> # 🔴 **DO NOT USE THE FACTORY/PREINSTALLED STOCK OS** 🔴
 >
-> ## **MANDATORY: FORMAT THE SD CARD AND SET IT UP FRESH WITH THE EXACT BACKUP LINKED BELOW FOR YOUR DEVICE.**
->
-> **THIS IS NOT OPTIONAL. DO NOT COPY TREEFROGUI OVER THE STOCK SD CARD. DO NOT
-> REUSE OR MERGE WITH THE OS THAT CAME WITH THE HANDHELD.** The factory stock SD
-> card/OS is **not supported**, even if its folders look identical. Using it causes
-> **missing audio, broken controls, a black/incorrect display, crashes, or failure
-> to boot**. These are stock-OS compatibility failures, not valid TreeFrogUI test
-> results. Only continue after formatting the card and performing a clean restore
-> of the exact backup linked in Step 1. If a download is named “Stock Backup,”
-> that exact provided image is required—it does **not** mean “use whatever stock
-> OS came on the device.”
+> **Format the SD card and set it up fresh with the exact backup linked below.
+> This is not optional. Installing over the stock OS causes missing audio, broken
+> controls, display problems, crashes, and boot failures.**
 
 ---
 

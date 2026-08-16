@@ -2,8 +2,8 @@
 
 The release pipeline creates two GitHub assets:
 
-- `TreeFrogUI_<version>.zip` — the complete clean-card installation.
-- `update.zip` — an automatic offline update copied directly to the SD-card
+- `TreeFrogUI_<version>.zip` - the complete clean-card installation.
+- `update.zip` - an automatic offline update copied directly to the SD-card
   root by users.
 
 The generated workspace is deliberately separated:

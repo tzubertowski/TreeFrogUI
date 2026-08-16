@@ -22,6 +22,7 @@ Current standalone apps:
 | `rockbox`        | `cubegm/rockbox.sh`| Rockbox music player               |
 | `Ebook`          | `cubegm/ebook`     | Ebook/document reader (MuPDF - EPUB/MOBI/PDF) - [guide](cores/ebook.md) |
 | `videos`         | `cubegm/video_player` | Hardware-decoded MP4/MKV/AVI/MOV video player |
+| `music`          | `cubegm/video_player` | Simple hardware-backed music player          |
 | `images`         | `cubegm/image_viewer` | Native hardware-decoded JPG/PNG/BMP/GIF/WebP/TIFF image viewer |
 
 ## The launch contract
@@ -159,6 +160,14 @@ is determined by the firmware decoder.
 Its MinUI-style controls are drawn as a transparent overlay and inherit the
 active TreeFrogUI theme colors. A/Start pauses, Left/Right seeks 10 seconds,
 L/R seeks 60 seconds, and B/Select returns to TreeFrogUI.
+
+## Simple music player
+
+Drop MP3, M4A, AAC, WAV, FLAC, OGG or Opus files into `roms/music/`. This mode
+reuses the firmware-backed video player and the same controls: A/Start pauses,
+Left/Right seeks 10 seconds, L/R seeks 60 seconds, and B/Select returns to
+TreeFrogUI. Codec support depends on the decoder included in the device's
+firmware. Rockbox remains available for playlists and advanced library use.
 
 ## Image viewer
 

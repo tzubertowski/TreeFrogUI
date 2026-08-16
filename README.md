@@ -16,7 +16,7 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 > ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
 
 ### New here? Start with these
-- 🛑 **[How to install it](install.md)** - **MANDATORY: format the SD card and set it up fresh with the exact linked device backup; the factory stock SD/OS is unsupported**
+- 🟢 **[How to install it](install.md)** - start here, step by step
 - 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
 - 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
 - ⬇️ **[Download the latest version](https://github.com/tzubertowski/treefrog-ui/releases)**
@@ -59,6 +59,7 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Play-time stats** - Tracks how long you play each game, shown in the browser.
 - **Ebook reader** - Read **EPUB / MOBI / PDF / CBZ / FB2** on the go (MuPDF-powered): put files in `roms/Ebook/`, adjustable text size + font (custom TTFs supported), progress saved per book. See the [ebook guide](docs/cores/ebook.md).
 - **Video player** - Drop ordinary **MP4 / MKV / AVI / MOV** files into `roms/videos/`. Playback uses the firmware hardware decoder; its MinUI-style controls inherit your active theme colors and follow each device's native panel orientation. No conversion required.
+- **Simple music player** - Put **MP3 / M4A / AAC / WAV / FLAC / OGG / Opus** files in `roms/music/` for familiar A-to-pause, shoulder-button seek and B-to-exit controls. Rockbox remains available for advanced library features.
 - **Image viewer** - Browse **JPG / PNG / BMP / GIF / WebP / TIFF** files from `roms/images/` using the firmware's native picture decoder, with Fit/Fill, rotation and themed controls.
 - **Offline updates** - Copy the official `update.zip` directly to the SD-card root and reboot. It is checksum-verified, applied for the correct device, and deleted only after success. See the [installation guide](install.md#offline-updates).
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
@@ -156,6 +157,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **gong** | Pong clone | `gong_libretro.so` |
 | **vapor** | VaporSpec | `vaporspec_libretro.so` |
 | **rockbox** | Music player (MP3/FLAC/OGG…, standalone) - 📖 [setup guide](docs/cores/rockbox.md) | `rockbox` |
+| **music** | Simple themed music player (MP3/M4A/AAC/WAV/FLAC/OGG/Opus, standalone) | `video_player` |
 | **videos** | Hardware video player (MP4/MKV/AVI/MOV/MPEG/TS/WebM, standalone) | `video_player` |
 | **images** | Hardware image viewer (JPG/PNG/BMP/GIF/WebP/TIFF…, standalone) | `image_viewer` |
 

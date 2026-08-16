@@ -5,8 +5,7 @@
 **Problem:** on our ALi MIPS SoCs (SF3000/SF3500/R36SX/GB350), the `ps1r`
 (pcsx_rearmed) core is slow because it is stuck on **lightrec**, whose portable
 IR pipeline is too heavy for a weak in-order MIPS. This doc records why, and what
-it would take to give it a lighter dynarec. **No code has been written yet** —
-this is the scoping analysis.
+it would take to give it a lighter dynarec. **No code has been written yet** - this is the scoping analysis.
 
 ## Why it's slow here
 
@@ -41,17 +40,17 @@ Init / Reset / Execute / ExecuteBlock / Clear / Shutdown / SetPGXPMode
 ```
 
 pcsx4all's rec exposes the same `recInit / recReset / recExecute / recClear /
-recShutdown` shape. So an alternative dynarec slots in as another `psxRec` — no
+recShutdown` shape. So an alternative dynarec slots in as another `psxRec` - no
 surgery needed to *select* it.
 
-## Path A — write `assem_mips.c` for new_dynarec (best engine)
+## Path A - write `assem_mips.c` for new_dynarec (best engine)
 
 Implement ari64's backend for MIPS: host register map (`HOST_REGS`), the
 `emit_*` primitives (mov/add/load/store/branch/call), literal pools, i-cache
 flush, and a `linkage_mips.S`.
 
 - **Pros:** ari64 is genuinely better than pcsx4all's rec (regalloc, block
-  linking, constant propagation — it's *why* pcsx_rearmed flies on ARM). Native
+  linking, constant propagation - it's *why* pcsx_rearmed flies on ARM). Native
   integration with pcsx_rearmed's memory + timing. Clean, intended backend seam.
 - **Cons:** `assem_arm.c` is thousands of lines of arch codegen, and MIPS is
   **not** a mechanical translation of it:
@@ -62,47 +61,47 @@ flush, and a `linkage_mips.S`.
   No existing MIPS backend to crib from. Weeks of work, needs real dynarec
   expertise. Highest payoff, highest cost.
 
-## Path B — graft pcsx4all's MIPS rec into pcsx_rearmed (pragmatic)
+## Path B - graft pcsx4all's MIPS rec into pcsx_rearmed (pragmatic)
 
 Drop pcsx4all's `src/recompiler/mips/` in as an alternative `R3000Acpu`.
 
 **Reuse mostly as-is** (bulk of the 11.5k lines): `mips_codegen`,
-`rec_alu/bcu/lsu/mdu/gte/cp0.cpp.h`, `host_asm.S` — the emitters that already
+`rec_alu/bcu/lsu/mdu/gte/cp0.cpp.h`, `host_asm.S` - the emitters that already
 produce working mips32r2 on our exact CPU.
 
 **Rewire (the real work, ~1–2k lines of glue):**
-1. **Register struct** — pcsx4all `psxRegs` layout ≠ pcsx_rearmed's; every
+1. **Register struct** - pcsx4all `psxRegs` layout ≠ pcsx_rearmed's; every
    emitter that touches a guest reg by offset must be retargeted.
-2. **Memory access** — pcsx4all `mem_mapping.c` vs pcsx_rearmed `pcsxmem.c`
+2. **Memory access** - pcsx4all `mem_mapping.c` vs pcsx_rearmed `pcsxmem.c`
    (different mmap layout + load/store LUTs). Load/store emitters must call
    pcsx_rearmed's memory path.
-3. **Timing / events** — pcsx_rearmed has a real event scheduler; pcsx4all's is
+3. **Timing / events** - pcsx_rearmed has a real event scheduler; pcsx4all's is
    simpler. Cycle counting, IRQ checks, `psxException` hooks must match
    pcsx_rearmed or games desync/hang.
-4. **GTE** — pcsx_rearmed uses its own `gte.c`; bridge pcsx4all's `rec_gte` or
+4. **GTE** - pcsx_rearmed uses its own `gte.c`; bridge pcsx4all's `rec_gte` or
    call rearmed's.
 5. **Block-cache invalidation** (`Clear`) semantics.
 
 - **Pros:** codegen proven on this device; smaller than a from-scratch backend;
   zero IR overhead.
 - **Cons:** the glue points (memory + timing + GTE) are exactly where PSX
-  dynarecs are subtle — bugs = crashes/desyncs, hard to debug. Risk of importing
+  dynarecs are subtle - bugs = crashes/desyncs, hard to debug. Risk of importing
   pcsx4all's lower compatibility in those edge cases. Still a multi-week port.
 
 ## Recommendation
 
 **Cheaper shots before any port:**
-- **Profile lightrec on-device** — is the cost compile (IR/opt passes) or
+- **Profile lightrec on-device** - is the cost compile (IR/opt passes) or
   dispatch? Try `lightrec_set_unsafe_opt_flags`, a bigger code cache, and confirm
   **`NDRC_THREAD`** (threaded recompile) is on so compilation overlaps emulation.
   This alone may reclaim enough and costs almost nothing.
 - **Question the premise.** We already ship **pcsx4all** with the fast MIPS rec.
   Speed-critical games run there; `ps1r`/pcsx_rearmed is the compatibility
   fallback. The port only pays off for titles needing *both* rearmed-compat *and*
-  speed — enumerate those first.
+  speed - enumerate those first.
 
 **If a port is warranted:** **Path B** (graft pcsx4all's rec) is the shorter,
-lower-risk route to a result on this hardware — the codegen already runs here;
+lower-risk route to a result on this hardware - the codegen already runs here;
 the work is core-glue, not new codegen. **Path A** is the better engine but a
 much larger, expert-only effort.
 

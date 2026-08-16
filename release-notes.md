@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> v1.0.13 adds native hardware-decoded video and image playback and polishes navigation, scaling and emulator menus across supported devices.
+> v1.0.14 improves audio recovery and custom-aspect performance, fixes SF3000HD image controls, and adds a simple music player.
 >
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
@@ -16,18 +16,15 @@ Maintainers keep comparison ZIPs under `release/artifact/`; current staging and 
 
 ---
 
-## What's New in v1.0.13
+## What's New in v1.0.14
 
-- **Native video player.** Put normal MP4, MKV, AVI, MOV, MPEG, TS or WebM files in `roms/videos/`. Playback uses the stock hardware decoder, needs no conversion, and has MinUI-style controls colored by the active TreeFrogUI theme.
-- **Correct SF video orientation.** Video and its controls now follow the device profile's panel rotation, fixing 90-degree counter-clockwise playback and reversed/top-aligned controls on SF3000 and SF3500.
-- **Native image viewer.** Put JPG, PNG, BMP, GIF, TGA, ICO, WebP or TIFF files in `roms/images/`. The stock picture decoder provides Fit/Fill and rotation, with themed controls and sibling-image browsing.
-- **Smoother Integer scaling.** Cached scaling maps remove the v1.0.12 performance regression, while more tolerant audio buffering prevents the associated sound stutter.
-- **Vectrex restored.** Games once again use the correct native display envelope instead of opening to a black screen.
-- **VICE controls restored.** Keyboard and joystick modes now receive RetroPad input in the VICE x64 core.
-- **Safer list navigation.** Scrolling through games no longer opens Search accidentally, and Left/Right stays within the Vertical view instead of changing tabs. Use L1/R1 for tabs.
-- **Readable emulator menus.** Selected values that are wider than the screen now scroll so the complete text can be read.
-- **Clean menu return.** Select+Start is held back until released after closing the emulator menu, preventing the shortcut from leaking into games and triggering actions such as PCE soft reset.
-- **Clearer classic-FPS setup.** The Wolfenstein guide now covers Wolf3D (`.wl1`/`.wl6`) and Spear of Destiny (`.sdm`/`.sod`) data sets. The bundled PrBoom core supports Doom, Heretic and Hexen IWADs from `roms/prboom/`; game data is not bundled.
+- **Automatic audio recovery.** Picoarch now performs a clean same-thread AUDDEC/I2SO cycle on startup and reopens the driver if a sample write fails. This automates the recovery previously achieved by briefly launching a PS1 game.
+- **Faster custom aspect ratios.** Forced 4:3, 5:4, 8:7 and other ratios retain their corrected pixel geometry without a redundant CPU bilinear pass. The hardware still filters the final enlargement, leaving substantially more CPU time for QuickNES, Nestopia and SNES9x 2005.
+- **Simple music player.** Put MP3, M4A, AAC, WAV, FLAC, OGG or Opus files in `roms/music/`. It uses the themed video-player controls: A/Start pauses, Left/Right seeks 10 seconds, L/R seeks 60 seconds, and B/Select exits.
+- **Correct image-viewer orientation.** The image HUD now uses the device's explicit rotation profile instead of guessing from framebuffer dimensions, fixing upside-down informational text on SF3000HD-class devices.
+- **Image Fit restoration.** Fit mode keeps the firmware picture background active so letterboxed images are no longer promoted to the same full-screen presentation as Fill on affected firmware.
+- **Correct Rockbox colors.** The hardware presenter now reads Rockbox's 24-bit framebuffer in its actual BGR byte order, removing the yellow cast from saved and default themes after a cold boot.
+- **PCE menu reset fix.** Select+Start remains suppressed until both buttons are released after closing the emulator menu, preventing a PCE hardware reset when changing settings.
 
 **Updating from an older build:** copy `cubegm/` and `frogui/` over the card, then copy `install_first/<device>/` again. This one-time manual update installs the offline updater; later releases need only `update.zip` copied to the SD-card root.
 

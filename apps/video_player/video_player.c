@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/ioctl.h>
 #include <sys/ipc.h>
 #include <sys/mman.h>
@@ -308,6 +309,15 @@ static const char *display_name(const char *path, char *out, size_t n) {
     return out;
 }
 
+static bool is_audio_path(const char *path) {
+    const char *ext = strrchr(path, '.');
+    if (!ext) return false;
+    return !strcasecmp(ext, ".mp3") || !strcasecmp(ext, ".m4a") ||
+           !strcasecmp(ext, ".aac") || !strcasecmp(ext, ".wav") ||
+           !strcasecmp(ext, ".flac") || !strcasecmp(ext, ".ogg") ||
+           !strcasecmp(ext, ".opus");
+}
+
 static void draw_hud(Overlay *o, Theme t, const char *path, int64_t pos, int64_t duration,
                      bool paused, const char *status) {
     if (!o->canvas) return;
@@ -354,14 +364,16 @@ static void draw_hud(Overlay *o, Theme t, const char *path, int64_t pos, int64_t
     overlay_present(o);
 }
 
-static bool player_error(long type) {
+static bool player_error(long type, bool audio_only) {
     return type == HCPLAYER_MSG_OPEN_FILE_FAILED || type == HCPLAYER_MSG_UNSUPPORT_FORMAT ||
-           type == HCPLAYER_MSG_UNSUPPORT_ALL_VIDEO || type == HCPLAYER_MSG_VIDEO_DECODE_ERR ||
+           (!audio_only && (type == HCPLAYER_MSG_UNSUPPORT_ALL_VIDEO ||
+                            type == HCPLAYER_MSG_VIDEO_DECODE_ERR)) ||
            type == HCPLAYER_MSG_ERR_UNDEFINED || type == HCPLAYER_MSG_READ_TIMEOUT;
 }
 
 int main(int argc, char **argv) {
     if (argc != 2) return 2;
+    bool audio_only = is_audio_path(argv[1]);
     log_step("process started");
     signal(SIGINT, on_signal);
     signal(SIGTERM, on_signal);
@@ -419,7 +431,8 @@ int main(int argc, char **argv) {
     log_step("calling hcplayer_create");
     void *player = hcplayer_create(args);
     if (!player) {
-        if (have_overlay) draw_hud(&overlay, theme, argv[1], 0, 0, true, "CANNOT OPEN VIDEO");
+        if (have_overlay) draw_hud(&overlay, theme, argv[1], 0, 0, true,
+                                   audio_only ? "CANNOT OPEN AUDIO" : "CANNOT OPEN VIDEO");
         sleep(3);
         hcplayer_deinit();
         goto done;
@@ -449,8 +462,8 @@ int main(int argc, char **argv) {
             if (msg.type == HCPLAYER_MSG_STATE_EOS) eos = true;
             else if (msg.type == HCPLAYER_MSG_FIRST_VIDEO_FRAME_DECODED ||
                      msg.type == HCPLAYER_MSG_FIRST_VIDEO_FRAME_SHOWED) first_frame = true;
-            else if (player_error(msg.type)) {
-                status = "UNSUPPORTED VIDEO";
+            else if (player_error(msg.type, audio_only)) {
+                status = audio_only ? "UNSUPPORTED AUDIO" : "UNSUPPORTED VIDEO";
                 fatal_at = now_ms() + 3500;
                 hud_until = fatal_at;
             }
@@ -468,9 +481,11 @@ int main(int argc, char **argv) {
          * first-frame messages. */
         if (pos > 250) first_frame = true;
         if (!first_frame && now - playback_started_at > 10000) {
-            log_step("startup watchdog: no video frame");
+            log_step(audio_only ? "startup watchdog: no audio progress" :
+                                  "startup watchdog: no video frame");
             if (have_overlay)
-                draw_hud(&overlay, theme, argv[1], pos, duration, true, "VIDEO START FAILED");
+                draw_hud(&overlay, theme, argv[1], pos, duration, true,
+                         audio_only ? "AUDIO START FAILED" : "VIDEO START FAILED");
             sleep(2);
             break;
         }

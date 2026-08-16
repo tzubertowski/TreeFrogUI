@@ -38,7 +38,7 @@ typedef struct {
     int fb_w, fb_h, pitch, bytespp;
     struct fb_var_screeninfo vi;
     int logical_w, logical_h;
-    bool rotated;
+    int rotation;
     uint32_t *canvas;
 } Overlay;
 
@@ -69,19 +69,21 @@ static void configure_image_layer(void) {
     close(fd);
 }
 
-static void read_device_geometry(int *w, int *h) {
+static void read_device_geometry(int *w, int *h, int *rotation) {
     FILE *f = fopen(DEVICE_FILE, "r");
     char line[128], key[64], value[64];
-    *w = 640; *h = 480;
+    *w = 640; *h = 480; *rotation = 0;
     if (!f) return;
     while (fgets(line, sizeof(line), f)) {
         if (sscanf(line, "%63[^=]=%63s", key, value) != 2) continue;
         if (!strcmp(key, "TF_PANEL_W")) *w = atoi(value);
         else if (!strcmp(key, "TF_PANEL_H")) *h = atoi(value);
+        else if (!strcmp(key, "TF_ROTATE")) *rotation = atoi(value);
     }
     fclose(f);
     if (*w < 320 || *w > 1920) *w = 640;
     if (*h < 240 || *h > 1080) *h = 480;
+    if (*rotation != 90 && *rotation != 180 && *rotation != 270) *rotation = 0;
 }
 
 static uint32_t parse_rgb(const char *s, uint32_t fallback) {
@@ -185,7 +187,7 @@ static int image_list_build(ImageList *list, const char *selected) {
 
 static int overlay_open(Overlay *overlay) {
     memset(overlay, 0, sizeof(*overlay)); overlay->fd = -1;
-    read_device_geometry(&overlay->logical_w, &overlay->logical_h);
+    read_device_geometry(&overlay->logical_w, &overlay->logical_h, &overlay->rotation);
     overlay->fd = open("/dev/fb1", O_RDWR);
     if (overlay->fd < 0) return -1;
     struct fb_fix_screeninfo fixed;
@@ -199,7 +201,11 @@ static int overlay_open(Overlay *overlay) {
     if (overlay->mem == MAP_FAILED) { overlay->mem = NULL; goto fail; }
     overlay->canvas = calloc((size_t)overlay->logical_w * overlay->logical_h, 4);
     if (!overlay->canvas) goto fail;
-    overlay->rotated = overlay->fb_w < overlay->fb_h && overlay->logical_w > overlay->logical_h;
+    /* Match the video player's device-profile transform exactly. Geometry
+     * alone cannot distinguish clockwise from counter-clockwise mounting, and
+     * guessed rotation made the SF3000HD HUD appear upside down. */
+    if (!(overlay->fb_w < overlay->fb_h && overlay->logical_w > overlay->logical_h))
+        overlay->rotation = 0;
     return 0;
 fail:
     if (overlay->mem) munmap(overlay->mem, overlay->mem_len);
@@ -238,7 +244,13 @@ static void overlay_present(Overlay *overlay) {
         unsigned char *row = overlay->mem + (size_t)(fy + overlay->vi.yoffset) * overlay->pitch;
         for (int fx = 0; fx < overlay->fb_w; fx++) {
             int lx, ly;
-            if (overlay->rotated) {
+            if (overlay->rotation == 90) {
+                lx = fy * overlay->logical_w / overlay->fb_h;
+                ly = overlay->logical_h - 1 - fx * overlay->logical_h / overlay->fb_w;
+            } else if (overlay->rotation == 180) {
+                lx = overlay->logical_w - 1 - fx * overlay->logical_w / overlay->fb_w;
+                ly = overlay->logical_h - 1 - fy * overlay->logical_h / overlay->fb_h;
+            } else if (overlay->rotation == 270) {
                 lx = overlay->logical_w - 1 - fy * overlay->logical_w / overlay->fb_h;
                 ly = fx * overlay->logical_h / overlay->fb_w;
             } else {
@@ -320,7 +332,10 @@ static void *open_picture(const char *path, int msg_id, bool fill, int rotation)
     args->img_dis_hold_time = 24 * 60 * 60 * 1000;
     args->gif_dis_interval = 100;
     args->img_alpha_mode = ALPHA_BLEND_UNIFORM;
-    args->bg_disable = true;
+    /* IMG_DIS_SCALE uses the picture player's background surface for its
+     * letterbox area. Disabling that surface makes some firmware builds expand
+     * the picture plane anyway, so Fit becomes indistinguishable from Fill. */
+    args->bg_disable = fill;
     void *player = hcplayer_create(args);
     if (player) hcplayer_play(player);
     return player;
