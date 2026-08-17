@@ -1,11 +1,11 @@
 # TreeFrogUI Installation Guide
 
-One TreeFrogUI package supports **six devices** - it auto-detects which one it is
+One TreeFrogUI package supports **seven devices** - it auto-detects which one it is
 at boot. Pick your device below, grab its required backup, then follow the same
 install steps for everyone.
 
-Supported: **R36SX** (v2.6 / v2.7) · **SF3000** · **SF3000 HD** · **SF3100** ·
-**SF3500** · **GB350**.
+Supported: **R36SX** (v2.6 / v2.7) · **R36HD** · **SF3000** · **SF3000 HD** ·
+**SF3100** · **SF3500** · **GB350**.
 
 > [!CAUTION]
 > # 🔴 **DO NOT USE THE FACTORY/PREINSTALLED STOCK OS** 🔴
@@ -38,6 +38,15 @@ factory card, or substitute a different backup.
 - Install folder: **`install_first/r36sx/`** (same xml as v2.6)
 - Boot logo: included in this folder (no action needed)
 - Clones (R36HD, etc.) run a different kernel/DTB - see [R36SX clones](#r36sx-clones-r36hd-etc).
+</details>
+
+<details>
+<summary><b>R36HD</b> (R36SX clone)</summary>
+
+- 📦 **Download the [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O), then proceed with the R36HD steps below.**
+- The linked repository does not provide a separate R36HD stock backup. Keep the three boot files from your original R36HD card and copy them over the v2.7 backup before installing TreeFrogUI.
+- Install folder: **`install_first/r36hd/`** (not `r36sx`)
+- Full details: [R36SX clones (R36HD, etc.)](#r36sx-clones-r36hd-etc)
 </details>
 
 <details>
