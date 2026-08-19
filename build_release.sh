@@ -35,6 +35,7 @@ DUMMY_ABS="/mnt/sdcard/$DUMMY_REL"        # rkgame needs the ABSOLUTE path
 PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
 FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
+FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
 
 # device name -> stock cubegm path (for generating per-device xml)
@@ -109,6 +110,7 @@ if [ "$PICOARCH" -nt "$PICOARCH_HI" ]; then
 fi
 make -C apps/video_player >/dev/null
 make -C apps/image_viewer >/dev/null
+make -C "$FROGSHELL" TARGET="$(pwd)/sdcard/cubegm/frogshell" >/dev/null
 cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$2"; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
@@ -175,7 +177,7 @@ fi
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
 # (boot logos are NOT shipped here - install_first/<dev>/ provides the device-correct
 #  xgame-logo.bmp, so no fix_bootlogo script is needed.)
-for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer; do
+for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer frogshell; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 [ -d "$STAGE/cubegm/bios" ] && cp -a "$STAGE/cubegm/bios" "$OUT/cubegm/bios"
