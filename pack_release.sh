@@ -45,7 +45,10 @@ pack_zip() {
     rm -f "$output"
     output_abs="$PWD/$output"
     if command -v 7z >/dev/null 2>&1; then
-        (cd "$parent" && 7z a -tzip -mx=9 -mfb=258 -mpass=15 "$output_abs" "$entry" >/dev/null)
+        # Keep packaging reliable on build hosts with constrained memory. The
+        # release tree contains many already-compressed assets, so maximum ZIP
+        # compression costs a lot of RAM for negligible size savings.
+        (cd "$parent" && 7z a -tzip -mx=1 -mfb=64 -mpass=1 "$output_abs" "$entry" >/dev/null)
     elif command -v zip >/dev/null 2>&1; then
         (cd "$parent" && zip -9qr "$output_abs" "$entry")
     else
