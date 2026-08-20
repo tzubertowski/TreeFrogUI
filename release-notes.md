@@ -25,6 +25,7 @@ Maintainers keep comparison ZIPs under `release/artifact/`; current staging and 
 - **Image Fit restoration.** Fit mode keeps the firmware picture background active so letterboxed images are no longer promoted to the same full-screen presentation as Fill on affected firmware.
 - **Correct Rockbox colors.** The hardware presenter now reads Rockbox's 24-bit framebuffer in its actual BGR byte order, removing the yellow cast from saved and default themes after a cold boot.
 - **PCE menu reset fix.** Select+Start remains suppressed until both buttons are released after closing the emulator menu, preventing a PCE hardware reset when changing settings.
+- **FrogShell file manager.** Apps now include an offline VitaShell-style SD-card manager with folder icons, file types, updated timestamps, on-demand recursive folder sizes, copy/cut/paste, multi-select, rename, delete, and safe same-name handling. Conflicts offer Skip, numbered copies (`name (1).ext`), or an explicit rewrite confirmation. START+SELECT exits FrogShell.
 
 **Updating from an older build:** copy `cubegm/` and `frogui/` over the card, then copy `install_first/<device>/` again. This one-time manual update installs the offline updater; later releases need only `update.zip` copied to the SD-card root.
 
