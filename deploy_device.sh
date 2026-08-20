@@ -8,7 +8,7 @@
 #
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
-#   release, clean-themes, picoarch, picoarch-hi, frogui, ebook, pcsx4all, pcsx4all-config,
+#   release, clean-themes, picoarch, picoarch-hi, frogui, frogshell, ebook, pcsx4all, pcsx4all-config,
 #   tic80, vecx, o2em, o2em-test, c64-test,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
@@ -30,7 +30,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|sf3000|sf3500> [payload ...]
-payloads: release clean-themes picoarch picoarch-hi frogui ebook pcsx4all pcsx4all-config tic80 vecx o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
+payloads: release clean-themes picoarch picoarch-hi frogui frogshell ebook pcsx4all pcsx4all-config tic80 vecx o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -70,7 +70,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|clean-themes|picoarch|picoarch-hi|frogui|ebook|pcsx4all|pcsx4all-config|tic80|vecx|o2em|o2em-test|c64-test|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|clean-themes|picoarch|picoarch-hi|frogui|frogshell|ebook|pcsx4all|pcsx4all-config|tic80|vecx|o2em|o2em-test|c64-test|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -307,6 +307,10 @@ deploy_one() {
         frogui)
             src="$WORK/FrogUI/frogui_libretro.so"
             dst="$MOUNT/cubegm/cores/frogui_libretro.so"
+            ;;
+        frogshell)
+            src="$STAGE/cubegm/frogshell"
+            dst="$MOUNT/cubegm/frogshell"
             ;;
         ebook)
             src="$WORK/ebook/ebook"
