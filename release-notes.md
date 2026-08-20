@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> v1.0.14 improves audio recovery and custom-aspect performance, fixes SF3000HD image controls, and adds a simple music player.
+> v1.0.15 adds the FrogShell file manager on top of the v1.0.14 audio, aspect-ratio, image-viewer, Rockbox, and music-player improvements.
 >
 > **[Submit anonymous feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
@@ -16,7 +16,7 @@ Maintainers keep comparison ZIPs under `release/artifact/`; current staging and 
 
 ---
 
-## What's New in v1.0.14
+## What's New in v1.0.15
 
 - **Automatic audio recovery.** Picoarch now performs a clean same-thread AUDDEC/I2SO cycle on startup and reopens the driver if a sample write fails. This automates the recovery previously achieved by briefly launching a PS1 game.
 - **Faster custom aspect ratios.** Forced 4:3, 5:4, 8:7 and other ratios retain their corrected pixel geometry without a redundant CPU bilinear pass. The hardware still filters the final enlargement, leaving substantially more CPU time for QuickNES, Nestopia and SNES9x 2005.
