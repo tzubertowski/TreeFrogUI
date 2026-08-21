@@ -205,7 +205,7 @@ Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide]
 
 No account, Node.js or manual image renaming is required. Mini Scraper finds matching artwork and creates TreeFrogUI's `.res/` folders and filenames automatically.
 
-To add artwork manually, drop a **PNG / JPG / BMP** in a hidden `.res/` folder next to the ROM, named after the ROM:
+To add artwork manually, drop a **PNG / JPG / BMP** in a hidden `.res/` folder next to the ROM, named after the ROM. MinUI/muOS-style `Imgs/`, `images/`, and `Images/` folders are also supported:
 
 ```
 roms/GBA/Advance Wars.gba
@@ -213,6 +213,8 @@ roms/GBA/.res/Advance Wars.png    ← the box art
 ```
 
 No conversion is needed - use **PNG or JPG**, any resolution; large images are downscaled automatically (maximum displayed size 250×200), and PNG transparency is supported. Rule: `<rom folder>/.res/<rom name without extension>.png` (or `.jpg`). Old raw `.rgb565` thumbnail sets still work - see [Box art, game covers and thumbnails](theme.md#box-art-game-covers-and-thumbnails).
+
+Title screens and screenshots can use the same folders with a suffix such as `-title`, `-titlescreen`, `-screenshot`, `-screen`, or `-preview` (for example `Imgs/Advance Wars-title.png`). Box art is preferred; the title/screenshot is used when box art is missing, including the Recents preview.
 
 **Background image** (per system / screen) - drop a `.png`, `.jpg`, `.jpeg`, or `.bmp` in **`frogui/`**, named after the screen or folder:
 ```
