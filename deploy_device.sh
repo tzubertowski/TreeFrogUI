@@ -17,7 +17,7 @@ set -euo pipefail
 
 readonly WORK=/home/tomaszz/sf3000-work
 readonly REPO="$WORK/sf3000_treefrogui"
-readonly RELEASE="$REPO/release"
+readonly RELEASE="$REPO/release/latest/release"
 readonly STAGE="$REPO/sdcard"
 readonly OWNER_UID=1000
 readonly OWNER_GID=1000
