@@ -4,6 +4,39 @@ TreeFrogUI supports colour themes, custom fonts, one global wallpaper, per-syste
 
 ---
 
+## Box art, game covers and thumbnails
+
+TreeFrogUI can show box art, cover images or gameplay thumbnails beside the selected game. The Recents game switcher prefers box art; when none is available, it uses the latest gameplay screenshot instead.
+
+### Recommended: get box art automatically in three steps
+
+Use **[Mini Scraper for CFW](https://github.com/tzubertowski/mini-scraper-cfw/releases)** to download box art without finding, resizing or renaming every image yourself. Ready-to-run desktop ZIPs are available for Windows x64, Linux x64 and macOS ARM64; the app needs no account and includes everything it needs.
+
+1. Download the latest desktop ZIP for your computer, extract it and run Mini Scraper.
+2. Choose the SD card or ROM folder and confirm the detected **TreeFrogUI** format.
+3. Press **Add artwork**.
+
+Mini Scraper matches covers to the ROM filenames and writes them directly to TreeFrogUI's required `.res/<ROM name>.png` locations. Existing artwork is preserved unless you explicitly choose to replace it.
+
+### Add box art manually
+
+Place each cover image in a hidden `.res/` folder next to the ROM. Match the ROM filename without its extension:
+
+```text
+roms/GBA/Advance Wars.gba
+roms/GBA/.res/Advance Wars.png
+```
+
+The rule is `<ROM folder>/.res/<ROM name without extension>.<png|jpg|jpeg|bmp>`.
+
+PNG, JPG, JPEG and BMP images can be any resolution. Images larger than the 250×200 preview area are downscaled automatically with their aspect ratio preserved. PNG transparency is supported. Keep files reasonably small because they are decoded while browsing.
+
+Older headerless `.rgb565` thumbnail sets also work at these fixed sizes: `64×64`, `128×128`, `160×160`, `200×200`, `250×200`, and `200×250`.
+
+In-game savestate and last-screen images are captured automatically and need no manual setup.
+
+---
+
 ## Appearance settings
 
 Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to select an option and Left/Right to change it. Press A or B to close Settings and save.
@@ -147,39 +180,6 @@ The base filename must exactly match the ROM folder name, including case. Use a 
 Per-system images stretch to the full panel. Use **640×480** on R36SX, R36 HD and GB350, or **854×480** on the SF3000 family, to avoid distortion. If a screen has no matching image, TreeFrogUI falls back to `main.*`.
 
 Dark, low-contrast images work best because menu text is drawn over them.
-
----
-
-## Game thumbnails
-
-TreeFrogUI shows a preview image for the selected game. In the Recents game switcher, box art is preferred; if none exists, TreeFrogUI uses the latest gameplay screenshot.
-
-### Recommended: scrape box art automatically
-
-Use **[Mini Scraper for CFW](https://github.com/tzubertowski/mini-scraper-cfw/releases)** to add artwork without finding, resizing or renaming every image yourself. Ready-to-run desktop ZIPs are available for Windows x64, Linux x64 and macOS ARM64; the app needs no account and includes everything it needs.
-
-1. Download the latest desktop ZIP for your computer, extract it and run Mini Scraper.
-2. Choose the SD card or ROM folder and confirm the detected **TreeFrogUI** format.
-3. Press **Add artwork**.
-
-Mini Scraper matches artwork to the ROM filenames and writes it directly to TreeFrogUI's required `.res/<ROM name>.png` locations. Existing artwork is preserved unless you explicitly choose to replace it.
-
-### Manual setup
-
-Place each image in a hidden `.res/` folder next to the ROM. Match the ROM filename without its extension:
-
-```text
-roms/GBA/Advance Wars.gba
-roms/GBA/.res/Advance Wars.png
-```
-
-The rule is `<ROM folder>/.res/<ROM name without extension>.<png|jpg|jpeg|bmp>`.
-
-PNG, JPG, JPEG and BMP images can be any resolution. Images larger than the 250×200 preview area are downscaled automatically with their aspect ratio preserved. PNG transparency is supported. Keep files reasonably small because they are decoded while browsing.
-
-Older headerless `.rgb565` thumbnail sets also work at these fixed sizes: `64×64`, `128×128`, `160×160`, `200×200`, `250×200`, and `200×250`.
-
-In-game savestate and last-screen images are captured automatically and need no manual setup.
 
 ---
 
