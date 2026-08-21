@@ -218,6 +218,24 @@ No conversion is needed - use **PNG or JPG**, any resolution; large images are d
 
 Title screens and screenshots can use the same folders with a suffix such as `-title`, `-titlescreen`, `-screenshot`, `-screen`, or `-preview` (for example `Imgs/Advance Wars-title.png`). Box art is preferred; the title/screenshot is used when box art is missing, including the Recents preview.
 
+## Artwork and theme credits
+
+TreeFrogUI's built-in colour themes are maintained as part of TreeFrogUI. The
+external background packs and System View icon packs are credited here so the
+original artists remain easy to find:
+
+- The bundled background packs are **Art Book Next** (legacy pack), **Art Book
+  NextUI**, and **Nao Black**. Art Book NextUI and Nao Black are adapted from
+  [Leviathanium/NextUI-Themes](https://github.com/Leviathanium/NextUI-Themes);
+  the test artwork sets **Elementerial**, **Iconic**, and **PlayStation-X** are
+  documented in the [customization guide](theme.md#background-theme-packs).
+- The bundled icon packs are **Arcticons** (joelchrono / Arcticons Team),
+  **Cosy** (KyleBing), **CyberOnion** (Aemiii91), **Dot-art** (Yoshi-kun),
+  **Hakchi Pixel Art** (faustbear), **NSO** (Cheetashock), **Onion PS Text
+  Icons** (hanessh4), **Pixel** (Ben Jelter / Jeltron), and **Silhouette Black**
+  and **Silhouette White** (Dreambrace). Full upstream links and terms are in
+  [`assets/icon-packs/README.md`](assets/icon-packs/README.md).
+
 **Background image** (per system / screen) - drop a `.png`, `.jpg`, `.jpeg`, or `.bmp` in **`frogui/`**, named after the screen or folder:
 ```
 frogui/main.png          ← main systems list
