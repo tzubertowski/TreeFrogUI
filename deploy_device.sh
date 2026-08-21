@@ -202,7 +202,7 @@ esac
     die "not a $EXPECTED_LABEL system card: cubegm/ is missing"
 
 if [ "${PAYLOADS[*]}" = "clean-themes" ]; then
-    for retired in Aura Catppuccin Elementerial Iconic PlayStation_X; do
+    for retired in Aura Canvas_Pastel Catppuccin Elementerial Iconic PlayStation_X; do
         rm -rf "$MOUNT/frogui/theme-packs/$retired"
     done
     echo "Retired theme packs removed from $EXPECTED_LABEL."
