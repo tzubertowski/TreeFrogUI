@@ -43,6 +43,7 @@ Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to sel
 
 | Setting | What it changes |
 |---|---|
+| **Background Theme Pack** | Selects a folder of themed background artwork |
 | **Theme** | Interface colours |
 | **Style** | Chooses Vertical, Horizontal or System View |
 | **Icon Pack** | Chooses System View artwork independently from backgrounds |
@@ -52,7 +53,6 @@ Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to sel
 | **Animations** | Background crossfades and other UI motion |
 | **Battery Colour Mode** | Uses a green, blue or red battery status light |
 | **Background Images** | Enables wallpapers and per-system backgrounds |
-| **Background Theme Pack** | Selects a folder of themed background artwork |
 | **Wallpaper** | Selects one image for every TreeFrogUI screen |
 | **Wallpaper Fit** | Controls how the selected wallpaper fills the display |
 | **Hide Extensions** | Hides file extensions in game lists |
@@ -74,6 +74,9 @@ per-system artwork adapted from **Elementerial**, **Iconic** and
 [Leviathanium's ArtBookNextUI theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/ArtBookNextUI.theme).
 It is center-cropped to the supported 854×480 display size and keeps the
 original pack available for comparison.
+
+`Nao_Black` is another adapted background set from
+[Leviathanium's Nao-Black theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/Nao-Black.theme).
 
 The supplied packs include explicit artwork aliases for the short TreeFrogUI
 folder names used on the device (for example `a26`, `m2k`, `pcesgx` and

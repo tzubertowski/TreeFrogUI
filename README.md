@@ -191,6 +191,8 @@ Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide]
 
 **Theme** - in TreeFrogUI: Settings → Theme, press Left/Right. There are 30 built-in colour themes. **Style** offers the standard Vertical list, an animated Horizontal carousel, or an Onion-style System View with a paged console-icon grid. **Icon Pack** changes System View artwork without changing its background or colours. **Friendly System Names** expands folder codes such as `ps` and `gba` in every style.
 
+**Background Theme Pack** - Settings → Appearance → **Background Theme Pack**. Choose **Art Book NextUI** (adapted from [Leviathanium's NextUI-Themes](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/ArtBookNextUI.theme)), **Nao Black** (adapted from [Leviathanium's Nao-Black theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/Nao-Black.theme)), or another installed pack. **Background Images** must be on for the selected pack to appear.
+
 **Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it. The default is **BPreplayBold** (the bold font used by MinUI/NextUI).
 
 **Wallpaper** (one image for every screen) - drop a `.png`, `.jpg`, `.jpeg`, or `.bmp` into **`frogui/wallpapers/`**, restart TreeFrogUI, then select it under Settings → Appearance → **Wallpaper**. **Wallpaper Fit** controls its placement: **Fill** covers the display and crops the excess, **Fit** shows the whole image with bars, **Stretch** fills the display without cropping, **Center** keeps the original size, and **Tile** repeats it. Choose **None** to use per-system backgrounds again.
