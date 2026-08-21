@@ -19,6 +19,7 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 - 🟢 **[How to install it](install.md)** - start here, step by step
 - 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
 - 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
+- 🖼️ **[Get box art in three clicks](https://github.com/tzubertowski/mini-scraper-cfw/releases)** - download Mini Scraper, choose your SD card, then press **Add artwork**
 - ⬇️ **[Download the latest version](https://github.com/tzubertowski/treefrog-ui/releases)**
 - 💬 **[Report a bug / give feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
 
@@ -196,12 +197,22 @@ Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide]
 
 **Hide extensions / backgrounds** - Settings → Appearance: **Hide Extensions** drops the `.gb`/`.gba` from names. **Background Images** must be on for wallpapers or per-system art to appear; turn it off for a plain themed background.
 
-**Game art / box art / cover / thumbnail** (the picture shown for each game) - drop a **PNG / JPG / BMP** in a hidden `.res/` folder next to the ROM, named after the ROM:
+**Game art / box art / cover / thumbnail** (the picture shown for each game) - the easiest option is **[Mini Scraper](https://github.com/tzubertowski/mini-scraper-cfw/releases)**. Download and extract the desktop app for Windows, Linux or macOS, then:
+
+1. Open Mini Scraper and choose your SD card or ROM folder.
+2. Confirm the automatically detected **TreeFrogUI** format.
+3. Press **Add artwork**.
+
+No account, Node.js or manual image renaming is required. Mini Scraper finds matching artwork and creates TreeFrogUI's `.res/` folders and filenames automatically.
+
+To add artwork manually, drop a **PNG / JPG / BMP** in a hidden `.res/` folder next to the ROM, named after the ROM:
+
 ```
 roms/GBA/Advance Wars.gba
 roms/GBA/.res/Advance Wars.png    ← the box art
 ```
-No conversion needed - use **PNG or JPG**, any resolution, big images are downscaled automatically (max shown size 250×200), and PNG transparency is supported. Rule: `<rom folder>/.res/<rom name without extension>.png` (or `.jpg`). Old raw `.rgb565` thumbnail sets still work - see [theme.md](theme.md#game-thumbnails).
+
+No conversion is needed - use **PNG or JPG**, any resolution; large images are downscaled automatically (maximum displayed size 250×200), and PNG transparency is supported. Rule: `<rom folder>/.res/<rom name without extension>.png` (or `.jpg`). Old raw `.rgb565` thumbnail sets still work - see [theme.md](theme.md#game-thumbnails).
 
 **Background image** (per system / screen) - drop a `.png`, `.jpg`, `.jpeg`, or `.bmp` in **`frogui/`**, named after the screen or folder:
 ```
