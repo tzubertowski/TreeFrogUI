@@ -70,6 +70,11 @@ as per-system backgrounds: `main.jpg`, `settings.jpg`, `recents.jpg`,
 per-system artwork adapted from **Elementerial**, **Iconic** and
 **PlayStation-X**.
 
+`Art_Book_NextUI` is the updated NextUI resource set adapted from
+[Leviathanium's ArtBookNextUI theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/ArtBookNextUI.theme).
+It is center-cropped to the supported 854×480 display size and keeps the
+original pack available for comparison.
+
 The supplied packs include explicit artwork aliases for the short TreeFrogUI
 folder names used on the device (for example `a26`, `m2k`, `pcesgx` and
 `ps1r`), so these systems do not fall back to the generic main image.
