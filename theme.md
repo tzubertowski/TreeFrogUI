@@ -13,7 +13,7 @@ TreeFrogUI can show box art, cover images or gameplay thumbnails beside the sele
 Use **[Mini Scraper for CFW](https://github.com/tzubertowski/mini-scraper-cfw/releases)** to download box art without finding, resizing or renaming every image yourself. Ready-to-run desktop ZIPs are available for Windows x64, Linux x64 and macOS ARM64; the app needs no account and includes everything it needs.
 
 1. Download the latest desktop ZIP for your computer, extract it and run Mini Scraper.
-2. Choose the SD card or ROM folder and confirm the detected **TreeFrogUI** format.
+2. Choose the SD card or ROM folder, confirm the detected **TreeFrogUI** format, and leave artwork source option 1 selected: **Automatic (Libretro Thumbnails) · no login**.
 3. Press **Add artwork**.
 
 Mini Scraper matches covers to the ROM filenames and writes them directly to TreeFrogUI's required `.res/<ROM name>.png` locations. Existing artwork is preserved unless you explicitly choose to replace it.

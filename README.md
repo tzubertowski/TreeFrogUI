@@ -200,7 +200,7 @@ Make it look how you want. Full step-by-step in the 📦 **[Customisation Guide]
 **Game art / box art / cover / thumbnail** (the picture shown for each game) - the easiest option is **[Mini Scraper](https://github.com/tzubertowski/mini-scraper-cfw/releases)**. Download and extract the desktop app for Windows, Linux or macOS, then:
 
 1. Open Mini Scraper and choose your SD card or ROM folder.
-2. Confirm the automatically detected **TreeFrogUI** format.
+2. Confirm the detected **TreeFrogUI** format and leave the first artwork source selected: **Automatic (Libretro Thumbnails) · no login**.
 3. Press **Add artwork**.
 
 No account, Node.js or manual image renaming is required. Mini Scraper finds matching artwork and creates TreeFrogUI's `.res/` folders and filenames automatically.
