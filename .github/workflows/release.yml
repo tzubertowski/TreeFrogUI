@@ -149,6 +149,37 @@ jobs:
           TREEFROG_STOCK_ROOT: ${{ runner.temp }}/base/unpacked/release/install_first
         run: ./build_release.sh
 
+      - name: Sanity-check cores and resources
+        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
+        env:
+          BASE_TREE: ${{ runner.temp }}/base/unpacked/release
+        run: |
+          set -euo pipefail
+          current=release/latest/release
+          # A CI build starts from the previous full release, so every shipped
+          # core/resource must remain present unless it was deliberately
+          # removed in the build script. Catch silent cp_if_diff omissions.
+          for subtree in cubegm/cores cubegm/bios cubegm/lib frogui; do
+            [[ -d "$BASE_TREE/$subtree" ]] || continue
+            while IFS= read -r -d '' file; do
+              rel=${file#"$BASE_TREE/"}
+              [[ -f "$current/$rel" ]] || {
+                echo "Missing release payload: $rel" >&2
+                exit 1
+              }
+            done < <(find "$BASE_TREE/$subtree" -type f -print0)
+          done
+          required=(
+            cubegm/picoarch cubegm/picoarch_hi
+            cubegm/cores/frogui_libretro.so cubegm/cores/tyrquake_libretro.so
+            cubegm/lib/libSDL-1.2.so.0 cubegm/lib/libpng12.so.0
+            cubegm/lib/libpng16.so.16
+          )
+          for rel in "${required[@]}"; do
+            [[ -f "$current/$rel" ]] || { echo "Missing required payload: $rel" >&2; exit 1; }
+          done
+          echo "Release sanity check passed: $(find "$current/cubegm/cores" -name '*.so' | wc -l) cores; resources present."
+
       - name: Package full install and update
         id: package
         working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
