@@ -37,6 +37,10 @@ PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
 FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
+# CI/release builders can provide the small per-device stock bootstrap files
+# from a previous full release instead of keeping proprietary stock SD images
+# in the workspace. Each directory must contain setting.xml.
+STOCK_FALLBACK=${TREEFROG_STOCK_ROOT:-}
 
 # device name -> stock cubegm path (for generating per-device xml)
 declare -A STOCK=(
@@ -110,7 +114,9 @@ if [ "$PICOARCH" -nt "$PICOARCH_HI" ]; then
 fi
 make -C apps/video_player >/dev/null
 make -C apps/image_viewer >/dev/null
-make -C "$FROGSHELL" TARGET="$(pwd)/sdcard/cubegm/frogshell" >/dev/null
+if [ -d "$FROGSHELL" ]; then
+    make -C "$FROGSHELL" TARGET="$(pwd)/sdcard/cubegm/frogshell" >/dev/null
+fi
 cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$2"; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
@@ -219,6 +225,10 @@ printf 'dummy.md,TreeFrogUI,MD\n' > "$OUT/$(dirname "$DUMMY_REL")/filelist.csv"
 # paths, and a new core name all silently failed on hardware).
 for dev in "${!STOCK[@]}"; do
     src="${STOCK[$dev]}"; dst="$OUT/install_first/$dev"
+    if [ ! -f "$src/setting.xml" ] && [ -n "$STOCK_FALLBACK" ] &&
+       [ -f "$STOCK_FALLBACK/$dev/cubegm/setting.xml" ]; then
+        src="$STOCK_FALLBACK/$dev/cubegm"
+    fi
     [ -d "$src" ] || { echo "WARN: no stock for $dev ($src) - skipping"; continue; }
     mkdir -p "$dst/cubegm/cores"
     cp "$src/setting.xml" "$dst/cubegm/setting.xml"

@@ -125,6 +125,26 @@ release.
 Publishing mutates GitHub state. Automation agents must not run this command
 without explicit authorization to publish.
 
+## GitHub Actions automation
+
+The `Build TreeFrogUI release` workflow in `.github/workflows/release.yml`
+repeats the cross-build and packaging process on an Ubuntu runner. It downloads
+the public SF3000 toolchain, checks out the FrogUI and picoarch `r36sx` sources,
+seeds ignored staging files from an existing full release, builds both
+frontends, and publishes the full ZIP plus `update.zip`.
+
+It can be started in either of these ways:
+
+- Push a `vMAJOR.MINOR.RELEASE` tag. The workflow uses that tag and creates a
+  prerelease automatically.
+- Run it from **Actions → Build TreeFrogUI release → Run workflow**. Enter a
+  `tag` to publish a release, or leave it blank to produce downloadable
+  build-only artifacts. Set `base_tag` to the full release used for the update
+  delta.
+
+Manual runs without a tag never mutate GitHub releases; they upload the ZIPs as
+workflow artifacts for testing.
+
 ## User update flow
 
 Users download the release asset named exactly `update.zip`, copy it directly

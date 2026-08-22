@@ -1,0 +1,174 @@
+name: Build TreeFrogUI release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to create (leave blank for build-only)
+        required: false
+        type: string
+      base_tag:
+        description: Existing full release used as the update base
+        required: true
+        default: v1.1.0_a
+        type: string
+      prerelease:
+        description: Mark the GitHub release as a prerelease
+        required: true
+        default: true
+        type: boolean
+  repository_dispatch:
+    types: [release]
+
+concurrency:
+  group: treefrog-release
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+env:
+  WORK_ROOT: /home/runner/sf3000-work
+  TOOLCHAIN_URL: https://github.com/game-de-it/sf3000/releases/download/sf3000_toolchain_v0.1/mipsel-buildroot-linux-gnu_sdk-buildroot.tar.gz
+
+jobs:
+  build:
+    name: Cross-build and package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out TreeFrogUI
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Resolve build and release names
+        id: names
+        shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          INPUT_BASE: ${{ inputs.base_tag }}
+          EVENT_NAME: ${{ github.event_name }}
+          PUSH_TAG: ${{ github.ref_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$INPUT_TAG" ]]; then
+            tag="$INPUT_TAG"
+          elif [[ "$EVENT_NAME" == push ]]; then
+            tag="$PUSH_TAG"
+          else
+            tag=""
+          fi
+          if [[ -n "$tag" ]]; then
+            version="$tag"
+          else
+            version="v0.0.0-ci.${RUN_NUMBER}"
+          fi
+          base="$INPUT_BASE"
+          [[ -n "$base" ]] || base="v1.1.0_a"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+
+      - name: Install build dependencies
+        run: sudo apt-get update && sudo apt-get install --yes build-essential cmake unzip zip jq
+
+      - name: Download SF3000 cross-toolchain
+        run: |
+          set -euo pipefail
+          mkdir -p "$WORK_ROOT/sf3000toolchain"
+          curl --fail --location --retry 3 "$TOOLCHAIN_URL" \
+            | tar -xz -C "$WORK_ROOT/sf3000toolchain"
+
+      - name: Fetch companion source repositories
+        working-directory: ${{ env.WORK_ROOT }}
+        run: |
+          set -euo pipefail
+          sudo mkdir -p /home/tomaszz
+          sudo ln -sfn "$WORK_ROOT" /home/tomaszz/sf3000-work
+          ln -sfn "$GITHUB_WORKSPACE" sf3000_treefrogui
+          git clone --depth 1 --branch r36sx https://github.com/tzubertowski/FrogUI.git FrogUI
+          git clone --depth 1 --branch r36sx https://github.com/tzubertowski/TreeFrogUI_picoarch.git picoarch
+          git -C picoarch submodule update --init --depth 1 libretro-common
+
+      - name: Download previous full release as build base
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE_TAG: ${{ steps.names.outputs.base }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/base"
+          gh release download "$BASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'TreeFrogUI_*.zip' --dir "$RUNNER_TEMP/base"
+          base_zip="$(find "$RUNNER_TEMP/base" -maxdepth 1 -name 'TreeFrogUI_*.zip' -print -quit)"
+          [[ -n "$base_zip" ]] || { echo 'Base full release archive not found' >&2; exit 1; }
+          unzip -q "$base_zip" -d "$RUNNER_TEMP/base/unpacked"
+          [[ -d "$RUNNER_TEMP/base/unpacked/release" ]] || {
+            echo 'Base archive does not contain release/' >&2; exit 1;
+          }
+          # Seed ignored staging files (cores, binaries, FrogShell, BIOS, etc.)
+          # from the last full release. New builds replace the binaries they own.
+          cp -a "$RUNNER_TEMP/base/unpacked/release/." "$GITHUB_WORKSPACE/sdcard/"
+
+      - name: Build FrogUI core
+        working-directory: ${{ env.WORK_ROOT }}/FrogUI
+        run: ./build_libretro.sh
+
+      - name: Build picoarch frontends
+        working-directory: ${{ env.WORK_ROOT }}/picoarch
+        run: |
+          ./build_sf3000.sh
+          ./build_picoarch_hi.sh
+
+      - name: Build unified release tree
+        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
+        env:
+          TREEFROG_STOCK_ROOT: ${{ runner.temp }}/base/unpacked/release/install_first
+        run: ./build_release.sh
+
+      - name: Package full install and update
+        id: package
+        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
+        env:
+          VERSION: ${{ steps.names.outputs.version }}
+          BASE_TAG: ${{ steps.names.outputs.base }}
+        run: |
+          set -euo pipefail
+          base_zip="$(find "$RUNNER_TEMP/base" -maxdepth 1 -name 'TreeFrogUI_*.zip' -print -quit)"
+          ./pack_release.sh "$VERSION" "$base_zip"
+          if [[ "$VERSION" == v0.0.0-ci.* ]]; then
+            cp "release/latest/TreeFrogUI_${VERSION}.zip" "$RUNNER_TEMP/TreeFrogUI_build.zip"
+            cp release/latest/update.zip "$RUNNER_TEMP/update_build.zip"
+          else
+            echo "full=release/latest/TreeFrogUI_${VERSION}.zip" >> "$GITHUB_OUTPUT"
+            echo "update=release/latest/update.zip" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload build-only artifacts
+        if: steps.names.outputs.tag == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: TreeFrogUI-build-${{ github.run_number }}
+          path: |
+            ${{ runner.temp }}/TreeFrogUI_build.zip
+            ${{ runner.temp }}/update_build.zip
+          if-no-files-found: error
+
+      - name: Create GitHub release
+        if: steps.names.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.names.outputs.tag }}
+          VERSION: ${{ steps.names.outputs.version }}
+          PRERELEASE: ${{ inputs.prerelease || 'true' }}
+        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
+        run: |
+          set -euo pipefail
+          notes="Automated TreeFrogUI build for ${VERSION}. See the README and commit history for the changelog."
+          args=("$RELEASE_TAG" "release/latest/TreeFrogUI_${VERSION}.zip" "release/latest/update.zip" --repo "$GITHUB_REPOSITORY" --title "TreeFrogUI ${VERSION}" --notes "$notes")
+          if [[ "$PRERELEASE" == true || "$RELEASE_TAG" == *-unstable* ]]; then args+=(--prerelease); fi
+          gh release create "${args[@]}"
