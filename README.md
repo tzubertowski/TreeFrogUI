@@ -16,8 +16,6 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 > ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
 
 ### New here? Start with these
-- 🧰 **[Recommended: use the TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest)** - choose your device, select the SD card, and let it restore the correct stock backup and install TreeFrogUI automatically. The installer supports stable and pre-release builds.
-- 🟢 **[How to install it](install.md)** - start here, step by step
 - 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
 - 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
 - 🖼️ **[Get box art in three clicks](https://github.com/tzubertowski/mini-scraper-cfw/releases)** - download Mini Scraper, choose your SD card, then press **Add artwork**
@@ -26,9 +24,7 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 
 ### Installing TreeFrogUI
 
-The easiest route is the **[TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest)**. It runs on Windows, macOS, and Linux, downloads the matching stock backup, formats the SD card safely, and overlays the selected TreeFrogUI release. Use a fresh, quality SD card when possible; stock cards are often unreliable.
-
-Prefer to do it by hand, or need a clone-specific procedure? Follow the **[manual installation guide](install.md)**. It remains the authoritative fallback and documents every backup, device overlay, and recovery step.
+Just use our **[TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest)**, or **[follow the manual installation steps](install.md)**.
 
 > **Words you'll see (plain English):**
 > - **SD card** = the little memory card your games live on.
