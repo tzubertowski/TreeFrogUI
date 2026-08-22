@@ -83,6 +83,12 @@ jobs:
           mkdir -p "$WORK_ROOT/sf3000toolchain"
           curl --fail --location --retry 3 "$TOOLCHAIN_URL" \
             | tar -xz -C "$WORK_ROOT/sf3000toolchain"
+          # The public SDK archive contains the runtime SONAME but some
+          # versions omit the development symlink used by picoarch's linker.
+          sysroot="$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot/usr/lib"
+          if [[ ! -e "$sysroot/libpng12.so" && -e "$sysroot/libpng12.so.0" ]]; then
+            ln -s libpng12.so.0 "$sysroot/libpng12.so"
+          fi
 
       - name: Fetch companion source repositories
         working-directory: ${{ env.WORK_ROOT }}
