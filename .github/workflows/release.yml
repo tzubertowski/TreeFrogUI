@@ -99,6 +99,9 @@ jobs:
           ln -sfn "$GITHUB_WORKSPACE" sf3000_treefrogui
           git clone --depth 1 --branch r36sx https://github.com/tzubertowski/FrogUI.git FrogUI
           git clone --depth 1 --branch r36sx https://github.com/tzubertowski/TreeFrogUI_picoarch.git picoarch
+          # The media-player Makefiles refer to ../../../picoarch from the
+          # checkout layout used by local development.
+          ln -sfn "$WORK_ROOT/picoarch" "$GITHUB_WORKSPACE/../../../picoarch"
           git -C picoarch submodule update --init --depth 1 libretro-common
 
       - name: Download previous full release as build base
