@@ -116,6 +116,16 @@ jobs:
           [[ -d "$RUNNER_TEMP/base/unpacked/release" ]] || {
             echo 'Base archive does not contain release/' >&2; exit 1;
           }
+          # The SDK's libpng12 development files are not consistently present;
+          # the previous release already carries the exact target runtime.
+          sysroot="$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot/usr/lib"
+          png_runtime="$RUNNER_TEMP/base/unpacked/release/cubegm/lib/libpng12.so.0"
+          if [[ ! -e "$sysroot/libpng12.so.0" && -f "$png_runtime" ]]; then
+            cp "$png_runtime" "$sysroot/libpng12.so.0"
+          fi
+          if [[ ! -e "$sysroot/libpng12.so" && -e "$sysroot/libpng12.so.0" ]]; then
+            ln -s libpng12.so.0 "$sysroot/libpng12.so"
+          fi
           # Seed ignored staging files (cores, binaries, FrogShell, BIOS, etc.)
           # from the last full release. New builds replace the binaries they own.
           cp -a "$RUNNER_TEMP/base/unpacked/release/." "$GITHUB_WORKSPACE/sdcard/"
