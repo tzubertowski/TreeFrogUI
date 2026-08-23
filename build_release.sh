@@ -36,6 +36,7 @@ PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
 FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
+FROGSHELL_ASSET="$(pwd)/assets/frogshell"
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
 # CI/release builders can provide the small per-device stock bootstrap files
 # from a previous full release instead of keeping proprietary stock SD images
@@ -79,7 +80,10 @@ declare -A STOCK=(
 declare -A HJ=(
   [r36sx]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
   [r36hd]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
-  [sf3000]="  SF3000   854 480 16 9   90  dispframe driver_sf3000.so  kill"
+  # The SF3000 framebuffer is portrait-oriented.  FrogShell's 90-degree
+  # mapping was counter-clockwise on the hardware, so request the inverse
+  # transform here (the shell applies this profile rotation when presenting).
+  [sf3000]="  SF3000   854 480 16 9   270  dispframe driver_sf3000.so  kill"
   [sf3500]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
   [sf3000hd]="SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
   [sf3100]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
@@ -122,6 +126,9 @@ cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
+# CI does not have the standalone FrogShell checkout. Keep the tested shell
+# binary in-tree so release builds include the same rotation/keyboard fixes.
+cp_if_diff "$FROGSHELL_ASSET" "$STAGE/cubegm/frogshell"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null
 cp_if_diff "$HIJACK/nosleep" "$STAGE/cubegm/nosleep"
 
