@@ -16,7 +16,7 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 > ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
 
 ### New here? Start with these
-- 🧰 **[How to install it](install.md)** - use our [TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest), or follow the manual installation steps
+- 🧰 **How to install it** - use our TreeFrogUI Installer, or [follow the manual installation steps](install.md)
 - 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
 - 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
 - 🖼️ **[Get box art in three clicks](https://github.com/tzubertowski/mini-scraper-cfw/releases)** - download Mini Scraper, choose your SD card, then press **Add artwork**
