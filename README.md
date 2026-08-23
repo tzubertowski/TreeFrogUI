@@ -16,23 +16,12 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 > ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
 
 ### New here? Start with these
+- 🧰 **[How to install it](install.md)** - use our [TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest), or follow the manual installation steps
 - 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
 - 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
 - 🖼️ **[Get box art in three clicks](https://github.com/tzubertowski/mini-scraper-cfw/releases)** - download Mini Scraper, choose your SD card, then press **Add artwork**
 - ⬇️ **[Download the latest version](https://github.com/tzubertowski/treefrog-ui/releases)**
 - 💬 **[Report a bug / give feedback](https://docs.google.com/forms/d/e/1FAIpQLSfM-y2_UnERrjScqkSfkRSEfBPJ79rDwDo3GwuYWXxpkFTp4Q/viewform?usp=header)**
-
-### Installing TreeFrogUI
-
-Just use our **[TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest)**, or **[follow the manual installation steps](install.md)**.
-
-> **Words you'll see (plain English):**
-> - **SD card** = the little memory card your games live on.
-> - **"root of the SD card"** = the **top level** of the card, **not inside any folder**. When you open the card on your PC and see folders like `cubegm`, `roms`, `frogui`, that first screen **is** the root.
-> - **folder** = a directory you make on the card (e.g. `roms/GBA`). The folder **name** decides which system it runs.
-> - **ROM** = a game file.
-> - **BIOS** = an extra system file some consoles need to run (you supply it; see [BIOS files](#bios-files-required)).
-> - **keep zips zipped** = for arcade games, do **not** unzip the `.zip`. Drop it in as-is.
 
 ---
 

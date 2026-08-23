@@ -14,6 +14,14 @@ Supported: **R36SX** (v2.6 / v2.7) · **R36HD** · **SF3000** · **SF3000 HD** �
 > This is not optional. Installing over the stock OS causes missing audio, broken
 > controls, display problems, crashes, and boot failures.**
 
+> **Words you'll see (plain English):**
+> - **SD card** = the little memory card your games live on.
+> - **"root of the SD card"** = the **top level** of the card, **not inside any folder**. When you open the card on your PC and see folders like `cubegm`, `roms`, `frogui`, that first screen **is** the root.
+> - **folder** = a directory you make on the card (e.g. `roms/GBA`). The folder **name** decides which system it runs.
+> - **ROM** = a game file.
+> - **BIOS** = an extra system file some consoles need to run (you supply it; see [BIOS files](#bios-files-required)).
+> - **keep zips zipped** = for arcade games, do **not** unzip the `.zip`. Drop it in as-is.
+
 ---
 
 ## Step 1: Get the REQUIRED PROVIDED backup for YOUR device
