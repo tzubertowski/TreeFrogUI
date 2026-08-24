@@ -58,6 +58,13 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
 - **Flexible display scaling** - Easily adjust display scaling modes (Zoom, Aspect Ratio, and Integer Scaling) to suit your preference.
 
+### Display scaling by device
+
+R36SX supports the complete hardware aspect-ratio menu. SF3000/SF3500 expose
+Integer, Native, and Fill only because their rotated stock display drivers do
+not provide an arbitrary HCGE viewport/crop control; see
+[the display-scaling guide](docs/display-scaling.md).
+
 ---
 ## ROM folder setup
 
