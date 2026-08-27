@@ -51,8 +51,8 @@ factory card, or substitute a different backup.
 <details>
 <summary><b>R36HD</b> (R36SX clone)</summary>
 
-- 📦 **Download the [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O), then proceed with the R36HD steps below.**
-- The linked repository does not provide a separate R36HD stock backup. Keep the three boot files from your original R36HD card and copy them over the v2.7 backup before installing TreeFrogUI.
+- 📦 **Use the [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD) as the base.**
+- The factory R36HD/R36SX v2.7 protected menu binary does not reach the TreeFrogUI hook and stalls at the boot logo. The tested adapter fix uses the v2.6 boot/menu stack.
 - Install folder: **`install_first/r36hd/`** (not `r36sx`)
 - Full details: [R36SX clones (R36HD, etc.)](#r36sx-clones-r36hd-etc)
 </details>
@@ -172,21 +172,17 @@ one-time bootstrap.
 
 ## R36SX clones (R36HD, etc.)
 
-Clones (e.g. **R36HD**) run the same stock software but boot a **different kernel
-and device tree** for their hardware revision. If you flash the plain v2.7 backup
-they won't boot (black screen), because that kernel/DTB doesn't match the clone.
-Keep your clone's own boot files on top of the v2.7 setup:
+The tested **R36HD / R36S-H.05-V1.2** adapter path uses the R36SX v2.6 boot and
+menu stack. Its `rkgame`, kernel, device tree, AVP image and startup scripts match
+the known-working adapter fix, while the factory R36HD/R36SX v2.7 protected
+`rkgame` never loads the TreeFrogUI hook and stalls at the boot logo.
 
-1. **Backup your clone's stock boot files first** (from its **original** stock card,
-   in `cubegm/` at the SD root; note the device tree is `dtb.bin`, not `*.dtb`):
-   - `cubegm/vmlinux.uImage` - kernel
-   - `cubegm/avp.uImage` - secondary boot image
-   - `cubegm/dtb.bin` - device tree
-2. **Restore the [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O).**
-3. **Copy your clone's 3 boot files** into the v2.7 SD's `cubegm/`, overwriting.
-   This pairs your clone's kernel + DTB with the v2.7 userland.
-4. **Do the standard TreeFrogUI install** on top (Steps 2-3), but use the
-   clone-specific **`install_first/r36hd/`** folder (**not** `r36sx/`).
+1. **Restore the [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD).**
+2. **Copy the current TreeFrogUI universal payload** to the card as described in Steps 2-3.
+3. **Apply `install_first/r36hd/`** (**not** `r36sx/`) so the R36HD display and hook configuration are installed.
+
+Do not restore the factory R36HD boot/menu files over this setup, and do not use
+the R36SX v2.7 backup as the R36HD base.
 
 > [!IMPORTANT]
 > **Use `install_first/r36hd/`, not `r36sx/`.** The R36SX folder ships a display-driver
@@ -196,7 +192,8 @@ Keep your clone's own boot files on top of the v2.7 setup:
 
 > [!TIP]
 > Still won't boot? Your clone likely has yet another kernel/DTB revision.
-> Double-check you copied **your own device's** boot files and that all three made it over.
+> This procedure is verified for R36S-H.05-V1.2-style R36HD hardware; retain a
+> backup of your original card when testing another clone revision.
 
 ---
 
