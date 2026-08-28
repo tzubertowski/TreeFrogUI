@@ -6,6 +6,10 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 
 **Supported devices:** R36SX (v2.6 & v2.7), **R36 HD** (and R36SX clones - see [install guide](install.md#r36sx-clones-r36hd-etc)), SF3000, SF3000 HD, SF3100, SF3500, and GB350.
 
+### R36HD manual installation
+
+For a manual R36HD setup, start with the [R36HD stock backup](https://github.com/tzubertowski/H.OS_stock_backup/releases/download/stock-backups-v1/R36HD_stock.7z), restore it to a freshly FAT32-formatted card, copy the TreeFrogUI release payload to the card root, then copy `install_first/r36sx/` to the root. R36HD uses the R36SX v2.6-compatible boot/menu stack; do not restore the protected v2.7 stock menu afterward. See the complete [R36HD clone installation procedure](install.md#r36sx-clones-r36hd-etc).
+
 ![UI Preview on SF3000 Console](console.jpg)
 
 > # ☕ Consider donating to extend device support: [ko-fi.com/proszty](https://ko-fi.com/proszty)
@@ -51,9 +55,9 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Start in Recents** - Optional: boot straight into your recents (list or switcher) every time, in Settings.
 - **Play-time stats** - Tracks how long you play each game, shown in the browser.
 - **Ebook reader** - Read **EPUB / MOBI / PDF / CBZ / FB2** on the go (MuPDF-powered): put files in `roms/Ebook/`, adjustable text size + font (custom TTFs supported), progress saved per book. See the [ebook guide](docs/cores/ebook.md).
-- **Video player** - Drop ordinary **MP4 / MKV / AVI / MOV** files into `roms/videos/`. Playback uses the firmware hardware decoder; its MinUI-style controls inherit your active theme colors and follow each device's native panel orientation. No conversion required.
-- **Simple music player** - Put **MP3 / M4A / AAC / WAV / FLAC / OGG / Opus** files in `roms/music/` for familiar A-to-pause, shoulder-button seek and B-to-exit controls. Rockbox remains available for advanced library features.
-- **Image viewer** - Browse **JPG / PNG / BMP / GIF / WebP / TIFF** files from `roms/images/` using the firmware's native picture decoder, with Fit/Fill, rotation and themed controls.
+- **Video player** - Drop ordinary **MP4 / MKV / AVI / MOV / WMV** files into `roms/videos/`. Playback uses the firmware hardware decoder; its MinUI-style controls inherit your active theme colors and follow each device's native panel orientation. No conversion required.
+- **Simple music player** - Put **MP3 / M4A / AAC / WAV / FLAC / OGG / Opus** files in a folder under `roms/music/`. Each folder acts as a playlist with alphabetical auto-advance, X/Y previous/next, sequential/loop/random modes, embedded ID3v1/ID3v2 metadata and album covers, and a themed interface. Rockbox remains available for advanced library features.
+- **Image viewer** - Browse **JPG / PNG / BMP / GIF / WebP / TIFF** files from `roms/images/`, with Fit/Fill, reliable 1x–4x JPEG/PNG zoom, D-pad panning, and the same themed controls as the music and video players.
 - **Offline updates** - Copy the official `update.zip` directly to the SD-card root and reboot. It is checksum-verified, applied for the correct device, and deleted only after success. See the [installation guide](install.md#offline-updates).
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
 - **Flexible display scaling** - Easily adjust display scaling modes (Zoom, Aspect Ratio, and Integer Scaling) to suit your preference.

@@ -15,7 +15,7 @@ all: $(TARGET)
 
 $(TARGET): image_viewer.c $(FONT_SOURCE)
 	$(CC) $(CFLAGS) image_viewer.c $(FONT_SOURCE) \
-		$(LDFLAGS) -Wl,--gc-sections -lffplayer -lpthread -o $@
+		$(LDFLAGS) -Wl,--gc-sections -lffplayer -ljpeg -lpng16 -lpthread -o $@
 	$(CROSS)strip $@
 
 clean:

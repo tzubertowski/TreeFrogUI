@@ -163,19 +163,23 @@ L/R seeks 60 seconds, and B/Select returns to TreeFrogUI.
 
 ## Simple music player
 
-Drop MP3, M4A, AAC, WAV, FLAC, OGG or Opus files into `roms/music/`. This mode
-reuses the firmware-backed video player and the same controls: A/Start pauses,
-Left/Right seeks 10 seconds, L/R seeks 60 seconds, and B/Select returns to
-TreeFrogUI. Codec support depends on the decoder included in the device's
-firmware. Rockbox remains available for playlists and advanced library use.
+Drop MP3, M4A, AAC, WAV, FLAC, OGG or Opus files into a folder below
+`roms/music/`; each folder is an alphabetical playlist. A/Start pauses,
+X/Y selects the previous/next track, Select cycles sequential, loop and random
+modes, and B returns to TreeFrogUI. Playback mode persists between tracks.
+ID3v1/ID3v2 title, artist and album metadata and standard embedded APIC JPEG
+covers are displayed when present; the filename is used when title metadata is
+missing. Codec support depends on the device firmware. Rockbox remains
+available for advanced library use.
 
 ## Image viewer
 
 Drop JPG/JPEG, PNG, BMP, GIF, TGA, ICO, WebP or TIFF images into
-`roms/images/`. The viewer passes the files directly to `libffplayer`'s native
-picture decoder and hardware video plane; no conversion or bundled software
-image codec is used.
+`roms/images/`. JPEG and PNG use the framebuffer renderer for deterministic
+zooming and panning; the remaining formats use the firmware picture decoder.
 
-Left/Right or L1/R1 browses adjacent images, A switches between Fit and Fill,
-X rotates clockwise, Y toggles the themed controls, and B/Select returns to
-TreeFrogUI.
+L1/R1 browses adjacent images (or Left/Right while fitted), A switches between
+Fit and Fill, X/Y zoom in and out up to 4x, and the D-pad pans a zoomed page.
+Start toggles the themed controls; that visibility state is retained while
+turning pages. B/Select returns to TreeFrogUI. The image, music and video apps
+share the same rounded control panel, progress styling and theme colors.

@@ -51,7 +51,8 @@ factory card, or substitute a different backup.
 <details>
 <summary><b>R36HD</b> (R36SX clone)</summary>
 
-- 📦 **Use the [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD) as the base.**
+- 📦 **Use the [R36HD stock backup](https://github.com/tzubertowski/H.OS_stock_backup/releases/download/stock-backups-v1/R36HD_stock.7z) as the base.**
+- If that release is unavailable, the [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD) is the compatible fallback.
 - The factory R36HD/R36SX v2.7 protected menu binary does not reach the TreeFrogUI hook and stalls at the boot logo. The tested adapter fix uses the v2.6 boot/menu stack.
 - The release applies the proven **`install_first/r36sx/`** hook for R36HD;
   the installer selects this automatically and includes the driver fallback.
@@ -178,7 +179,7 @@ menu stack. Its `rkgame`, kernel, device tree, AVP image and startup scripts mat
 the known-working adapter fix, while the factory R36HD/R36SX v2.7 protected
 `rkgame` never loads the TreeFrogUI hook and stalls at the boot logo.
 
-1. **Restore the [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD).**
+1. **Restore the [R36HD stock backup](https://github.com/tzubertowski/H.OS_stock_backup/releases/download/stock-backups-v1/R36HD_stock.7z)** to a freshly FAT32-formatted card. (The R36SX v2.6 backup remains a compatible fallback.)
 2. **Copy the current TreeFrogUI universal payload** to the card as described in Steps 2-3.
 3. **Apply `install_first/r36sx/`** so the R36HD display and hook configuration are installed.
 

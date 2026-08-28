@@ -3,10 +3,13 @@
 #include <dirent.h>
 #include <fcntl.h>
 #include <linux/fb.h>
+#include <setjmp.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <jpeglib.h>
+#include <png.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -27,9 +30,9 @@ extern unsigned char fontdata8x8[64 * 16];
 #define DEVICE_FILE "/tmp/tfdevice.env"
 #define KEYMAP_FILE "/mnt/sdcard/frogui/keymap.txt"
 
-enum { BTN_LEFT, BTN_RIGHT, BTN_A, BTN_B, BTN_L1, BTN_R1, BTN_X, BTN_Y, BTN_SELECT, BTN_COUNT };
-static int key_bits[BTN_COUNT] = { 7, 5, 13, 14, 10, 11, 12, 15, 0 };
-static const char *key_names[BTN_COUNT] = { "LEFT", "RIGHT", "A", "B", "L1", "R1", "X", "Y", "SELECT" };
+enum { BTN_LEFT, BTN_RIGHT, BTN_UP, BTN_DOWN, BTN_A, BTN_B, BTN_L1, BTN_R1, BTN_X, BTN_Y, BTN_START, BTN_SELECT, BTN_COUNT };
+static int key_bits[BTN_COUNT] = { 7, 5, 2, 3, 13, 14, 10, 11, 12, 15, 1, 0 };
+static const char *key_names[BTN_COUNT] = { "LEFT", "RIGHT", "UP", "DOWN", "A", "B", "L1", "R1", "X", "Y", "START", "SELECT" };
 
 typedef struct {
     int fd;
@@ -44,6 +47,7 @@ typedef struct {
 
 typedef struct { uint32_t text, accent, selected_text; } Theme;
 typedef struct { char **path; int count, current; } ImageList;
+typedef struct { unsigned char *rgb; int width, height; } RasterImage;
 
 static volatile sig_atomic_t quit_requested;
 
@@ -274,6 +278,27 @@ static void rect(Overlay *overlay, int x, int y, int w, int h, uint32_t color) {
         for (int xx = x; xx < x + w; xx++) overlay->canvas[(size_t)yy * overlay->logical_w + xx] = color;
 }
 
+static void round_rect(Overlay *overlay, int x, int y, int w, int h, int radius, uint32_t color) {
+    if (w <= 0 || h <= 0) return;
+    if (radius > w / 2) radius = w / 2;
+    if (radius > h / 2) radius = h / 2;
+    if (radius < 1) { rect(overlay, x, y, w, h, color); return; }
+    rect(overlay, x + radius, y, w - radius * 2, h, color);
+    rect(overlay, x, y + radius, radius, h - radius * 2, color);
+    rect(overlay, x + w - radius, y + radius, radius, h - radius * 2, color);
+    for (int yy = 0; yy < radius; yy++) for (int xx = 0; xx < radius; xx++) {
+        int dx = radius - 1 - xx, dy = radius - 1 - yy;
+        if (dx * dx + dy * dy <= radius * radius) {
+            rect(overlay, x + xx, y + yy, 1, 1, color);
+            rect(overlay, x + w - 1 - xx, y + yy, 1, 1, color);
+            rect(overlay, x + xx, y + h - 1 - yy, 1, 1, color);
+            rect(overlay, x + w - 1 - xx, y + h - 1 - yy, 1, 1, color);
+        }
+    }
+}
+
+static int text_width(const char *text, int scale) { return (int)strlen(text) * 8 * scale; }
+
 static void text_draw(Overlay *overlay, int x, int y, const char *text, int scale, uint32_t color, int max_width) {
     int start = x;
     for (; *text && x + 8 * scale <= start + max_width; text++, x += 8 * scale) {
@@ -288,25 +313,131 @@ static const char *base_name(const char *path) {
     const char *slash = strrchr(path, '/'); return slash ? slash + 1 : path;
 }
 
-static void draw_hud(Overlay *overlay, Theme theme, const char *path, int current, int count,
-                     bool fill, int rotation, const char *status) {
+typedef struct { struct jpeg_error_mgr base; jmp_buf jump; } JpegError;
+
+static void jpeg_fail(j_common_ptr common) {
+    JpegError *error = (JpegError *)common->err;
+    longjmp(error->jump, 1);
+}
+
+static void raster_free(RasterImage *image) {
+    free(image->rgb);
+    memset(image, 0, sizeof(*image));
+}
+
+static bool raster_load_jpeg(const char *path, RasterImage *image) {
+    FILE *file = fopen(path, "rb");
+    if (!file) return false;
+    struct jpeg_decompress_struct decoder;
+    JpegError error;
+    memset(&decoder, 0, sizeof(decoder));
+    decoder.err = jpeg_std_error(&error.base);
+    error.base.error_exit = jpeg_fail;
+    if (setjmp(error.jump)) {
+        jpeg_destroy_decompress(&decoder); fclose(file); raster_free(image); return false;
+    }
+    jpeg_create_decompress(&decoder);
+    jpeg_stdio_src(&decoder, file);
+    jpeg_read_header(&decoder, TRUE);
+    decoder.out_color_space = JCS_RGB;
+    jpeg_start_decompress(&decoder);
+    image->width = (int)decoder.output_width;
+    image->height = (int)decoder.output_height;
+    size_t stride = (size_t)image->width * 3;
+    image->rgb = malloc(stride * (size_t)image->height);
+    if (!image->rgb) longjmp(error.jump, 1);
+    while (decoder.output_scanline < decoder.output_height) {
+        JSAMPROW row = image->rgb + (size_t)decoder.output_scanline * stride;
+        jpeg_read_scanlines(&decoder, &row, 1);
+    }
+    jpeg_finish_decompress(&decoder); jpeg_destroy_decompress(&decoder); fclose(file);
+    return true;
+}
+
+static bool raster_load_png(const char *path, RasterImage *image) {
+    png_image png;
+    memset(&png, 0, sizeof(png)); png.version = PNG_IMAGE_VERSION;
+    if (!png_image_begin_read_from_file(&png, path)) return false;
+    png.format = PNG_FORMAT_RGB;
+    image->width = (int)png.width; image->height = (int)png.height;
+    image->rgb = malloc(PNG_IMAGE_SIZE(png));
+    if (!image->rgb || !png_image_finish_read(&png, NULL, image->rgb, 0, NULL)) {
+        png_image_free(&png); raster_free(image); return false;
+    }
+    png_image_free(&png);
+    return true;
+}
+
+static bool raster_load(const char *path, RasterImage *image) {
+    raster_free(image);
+    const char *dot = strrchr(path, '.');
+    if (!dot) return false;
+    if (!strcasecmp(dot, ".jpg") || !strcasecmp(dot, ".jpeg") || !strcasecmp(dot, ".jpe"))
+        return raster_load_jpeg(path, image);
+    if (!strcasecmp(dot, ".png")) return raster_load_png(path, image);
+    return false;
+}
+
+static void raster_draw(Overlay *overlay, const RasterImage *image, bool fill,
+                        int zoom, int pan_x, int pan_y) {
     memset(overlay->canvas, 0, (size_t)overlay->logical_w * overlay->logical_h * 4);
+    if (!image->rgb || image->width <= 0 || image->height <= 0) return;
+    double sx = (double)overlay->logical_w / image->width;
+    double sy = (double)overlay->logical_h / image->height;
+    double scale = (fill ? (sx > sy ? sx : sy) : (sx < sy ? sx : sy)) * zoom;
+    int draw_w = (int)(image->width * scale + 0.5);
+    int draw_h = (int)(image->height * scale + 0.5);
+    if (draw_w < 1 || draw_h < 1) return;
+    int overflow_x = draw_w > overlay->logical_w ? (draw_w - overlay->logical_w) / 2 : 0;
+    int overflow_y = draw_h > overlay->logical_h ? (draw_h - overlay->logical_h) / 2 : 0;
+    if (pan_x > overflow_x) pan_x = overflow_x;
+    if (pan_x < -overflow_x) pan_x = -overflow_x;
+    if (pan_y > overflow_y) pan_y = overflow_y;
+    if (pan_y < -overflow_y) pan_y = -overflow_y;
+    int x0 = (overlay->logical_w - draw_w) / 2 + pan_x;
+    int y0 = (overlay->logical_h - draw_h) / 2 + pan_y;
+    int left = x0 > 0 ? x0 : 0, top = y0 > 0 ? y0 : 0;
+    int right = x0 + draw_w < overlay->logical_w ? x0 + draw_w : overlay->logical_w;
+    int bottom = y0 + draw_h < overlay->logical_h ? y0 + draw_h : overlay->logical_h;
+    for (int y = top; y < bottom; y++) for (int x = left; x < right; x++) {
+        int source_x = (int)((x - x0) / scale), source_y = (int)((y - y0) / scale);
+        const unsigned char *pixel = image->rgb + ((size_t)source_y * image->width + source_x) * 3;
+        overlay->canvas[(size_t)y * overlay->logical_w + x] =
+            0xFF000000u | ((uint32_t)pixel[0] << 16) | ((uint32_t)pixel[1] << 8) | pixel[2];
+    }
+}
+
+static void draw_hud(Overlay *overlay, Theme theme, const char *path, int current, int count,
+                     bool fill, int zoom, const char *status, bool clear) {
+    if (clear) memset(overlay->canvas, 0, (size_t)overlay->logical_w * overlay->logical_h * 4);
     int scale = overlay->logical_w >= 800 ? 2 : 1;
-    int margin = overlay->logical_w / 28, panel_h = scale == 2 ? 104 : 86;
+    int margin = overlay->logical_w / 28, panel_h = scale == 2 ? 136 : 112;
     int panel_y = overlay->logical_h - panel_h - margin;
-    rect(overlay, margin, panel_y, overlay->logical_w - margin * 2, panel_h, argb(226, 0x101010));
-    char title[512], detail[160];
+    round_rect(overlay, margin, panel_y, overlay->logical_w - margin * 2, panel_h,
+               24, argb(232, 0x101010));
+    char title[512], detail[80], badge[32];
     snprintf(title, sizeof(title), "%s", base_name(path));
-    snprintf(detail, sizeof(detail), "%d/%d  %s  %d DEG    LEFT/RIGHT IMAGE  A FIT/FILL  X ROTATE  B BACK",
-             current + 1, count, fill ? "FILL" : "FIT", rotation * 90);
-    text_draw(overlay, margin + 16, panel_y + 14, title, scale, argb(255, theme.text),
-              overlay->logical_w - margin * 2 - 32);
-    text_draw(overlay, margin + 16, panel_y + (scale == 2 ? 55 : 43), detail, scale,
-              argb(255, theme.text), overlay->logical_w - margin * 2 - 32);
+    snprintf(detail, sizeof(detail), "%d / %d   %s", current + 1, count, fill ? "FILL" : "FIT");
+    snprintf(badge, sizeof(badge), "%dX ZOOM", zoom);
+    int left = margin + 18, right = overlay->logical_w - margin - 18;
+    int badge_width = text_width(badge, scale) + 20;
+    round_rect(overlay, left, panel_y - 38, badge_width, 26, 13, argb(235, theme.accent));
+    text_draw(overlay, left + 10, panel_y - 31, badge, scale,
+              argb(255, theme.selected_text), badge_width - 20);
+    text_draw(overlay, left, panel_y + 12, title, scale, argb(255, theme.text), right - left);
+    text_draw(overlay, left, panel_y + (scale == 2 ? 38 : 30), detail, scale,
+              argb(255, theme.accent), right - left);
+    int bar_y = panel_y + (scale == 2 ? 68 : 54);
+    round_rect(overlay, left, bar_y, right - left, 10, 5, argb(255, 0x3A3A3A));
+    int fill_width = count > 0 ? (right - left) * (current + 1) / count : 0;
+    if (fill_width > 0)
+        round_rect(overlay, left, bar_y, fill_width, 10, 5, argb(255, theme.accent));
+    const char *help = "A VIEW  X/Y ZOOM  DPAD PAN  L/R PAGE  B BACK";
+    text_draw(overlay, left, bar_y + 26, help, scale, argb(190, theme.text), right - left);
     if (status && *status) {
-        int width = (int)strlen(status) * 8 * scale + 24;
+        int width = text_width(status, scale) + 24;
         int x = (overlay->logical_w - width) / 2;
-        rect(overlay, x, panel_y - 42, width, 30, argb(245, theme.accent));
+        round_rect(overlay, x, panel_y - 46, width, 34, 10, argb(245, theme.accent));
         text_draw(overlay, x + 12, panel_y - 35, status, scale, argb(255, theme.selected_text), width - 24);
     }
     overlay_present(overlay);
@@ -318,7 +449,8 @@ static bool player_error(long type) {
            type == HCPLAYER_MSG_ERR_UNDEFINED || type == HCPLAYER_MSG_READ_TIMEOUT;
 }
 
-static void *open_picture(const char *path, int msg_id, bool fill, int rotation) {
+static void *open_picture(const char *path, int msg_id, bool fill, int rotation, int zoom,
+                          int logical_w, int logical_h) {
     union { long double alignment; unsigned char raw[256]; } storage;
     memset(&storage, 0, sizeof(storage));
     HCPlayerInitArgs *args = (HCPlayerInitArgs *)storage.raw;
@@ -329,6 +461,13 @@ static void *open_picture(const char *path, int msg_id, bool fill, int rotation)
     args->rotate_enable = true;
     args->rotate_type = (rotate_type_e)(rotation & 3);
     args->img_dis_mode = fill ? IMG_DIS_FULLSCREEN : IMG_DIS_SCALE;
+    if (zoom > 1) {
+        args->preview_enable = true;
+        args->dst_area.x = 0;
+        args->dst_area.y = 0;
+        args->dst_area.w = (uint16_t)(logical_w * zoom);
+        args->dst_area.h = (uint16_t)(logical_h * zoom);
+    }
     args->img_dis_hold_time = 24 * 60 * 60 * 1000;
     args->gif_dis_interval = 100;
     args->img_alpha_mode = ALPHA_BLEND_UNIFORM;
@@ -339,6 +478,30 @@ static void *open_picture(const char *path, int msg_id, bool fill, int rotation)
     void *player = hcplayer_create(args);
     if (player) hcplayer_play(player);
     return player;
+}
+
+static void apply_zoom_pan(void *player, const Overlay *overlay, int zoom, int pan_x, int pan_y) {
+    if (!player || zoom <= 1) return;
+    struct vdec_dis_rect rect;
+    memset(&rect, 0, sizeof(rect));
+    HCPlayerVideoInfo info;
+    memset(&info, 0, sizeof(info));
+    if (hcplayer_get_cur_video_stream_info(player, &info) != 0 || info.width <= 0 || info.height <= 0) return;
+    int src_w = info.width / zoom, src_h = info.height / zoom;
+    if (src_w < 1) src_w = 1;
+    if (src_h < 1) src_h = 1;
+    int max_x = info.width - src_w, max_y = info.height - src_h;
+    int src_x = max_x / 2 - pan_x * info.width / (overlay->logical_w * zoom);
+    int src_y = max_y / 2 - pan_y * info.height / (overlay->logical_h * zoom);
+    if (src_x < 0) src_x = 0;
+    if (src_x > max_x) src_x = max_x;
+    if (src_y < 0) src_y = 0;
+    if (src_y > max_y) src_y = max_y;
+    rect.src_rect.x = (uint16_t)src_x; rect.src_rect.y = (uint16_t)src_y;
+    rect.src_rect.w = (uint16_t)src_w; rect.src_rect.h = (uint16_t)src_h;
+    rect.dst_rect.w = (uint16_t)overlay->logical_w;
+    rect.dst_rect.h = (uint16_t)overlay->logical_h;
+    hcplayer_set_display_rect(player, &rect);
 }
 
 int main(int argc, char **argv) {
@@ -355,23 +518,35 @@ int main(int argc, char **argv) {
 
     bool fill = false, hud = true, reload = true, first_frame = false;
     int rotation = 0;
+    int zoom = 1, pan_x = 0, pan_y = 0;
     int64_t started_at = 0, hud_until = now_ms() + 4500;
     int64_t last_hud_draw = 0;
     bool overlay_visible = false;
+    bool zoom_applied = false;
     const char *status = NULL;
     void *player = NULL;
+    RasterImage raster = {0};
     uint32_t previous = logical_keys(raw_keys);
 
     while (!quit_requested) {
         if (reload) {
             if (player) hcplayer_stop2(player, true, true);
+            player = NULL;
+            raster_free(&raster);
             HCPlayerMsg discard;
             while (msg_id >= 0 && msgrcv(msg_id, &discard, sizeof(discard) - sizeof(long), 0, IPC_NOWAIT) >= 0) {}
-            player = open_picture(list.path[list.current], msg_id, fill, rotation);
-            configure_image_layer();
-            first_frame = false; started_at = now_ms(); reload = false;
-            status = player ? NULL : "CANNOT OPEN IMAGE";
-            hud = true; hud_until = now_ms() + (player ? 4500 : 6000);
+            bool software = have_overlay && raster_load(list.path[list.current], &raster);
+            if (!software) {
+                player = open_picture(list.path[list.current], msg_id, fill, rotation, zoom,
+                                      have_overlay ? overlay.logical_w : 640,
+                                      have_overlay ? overlay.logical_h : 480);
+                configure_image_layer();
+            }
+            first_frame = software; started_at = now_ms(); reload = false;
+            zoom_applied = false;
+            status = (software || player) ? NULL : "CANNOT OPEN IMAGE";
+            if (hud) hud_until = now_ms() + ((software || player) ? 4500 : 6000);
+            last_hud_draw = 0;
         }
         HCPlayerMsg message;
         if (msg_id >= 0) while (msgrcv(msg_id, &message, sizeof(message) - sizeof(long), 0, IPC_NOWAIT) >= 0) {
@@ -381,35 +556,75 @@ int main(int argc, char **argv) {
         }
         int64_t now = now_ms();
         if (player && !first_frame && now - started_at > 10000) status = "IMAGE START FAILED";
+        /* The decoder only exposes the source dimensions after its first
+         * frame. Apply the crop then; setting it during create is ignored by
+         * several firmware builds, which made X/Y appear to do nothing. */
+        if (player && first_frame && zoom > 1 && !zoom_applied) {
+            apply_zoom_pan(player, &overlay, zoom, pan_x, pan_y);
+            zoom_applied = true;
+        }
         if (status && first_frame && now >= hud_until) status = NULL;
         uint32_t keys = logical_keys(raw_keys), pressed = keys & ~previous; previous = keys;
         if (pressed & ((1u << BTN_B) | (1u << BTN_SELECT))) break;
         int change = 0;
-        if (pressed & ((1u << BTN_LEFT) | (1u << BTN_L1))) change = -1;
-        if (pressed & ((1u << BTN_RIGHT) | (1u << BTN_R1))) change = 1;
+        if (pressed & (1u << BTN_L1)) change = -1;
+        if (pressed & (1u << BTN_R1)) change = 1;
+        if (zoom == 1 && (pressed & (1u << BTN_LEFT))) change = -1;
+        if (zoom == 1 && (pressed & (1u << BTN_RIGHT))) change = 1;
         if (change) {
             list.current = (list.current + change + list.count) % list.count;
-            rotation = 0; status = NULL; reload = true;
+            rotation = 0; zoom = 1; pan_x = pan_y = 0; status = NULL; reload = true;
         }
-        if (pressed & (1u << BTN_A)) { fill = !fill; status = fill ? "FILL" : "FIT"; reload = true; }
+        if (pressed & (1u << BTN_A)) {
+            fill = !fill; status = fill ? "FILL" : "FIT";
+            if (raster.rgb) last_hud_draw = 0; else reload = true;
+        }
         if (pressed & (1u << BTN_X)) {
-            rotation = (rotation + 1) & 3;
-            if (player && hcplayer_change_rotate_type(player, (rotate_type_e)rotation) == 0) {
-                status = "ROTATED"; hud = true; hud_until = now + 2500;
-            } else reload = true;
+            if (zoom < 4) zoom++;
+            pan_x = pan_y = 0;
+            if (raster.rgb) last_hud_draw = 0; else reload = true;
+            status = zoom > 1 ? "ZOOM IN" : "FIT"; hud = true; hud_until = now + 2500;
         }
-        if (pressed & (1u << BTN_Y)) { hud = !hud; hud_until = now + 4500; }
+        if (pressed & (1u << BTN_Y)) {
+            if (zoom > 1) zoom--;
+            pan_x = pan_y = 0;
+            if (raster.rgb) last_hud_draw = 0; else reload = true;
+            status = zoom > 1 ? "ZOOM OUT" : "FIT"; hud = true; hud_until = now + 2500;
+        }
+        if (pressed & (1u << BTN_START)) { hud = !hud; hud_until = now + 4500; }
+        if (zoom > 1) {
+            bool moved = false;
+            if (pressed & (1u << BTN_LEFT)) { pan_x += 80; moved = true; }
+            if (pressed & (1u << BTN_RIGHT)) { pan_x -= 80; moved = true; }
+            if (pressed & (1u << BTN_UP)) { pan_y += 80; moved = true; }
+            if (pressed & (1u << BTN_DOWN)) { pan_y -= 80; moved = true; }
+            if (moved) {
+                if (raster.rgb) {
+                    last_hud_draw = 0;
+                    if (!hud && !status) {
+                        raster_draw(&overlay, &raster, fill, zoom, pan_x, pan_y);
+                        overlay_present(&overlay);
+                    }
+                }
+                else apply_zoom_pan(player, &overlay, zoom, pan_x, pan_y);
+            }
+        }
         if (have_overlay && (hud || status) && now - last_hud_draw >= 200) {
-            draw_hud(&overlay, theme, list.path[list.current], list.current, list.count, fill, rotation, status);
+            if (raster.rgb) raster_draw(&overlay, &raster, fill, zoom, pan_x, pan_y);
+            draw_hud(&overlay, theme, list.path[list.current], list.current, list.count,
+                     fill, zoom, status, !raster.rgb);
             last_hud_draw = now; overlay_visible = true;
         }
         if (hud && !status && now >= hud_until) hud = false;
         if (have_overlay && !hud && !status && overlay_visible) {
-            overlay_clear(&overlay); overlay_visible = false; last_hud_draw = 0;
+            if (raster.rgb) { raster_draw(&overlay, &raster, fill, zoom, pan_x, pan_y); overlay_present(&overlay); }
+            else overlay_clear(&overlay);
+            overlay_visible = false; last_hud_draw = 0;
         }
         usleep(20000);
     }
     if (player) hcplayer_stop2(player, true, true);
+    raster_free(&raster);
     hcplayer_deinit();
 done:
     if (msg_id >= 0) msgctl(msg_id, IPC_RMID, NULL);

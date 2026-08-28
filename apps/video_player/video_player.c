@@ -315,6 +315,10 @@ static void rect(Overlay *o, int x, int y, int w, int h, uint32_t color) {
 }
 
 static void round_rect(Overlay *o, int x, int y, int w, int h, int r, uint32_t color) {
+    if (w <= 0 || h <= 0) return;
+    if (r > w / 2) r = w / 2;
+    if (r > h / 2) r = h / 2;
+    if (r < 1) { rect(o, x, y, w, h, color); return; }
     rect(o, x + r, y, w - 2 * r, h, color);
     rect(o, x, y + r, w, h - 2 * r, color);
     for (int yy = 0; yy < r; yy++) for (int xx = 0; xx < r; xx++) {
