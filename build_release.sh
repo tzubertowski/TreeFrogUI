@@ -36,7 +36,7 @@ PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
 FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
-FROGSHELL_ASSET="$(pwd)/assets/frogshell"
+FROGSHELL_ASSET="$(pwd)/assets/frogshell_libretro.so"
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
 # CI/release builders can provide the small per-device stock bootstrap files
 # from a previous full release instead of keeping proprietary stock SD images
@@ -80,10 +80,7 @@ declare -A STOCK=(
 declare -A HJ=(
   [r36sx]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
   [r36hd]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
-  # The SF3000 framebuffer is portrait-oriented.  FrogShell's 90-degree
-  # mapping was counter-clockwise on the hardware, so request the inverse
-  # transform here (the shell applies this profile rotation when presenting).
-  [sf3000]="  SF3000   854 480 16 9   270  dispframe driver_sf3000.so  kill"
+  [sf3000]="  SF3000   854 480 16 9   270 dispframe driver_sf3000.so  kill"
   [sf3500]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
   [sf3000hd]="SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
   [sf3100]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
@@ -119,16 +116,16 @@ fi
 make -C apps/video_player >/dev/null
 make -C apps/image_viewer >/dev/null
 if [ -d "$FROGSHELL" ]; then
-    make -C "$FROGSHELL" TARGET="$(pwd)/sdcard/cubegm/frogshell" >/dev/null
+    make -C "$FROGSHELL" TARGET="$(pwd)/sdcard/cubegm/cores/frogshell_libretro.so" >/dev/null
 fi
 cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$2"; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
-# CI does not have the standalone FrogShell checkout. Keep the tested shell
-# binary in-tree so release builds include the same rotation/keyboard fixes.
-cp_if_diff "$FROGSHELL_ASSET" "$STAGE/cubegm/frogshell"
+# CI does not have the FrogShell checkout. Keep the tested libretro core
+# in-tree so release builds use the same picoarch display path as local builds.
+cp_if_diff "$FROGSHELL_ASSET" "$STAGE/cubegm/cores/frogshell_libretro.so"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null
 cp_if_diff "$HIJACK/nosleep" "$STAGE/cubegm/nosleep"
 
@@ -190,7 +187,7 @@ fi
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
 # (boot logos are NOT shipped here - install_first/<dev>/ provides the device-correct
 #  xgame-logo.bmp, so no fix_bootlogo script is needed.)
-for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer frogshell; do
+for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 [ -d "$STAGE/cubegm/bios" ] && cp -a "$STAGE/cubegm/bios" "$OUT/cubegm/bios"
