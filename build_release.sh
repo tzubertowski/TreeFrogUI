@@ -271,7 +271,9 @@ for dev in "${!STOCK[@]}"; do
     # R36SX-only block (@R36@: driver self-selection). Non-R36SX-only block
     # (@HW@: HW-render watchdog → force SW). R36SX renders via fb-write and has
     # no SW-transpose fallback tuned for its panel, so it never force-SWs.
-    if [ "$dev" = r36sx ]; then
+    # R36HD is an R36SX-compatible clone and needs the same driver fallback
+    # block; its panel and boot path are the proven R36SX configuration.
+    if [ "$dev" = r36sx ] || [ "$dev" = r36hd ]; then
         sed -i -e 's/ #@R36@//' -e '/#@HW@/d' "$dst/cubegm/zhijack.sh"
     else
         sed -i -e '/#@R36@/d' -e 's/ #@HW@//' "$dst/cubegm/zhijack.sh"

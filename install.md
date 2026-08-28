@@ -53,7 +53,8 @@ factory card, or substitute a different backup.
 
 - 📦 **Use the [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD) as the base.**
 - The factory R36HD/R36SX v2.7 protected menu binary does not reach the TreeFrogUI hook and stalls at the boot logo. The tested adapter fix uses the v2.6 boot/menu stack.
-- Install folder: **`install_first/r36hd/`** (not `r36sx`)
+- The release applies the proven **`install_first/r36sx/`** hook for R36HD;
+  the installer selects this automatically and includes the driver fallback.
 - Full details: [R36SX clones (R36HD, etc.)](#r36sx-clones-r36hd-etc)
 </details>
 
@@ -179,16 +180,14 @@ the known-working adapter fix, while the factory R36HD/R36SX v2.7 protected
 
 1. **Restore the [R36SX v2.6 Minimal Backup](https://drive.google.com/file/d/1xTCNNRKfQmFJr2Zkd1oCBRChuWiidIBD).**
 2. **Copy the current TreeFrogUI universal payload** to the card as described in Steps 2-3.
-3. **Apply `install_first/r36hd/`** (**not** `r36sx/`) so the R36HD display and hook configuration are installed.
+3. **Apply `install_first/r36sx/`** so the R36HD display and hook configuration are installed.
 
 Do not restore the factory R36HD boot/menu files over this setup, and do not use
 the R36SX v2.7 backup as the R36HD base.
 
 > [!IMPORTANT]
-> **Use `install_first/r36hd/`, not `r36sx/`.** The R36SX folder ships a display-driver
-> self-select that, after two crashes, swaps to a stubbed driver variant. On clones
-> that swap kills the panel (no UI, buzzing) even though the normal driver works fine.
-> The `r36hd/` folder keeps the proven `driver_r36sx.so` and never swaps.
+> **Use `install_first/r36sx/` for R36HD.** R36HD is an R36SX-compatible clone;
+> this overlay carries the proven driver and its automatic safe-variant fallback.
 
 > [!TIP]
 > Still won't boot? Your clone likely has yet another kernel/DTB revision.
