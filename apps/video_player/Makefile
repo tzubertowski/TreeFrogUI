@@ -14,7 +14,7 @@ TARGET := ../../sdcard/cubegm/video_player
 all: $(TARGET)
 
 $(TARGET): video_player.c $(FONT_SOURCE)
-	$(CC) $(CFLAGS) video_player.c $(FONT_SOURCE) $(LDFLAGS) -Wl,--gc-sections -lffplayer -lpthread -o $@
+	$(CC) $(CFLAGS) video_player.c $(FONT_SOURCE) $(LDFLAGS) -Wl,--gc-sections -lffplayer -ljpeg -lpthread -o $@
 	$(CROSS)strip $@
 
 clean:
