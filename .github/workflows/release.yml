@@ -13,7 +13,6 @@ on:
       base_tag:
         description: Existing full release used as the update base
         required: true
-        default: v1.1.0_a
         type: string
       prerelease:
         description: Mark the GitHub release as a prerelease
@@ -69,7 +68,7 @@ jobs:
             version="v0.0.0-ci.${RUN_NUMBER}"
           fi
           base="$INPUT_BASE"
-          [[ -n "$base" ]] || base="v1.1.0_a"
+          [[ -n "$base" ]] || { echo 'base_tag is required for release builds' >&2; exit 1; }
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "base=$base" >> "$GITHUB_OUTPUT"
