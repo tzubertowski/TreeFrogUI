@@ -76,18 +76,31 @@ grep -qx 'new-settings' "$SD/frogui/settings.txt"
 if [ -n "$GENERATED_ARCHIVE" ]; then
     ARCHIVE_VERSION=$(7z e -so "$GENERATED_ARCHIVE" treefrog-update/manifest.txt 2>/dev/null \
         | sed -n 's/^version=//p')
+    ARCHIVE_BASE_VERSION=$(7z e -so "$GENERATED_ARCHIVE" treefrog-update/manifest.txt 2>/dev/null \
+        | sed -n 's/^base_version=//p')
+    ARCHIVE_BASE_MAJOR=$(7z e -so "$GENERATED_ARCHIVE" treefrog-update/manifest.txt 2>/dev/null \
+        | sed -n 's/^base_major=//p')
     [ -n "$ARCHIVE_VERSION" ] || { echo "generated update version missing"; exit 1; }
     REAL_SD="$TMP/real-sd"
     mkdir -p "$REAL_SD/frogui" "$REAL_SD/cubegm/cores/.pcsx4all" "$REAL_SD/roms/gb"
     printf 'pre-release-settings\n' > "$REAL_SD/frogui/settings.txt"
     printf 'pre-release-emu-config\n' > "$REAL_SD/cubegm/cores/.pcsx4all/pcsx4all.cfg"
     printf 'keep-me\n' > "$REAL_SD/roms/gb/personal.gb"
+    if [ -n "$ARCHIVE_BASE_MAJOR" ]; then
+        printf 'v%s.0.0\n' "$ARCHIVE_BASE_MAJOR" > "$REAL_SD/cubegm/version.txt"
+    elif [ -n "$ARCHIVE_BASE_VERSION" ] && [ "$ARCHIVE_BASE_VERSION" != unknown ]; then
+        printf '%s\n' "$ARCHIVE_BASE_VERSION" > "$REAL_SD/cubegm/version.txt"
+    fi
     cp "$GENERATED_ARCHIVE" "$REAL_SD/update.zip"
     set +e
     TFUPDATE_ROOT="$REAL_SD" sh hijack/tfupdate.sh sf3000
     STATUS=$?
     set -e
-    [ "$STATUS" = 10 ] || { echo "generated update returned $STATUS"; exit 1; }
+    [ "$STATUS" = 10 ] || {
+        echo "generated update returned $STATUS"
+        [ ! -f "$REAL_SD/update.log" ] || cat "$REAL_SD/update.log"
+        exit 1
+    }
     [ ! -e "$REAL_SD/update.zip" ] || { echo "generated update was not deleted"; exit 1; }
     cmp "$CURRENT/frogui/settings.txt" "$REAL_SD/frogui/settings.txt"
     cmp "$CURRENT/cubegm/cores/.pcsx4all/pcsx4all.cfg" \
@@ -115,7 +128,11 @@ if [ -n "$GENERATED_ARCHIVE" ] && [ -n "$BASE_ARCHIVE" ]; then
     TFUPDATE_ROOT="$BASE_SD" sh hijack/tfupdate.sh sf3000
     STATUS=$?
     set -e
-    [ "$STATUS" = 10 ] || { echo "base-to-current delta returned $STATUS"; exit 1; }
+    [ "$STATUS" = 10 ] || {
+        echo "base-to-current delta returned $STATUS"
+        [ ! -f "$BASE_SD/update.log" ] || cat "$BASE_SD/update.log"
+        exit 1
+    }
 
     find "$CURRENT" -path "$CURRENT/install_first" -prune -o -type f -print \
         | while IFS= read -r current; do
