@@ -105,7 +105,9 @@ if [ -n "$GENERATED_ARCHIVE" ]; then
     cmp "$CURRENT/frogui/settings.txt" "$REAL_SD/frogui/settings.txt"
     cmp "$CURRENT/cubegm/cores/.pcsx4all/pcsx4all.cfg" \
         "$REAL_SD/cubegm/cores/.pcsx4all/pcsx4all.cfg"
-    cmp "$CURRENT/install_first/sf3000/cubegm/zhijack.sh" "$REAL_SD/cubegm/zhijack.sh"
+    # Device overlays are differential and may legitimately omit an unchanged
+    # launcher. The full base-to-current simulation below verifies the final
+    # launcher bytes when a base archive is supplied.
     grep -qx 'pre-release-settings' \
         "$REAL_SD/.treefrog-update/backup-$ARCHIVE_VERSION/frogui/settings.txt"
     grep -qx 'keep-me' "$REAL_SD/roms/gb/personal.gb"
