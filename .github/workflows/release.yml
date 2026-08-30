@@ -11,7 +11,11 @@ on:
         required: false
         type: string
       base_tag:
-        description: Existing full release used as the update base
+        description: Latest full release used to seed the build
+        required: true
+        type: string
+      update_base_tag:
+        description: Oldest compatible release used for the cumulative update
         required: true
         type: string
       prerelease:
@@ -50,6 +54,7 @@ jobs:
         env:
           INPUT_TAG: ${{ inputs.tag }}
           INPUT_BASE: ${{ inputs.base_tag }}
+          INPUT_UPDATE_BASE: ${{ inputs.update_base_tag }}
           EVENT_NAME: ${{ github.event_name }}
           PUSH_TAG: ${{ github.ref_name }}
           RUN_NUMBER: ${{ github.run_number }}
@@ -68,10 +73,13 @@ jobs:
             version="v0.0.0-ci.${RUN_NUMBER}"
           fi
           base="$INPUT_BASE"
+          update_base="$INPUT_UPDATE_BASE"
           [[ -n "$base" ]] || { echo 'base_tag is required for release builds' >&2; exit 1; }
+          [[ -n "$update_base" ]] || { echo 'update_base_tag is required for release builds' >&2; exit 1; }
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "update_base=$update_base" >> "$GITHUB_OUTPUT"
 
       - name: Install build dependencies
         run: sudo apt-get update && sudo apt-get install --yes build-essential cmake unzip zip jq
@@ -132,6 +140,16 @@ jobs:
           # from the last full release. New builds replace the binaries they own.
           cp -a "$RUNNER_TEMP/base/unpacked/release/." "$GITHUB_WORKSPACE/sdcard/"
 
+      - name: Download cumulative update base
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPDATE_BASE_TAG: ${{ steps.names.outputs.update_base }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/update-base"
+          gh release download "$UPDATE_BASE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern 'TreeFrogUI_*.zip' --dir "$RUNNER_TEMP/update-base"
+
       - name: Build FrogUI core
         working-directory: ${{ env.WORK_ROOT }}/FrogUI
         run: ./build_libretro.sh
@@ -184,11 +202,11 @@ jobs:
         working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         env:
           VERSION: ${{ steps.names.outputs.version }}
-          BASE_TAG: ${{ steps.names.outputs.base }}
         run: |
           set -euo pipefail
-          base_zip="$(find "$RUNNER_TEMP/base" -maxdepth 1 -name 'TreeFrogUI_*.zip' -print -quit)"
-          ./pack_release.sh "$VERSION" "$base_zip"
+          update_base_zip="$(find "$RUNNER_TEMP/update-base" -maxdepth 1 -name 'TreeFrogUI_*.zip' -print -quit)"
+          TREEFROG_CUMULATIVE_UPDATE=1 ./pack_release.sh "$VERSION" "$update_base_zip"
+          ./tests/test_offline_update.sh release/latest/update.zip "$update_base_zip"
           if [[ "$VERSION" == v0.0.0-ci.* ]]; then
             cp "release/latest/TreeFrogUI_${VERSION}.zip" "$RUNNER_TEMP/TreeFrogUI_build.zip"
             cp release/latest/update.zip "$RUNNER_TEMP/update_build.zip"
@@ -217,7 +235,6 @@ jobs:
         working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         run: |
           set -euo pipefail
-          notes="Automated TreeFrogUI build for ${VERSION}. See the README and commit history for the changelog."
-          args=("$RELEASE_TAG" "release/latest/TreeFrogUI_${VERSION}.zip" "release/latest/update.zip" --repo "$GITHUB_REPOSITORY" --title "TreeFrogUI ${VERSION}" --notes "$notes")
+          args=("$RELEASE_TAG" "release/latest/TreeFrogUI_${VERSION}.zip" "release/latest/update.zip" --repo "$GITHUB_REPOSITORY" --title "TreeFrogUI ${VERSION}" --notes-file release-notes.md)
           if [[ "$PRERELEASE" == true || "$RELEASE_TAG" == *-unstable* ]]; then args+=(--prerelease); fi
           gh release create "${args[@]}"

@@ -1,16 +1,11 @@
-## TreeFrogUI v1.2.0_b
+## TreeFrogUI v1.3.0_a
 
 ### What's new
 
-- **Music playlists:** auto-advance, previous/next track, and persistent Sequential, Loop and Random modes.
-- **Music metadata:** ID3 title, artist and album details, embedded album covers, and filename fallback.
-- **Stable album artwork:** fixed flashing, disappearing, partially rendered, and delayed covers.
-- **Image viewer:** reliable 1x–4x JPEG/PNG zoom, D-pad panning, and L/R page navigation.
-- **Video playback:** folder navigation, auto-play next, and playback modes.
-- **Unified media design:** matching themed controls across music, video, and images.
-- **Arcade and Game Boy Color:** correct names, core mappings, and theme backgrounds.
-- **R36HD:** tested installation support and expanded manual-install documentation.
-- **FrogShell display fix:** the file manager now runs through picoarch instead of drawing directly to `/dev/fb0`. This uses the same proven rotation path on SF3000 and R36HD, with consistent 480p UI sizing.
+- **Cleaner SF-class audio:** mono output by default, steadier buffering, and fewer crackles on demanding cores.
+- **Scrollable core menus:** long key-binding menus no longer run past the bottom of the 854×480 display.
+- **Physical FN input:** R36SX FN-button support in picoarch, contributed by @ozkaoz in [TreeFrogUI_picoarch#1](https://github.com/tzubertowski/TreeFrogUI_picoarch/pull/1). Thank you!
+- **Cumulative updates:** this and later `1.x` update ZIPs can update any supported `1.x` installation from v1.1.0_c onward.
 
 ### Install or update
 
@@ -18,7 +13,7 @@
 
 Manual fallback:
 
-- Fresh install: download `TreeFrogUI_v1.2.0_b.zip` and apply `install_first/<device>/`.
+- Fresh install: download `TreeFrogUI_v1.3.0_a.zip` and apply `install_first/<device>/`.
 - Update: copy `update.zip` to the SD-card root and reboot.
 
 This is a prerelease for wider device testing before promotion to stable.

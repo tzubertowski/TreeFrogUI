@@ -82,16 +82,26 @@ BUNDLE="$STAGE/treefrog-update"
 
 VERSION=$(sed -n 's/^version=//p' "$BUNDLE/manifest.txt")
 BASE_VERSION=$(sed -n 's/^base_version=//p' "$BUNDLE/manifest.txt")
+BASE_MAJOR=$(sed -n 's/^base_major=//p' "$BUNDLE/manifest.txt")
 case "$VERSION" in
     ''|*[!A-Za-z0-9._-]*) fail "invalid update version" ;;
 esac
 case "$BASE_VERSION" in
     *[!A-Za-z0-9._-]*) fail "invalid base version" ;;
 esac
+case "$BASE_MAJOR" in
+    ''|*[!0-9]*) [ -z "$BASE_MAJOR" ] || fail "invalid base major" ;;
+esac
+INSTALLED_VERSION=$(cat "$SDROOT/cubegm/version.txt" 2>/dev/null)
 if [ -n "$BASE_VERSION" ] && [ "$BASE_VERSION" != unknown ]; then
-    INSTALLED_VERSION=$(cat "$SDROOT/cubegm/version.txt" 2>/dev/null)
     [ "$INSTALLED_VERSION" = "$BASE_VERSION" ] \
         || fail "requires $BASE_VERSION, installed version is ${INSTALLED_VERSION:-unknown}"
+fi
+if [ -n "$BASE_MAJOR" ]; then
+    case "$INSTALLED_VERSION" in
+        v"$BASE_MAJOR".*) ;;
+        *) fail "requires major v$BASE_MAJOR, installed version is ${INSTALLED_VERSION:-unknown}" ;;
+    esac
 fi
 
 # Configs are intentionally authoritative: releases may add options, migrate

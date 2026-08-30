@@ -25,8 +25,11 @@ commit it.
 Versions must begin with `vMAJOR.MINOR.RELEASE`, optionally followed by a
 suffix, such as `v1.0.14_a`.
 
-The delta base is the newest archive from the preceding **numeric release
-line**. Suffix variants do not become bases for each other:
+Normal local builds select the newest archive from the preceding numeric line.
+Published cumulative builds instead use two archives: the latest release seeds
+the complete build tree, while the oldest update-capable release in the current
+major line is passed to `pack_release.sh` with
+`TREEFROG_CUMULATIVE_UPDATE=1`.
 
 | New version | Selected base |
 |---|---|
@@ -38,9 +41,10 @@ This makes every suffix build in a line upgrade the same previous numeric
 release. `select_release_base.sh` implements this rule; do not replace it with
 "latest ZIP" selection.
 
-Full releases produced by this pipeline contain `cubegm/version.txt`. An
-`update.zip` checks that version before installing. Legacy bases without that
-file are recorded as `unknown` and cannot be checked exactly.
+Full releases contain `cubegm/version.txt`. Ordinary deltas require an exact
+base version. Cumulative updates carry a major-version constraint; their
+`base_version=unknown` compatibility marker also lets older updaters install
+the package.
 
 ## Build without publishing
 
@@ -139,8 +143,9 @@ It can be started in either of these ways:
   prerelease automatically.
 - Run it from **Actions → Build TreeFrogUI release → Run workflow**. Enter a
   `tag` to publish a release, or leave it blank to produce downloadable
-  build-only artifacts. Set `base_tag` to the full release used for the update
-  delta.
+  build-only artifacts. Set `base_tag` to the latest full release used to seed
+  the build and `update_base_tag` to the oldest compatible release in the
+  current major line.
 
 Manual runs without a tag never mutate GitHub releases; they upload the ZIPs as
 workflow artifacts for testing.

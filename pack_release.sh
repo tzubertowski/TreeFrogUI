@@ -2,7 +2,7 @@
 # Build both distributable artifacts from release/latest/release/:
 #   ./pack_release.sh v1.0.14_a [previous-full-release.zip]
 #   release/latest/TreeFrogUI_v1.0.14_a.zip  full clean-card installation
-#   release/latest/update.zip                  previous numeric-line delta
+#   release/latest/update.zip                  update payload
 set -eu
 cd "$(dirname "$0")"
 [ -n "${1:-}" ] || {
@@ -111,6 +111,20 @@ extract_zip "$BASE_ZIP" "$BASE_STAGE"
 BASE_VERSION=$(cat "$BASE_STAGE/release/cubegm/version.txt" 2>/dev/null || true)
 [ -n "$BASE_VERSION" ] || BASE_VERSION=unknown
 
+MANIFEST_BASE_VERSION=$BASE_VERSION
+MANIFEST_BASE_MAJOR=
+if [ "${TREEFROG_CUMULATIVE_UPDATE:-0}" = 1 ]; then
+    MANIFEST_BASE_MAJOR=$(printf '%s\n' "$BASE_VERSION" \
+        | sed -nE 's/^v([0-9]+)\..*$/\1/p')
+    [ -n "$MANIFEST_BASE_MAJOR" ] || {
+        echo "ERROR: cumulative update base has no valid major version: $BASE_VERSION" >&2
+        exit 1
+    }
+    # Older 1.x updaters understand base_version=unknown and will accept this
+    # package. Newer updaters also enforce base_major below.
+    MANIFEST_BASE_VERSION=unknown
+fi
+
 # Recreate the universal directory skeleton, then copy only files whose bytes
 # changed (plus explicitly forced migration/config files).
 find "$CURRENT" -path "$CURRENT/install_first" -prune -o -type d -print \
@@ -163,8 +177,9 @@ done
 cat > "$BUNDLE/manifest.txt" <<EOF
 format=1
 version=$VERSION
-base_version=$BASE_VERSION
-base_archive=$(basename "$BASE_ZIP")
+base_version=$MANIFEST_BASE_VERSION
+${MANIFEST_BASE_MAJOR:+base_major=$MANIFEST_BASE_MAJOR
+}base_archive=$(basename "$BASE_ZIP")
 credit=Offline update idea by devdeve1oper
 EOF
 
