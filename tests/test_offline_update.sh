@@ -145,7 +145,14 @@ if [ -n "$GENERATED_ARCHIVE" ] && [ -n "$BASE_ARCHIVE" ]; then
             }
           done
     for relative in cubegm/zhijack.sh cubegm/cores/libemu_md.so cubegm/xgame-logo.bmp; do
-        cmp "$CURRENT/install_first/sf3000/$relative" "$BASE_SD/$relative"
+        if [ -f "$CURRENT/install_first/sf3000/$relative" ]; then
+            cmp "$CURRENT/install_first/sf3000/$relative" "$BASE_SD/$relative"
+        else
+            [ ! -e "$BASE_SD/$relative" ] || {
+                echo "obsolete device file survived: $relative" >&2
+                exit 1
+            }
+        fi
     done
     grep -qx 'survives-delta' "$BASE_SD/roms/gb/personal.gb"
 fi
