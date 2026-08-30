@@ -43,8 +43,8 @@ Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to sel
 
 | Setting | What it changes |
 |---|---|
-| **Background Theme Pack** | Selects a folder of themed background artwork |
 | **Theme** | Interface colours |
+| **Background Theme Pack** | Selects a folder of themed background artwork |
 | **Style** | Chooses Vertical, Horizontal or System View |
 | **Icon Pack** | Chooses System View artwork independently from backgrounds |
 | **Friendly System Names** | Expands folder codes such as `ps` and `gba` |
