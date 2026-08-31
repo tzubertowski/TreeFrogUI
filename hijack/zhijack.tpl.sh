@@ -10,6 +10,24 @@
 # pico286) read it.
 mkdir /tmp/zhijack.lock 2>/dev/null || exit 0
 
+# Never inherit the stock launcher's SD-card working directory.  USB mode
+# must unmount /mnt/sdcard before exporting its block device; a shell (or
+# child launcher) whose cwd is on that filesystem makes umount fail with
+# EBUSY even after the UI has exited.
+cd / || exit 1
+
+# Re-exec the launcher from RAM.  BusyBox ash keeps the file descriptor for
+# the script it is interpreting; if this remains the SD copy, USB mode cannot
+# unmount the card even after all child processes exit.
+if [ "${TF_ZHIJACK_RAM:-0}" != 1 ]; then
+    cp "$0" /tmp/treefrog-zhijack.sh 2>/dev/null || exit 1
+    chmod 700 /tmp/treefrog-zhijack.sh 2>/dev/null || exit 1
+    # The RAM copy must be able to reacquire the single-instance lock.
+    rm -rf /tmp/zhijack.lock 2>/dev/null
+    TF_ZHIJACK_RAM=1 exec /bin/sh /tmp/treefrog-zhijack.sh
+    exit 1
+fi
+
 # Diagnostics are OPT-IN so we don't chew the SD card in normal use: logging is
 # ON only if the user pre-created /mnt/sdcard/log.txt. Otherwise LOG=/dev/null and
 # every write below is a no-op (and picoarch's own dbg_log is gated the same way,
@@ -135,40 +153,17 @@ PICOARCH_HI=/mnt/sdcard/cubegm/picoarch_hi
 FROGUI_CORE=/mnt/sdcard/cubegm/cores/frogui_libretro.so
 LAUNCH=/tmp/frogui_launch.txt
 
-# Self-healing HW-render fallback (disp_frame devices, non-R36SX). A few units  #@HW@
-# can't drive the HW path and picoarch ABORTS on it (SIGABRT/SIGBUS) before it  #@HW@
-# ever renders a frame. Crash-only: count such crashes, and after 2 strikes in  #@HW@
-# one boot switch permanently to software (marker on SD). Crash-only cannot     #@HW@
-# false-trigger on a healthy unit (which never crashes). Once HW has proven     #@HW@
-# itself (/tmp/hw_rendered), later crashes are game bugs, not HW, so ignored.    #@HW@
-FORCE_SW_FLAG=/mnt/sdcard/cubegm/force_sw.flag #@HW@
-HW_CRASH_N=0 #@HW@
-if [ -f "$FORCE_SW_FLAG" ]; then export TF_FORCE_SW=1; echo "display: SW forced (marker present)" >> "$LOG"; fi #@HW@
-hw_crash_check() { #@HW@
-    [ -n "$FORCE_SW_FLAG" ] || return 0 #@HW@
-    [ -f "$FORCE_SW_FLAG" ] && return 0 #@HW@
-    [ -f /tmp/hw_rendered ] && return 0 #@HW@
-    [ "$1" -ge 129 ] 2>/dev/null || return 0 #@HW@
-    HW_CRASH_N=$((HW_CRASH_N+1)) #@HW@
-    echo "HW crash rc=$1 (strike $HW_CRASH_N, before any HW frame)" >> "$LOG" #@HW@
-    if [ "$HW_CRASH_N" -ge 2 ]; then #@HW@
-        touch "$FORCE_SW_FLAG"; export TF_FORCE_SW=1; sync #@HW@
-        echo "2x HW crash → forcing software rendering permanently" >> "$LOG" #@HW@
-    fi #@HW@
-} #@HW@
-# R36SX (no FORCE_SW_FLAG): make hw_crash_check a harmless no-op.
-[ -n "$FORCE_SW_FLAG" ] || hw_crash_check() { :; }
-
 ITER=0
 while true; do
     ITER=$((ITER+1))
     rm -f "$LAUNCH"
     killall rkgame 2>/dev/null #@KILL@
     echo "--- iter $ITER: frogui ---" >> "$LOG"
-    "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> "$LOG" 2>&1
+    # Keep child stdout off the SD.  USB mode must be able to unmount even
+    # when diagnostics are enabled via /mnt/sdcard/log.txt.
+    "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> /tmp/treefrog_ui.log 2>&1
     RC=$?
     echo "frogui exited rc=$RC" >> "$LOG"
-    hw_crash_check "$RC"
     # SIGBUS in the menu with the full driver → count, and after 2 strikes    #@R36@
     # flip to the safe driver for this and every future boot.                 #@R36@
     if [ "$RC" = 138 ] && [ ! -f "$DRV_FLAG" ] && [ -f "$DRV_SAFE" ]; then #@R36@
@@ -193,10 +188,24 @@ while true; do
                 *gpsp*|*pcsx*|*ps1*) [ -f "$PICOARCH_HI" ] && BIN="$PICOARCH_HI" ;;
             esac
             echo "--- iter $ITER: game [$CORE_PATH] via $BIN ---" >> "$LOG"
-            "$BIN" "$CORE_PATH" "$ROM_PATH" >> "$LOG" 2>&1
+            echo "launcher pid=$$ exe=$(readlink /proc/$$/exe 2>/dev/null)" >> "$LOG"
+            echo "bin stat: $(ls -l "$BIN" 2>/dev/null)" >> "$LOG"
+            echo "core stat: $(ls -l "$CORE_PATH" 2>/dev/null)" >> "$LOG"
+            echo "rom stat: $(ls -l "$ROM_PATH" 2>/dev/null)" >> "$LOG"
+            echo "device env: $(tr '\n' ' ' < /tmp/tfdevice.env 2>/dev/null)" >> "$LOG"
+            echo "pre-game ps:" >> "$LOG"; ps >> "$LOG" 2>&1
+            # Record the exact child executable/PID; stock rkgame and the
+            # TreeFrogUI child can otherwise produce indistinguishable driver
+            # messages in the shared log.
+            "$BIN" "$CORE_PATH" "$ROM_PATH" >> /tmp/treefrog_ui.log 2>&1 &
+            GAME_PID=$!
+            GAME_EXE=$(readlink "/proc/$GAME_PID/exe" 2>/dev/null)
+            echo "game pid=$GAME_PID exe=$GAME_EXE" >> "$LOG"
+            echo "game cmdline: $(tr '\0' ' ' < /proc/$GAME_PID/cmdline 2>/dev/null)" >> "$LOG"
+            echo "game status: $(tr '\n' ' ' < /proc/$GAME_PID/status 2>/dev/null)" >> "$LOG"
+            wait "$GAME_PID"
             GRC=$?
             echo "game exited rc=$GRC" >> "$LOG"
-            hw_crash_check "$GRC"
         fi
     fi
     sleep 0.2

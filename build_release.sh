@@ -190,6 +190,14 @@ fi
 for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
+install -m 0755 apps/usb_mode/usb_mode.sh "$OUT/cubegm/usb_mode.sh"
+install -m 0755 apps/usb_mode/usb_mtp.sh "$OUT/cubegm/usb_mtp.sh"
+install -m 0755 apps/usb_mode/mtp-server "$OUT/cubegm/mtp-server"
+mkdir -p "$OUT/cubegm/modules/4.4.186-release"
+install -m 0644 apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko \
+    "$OUT/cubegm/modules/4.4.186-release/usb_f_mass_storage.ko"
+install -m 0644 apps/usb_mode/modules/4.4.186-release/usb_f_mtp.ko \
+    "$OUT/cubegm/modules/4.4.186-release/usb_f_mtp.ko"
 [ -d "$STAGE/cubegm/bios" ] && cp -a "$STAGE/cubegm/bios" "$OUT/cubegm/bios"
 
 # 1c) Top-level docs + user-facing files the old release had (authoritative

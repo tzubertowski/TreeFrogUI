@@ -1,0 +1,420 @@
+#!/bin/sh
+# Expose the TreeFrogUI SD partition to a USB host through Linux USB gadget.
+# `run` is deliberately blocking: unplug the USB cable to restore the SD mount.
+
+set -u
+
+SYS_ROOT=${TF_USB_SYS_ROOT:-/sys}
+CONFIG_ROOT=${TF_USB_CONFIG_ROOT:-$SYS_ROOT/kernel/config}
+PROC_MOUNTS=${TF_USB_PROC_MOUNTS:-/proc/mounts}
+MOUNTPOINT=${TF_USB_MOUNTPOINT:-/mnt/sdcard}
+BLOCK_DEVICE=${TF_USB_BLOCK_DEVICE:-}
+PROC_SWAPS=${TF_USB_PROC_SWAPS:-/proc/swaps}
+SWAPFILE=${TF_USB_SWAPFILE:-$MOUNTPOINT/cubegm/pagefile.sys}
+PERSIST_LOG=${TF_USB_LOG:-$MOUNTPOINT/USB_MODE_ERROR.log}
+LOG=$PERSIST_LOG
+RAM_LOG=/tmp/treefrog-usb-mode.log
+MODULE_DIR=${TF_USB_MODULE_DIR:-$MOUNTPOINT/cubegm/modules/$(uname -r)}
+MTP_RESPONDER=${TF_USB_MTP_RESPONDER:-$MOUNTPOINT/cubegm/mtp-server}
+MTP_EXIT_FLAG=/tmp/treefrog_mtp_exit
+MTP_MODULE=${TF_USB_MTP_MODULE:-$MODULE_DIR/usb_f_mtp.ko}
+GADGET=$CONFIG_ROOT/usb_gadget/treefrog_storage
+ROLE_PATH=${TF_USB_ROLE_PATH:-$SYS_ROOT/devices/platform/soc/18844000.usb/musb-hdrc.0.auto/mode}
+UDC_NAME=${TF_USB_UDC_NAME:-musb-hdrc.0.auto}
+
+mounted=0
+bound=0
+configured_once=0
+role_changed=0
+original_role=
+mount_device=
+mount_type=
+mount_options=
+swap_was_active=0
+mtp_mode=0
+
+log() { printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo time-unknown)" "$*" >> "$LOG"; }
+fail() {
+    log "ERROR $*"
+    # Preserve failures that happen after logging moves to RAM (e.g. umount
+    # busy), so the next PC insertion contains the actionable reason.
+    if [ "$LOG" != "$PERSIST_LOG" ]; then
+        # Preserve the complete RAM trace, not just the final error.  This is
+        # essential when the console reboots before the card can be inspected.
+        cat "$LOG" >> "$PERSIST_LOG" 2>/dev/null || true
+        printf '%s ERROR %s\n' "$(date 2>/dev/null || echo time-unknown)" "$*" >> "$PERSIST_LOG" 2>/dev/null || true
+    fi
+    printf 'USB mode error: %s\n' "$*" >&2
+    exit 1
+}
+
+mount_record() {
+    awk -v mp="$MOUNTPOINT" '$2 == mp { print $1 " " $3 " " $4; exit }' "$PROC_MOUNTS" 2>/dev/null
+}
+
+read_mount() {
+    rec=$(mount_record)
+    [ -n "$rec" ] || return 1
+    mount_device=${rec%% *}
+    rest=${rec#* }
+    mount_type=${rest%% *}
+    mount_options=${rest#* }
+    case "$mount_device$MOUNTPOINT" in *'\\040'*|*'\\011'*) return 2;; esac
+    [ -n "$BLOCK_DEVICE" ] || BLOCK_DEVICE=$mount_device
+    [ "$BLOCK_DEVICE" = "$mount_device" ] || return 3
+    mounted=1
+}
+
+find_role_path() {
+    [ -e "$ROLE_PATH" ] && return 0
+    ROLE_PATH=$(find "$SYS_ROOT/devices" -path '*musb-hdrc.0.auto/mode' -print -quit 2>/dev/null || true)
+    [ -n "$ROLE_PATH" ] && [ -e "$ROLE_PATH" ]
+}
+
+remove_gadget() {
+    [ -d "$GADGET" ] || return 0
+    if [ -e "$GADGET/UDC" ]; then printf '\n' > "$GADGET/UDC" 2>/dev/null || return 1; fi
+    bound=0
+    find "$GADGET/configs" -type l -exec rm -f {} \; 2>/dev/null || true
+    find "$GADGET/functions" -mindepth 1 -maxdepth 1 -type d -exec rmdir {} \; 2>/dev/null || true
+    find "$GADGET/configs" -depth -type d -exec rmdir {} \; 2>/dev/null || true
+    find "$GADGET/strings" -depth -type d -exec rmdir {} \; 2>/dev/null || true
+    rmdir "$GADGET" 2>/dev/null || true
+}
+
+restore() {
+    rc=$?
+    trap - EXIT HUP INT TERM
+    if [ "$bound" -eq 1 ]; then
+        # A signal must never tear storage from a PC that may still be writing.
+        state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
+        if [ "$configured_once" -eq 1 ]; then
+            log "SIGNAL_DEFERRED host has configured storage; waiting for cable disconnect (state=$state)"
+            detached_samples=0
+            while [ "$detached_samples" -lt 2 ]; do
+                state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
+                if [ "$state" = 'not attached' ]; then detached_samples=$((detached_samples + 1)); else detached_samples=0; fi
+                sleep 1
+            done
+        fi
+    fi
+    remove_gadget || log "ERROR could not fully remove gadget"
+    if [ "$role_changed" -eq 1 ] && [ -n "$original_role" ]; then
+        printf '%s\n' "$original_role" > "$ROLE_PATH" 2>/dev/null || log "ERROR could not restore role=$original_role"
+    fi
+    if [ "$mounted" -eq 0 ] && [ -n "$mount_device" ]; then
+        mkdir -p "$MOUNTPOINT" 2>/dev/null || true
+        # Do not replay /proc/mounts' kernel/runtime-only flags (which some
+        # BusyBox mount versions reject).  Let the device's normal mount
+        # defaults apply; the filesystem and exact block device stay fixed.
+        if mount -t "$mount_type" "$mount_device" "$MOUNTPOINT"; then
+            mounted=1
+            log "RESTORED mount=$mount_device on $MOUNTPOINT"
+            if [ "$swap_was_active" -eq 1 ] && [ -f "$SWAPFILE" ]; then
+                if swapon "$SWAPFILE" 2>>"$LOG"; then
+                    log "RESTORED swap=$SWAPFILE"
+                else
+                    log "ERROR could not restore swap=$SWAPFILE"
+                    rc=1
+                fi
+            fi
+        else
+            log "FATAL SD_REMOUNT_FAILED device=$mount_device mountpoint=$MOUNTPOINT"
+            rc=1
+        fi
+    fi
+    exit "$rc"
+}
+
+disable_sd_swap() {
+    # The stock image enables cubegm/pagefile.sys during boot.  An active swap
+    # file is an open kernel reference and makes an otherwise clean SD
+    # unmount fail with EBUSY.  Remember and restore it after cable removal.
+    if [ -f "$SWAPFILE" ]; then
+        # Do not depend on a particular /proc/swaps formatting: vendor
+        # BusyBox builds have emitted both absolute and escaped filenames.
+        if grep -F "$SWAPFILE" "$PROC_SWAPS" >/dev/null 2>&1; then
+            log "SWAPOFF $SWAPFILE"
+            swapoff "$SWAPFILE" 2>>"$LOG" || fail "could not disable SD swap $SWAPFILE"
+            swap_was_active=1
+        else
+            # A stale/nonstandard proc entry is still safer to probe directly;
+            # inactive swapoff is harmless and its failure is ignored.
+            swapoff "$SWAPFILE" 2>>"$LOG" || true
+        fi
+    fi
+}
+
+release_mount_users() {
+    # A process cwd/root on the card keeps vfat busy.  Regular mapped
+    # libraries do not, so only target the two VFS references that make
+    # unmount impossible.  Never target this runtime (it is running from /tmp).
+    for proc in /proc/[0-9]*; do
+        pid=${proc##*/}
+        [ "$pid" = "$$" ] && continue
+        cwd=$(readlink "$proc/cwd" 2>/dev/null || true)
+        root=$(readlink "$proc/root" 2>/dev/null || true)
+        fd_ref=
+        for fd in "$proc"/fd/*; do
+            ref=$(readlink "$fd" 2>/dev/null || true)
+            case "$ref" in "$MOUNTPOINT"|"$MOUNTPOINT"/*) fd_ref=$ref; break;; esac
+        done
+        case "$cwd:$root:$fd_ref" in
+            "$MOUNTPOINT"*|*":$MOUNTPOINT"*|*":$MOUNTPOINT"*)
+                cmd=$(tr '\0' ' ' < "$proc/cmdline" 2>/dev/null || true)
+                log "MOUNT_USER pid=$pid cwd=$cwd root=$root fd=$fd_ref cmd=$cmd"
+                kill "$pid" 2>/dev/null || true
+                ;;
+        esac
+    done
+    sleep 0.2
+    for proc in /proc/[0-9]*; do
+        pid=${proc##*/}
+        [ "$pid" = "$$" ] && continue
+        cwd=$(readlink "$proc/cwd" 2>/dev/null || true)
+        root=$(readlink "$proc/root" 2>/dev/null || true)
+        fd_ref=
+        for fd in "$proc"/fd/*; do
+            ref=$(readlink "$fd" 2>/dev/null || true)
+            case "$ref" in "$MOUNTPOINT"|"$MOUNTPOINT"/*) fd_ref=$ref; break;; esac
+        done
+        case "$cwd:$root:$fd_ref" in
+            "$MOUNTPOINT"*|*":$MOUNTPOINT"*|*":$MOUNTPOINT"*) kill -9 "$pid" 2>/dev/null || true ;;
+        esac
+    done
+}
+
+load_gadget_stack() {
+    log "KERNEL uname=$(uname -a 2>/dev/null || true) role=$(cat "$ROLE_PATH" 2>/dev/null || echo unavailable)"
+    mount -t configfs none "$CONFIG_ROOT" >>"$LOG" 2>&1 || true
+    modprobe libcomposite >>"$LOG" 2>&1 || true
+    modprobe usb_f_mass_storage >>"$LOG" 2>&1 || true
+    if ! grep -q '^usb_f_mass_storage ' /proc/modules 2>/dev/null && [ -f "$MODULE_DIR/usb_f_mass_storage.ko" ]; then
+        log "INSMOD $MODULE_DIR/usb_f_mass_storage.ko"
+        insmod "$MODULE_DIR/usb_f_mass_storage.ko" >>"$LOG" 2>&1 || true
+    fi
+    log "MODULES $(grep -E '^(libcomposite|usb_f_mass_storage) ' /proc/modules 2>/dev/null | tr '\n' ';' || true)"
+    dmesg 2>/dev/null | tail -n 40 >>"$LOG" || true
+    [ -d "$CONFIG_ROOT/usb_gadget" ]
+}
+
+load_mtp_stack() {
+    log "MTP module=$MTP_MODULE responder=$MTP_RESPONDER"
+    modprobe usb_f_mtp >>"$LOG" 2>&1 || true
+    if ! grep -q '^usb_f_mtp ' /proc/modules 2>/dev/null && [ -f "$MTP_MODULE" ]; then
+        insmod "$MTP_MODULE" >>"$LOG" 2>&1 || true
+    fi
+    grep -q '^usb_f_mtp ' /proc/modules 2>/dev/null
+}
+
+create_mtp_gadget() {
+    mkdir -p "$GADGET" || return 1
+    # Use a libmtp-known Android MTP VID/PID.  KDE's kmtpd rejects unknown
+    # VID/PID devices even when mtp-probe identifies them correctly; the
+    # protocol and product strings still identify this as TreeFrogUI.
+    printf '0x18d1\n' > "$GADGET/idVendor"
+    printf '0x4ee2\n' > "$GADGET/idProduct"
+    printf '0x0100\n' > "$GADGET/bcdDevice"
+    printf '0x0200\n' > "$GADGET/bcdUSB"
+    mkdir -p "$GADGET/strings/0x409" "$GADGET/configs/c.1/strings/0x409" || return 1
+    printf 'TreeFrogUI-%s\n' "$(cat /etc/machine-id 2>/dev/null | cut -c1-16 || echo SF3000)" > "$GADGET/strings/0x409/serialnumber"
+    printf 'TreeFrogUI\n' > "$GADGET/strings/0x409/manufacturer"
+    printf 'TreeFrogUI MTP\n' > "$GADGET/strings/0x409/product"
+    printf 'MTP file access\n' > "$GADGET/configs/c.1/strings/0x409/configuration"
+    printf '120\n' > "$GADGET/configs/c.1/MaxPower"
+    # The recovered vendor module registers the configfs function as mtp.
+    mkdir "$GADGET/functions/mtp.usb0" 2>/dev/null || return 2
+    ln -s "$GADGET/functions/mtp.usb0" "$GADGET/configs/c.1/mtp.usb0" || return 1
+}
+
+run_mtp_mode() {
+    # MTP deliberately keeps /mnt/sdcard mounted; the responder accesses it
+    # through normal filesystem operations instead of exporting its block
+    # device. It must therefore run from the SD only after gadget setup.
+    : > "$LOG" 2>/dev/null || fail "cannot create log $LOG"
+    trap restore_mtp EXIT HUP INT TERM
+    [ "$(id -u)" = 0 ] || fail "must run as root"
+    read_mount || fail "$MOUNTPOINT is not a simple mounted filesystem"
+    find_role_path || fail "MUSB role control not found"
+    load_gadget_stack || fail "configfs/libcomposite unavailable"
+    load_mtp_stack || fail "MTP function module unavailable"
+    original_role=$(cat "$ROLE_PATH" 2>/dev/null) || fail "cannot read USB role"
+    if ! printf 'peripheral\n' > "$ROLE_PATH" 2>>"$LOG"; then
+        printf 'b_peripheral\n' > "$ROLE_PATH" 2>>"$LOG" || fail "cannot switch USB to peripheral role"
+    fi
+    role_changed=1
+    n=0; while [ "$n" -lt 20 ] && [ ! -e "$SYS_ROOT/class/udc/$UDC_NAME" ]; do sleep 0.1; n=$((n+1)); done
+    [ -e "$SYS_ROOT/class/udc/$UDC_NAME" ] || fail "UDC $UDC_NAME did not appear"
+    create_mtp_gadget || fail "could not create MTP gadget"
+    printf '%s\n' "$UDC_NAME" > "$GADGET/UDC" || fail "could not bind MTP UDC"
+    bound=1; mtp_mode=1
+    [ -x "$MTP_RESPONDER" ] || fail "MTP responder missing: $MTP_RESPONDER"
+    rm -f "$MTP_EXIT_FLAG"
+    log "MTP_READY mount=$MOUNTPOINT responder=$MTP_RESPONDER"
+    printf 'MTP USB ready. Eject/disconnect USB to exit.\n'
+    "$MTP_RESPONDER" "$MOUNTPOINT" >>"$LOG" 2>&1
+    mtp_rc=$?
+    log "MTP_EXIT rc=$mtp_rc"
+    if [ -f "$MTP_EXIT_FLAG" ]; then
+        rm -f "$MTP_EXIT_FLAG"
+    else
+        while [ "$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)" != 'not attached' ]; do sleep 1; done
+    fi
+}
+
+restore_mtp() {
+    rc=$?; trap - EXIT HUP INT TERM
+    remove_gadget || log "ERROR could not remove MTP gadget"
+    if [ "$role_changed" -eq 1 ] && [ -n "$original_role" ]; then printf '%s\n' "$original_role" > "$ROLE_PATH" 2>/dev/null || true; fi
+    exit "$rc"
+}
+
+create_gadget() {
+    mkdir -p "$GADGET" || return 1
+    printf '0x1209\n' > "$GADGET/idVendor"
+    printf '0x3000\n' > "$GADGET/idProduct"
+    printf '0x0100\n' > "$GADGET/bcdDevice"
+    printf '0x0200\n' > "$GADGET/bcdUSB"
+    mkdir -p "$GADGET/strings/0x409" "$GADGET/configs/c.1/strings/0x409" || return 1
+    printf 'TreeFrogUI-%s\n' "$(cat /etc/machine-id 2>/dev/null | cut -c1-16 || echo SF3000)" > "$GADGET/strings/0x409/serialnumber"
+    printf 'TreeFrogUI\n' > "$GADGET/strings/0x409/manufacturer"
+    printf 'TreeFrogUI SD Card\n' > "$GADGET/strings/0x409/product"
+    printf 'SD card storage\n' > "$GADGET/configs/c.1/strings/0x409/configuration"
+    printf '120\n' > "$GADGET/configs/c.1/MaxPower"
+    mkdir "$GADGET/functions/mass_storage.usb0" 2>/dev/null || return 2
+    printf '1\n' > "$GADGET/functions/mass_storage.usb0/lun.0/removable"
+    printf '0\n' > "$GADGET/functions/mass_storage.usb0/lun.0/cdrom"
+    printf '0\n' > "$GADGET/functions/mass_storage.usb0/lun.0/ro"
+    ln -s "$GADGET/functions/mass_storage.usb0" "$GADGET/configs/c.1/mass_storage.usb0" || return 1
+}
+
+preflight() {
+    log "PREFLIGHT step=identity"
+    [ "$(id -u)" = 0 ] || fail "must run as root"
+    read_mount || fail "$MOUNTPOINT is not a simple mounted filesystem"
+    log "PREFLIGHT mount_device=$mount_device mount_type=$mount_type"
+    case "$BLOCK_DEVICE" in /dev/mmcblk*p[0-9]*) ;; *) fail "refusing unexpected backing device: $BLOCK_DEVICE";; esac
+    [ -b "$BLOCK_DEVICE" ] || fail "backing device is not a block device: $BLOCK_DEVICE"
+    log "PREFLIGHT step=role-path"
+    find_role_path || fail "MUSB role control not found"
+    log "PREFLIGHT role_path=$ROLE_PATH role=$(cat "$ROLE_PATH" 2>/dev/null || echo unavailable)"
+    # This kernel registers the gadget UDC only after MUSB leaves its boot-time
+    # host/b_idle state, so checking it before the role transition is invalid.
+    log "PREFLIGHT step=gadget-conflict-check"
+    for udc in "$CONFIG_ROOT"/usb_gadget/*/UDC; do
+        [ -e "$udc" ] || continue
+        [ -z "$(cat "$udc" 2>/dev/null)" ] || fail "another USB gadget is active: $udc"
+    done
+    load_gadget_stack || fail "configfs/libcomposite unavailable"
+    log "PREFLIGHT step=module-check"
+    grep -q '^usb_f_mass_storage ' /proc/modules 2>/dev/null ||
+        fail "mass-storage function unavailable; install ABI-matched usb_f_mass_storage.ko"
+    original_role=$(cat "$ROLE_PATH" 2>/dev/null) || fail "cannot read USB role"
+    log "PREFLIGHT step=role-switch from=$original_role"
+    if ! printf 'peripheral\n' > "$ROLE_PATH" 2>>"$LOG"; then
+        log "ROLE_SWITCH peripheral_failed"
+        if ! printf 'b_peripheral\n' > "$ROLE_PATH" 2>>"$LOG"; then
+            fail "cannot switch USB to peripheral/b_peripheral role"
+        fi
+    fi
+    log "PREFLIGHT role-after=$(cat "$ROLE_PATH" 2>/dev/null || echo unavailable)"
+    role_changed=1
+    n=0
+    while [ "$n" -lt 20 ] && [ ! -e "$SYS_ROOT/class/udc/$UDC_NAME" ]; do
+        sleep 0.1
+        n=$((n + 1))
+    done
+    [ -e "$SYS_ROOT/class/udc/$UDC_NAME" ] || fail "UDC $UDC_NAME did not appear after peripheral switch"
+    log "PREFLIGHT UDC_READY=$UDC_NAME"
+}
+
+run_mode() {
+    # ash may lazily read its script.  Keep execution alive after the backing
+    # SD filesystem is unmounted by re-executing a private RAM copy first.
+    if [ "${TF_USB_RUNNING_COPY:-0}" != 1 ]; then
+        runtime_script=/tmp/treefrog-usb-mode.$$.sh
+        cp "$0" "$runtime_script" || fail "cannot copy runtime to RAM"
+        chmod 700 "$runtime_script" || fail "cannot prepare RAM runtime"
+        TF_USB_RUNNING_COPY=1 exec "$runtime_script" run
+        fail "cannot execute RAM runtime"
+    fi
+    : > "$LOG" 2>/dev/null || fail "cannot create log $LOG"
+    trap restore EXIT HUP INT TERM
+    preflight
+    # Preflight failures remain on the mounted SD. After it succeeds, continue
+    # logging in RAM so no open/log writes can race the exported filesystem.
+    cp "$LOG" "$RAM_LOG" 2>/dev/null || true
+    LOG=$RAM_LOG
+    # zhijack launches picoarch with stdout/stderr redirected to the SD
+    # diagnostic log.  The exec'd runtime inherits those descriptors; close
+    # them before unmount or the runtime itself keeps /mnt/sdcard busy.
+    exec 1>/dev/null 2>/dev/null
+    # BusyBox ash also keeps the original script FD open (often fd 10) when
+    # a script re-execs a RAM copy. Close the inherited descriptor range; the
+    # runtime only needs stdin/stdout/stderr, and stdout/stderr are now RAM.
+    fd=3
+    while [ "$fd" -le 64 ]; do
+        eval "exec $fd>&- 2>/dev/null" || true
+        fd=$((fd + 1))
+    done
+    # The launcher commonly inherits /mnt/sdcard as cwd; release that VFS
+    # reference before attempting to unmount the filesystem.
+    cd / || fail "cannot change working directory before SD unmount"
+    disable_sd_swap
+    release_mount_users
+    sync
+    unmount_ok=0
+    unmount_try=0
+    while [ "$unmount_try" -lt 10 ]; do
+        if umount "$MOUNTPOINT" 2>>"$LOG"; then unmount_ok=1; break; fi
+        sleep 1
+        unmount_try=$((unmount_try + 1))
+    done
+    if [ "$unmount_ok" -eq 0 ]; then
+        # Vendor BusyBox can retain a transient VFS reference even after all
+        # users disappear.  -r first remounts read-only, then detaches; unlike
+        # -f/-l it never exports a filesystem still writable by the console.
+        log "UNMOUNT_RETRY readonly-remount"
+        if umount -r "$MOUNTPOINT" 2>>"$LOG"; then unmount_ok=1; fi
+    fi
+    [ "$unmount_ok" -eq 1 ] || fail "could not unmount $MOUNTPOINT; close all SD users first"
+    mounted=0
+    # Verify the exact backing device is no longer mounted anywhere.
+    awk -v d="$BLOCK_DEVICE" '$1 == d { found=1 } END { exit found ? 0 : 1 }' "$PROC_MOUNTS" &&
+        fail "$BLOCK_DEVICE remains mounted"
+    create_gadget || fail "could not create mass-storage gadget"
+    printf '%s\n' "$BLOCK_DEVICE" > "$GADGET/functions/mass_storage.usb0/lun.0/file" || fail "could not attach SD block device"
+    printf '%s\n' "$UDC_NAME" > "$GADGET/UDC" || fail "could not bind UDC"
+    bound=1
+    log "READY device=$BLOCK_DEVICE; unplug USB cable to exit safely"
+    printf 'USB storage ready. Eject it on the PC, then unplug the cable.\n'
+
+    # Do not interpret the initial not-attached state as a disconnect.
+    detached_samples=0
+    while :; do
+        state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo detached)
+        [ "$state" = configured ] && configured_once=1
+        if [ "$configured_once" -eq 1 ] && [ "$state" = 'not attached' ]; then
+            detached_samples=$((detached_samples + 1))
+            [ "$detached_samples" -ge 2 ] && break
+        else
+            detached_samples=0
+        fi
+        sleep 1
+    done
+    log "HOST_DISCONNECTED restoring local SD access"
+}
+
+status_mode() {
+    state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unavailable)
+    active=$(cat "$GADGET/UDC" 2>/dev/null || true)
+    if [ -n "$active" ]; then printf 'active (%s, UDC %s)\n' "$state" "$active"; else printf 'inactive (%s)\n' "$state"; fi
+}
+
+case "${1:-run}" in
+    run|start) run_mode ;;
+    mtp) run_mtp_mode ;;
+    status) status_mode ;;
+    stop) fail "stop is intentionally disabled; eject on the PC and unplug the cable" ;;
+    *) printf 'Usage: %s {run|start|mtp|status}\n' "$0" >&2; exit 2 ;;
+esac
