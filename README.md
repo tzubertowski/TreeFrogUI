@@ -13,11 +13,13 @@ For a manual R36HD setup, start with the [R36HD stock backup](https://github.com
 ![UI Preview on SF3000 Console](console.jpg)
 
 > # ☕ Consider donating to extend device support: [ko-fi.com/proszty](https://ko-fi.com/proszty)
+> 💬 Join the [TreeFrogUI community server](https://discord.gg/JYFsmBYFBd) on Discord.
 > TreeFrogUI is free and made by one person. Every device I support, I bought with my own money. Donations are what let me buy the next handheld and add support for it (R36SX v2.7, SF3000 V3, SF3500, SF3100, GB350, HDMI clones, and more).
 >
 > If TreeFrogUI gave you some fun, please consider chipping in. It genuinely decides whether the next port happens.
 >
 > ### 👉 [**Donate here: ko-fi.com/proszty**](https://ko-fi.com/proszty) 🙏
+> ### 💬 [**TreeFrogUI community server**](https://discord.gg/JYFsmBYFBd)
 
 ### New here? Start with these
 - 🧰 **How to install it** - use our [TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest), or [follow the manual installation steps](install.md)
@@ -466,7 +468,7 @@ no way to do it blind.
 Every device supported so far was bought out of my own pocket. There are far
 more clones out there than I can reasonably keep buying.
 
-If you want to see a port happen, chip in: **https://ko-fi.com/proszty**.
+If you want to see a port happen, chip in: **https://ko-fi.com/proszty**. Join the **[TreeFrogUI community server](https://discord.gg/JYFsmBYFBd)** to discuss development and device support.
 Donations go straight toward buying the next device to port to.
 
 ---
