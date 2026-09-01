@@ -6,10 +6,10 @@ flowchart TD
     LAUNCH --> RT[usb_mode.sh mtp]
     RT --> ROLE[Set MUSB peripheral role]
     RT --> CFG[ConfigFS + usb_f_mtp.ko]
-    CFG <--> DEV[/dev/mtp_usb]
+    CFG <--> DEV["/dev/mtp_usb"]
     DEV <--> RESP[MTP responder]
     RESP --> DB[SimpleMtpDatabase]
-    DB --> SD[/mnt/sdcard kept mounted]
+    DB --> SD["/mnt/sdcard kept mounted"]
     HOST[PC: Dolphin/libmtp] <--> RESP
     BTN[joy_key shared memory] -->|B| RESP
     HOST -->|disconnect| RT
