@@ -27,6 +27,14 @@ flowchart TD
 4. The standalone MIPS responder opens `/dev/mtp_usb`, indexes the SD tree, and
    serves MTP requests to the PC.
 
+### MTP is not ADB
+
+ADB is **not** used here: there is no `adbd`, ADB interface, shell transport,
+or Android userspace. The `android.com` string in the MTP extension list is
+only a compatibility declaration for libmtp. The console exposes one MTP
+interface from `usb_f_mtp.ko`; the PC is the MTP initiator and the responder is
+the console-side MTP server.
+
 ## How read/write works
 
 MTP does not export the SD block device. The PC asks for object handles and
@@ -37,6 +45,10 @@ SendObjectInfo → beginSendObject() → destination path is created
 SendObject     → payload is written
 endSendObject  → entry is kept on success or removed on failure
 ```
+
+On the wire, MTP uses little-endian PTP containers over USB bulk endpoints:
+command, optional data phase, then response. The responder performs the actual
+`open(2)`, `write(2)`, and close operations on the mounted SD filesystem.
 
 Parent handle `0` maps to the SD root for host uploads. The database has a
 special `getObjectFilePath(0)` case returning `/mnt/sdcard`; this is required by
@@ -67,6 +79,31 @@ only writer, so the PC never mounts the FAT filesystem concurrently.
 - The MTP kernel function is a recovered 4.4.186 MIPS module from the stock
   image, not a newly built kernel component.
 
+## USB gadget details
+
+The runtime uses Linux ConfigFS rather than legacy `g_mass_storage`:
+
+```text
+/sys/kernel/config/usb_gadget/treefrog_storage/
+  idVendor/idProduct, strings/0x409/*
+  configs/c.1/
+  functions/mtp.usb0/        <- created by usb_f_mtp.ko
+  configs/c.1/mtp.usb0        <- symlink into the configuration
+  UDC                         <- write musb-hdrc.0.auto to bind
+```
+
+MUSB is switched to peripheral mode before binding the UDC. Unbinding the UDC
+and restoring the original role tears the session down. The function's kernel
+ABI is the stock module's `/dev/mtp_usb` interface, so this responder is not a
+generic FunctionFS implementation.
+
+## Why the SD stays mounted
+
+Mass-storage gadget mode exports the block device and requires a clean
+unmount. MTP instead keeps the SD mounted and proxies file operations through
+one userspace owner. That avoids simultaneous FAT mounts, swapfile references,
+and the EBUSY failures encountered by the mass-storage experiment.
+
 ## Refactor/test backlog
 
 - Expand compact database methods into ordinary multi-line C++ with explicit
@@ -84,3 +121,13 @@ MUSB host mode, VBUS power, USB mass-storage/SCSI/FAT drivers, and hotplug with
 a powered OTG hub. Then mount the drive safely and add it as another FrogUI ROM
 root. The stock image currently documents only the internal `/dev/root` ext2
 filesystem and the normal VFAT SD; no separate ext2 games slot is present.
+
+## References
+
+- [Linux USB gadget ConfigFS](https://docs.kernel.org/usb/gadget_configfs.html)
+- [Linux gadget function testing](https://www.kernel.org/doc/html/latest/usb/gadget-testing.html)
+- [Android MtpServer source](https://android.googlesource.com/platform/frameworks/base/+/master/media/mtp/)
+- [Android MtpDevice handle semantics](https://developer.android.com/reference/android/mtp/MtpDevice.html)
+- [libmtp documentation and MTP specification link](https://github.com/libmtp/libmtp#documentation)
+- [USB-IF MTP 1.0 specification](https://www.usb.org/developers/devclass_docs/MTP_1.0.zip)
+- [KDE KIO MTP implementation](https://invent.kde.org/system/kio-extras/-/tree/master/mtp)
