@@ -198,6 +198,10 @@ install -m 0644 apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko \
     "$OUT/cubegm/modules/4.4.186-release/usb_f_mass_storage.ko"
 install -m 0644 apps/usb_mode/modules/4.4.186-release/usb_f_mtp.ko \
     "$OUT/cubegm/modules/4.4.186-release/usb_f_mtp.ko"
+[ -f rootfs-overlay/etc/mdev/mount-helper.sh ] && \
+    { mkdir -p "$OUT/rootfs/etc/mdev" && \
+      install -m 0755 rootfs-overlay/etc/mdev/mount-helper.sh \
+          "$OUT/rootfs/etc/mdev/mount-helper.sh"; }
 [ -d "$STAGE/cubegm/bios" ] && cp -a "$STAGE/cubegm/bios" "$OUT/cubegm/bios"
 
 # 1c) Top-level docs + user-facing files the old release had (authoritative

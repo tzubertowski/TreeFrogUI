@@ -77,6 +77,16 @@ echo ">> [2/4] TreeFrogUI cubegm + frogui overlay ..."          ; cp -r "$REL/cu
 echo ">> [3/4] roms + MD ..."                                   ; cp -r "$REL/roms/." "$MNT/roms/"; cp -r "$REL/MD/." "$MNT/MD/"
 echo ">> [4/4] install_first/$INST (autorun xml, hijack core, logo, zhijack) ..." ; cp -r "$REL/install_first/$INST/." "$MNT/"
 
+# ---- USB-host storage overlay ----
+# The mdev hotplug helper is part of the firmware rootfs (not the SD payload),
+# so install it while the stock backup is unpacked. It mounts an attached USB
+# drive at /media/hdd, which FrogUI offers as its separate OTG ROM source.
+if [ -d "$REPO/rootfs-overlay" ]; then
+    echo ">> [5/5] USB-host storage rootfs overlay ..."
+    cp -r "$REPO/rootfs-overlay/." "$MNT/rootfs/"
+    chmod +x "$MNT/rootfs/etc/mdev/mount-helper.sh" 2>/dev/null || true
+fi
+
 # ---- disable sleep: NOP the two sleep-arm stores in the on-card cubevol ----
 # (power-button tap used to sleep -> wake to a black screen; long-press power-off
 #  is on a separate flag and stays working). Verify each target half-word first.
