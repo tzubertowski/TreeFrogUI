@@ -81,7 +81,6 @@ if [ "$TF_DEVICE" = SF3000 ] && [ -f /mnt/sdcard/cubegm/driver_sf3500.so ] && \
     export TF_DEVICE=SF3500
     echo "SF3000 with encrypted (SF3500-class) driver detected → using driver_sf3500.so" >> "$LOG"
 fi
-
 # R36SX driver self-selection variable mapping.
 DRV_SAFE=/mnt/sdcard/cubegm/driver_r36sx27.so
 DRV_FLAG=/mnt/sdcard/cubegm/driver27.flag
@@ -150,13 +149,23 @@ while true; do
     echo "frogui exited rc=$RC" >> "$LOG"
     hw_crash_check "$RC"
     
+    # [NUEVA UBICACIÓN DE CONTROL] Capturamos el cierre de cualquier aplicación multimedia 
+    # nativa o emulador justo cuando frogui vuelve a despertar.
+    if [ -f /proc/meminfo ] && [ "$LOG" != /dev/null ]; then
+        RAM_VAL=$(grep "MemAvailable" /proc/meminfo || grep "MemFree" /proc/meminfo)
+        RAM_NUM=$(echo "$RAM_VAL" | awk '{print $2, $3}')
+        echo "Hardware RAM disponible es de: $RAM_NUM" >> "$LOG"
+    fi
+    
+    # [MEJORA ACELERADA EN SEGUNDO PLANO]
+    # Ejecuta el volcado de caché de forma aislada e invisible para que el menú de 
+    # la consola portátil cargue de inmediato sin esperar al procesador.
+    (sync; echo 3 > /proc/sys/vm/drop_caches) >/dev/null 2>&1 &
+
     # MODIFICACIÓN DE SEGURIDAD: Se desactivan las líneas reactivas del error 138 (SIGBUS).
-    # La interfaz volverá a cargar infinitamente en lugar de forzar cambios permanentes de controlador.
     if [ "$RC" = 138 ] && [ ! -f "$DRV_FLAG" ] && [ -f "$DRV_SAFE" ]; then
         SIGBUS_N=$((SIGBUS_N+1))
         if [ "$SIGBUS_N" -ge 2 ]; then
-            # touch "$DRV_FLAG"
-            # sed -i "s|^TF_DRIVER=.*|TF_DRIVER=$DRV_SAFE|" /tmp/tfdevice.env
             echo "driver: 2x SIGBUS detectado - Ejecución forzada continua protegida" >> "$LOG"
             sync
         fi
@@ -169,9 +178,12 @@ while true; do
         if [ -n "$CORE_PATH" ] && [ -n "$ROM_PATH" ]; then
             sleep 0.3
             BIN="$PICOARCH"
+            
+            # [MEJORA] Si es un emulador pesado que pasa por LAUNCH, mantiene el soporte HI
             case "$CORE_PATH" in
-                *gpsp*|*pcsx*|*ps1*) [ -f "$PICOARCH_HI" ] && BIN="$PICOARCH_HI" ;;
+                *gpsp*|*pcsx*|*ps1*|*ffmpeg*|*video*) [ -f "$PICOARCH_HI" ] && BIN="$PICOARCH_HI" ;;
             esac
+            
             echo "--- iter $ITER: game [$CORE_PATH] via $BIN ---" >> "$LOG"
             "$BIN" "$CORE_PATH" "$ROM_PATH" >> "$LOG" 2>&1
             GRC=$?
