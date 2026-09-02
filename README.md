@@ -24,6 +24,7 @@ For a manual R36HD setup, start with the [R36HD stock backup](https://github.com
 ### New here? Start with these
 - 🧰 **How to install it** - use our [TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest), or [follow the manual installation steps](install.md)
 - 🕹️ **[How to add games + which folder](#rom-folder-setup)** - where to put your ROMs
+- 🔌 **[Use a USB/OTG drive as a game library](docs/otg-storage.md)** - play ROMs directly from external storage
 - 🎨 **[How to customise it](theme.md)** - themes, fonts, game art / box art / thumbnails, backgrounds
 - 🖼️ **[Get box art in three clicks](https://github.com/tzubertowski/mini-scraper-cfw/releases)** - download Mini Scraper, choose your SD card, then press **Add artwork**
 - ⬇️ **[Download the latest version](https://github.com/tzubertowski/treefrog-ui/releases)**
@@ -61,6 +62,7 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Simple music player** - Put **MP3 / M4A / AAC / WAV / FLAC / OGG / Opus** files in a folder under `roms/music/`. Each folder acts as a playlist with alphabetical auto-advance, X/Y previous/next, sequential/loop/random modes, embedded ID3v1/ID3v2 metadata and album covers, and a themed interface. Rockbox remains available for advanced library features.
 - **Image viewer** - Browse **JPG / PNG / BMP / GIF / WebP / TIFF** files from `roms/images/`, with Fit/Fill, reliable 1x–4x JPEG/PNG zoom, D-pad panning, and the same themed controls as the music and video players.
 - **Offline updates** - Copy the official `update.zip` directly to the SD-card root and reboot. It is checksum-verified, applied for the correct device, and deleted only after success. See the [installation guide](install.md#offline-updates).
+- **OTG game library** - Plug in a FAT32 USB drive with a `roms/` folder and choose it as a separate SD/OTG game source in Settings. See the [OTG storage guide](docs/otg-storage.md).
 - **Proper PCSX4ALL support** - Configurable PlayStation 1 emulator core with native support for `.iso`, `.bin`/`.cue`, and other disc formats.
 - **Flexible display scaling** - Easily adjust display scaling modes (Zoom, Aspect Ratio, and Integer Scaling) to suit your preference.
 
