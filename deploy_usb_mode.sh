@@ -6,7 +6,9 @@ REPO="$(cd "$(dirname "$0")" && pwd)"
 CORE=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
 RUNTIME="$REPO/apps/usb_mode/usb_mode.sh"
 MTP_ENTRY="$REPO/apps/usb_mode/usb_mtp.sh"
+HOST_ENTRY="$REPO/apps/usb_mode/usb_host.sh"
 MTP_SERVER="$REPO/apps/usb_mode/mtp-server"
+MTP_EXIT_WATCHER="$REPO/apps/usb_mode/usb_exit_watcher"
 MODULE="$REPO/apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko"
 MTP_MODULE="$REPO/apps/usb_mode/modules/4.4.186-release/usb_f_mtp.ko"
 LAUNCHER="$REPO/release/latest/release/install_first/r36hd/cubegm/zhijack.sh"
@@ -19,7 +21,9 @@ validate_sources() {
     [ -f "$CORE" ] || die "missing built FrogUI core: $CORE"
     [ -x "$RUNTIME" ] || die "missing executable runtime: $RUNTIME"
     [ -x "$MTP_ENTRY" ] || die "missing MTP entrypoint: $MTP_ENTRY"
+    [ -x "$HOST_ENTRY" ] || die "missing USB host entrypoint: $HOST_ENTRY"
     [ -x "$MTP_SERVER" ] || die "missing MTP responder: $MTP_SERVER"
+    [ -x "$MTP_EXIT_WATCHER" ] || die "missing MTP exit watcher: $MTP_EXIT_WATCHER"
     [ -f "$MODULE" ] || die "missing module: $MODULE"
     [ -f "$MTP_MODULE" ] || die "missing MTP module: $MTP_MODULE"
     [ -x "$LAUNCHER" ] || die "missing generated launcher: $LAUNCHER"
@@ -54,7 +58,12 @@ if [ "${1:-}" != --root ]; then
     validate_sources
     DEV="$(resolve_card)"
     echo "Validated $EXPECTED_LABEL on $DEV. Requesting privilege once..."
-    exec pkexec "$0" --root "$DEV"
+    # One and only one elevation request for the complete deploy.  The
+    # privileged phase performs every mount/copy/fsck operation itself, so do
+    # not run a separate sudo -v (which produces an extra askpass prompt).
+    : "${SUDO_ASKPASS:=/home/tomaszz/bin/sudo-gui-askpass}"
+    export SUDO_ASKPASS
+    exec sudo -A "$0" --root "$DEV"
 fi
 
 [ "$EUID" -eq 0 ] || die "privileged phase is not root"
@@ -103,7 +112,9 @@ fi
 mkdir -p "$MOUNT/cubegm/modules/4.4.186-release"
 install -m 0755 "$RUNTIME" "$MOUNT/cubegm/usb_mode.sh"
 install -m 0755 "$MTP_ENTRY" "$MOUNT/cubegm/usb_mtp.sh"
+install -m 0755 "$HOST_ENTRY" "$MOUNT/cubegm/usb_host.sh"
 install -m 0755 "$MTP_SERVER" "$MOUNT/cubegm/mtp-server"
+install -m 0755 "$MTP_EXIT_WATCHER" "$MOUNT/cubegm/usb_exit_watcher"
 install -m 0644 "$MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mass_storage.ko"
 install -m 0644 "$MTP_MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mtp.ko"
 install -m 0644 "$CORE" "$MOUNT/cubegm/cores/frogui_libretro.so"
@@ -119,7 +130,9 @@ verify_equal() {
 verify_equal "$CORE" "$MOUNT/cubegm/cores/frogui_libretro.so" FrogUI
 verify_equal "$RUNTIME" "$MOUNT/cubegm/usb_mode.sh" usb_mode.sh
 verify_equal "$MTP_ENTRY" "$MOUNT/cubegm/usb_mtp.sh" usb_mtp.sh
+verify_equal "$HOST_ENTRY" "$MOUNT/cubegm/usb_host.sh" usb_host.sh
 verify_equal "$MTP_SERVER" "$MOUNT/cubegm/mtp-server" mtp-server
+verify_equal "$MTP_EXIT_WATCHER" "$MOUNT/cubegm/usb_exit_watcher" usb_exit_watcher
 verify_equal "$MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mass_storage.ko" usb_f_mass_storage.ko
 verify_equal "$MTP_MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mtp.ko" usb_f_mtp.ko
 verify_equal "$LAUNCHER" "$MOUNT/cubegm/zhijack.sh" zhijack.sh

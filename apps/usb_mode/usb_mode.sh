@@ -17,6 +17,9 @@ RAM_LOG=/tmp/treefrog-usb-mode.log
 MODULE_DIR=${TF_USB_MODULE_DIR:-$MOUNTPOINT/cubegm/modules/$(uname -r)}
 MTP_RESPONDER=${TF_USB_MTP_RESPONDER:-$MOUNTPOINT/cubegm/mtp-server}
 MTP_EXIT_FLAG=/tmp/treefrog_mtp_exit
+MTP_EXIT_WATCHER=${TF_USB_MTP_EXIT_WATCHER:-$MOUNTPOINT/cubegm/usb_exit_watcher}
+mtp_pid=
+exit_watcher_pid=
 MTP_MODULE=${TF_USB_MTP_MODULE:-$MODULE_DIR/usb_f_mtp.ko}
 GADGET=$CONFIG_ROOT/usb_gadget/treefrog_storage
 ROLE_PATH=${TF_USB_ROLE_PATH:-$SYS_ROOT/devices/platform/soc/18844000.usb/musb-hdrc.0.auto/mode}
@@ -73,7 +76,19 @@ find_role_path() {
 
 remove_gadget() {
     [ -d "$GADGET" ] || return 0
-    if [ -e "$GADGET/UDC" ]; then printf '\n' > "$GADGET/UDC" 2>/dev/null || return 1; fi
+    if [ -e "$GADGET/UDC" ]; then
+        printf '\n' > "$GADGET/UDC" 2>/dev/null || return 1
+        # The legacy f_mtp function keeps the configfs directory busy until
+        # the disconnect callback runs.  Give it a bounded handoff window so
+        # a B-exit can be followed by another MTP session without rebooting.
+        n=0
+        while [ "$n" -lt 25 ]; do
+            state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
+            [ "$state" = 'not attached' ] || [ "$state" = 'disconnected' ] && break
+            sleep 0.2
+            n=$((n + 1))
+        done
+    fi
     bound=0
     find "$GADGET/configs" -type l -exec rm -f {} \; 2>/dev/null || true
     find "$GADGET/functions" -mindepth 1 -maxdepth 1 -type d -exec rmdir {} \; 2>/dev/null || true
@@ -85,6 +100,11 @@ remove_gadget() {
 restore() {
     rc=$?
     trap - EXIT HUP INT TERM
+    if [ -n "${mtp_pid:-}" ] && kill -0 "$mtp_pid" 2>/dev/null; then
+        kill -TERM "$mtp_pid" 2>/dev/null || true
+        wait "$mtp_pid" 2>/dev/null || true
+    fi
+    [ -n "${exit_watcher_pid:-}" ] && kill "$exit_watcher_pid" 2>/dev/null || true
     if [ "$bound" -eq 1 ]; then
         # A signal must never tear storage from a PC that may still be writing.
         state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
@@ -192,7 +212,9 @@ release_mount_users() {
 
 load_gadget_stack() {
     log "KERNEL uname=$(uname -a 2>/dev/null || true) role=$(cat "$ROLE_PATH" 2>/dev/null || echo unavailable)"
-    mount -t configfs none "$CONFIG_ROOT" >>"$LOG" 2>&1 || true
+    if ! awk -v m="$CONFIG_ROOT" '$2 == m { found=1 } END { exit found ? 0 : 1 }' "$PROC_MOUNTS" 2>/dev/null; then
+        mount -t configfs none "$CONFIG_ROOT" >>"$LOG" 2>&1 || true
+    fi
     modprobe libcomposite >>"$LOG" 2>&1 || true
     modprobe usb_f_mass_storage >>"$LOG" 2>&1 || true
     if ! grep -q '^usb_f_mass_storage ' /proc/modules 2>/dev/null && [ -f "$MODULE_DIR/usb_f_mass_storage.ko" ]; then
@@ -213,6 +235,26 @@ load_mtp_stack() {
     grep -q '^usb_f_mtp ' /proc/modules 2>/dev/null
 }
 
+set_mtp_peripheral_role() {
+    if ! printf 'peripheral\n' > "$ROLE_PATH" 2>>"$LOG"; then
+        printf 'b_peripheral\n' > "$ROLE_PATH" 2>>"$LOG" || return 1
+    fi
+    role_changed=1
+    role_now=$(cat "$ROLE_PATH" 2>/dev/null || echo unavailable)
+    log "MTP_ROLE peripheral now=$role_now"
+}
+
+set_safe_host_role() {
+    # A stale f_mtp instance is not fully reset by unbinding its UDC on this
+    # 4.4 MUSB driver.  Returning the controller to host mode drops the UDC
+    # and gives the PC a genuine disconnect before the next peripheral bind.
+    if ! printf 'host\n' > "$ROLE_PATH" 2>>"$LOG"; then
+        printf 'b_idle\n' > "$ROLE_PATH" 2>>"$LOG" || return 1
+    fi
+    role_now=$(cat "$ROLE_PATH" 2>/dev/null || echo unavailable)
+    log "MTP_ROLE host now=$role_now"
+}
+
 create_mtp_gadget() {
     mkdir -p "$GADGET" || return 1
     # Use a libmtp-known Android MTP VID/PID.  KDE's kmtpd rejects unknown
@@ -225,14 +267,24 @@ create_mtp_gadget() {
     printf '0x4e22\n' > "$GADGET/idProduct"
     printf '0x0100\n' > "$GADGET/bcdDevice"
     printf '0x0200\n' > "$GADGET/bcdUSB"
-    mkdir -p "$GADGET/strings/0x409" "$GADGET/configs/c.1/strings/0x409" || return 1
+    mkdir -p "$GADGET/strings/0x409" "$GADGET/configs/c.1/strings/0x409" || {
+        log "MTP_SETUP_FAIL step=strings"; return 1;
+    }
     printf 'TreeFrogUI-%s\n' "$(cat /etc/machine-id 2>/dev/null | cut -c1-16 || echo SF3000)" > "$GADGET/strings/0x409/serialnumber"
     printf 'TreeFrogUI\n' > "$GADGET/strings/0x409/manufacturer"
     printf 'TreeFrogUI MTP\n' > "$GADGET/strings/0x409/product"
     printf 'MTP file access\n' > "$GADGET/configs/c.1/strings/0x409/configuration"
     printf '120\n' > "$GADGET/configs/c.1/MaxPower"
     # The recovered vendor module registers the configfs function as mtp.
-    mkdir "$GADGET/functions/mtp.usb0" 2>/dev/null || return 2
+    # configfs objects can survive a host-aborted session on the vendor 4.4
+    # kernel.  Reuse the function when it is already present; mkdir without
+    # -p made the next connection fail even though the gadget was otherwise
+    # perfectly usable.
+    if [ ! -d "$GADGET/functions/mtp.usb0" ]; then
+        mkdir "$GADGET/functions/mtp.usb0" 2>>"$LOG" || {
+            log "MTP_SETUP_FAIL step=create_function"; return 2;
+        }
+    fi
     # Enable the module's Android-compatible Microsoft OS descriptor path.
     # The function module supplies the MTP compatible-ID data; configfs only
     # enables the OS string and associates it with this configuration.
@@ -240,8 +292,12 @@ create_mtp_gadget() {
         # The recovered Android f_mtp module hard-codes vendor request 1 in
         # its MSFT100 string/control handler; configfs must advertise the
         # same value or Windows never receives the MTP compatible ID.
-        printf '1\n' > "$GADGET/os_desc/b_vendor_code" 2>/dev/null || return 1
-        printf 'MSFT100\n' > "$GADGET/os_desc/qw_sign" 2>/dev/null || return 1
+        printf '1\n' > "$GADGET/os_desc/b_vendor_code" 2>>"$LOG" || {
+            log "MTP_SETUP_FAIL step=os_desc_vendor"; return 1;
+        }
+        printf 'MSFT100\n' > "$GADGET/os_desc/qw_sign" 2>>"$LOG" || {
+            log "MTP_SETUP_FAIL step=os_desc_sign"; return 1;
+        }
         # Windows' inbox MTP driver is selected from the extended compatible
         # ID.  The Android f_mtp module handles the vendor request, but does
         # not create the configfs interface entry itself on this 4.4 tree.
@@ -250,16 +306,33 @@ create_mtp_gadget() {
         # Android's f_mtp exposes its own function-level os_desc group; the
         # compatible ID must be written there (a gadget-level directory is
         # ignored by the 4.4 configfs implementation).
-        mkdir -p "$GADGET/functions/mtp.usb0/os_desc/interface.MTP" 2>/dev/null || return 1
-        printf 'MTP\n' > "$GADGET/functions/mtp.usb0/os_desc/interface.MTP/compatible_id" 2>/dev/null || return 1
+        mkdir -p "$GADGET/functions/mtp.usb0/os_desc/interface.MTP" 2>>"$LOG" || {
+            log "MTP_SETUP_FAIL step=os_desc_interface"; return 1;
+        }
+        printf 'MTP\n' > "$GADGET/functions/mtp.usb0/os_desc/interface.MTP/compatible_id" 2>>"$LOG" || {
+            log "MTP_SETUP_FAIL step=compatible_id"; return 1;
+        }
         # Associate the configuration before enabling OS descriptors.  The
         # composite core snapshots this link while handling the first 0xEE /
         # vendor request; enabling `use` first can make Windows receive an
         # empty compatible-ID descriptor on this legacy kernel.
-        ln -sf "$GADGET/configs/c.1" "$GADGET/os_desc/c.1" 2>/dev/null || return 1
-        printf '1\n' > "$GADGET/os_desc/use" 2>/dev/null || return 1
+        # configfs links cannot be atomically replaced while their function
+        # is held by f_mtp.  Leave an already-correct link alone; `ln -sf`
+        # follows it as a directory on BusyBox and fails the second session.
+        if [ ! -L "$GADGET/os_desc/c.1" ]; then
+            ln -s "$GADGET/configs/c.1" "$GADGET/os_desc/c.1" 2>>"$LOG" || {
+                log "MTP_SETUP_FAIL step=os_desc_link"; return 1;
+            }
+        fi
+        printf '1\n' > "$GADGET/os_desc/use" 2>>"$LOG" || {
+            log "MTP_SETUP_FAIL step=os_desc_enable"; return 1;
+        }
     fi
-    ln -s "$GADGET/functions/mtp.usb0" "$GADGET/configs/c.1/mtp.usb0" || return 1
+    if [ ! -L "$GADGET/configs/c.1/mtp.usb0" ]; then
+        ln -s "$GADGET/functions/mtp.usb0" "$GADGET/configs/c.1/mtp.usb0" 2>>"$LOG" || {
+            log "MTP_SETUP_FAIL step=config_link"; return 1;
+        }
+    fi
 }
 
 run_mtp_mode() {
@@ -276,26 +349,34 @@ run_mtp_mode() {
     load_gadget_stack || fail "configfs/libcomposite unavailable"
     load_mtp_stack || fail "MTP function module unavailable"
     original_role=$(cat "$ROLE_PATH" 2>/dev/null) || fail "cannot read USB role"
-    if ! printf 'peripheral\n' > "$ROLE_PATH" 2>>"$LOG"; then
-        printf 'b_peripheral\n' > "$ROLE_PATH" 2>>"$LOG" || fail "cannot switch USB to peripheral role"
-    fi
-    role_changed=1
-    n=0; while [ "$n" -lt 20 ] && [ ! -e "$SYS_ROOT/class/udc/$UDC_NAME" ]; do sleep 0.1; n=$((n+1)); done
-    [ -e "$SYS_ROOT/class/udc/$UDC_NAME" ] || fail "UDC $UDC_NAME did not appear"
     # A previous session may have been detached by a host reset; legacy
     # configfs can finish unbinding asynchronously.  Clear that stale gadget
     # and wait briefly before creating the next one.
     if [ -d "$GADGET" ]; then
         log "MTP_STALE_GADGET cleanup"
         remove_gadget || true
+        # Drop the entire peripheral controller state before reusing any
+        # configfs object.  Without this, the host often keeps the previous
+        # MTP instance cached even though the console reports "initialized".
+        set_safe_host_role || log "ERROR could not switch MTP controller to host"
+        sleep 1
         n=0
         # f_mtp's release callback on this 4.4 vendor kernel can take several
         # seconds after a Windows descriptor-request abort.  Give configfs
         # enough time to finish unbinding before declaring it wedged.
-        while [ "$n" -lt 40 ] && [ -d "$GADGET" ]; do sleep 0.5; n=$((n+1)); done
+        while [ "$n" -lt 10 ] && [ -d "$GADGET" ]; do sleep 0.5; n=$((n+1)); done
         log "MTP_STALE_GADGET_WAIT elapsed=$((n / 2))s remaining=$( [ -d "$GADGET" ] && echo yes || echo no )"
-        [ ! -d "$GADGET" ] || fail "stale MTP gadget remains busy"
+        if [ -d "$GADGET" ]; then
+            # f_mtp may keep configfs references busy after Windows aborts
+            # descriptor negotiation.  The object is ours and can be safely
+            # rebound once UDC is detached, so keep it and make setup
+            # idempotent instead of wedging the UI or forcing a reboot.
+            log "MTP_STALE_GADGET_REUSE path=$GADGET"
+        fi
     fi
+    set_mtp_peripheral_role || fail "cannot switch USB to peripheral role"
+    n=0; while [ "$n" -lt 20 ] && [ ! -e "$SYS_ROOT/class/udc/$UDC_NAME" ]; do sleep 0.1; n=$((n+1)); done
+    [ -e "$SYS_ROOT/class/udc/$UDC_NAME" ] || fail "UDC $UDC_NAME did not appear"
     create_mtp_gadget || fail "could not create MTP gadget"
     log "MTP_OS_DESC vendor=$(cat "$GADGET/os_desc/b_vendor_code" 2>/dev/null || echo missing) sign=$(cat "$GADGET/os_desc/qw_sign" 2>/dev/null || echo missing) use=$(cat "$GADGET/os_desc/use" 2>/dev/null || echo missing) compat=$(cat "$GADGET/functions/mtp.usb0/os_desc/interface.MTP/compatible_id" 2>/dev/null || echo missing)"
     printf '%s\n' "$UDC_NAME" > "$GADGET/UDC" || fail "could not bind MTP UDC"
@@ -304,8 +385,32 @@ run_mtp_mode() {
     rm -f "$MTP_EXIT_FLAG"
     log "MTP_READY mount=$MOUNTPOINT responder=$MTP_RESPONDER"
     printf 'MTP USB ready. Eject/disconnect USB to exit.\n'
-    "$MTP_RESPONDER" "$MOUNTPOINT" >>"$LOG" 2>&1
+    # Keep the responder in the background so the launcher can surface the
+    # actual UDC state.  Windows may take several seconds to bind WPD; showing
+    # CONNECTED only after the gadget reports configured avoids a misleading
+    # "ready" message while the cable is still negotiating.
+    "$MTP_RESPONDER" "$MOUNTPOINT" >>"$LOG" 2>&1 &
+    mtp_pid=$!
+    if [ -x "$MTP_EXIT_WATCHER" ]; then
+        "$MTP_EXIT_WATCHER" "$mtp_pid" >/dev/null 2>&1 &
+        exit_watcher_pid=$!
+        log "MTP_EXIT_WATCHER pid=$exit_watcher_pid"
+    else
+        log "MTP_EXIT_WATCHER unavailable path=$MTP_EXIT_WATCHER"
+    fi
+    connected_reported=0
+    while kill -0 "$mtp_pid" 2>/dev/null; do
+        udc_state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
+        if [ "$udc_state" = configured ] && [ "$connected_reported" -eq 0 ]; then
+            log "MTP_CONNECTED state=$udc_state"
+            printf 'CONNECTED - TreeFrogUI MTP is mounted on the PC.\n'
+            connected_reported=1
+        fi
+        sleep 1
+    done
+    wait "$mtp_pid"
     mtp_rc=$?
+    [ -n "${exit_watcher_pid:-}" ] && kill "$exit_watcher_pid" 2>/dev/null || true
     log "MTP_EXIT rc=$mtp_rc"
     if [ -f "$MTP_EXIT_FLAG" ]; then
         rm -f "$MTP_EXIT_FLAG"
@@ -343,7 +448,10 @@ run_mtp_mode() {
 restore_mtp() {
     rc=$?; trap - EXIT HUP INT TERM
     remove_gadget || log "ERROR could not remove MTP gadget"
-    if [ "$role_changed" -eq 1 ] && [ -n "$original_role" ]; then printf '%s\n' "$original_role" > "$ROLE_PATH" 2>/dev/null || true; fi
+    # `(null)` is the vendor driver's reported boot value, not a writable
+    # role.  Always return to a real host/idle state so a future MTP run has
+    # a clean UDC and the PC observes a physical disconnect.
+    [ "$role_changed" -eq 0 ] || set_safe_host_role || log "ERROR could not restore host role"
     exit "$rc"
 }
 

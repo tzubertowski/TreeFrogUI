@@ -16,3 +16,15 @@
 - Never put ROMs, BIOS files, saves, screenshots, or other personal SD-card data
   in an update package. Configuration files listed in
   `update-force-include.txt` are intentionally replaced and backed up on-device.
+
+## Privileged SD-card operations
+
+- Use `/home/tomaszz/bin/mount-sd-rw` to mount the inserted card read-write;
+  it performs the required filesystem check and caches the sudo authorization
+  for the current session. Do not repeatedly invoke ad-hoc `sudo mount` or
+  `sudo cp` commands and prompt the user for the password each time.
+- Set `SUDO_ASKPASS=/home/tomaszz/bin/sudo-gui-askpass` and run one
+  `sudo -A -v` before a batch. Use `sudo -A` consistently for copy, sync, and
+  unmount; do not mix in `pkexec`, which creates separate authorization prompts.
+- After copying, run `sync` and unmount the card safely before asking for a
+  device test. Reuse the cached authorization for all commands in that session.
