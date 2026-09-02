@@ -12,7 +12,11 @@ BLOCK_DEVICE=${TF_USB_BLOCK_DEVICE:-}
 PROC_SWAPS=${TF_USB_PROC_SWAPS:-/proc/swaps}
 SWAPFILE=${TF_USB_SWAPFILE:-$MOUNTPOINT/cubegm/pagefile.sys}
 PERSIST_LOG=${TF_USB_LOG:-$MOUNTPOINT/USB_MODE_ERROR.log}
-LOG=$PERSIST_LOG
+TRACE_LOG=/dev/null
+# Match zhijack: detailed diagnostics are opt-in through an empty log.txt in
+# the SD root.  USB_MODE_ERROR.log is reserved for actionable failures.
+[ -f "$MOUNTPOINT/log.txt" ] && TRACE_LOG="$MOUNTPOINT/log.txt"
+LOG=$TRACE_LOG
 RAM_LOG=/tmp/treefrog-usb-mode.log
 MODULE_DIR=${TF_USB_MODULE_DIR:-$MOUNTPOINT/cubegm/modules/$(uname -r)}
 MTP_RESPONDER=${TF_USB_MTP_RESPONDER:-$MOUNTPOINT/cubegm/mtp-server}
@@ -39,14 +43,8 @@ mtp_mode=0
 log() { printf '%s %s\n' "$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || echo time-unknown)" "$*" >> "$LOG"; }
 fail() {
     log "ERROR $*"
-    # Preserve failures that happen after logging moves to RAM (e.g. umount
-    # busy), so the next PC insertion contains the actionable reason.
-    if [ "$LOG" != "$PERSIST_LOG" ]; then
-        # Preserve the complete RAM trace, not just the final error.  This is
-        # essential when the console reboots before the card can be inspected.
-        cat "$LOG" >> "$PERSIST_LOG" 2>/dev/null || true
-        printf '%s ERROR %s\n' "$(date 2>/dev/null || echo time-unknown)" "$*" >> "$PERSIST_LOG" 2>/dev/null || true
-    fi
+    # Keep the small, actionable error record even with tracing disabled.
+    printf '%s ERROR %s\n' "$(date 2>/dev/null || echo time-unknown)" "$*" >> "$PERSIST_LOG" 2>/dev/null || true
     printf 'USB mode error: %s\n' "$*" >&2
     exit 1
 }
@@ -529,8 +527,12 @@ run_mode() {
     preflight
     # Preflight failures remain on the mounted SD. After it succeeds, continue
     # logging in RAM so no open/log writes can race the exported filesystem.
-    cp "$LOG" "$RAM_LOG" 2>/dev/null || true
-    LOG=$RAM_LOG
+    # Once the SD is exported it cannot hold an open trace file.  Continue
+    # tracing in RAM only when the user explicitly enabled log.txt.
+    if [ "$TRACE_LOG" != /dev/null ]; then
+        cp "$LOG" "$RAM_LOG" 2>/dev/null || true
+        LOG=$RAM_LOG
+    fi
     # zhijack launches picoarch with stdout/stderr redirected to the SD
     # diagnostic log.  The exec'd runtime inherits those descriptors; close
     # them before unmount or the runtime itself keeps /mnt/sdcard busy.
