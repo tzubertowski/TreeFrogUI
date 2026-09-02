@@ -1,4 +1,4 @@
-## TreeFrogUI v1.3.0_b
+## TreeFrogUI v1.3.0_c
 
 ### What's new
 
@@ -8,6 +8,7 @@
 - **Cumulative updates:** this and later `1.x` update ZIPs can update any supported `1.x` installation from v1.1.0_c onward.
 - **USB MTP mode:** new guided USB MODE screen and PC file access for the SD card, with safe A/B entry and exit handling.
 - **MTP compatibility:** KDE/libmtp-compatible device identity, complete object metadata, and host-to-console file writes.
+- **Reliable USB re-entry:** exiting USB mode now fully resets the gadget controller, so MTP can be started again without rebooting the console.
 
 ### Install or update
 
@@ -15,7 +16,7 @@
 
 Manual fallback:
 
-- Fresh install: download `TreeFrogUI_v1.3.0_a.zip` and apply `install_first/<device>/`.
+- Fresh install: download `TreeFrogUI_v1.3.0_c.zip` and apply `install_first/<device>/`.
 - Update: copy `update.zip` to the SD-card root and reboot.
 
 This is a prerelease for wider device testing before promotion to stable.
