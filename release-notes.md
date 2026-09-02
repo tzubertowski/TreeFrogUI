@@ -1,4 +1,4 @@
-## TreeFrogUI v1.3.0_d
+## TreeFrogUI v1.3.0_e
 
 ### What's new
 
@@ -10,6 +10,7 @@
 - **MTP compatibility:** KDE/libmtp-compatible device identity, complete object metadata, and host-to-console file writes.
 - **Reliable USB re-entry:** exiting USB mode now fully resets the gadget controller, so MTP can be started again without rebooting the console.
 - **Quiet by default:** USB and FrogUI diagnostics now follow the existing `log.txt` opt-in switch; normal use no longer produces packet-level log spam.
+- **USB Mode in Apps:** USB Mode now lives with the other utilities instead of appearing in the Games library.
 
 ### Install or update
 
@@ -17,7 +18,7 @@
 
 Manual fallback:
 
-- Fresh install: download `TreeFrogUI_v1.3.0_d.zip` and apply `install_first/<device>/`.
+- Fresh install: download `TreeFrogUI_v1.3.0_e.zip` and apply `install_first/<device>/`.
 - Update: copy `update.zip` to the SD-card root and reboot.
 
 This is a prerelease for wider device testing before promotion to stable.
