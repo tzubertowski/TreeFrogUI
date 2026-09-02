@@ -85,6 +85,61 @@ TF_DRIVER=/mnt/sdcard/cubegm/@DRIVER@
 EOF
 export TF_DEVICE=@DEV@ TF_PANEL_W=@PW@ TF_PANEL_H=@PH@ TF_UI_SCALE=150
 
+# R36SX/R36HD hardware has a second microSD controller on supported units.
+# v1.4 starts with an opt-in, read-only probe so we can identify the actual
+# device node and mdev behaviour before exposing it as a selectable ROM source.
+# The probe never writes to a candidate card and always unmounts its temporary
+# mount before FrogUI starts.
+probe_sd2() {
+    root_dev=$(awk '$2 == "/mnt/sdcard" { print $1; exit }' /proc/mounts 2>/dev/null)
+    echo "=== SD2 probe begin root=$root_dev ===" >> "$LOG"
+    echo "SD2 partitions:" >> "$LOG"
+    cat /proc/partitions >> "$LOG" 2>&1
+    echo "SD2 existing mounts:" >> "$LOG"
+    cat /proc/mounts >> "$LOG" 2>&1
+    for sysdev in /sys/block/mmcblk*; do
+        [ -d "$sysdev" ] || continue
+        name=${sysdev##*/}
+        size=$(cat "$sysdev/size" 2>/dev/null || echo '?')
+        removable=$(cat "$sysdev/removable" 2>/dev/null || echo '?')
+        uevent=$(tr '\n' ' ' < "$sysdev/uevent" 2>/dev/null || true)
+        echo "SD2 block=$name sectors=$size removable=$removable $uevent" >> "$LOG"
+    done
+    echo "SD2 kernel messages:" >> "$LOG"
+    dmesg 2>/dev/null | grep -i 'mmc\|sdhci' | tail -n 80 >> "$LOG" 2>&1
+
+    # R36 boot media is normally mmcblk0p1; only probe other controllers.
+    # If mdev already mounted one, record that fact and leave it untouched.
+    probe_mount=/tmp/treefrog-sd2-probe
+    mkdir -p "$probe_mount" 2>/dev/null
+    for candidate in /dev/mmcblk1p* /dev/mmcblk2p* /dev/mmcblk3p*; do
+        [ -b "$candidate" ] || continue
+        [ "$candidate" = "$root_dev" ] && continue
+        if awk -v dev="$candidate" '$1 == dev { found=1 } END { exit found ? 0 : 1 }' /proc/mounts; then
+            echo "SD2 candidate=$candidate already-mounted" >> "$LOG"
+            continue
+        fi
+        if mount -o ro "$candidate" "$probe_mount" >> "$LOG" 2>&1; then
+            echo "SD2 candidate=$candidate readonly-mount=ok" >> "$LOG"
+            echo "SD2 top-level:" >> "$LOG"
+            ls -la "$probe_mount" >> "$LOG" 2>&1
+            [ -d "$probe_mount/roms" ] && echo "SD2 roms-dir=roms" >> "$LOG"
+            [ -d "$probe_mount/ROMS" ] && echo "SD2 roms-dir=ROMS" >> "$LOG"
+            umount "$probe_mount" >> "$LOG" 2>&1 || echo "SD2 candidate=$candidate readonly-unmount=failed" >> "$LOG"
+        else
+            echo "SD2 candidate=$candidate readonly-mount=failed" >> "$LOG"
+        fi
+    done
+    rmdir "$probe_mount" 2>/dev/null || true
+    echo "=== SD2 probe end ===" >> "$LOG"
+}
+
+if [ "$TF_DEVICE" = R36SX ] && [ "$LOG" != /dev/null ]; then
+    # Give mdev a bounded moment to publish a card inserted during boot.
+    sleep 1
+    probe_sd2
+fi
+
 # Some "SF3000"-branded units are really SF3500-class hardware (the "v3" / HDMI
 # variant): same 854x480 panel geometry, but the SF3500 audio+display driver. The
 # reliable tell is the stock driver.so format: classic SF3000 ships a PLAIN ELF
