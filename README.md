@@ -354,7 +354,7 @@ clone, so it needs no separate repo. BIOS, romsets, and the FreeDOS `x86BOOT.img
 are user-supplied (see the BIOS section).
 
 Release maintainers and automation agents should follow the canonical
-[release process](docs/RELEASING.md). It documents numeric-line delta selection,
+[release process](docs/dev/RELEASING.md). It documents numeric-line delta selection,
 the `release/artifact/` and `release/latest/` layout, validation, and publishing
 the full ZIP together with the root-ready `update.zip`.
 

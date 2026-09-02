@@ -34,4 +34,4 @@ sha256: 8a4e7279818c7071d8e8d57a5ee160f7ac1d3b27a7da10292f4ee81d4739c997
 ```
 
 Static and ABI checks do not equal a physical pass. Test first on a disposable,
-backed-up card and follow `docs/usb-mode-safety.md`.
+backed-up card and follow [`docs/dev/usb-mode-safety.md`](../../docs/dev/usb-mode-safety.md).

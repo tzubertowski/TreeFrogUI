@@ -1,6 +1,6 @@
 # pcsx_rearmed: a lighter MIPS dynarec
 
-← [back to README](../README.md)
+← [back to README](../../README.md)
 
 **Problem:** on our ALi MIPS SoCs (SF3000/SF3500/R36SX/GB350), the `ps1r`
 (pcsx_rearmed) core is slow because it is stuck on **lightrec**, whose portable
