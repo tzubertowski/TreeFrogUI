@@ -89,13 +89,19 @@ restore() {
         # A signal must never tear storage from a PC that may still be writing.
         state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
         if [ "$configured_once" -eq 1 ]; then
-            log "SIGNAL_DEFERRED host has configured storage; waiting for cable disconnect (state=$state)"
-            detached_samples=0
-            while [ "$detached_samples" -lt 2 ]; do
+            # Never block the UI forever when a host driver aborts.  Windows
+            # commonly signals the launcher while the legacy UDC still says
+            # `configured`; cap the safety wait and force gadget teardown.
+            detach_wait=0
+            detach_timeout=${TF_USB_MTP_DETACH_TIMEOUT:-5}
+            log "SIGNAL_DEFERRED state=$state timeout=${detach_timeout}s"
+            while [ "$detach_wait" -lt "$detach_timeout" ]; do
                 state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
-                if [ "$state" = 'not attached' ]; then detached_samples=$((detached_samples + 1)); else detached_samples=0; fi
+                [ "$state" = 'not attached' ] && break
                 sleep 1
+                detach_wait=$((detach_wait + 1))
             done
+            log "SIGNAL_CLEANUP state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown) elapsed=${detach_wait}s"
         fi
     fi
     remove_gadget || log "ERROR could not fully remove gadget"
@@ -213,7 +219,10 @@ create_mtp_gadget() {
     # VID/PID devices even when mtp-probe identifies them correctly; the
     # protocol and product strings still identify this as TreeFrogUI.
     printf '0x18d1\n' > "$GADGET/idVendor"
-    printf '0x4ee2\n' > "$GADGET/idProduct"
+    # 18D1:4E22 is a Windows-known Google MTP identity (Nexus 10).  Using
+    # this PID lets the inbox WPD MTP association match even when the host
+    # ignores the Microsoft compatible-ID descriptor on this legacy gadget.
+    printf '0x4e22\n' > "$GADGET/idProduct"
     printf '0x0100\n' > "$GADGET/bcdDevice"
     printf '0x0200\n' > "$GADGET/bcdUSB"
     mkdir -p "$GADGET/strings/0x409" "$GADGET/configs/c.1/strings/0x409" || return 1
@@ -224,6 +233,32 @@ create_mtp_gadget() {
     printf '120\n' > "$GADGET/configs/c.1/MaxPower"
     # The recovered vendor module registers the configfs function as mtp.
     mkdir "$GADGET/functions/mtp.usb0" 2>/dev/null || return 2
+    # Enable the module's Android-compatible Microsoft OS descriptor path.
+    # The function module supplies the MTP compatible-ID data; configfs only
+    # enables the OS string and associates it with this configuration.
+    if [ -d "$GADGET/os_desc" ]; then
+        # The recovered Android f_mtp module hard-codes vendor request 1 in
+        # its MSFT100 string/control handler; configfs must advertise the
+        # same value or Windows never receives the MTP compatible ID.
+        printf '1\n' > "$GADGET/os_desc/b_vendor_code" 2>/dev/null || return 1
+        printf 'MSFT100\n' > "$GADGET/os_desc/qw_sign" 2>/dev/null || return 1
+        # Windows' inbox MTP driver is selected from the extended compatible
+        # ID.  The Android f_mtp module handles the vendor request, but does
+        # not create the configfs interface entry itself on this 4.4 tree.
+        # Advertise the standard MTP ID on the function (the symlink is
+        # intentionally best-effort for kernels whose module owns this path).
+        # Android's f_mtp exposes its own function-level os_desc group; the
+        # compatible ID must be written there (a gadget-level directory is
+        # ignored by the 4.4 configfs implementation).
+        mkdir -p "$GADGET/functions/mtp.usb0/os_desc/interface.MTP" 2>/dev/null || return 1
+        printf 'MTP\n' > "$GADGET/functions/mtp.usb0/os_desc/interface.MTP/compatible_id" 2>/dev/null || return 1
+        # Associate the configuration before enabling OS descriptors.  The
+        # composite core snapshots this link while handling the first 0xEE /
+        # vendor request; enabling `use` first can make Windows receive an
+        # empty compatible-ID descriptor on this legacy kernel.
+        ln -sf "$GADGET/configs/c.1" "$GADGET/os_desc/c.1" 2>/dev/null || return 1
+        printf '1\n' > "$GADGET/os_desc/use" 2>/dev/null || return 1
+    fi
     ln -s "$GADGET/functions/mtp.usb0" "$GADGET/configs/c.1/mtp.usb0" || return 1
 }
 
@@ -231,7 +266,9 @@ run_mtp_mode() {
     # MTP deliberately keeps /mnt/sdcard mounted; the responder accesses it
     # through normal filesystem operations instead of exporting its block
     # device. It must therefore run from the SD only after gadget setup.
-    : > "$LOG" 2>/dev/null || fail "cannot create log $LOG"
+    # Keep prior sessions: a hard lock/reboot can otherwise erase the only
+    # evidence before the card is removed for inspection.
+    printf '\n--- MTP session %s ---\n' "$(date 2>/dev/null || echo unknown)" >> "$LOG" 2>/dev/null || fail "cannot create log $LOG"
     trap restore_mtp EXIT HUP INT TERM
     [ "$(id -u)" = 0 ] || fail "must run as root"
     read_mount || fail "$MOUNTPOINT is not a simple mounted filesystem"
@@ -245,7 +282,22 @@ run_mtp_mode() {
     role_changed=1
     n=0; while [ "$n" -lt 20 ] && [ ! -e "$SYS_ROOT/class/udc/$UDC_NAME" ]; do sleep 0.1; n=$((n+1)); done
     [ -e "$SYS_ROOT/class/udc/$UDC_NAME" ] || fail "UDC $UDC_NAME did not appear"
+    # A previous session may have been detached by a host reset; legacy
+    # configfs can finish unbinding asynchronously.  Clear that stale gadget
+    # and wait briefly before creating the next one.
+    if [ -d "$GADGET" ]; then
+        log "MTP_STALE_GADGET cleanup"
+        remove_gadget || true
+        n=0
+        # f_mtp's release callback on this 4.4 vendor kernel can take several
+        # seconds after a Windows descriptor-request abort.  Give configfs
+        # enough time to finish unbinding before declaring it wedged.
+        while [ "$n" -lt 40 ] && [ -d "$GADGET" ]; do sleep 0.5; n=$((n+1)); done
+        log "MTP_STALE_GADGET_WAIT elapsed=$((n / 2))s remaining=$( [ -d "$GADGET" ] && echo yes || echo no )"
+        [ ! -d "$GADGET" ] || fail "stale MTP gadget remains busy"
+    fi
     create_mtp_gadget || fail "could not create MTP gadget"
+    log "MTP_OS_DESC vendor=$(cat "$GADGET/os_desc/b_vendor_code" 2>/dev/null || echo missing) sign=$(cat "$GADGET/os_desc/qw_sign" 2>/dev/null || echo missing) use=$(cat "$GADGET/os_desc/use" 2>/dev/null || echo missing) compat=$(cat "$GADGET/functions/mtp.usb0/os_desc/interface.MTP/compatible_id" 2>/dev/null || echo missing)"
     printf '%s\n' "$UDC_NAME" > "$GADGET/UDC" || fail "could not bind MTP UDC"
     bound=1; mtp_mode=1
     [ -x "$MTP_RESPONDER" ] || fail "MTP responder missing: $MTP_RESPONDER"
@@ -257,8 +309,34 @@ run_mtp_mode() {
     log "MTP_EXIT rc=$mtp_rc"
     if [ -f "$MTP_EXIT_FLAG" ]; then
         rm -f "$MTP_EXIT_FLAG"
+    elif [ "$mtp_rc" -ne 0 ]; then
+        # A responder terminated by the host (usually SIGTERM=143 when Windows
+        # abandons enumeration) is already a failed/disconnected session.
+        # Do not wait on a stale UDC state in this case: cleanup must happen
+        # immediately so the FrogUI event loop cannot appear frozen.
+        log "MTP_ABORT cleanup_immediate rc=$mtp_rc"
     else
-        while [ "$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)" != 'not attached' ]; do sleep 1; done
+        # A Windows driver failure can leave the UDC in `configured` (or
+        # `unknown`) forever even though the responder has exited.  Waiting
+        # unboundedly here used to deadlock the UI and made the console appear
+        # frozen.  Give a real host a short grace period, then let the EXIT
+        # trap unbind the gadget and restore the normal USB role.
+        detach_wait=0
+        detach_timeout=${TF_USB_MTP_DETACH_TIMEOUT:-5}
+        while :; do
+            udc_state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
+            [ "$udc_state" = 'not attached' ] && break
+            [ "$detach_wait" -ge "$detach_timeout" ] && break
+            log "MTP_WAIT_DISCONNECT state=$udc_state elapsed=${detach_wait}s"
+            sleep 1
+            detach_wait=$((detach_wait + 1))
+        done
+        udc_state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
+        if [ "$udc_state" != 'not attached' ]; then
+            log "MTP_FORCE_UNBIND state=$udc_state timeout=${detach_timeout}s"
+        else
+            log "MTP_DISCONNECTED elapsed=${detach_wait}s"
+        fi
     fi
 }
 
