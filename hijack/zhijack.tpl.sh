@@ -105,6 +105,23 @@ probe_sd2() {
         uevent=$(tr '\n' ' ' < "$sysdev/uevent" 2>/dev/null || true)
         echo "SD2 block=$name sectors=$size removable=$removable $uevent" >> "$LOG"
     done
+    echo "SD2 host controllers (before rescan):" >> "$LOG"
+    for host in /sys/class/mmc_host/mmc*; do
+        [ -d "$host" ] || continue
+        host_name=${host##*/}
+        host_dev=$(readlink "$host/device" 2>/dev/null || echo '?')
+        echo "SD2 host=$host_name device=$host_dev rescan=$( [ -w "$host/rescan" ] && echo writable || echo unavailable )" >> "$LOG"
+    done
+    # Some R36 stock images do not rescan the secondary host during early
+    # boot. Rescanning is a read-only bus discovery operation; it cannot
+    # alter card contents and may make a late card-detect visible.
+    for host in /sys/class/mmc_host/mmc*; do
+        [ -w "$host/rescan" ] || continue
+        echo 1 > "$host/rescan" 2>/dev/null || true
+    done
+    sleep 1
+    echo "SD2 partitions after host rescan:" >> "$LOG"
+    cat /proc/partitions >> "$LOG" 2>&1
     echo "SD2 kernel messages:" >> "$LOG"
     dmesg 2>/dev/null | grep -i 'mmc\|sdhci' | tail -n 80 >> "$LOG" 2>&1
 
