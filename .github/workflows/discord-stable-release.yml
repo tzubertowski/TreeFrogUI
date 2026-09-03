@@ -1,6 +1,8 @@
 name: Post stable release to Discord
 
 on:
+  schedule:
+    - cron: '*/5 * * * *'
   release:
     # "released" covers converting an existing prerelease to a full release.
     types: [published, released, edited]
@@ -25,14 +27,23 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" \
             | tee /tmp/latest-release.json \
             | jq -r '.id')
-          if [ "$latest_id" = "$RELEASE_ID" ]; then
-            echo "is_latest=true" >> "$GITHUB_OUTPUT"
+          echo "latest_id=$latest_id" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] || [ "$latest_id" = "$RELEASE_ID" ]; then
+            echo "should_post=true" >> "$GITHUB_OUTPUT"
           else
-            echo "is_latest=false" >> "$GITHUB_OUTPUT"
+            echo "should_post=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check whether this Latest release was already posted
+        if: steps.latest.outputs.should_post == 'true'
+        id: posted
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/discord-latest-posted
+          key: discord-latest-${{ steps.latest.outputs.latest_id }}
+
       - name: Post release and changelog
-        if: steps.latest.outputs.is_latest == 'true'
+        if: steps.latest.outputs.should_post == 'true' && steps.posted.outputs.cache-hit != 'true'
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_STABLE_RELEASE_WEBHOOK }}
         run: |
@@ -49,3 +60,12 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$DISCORD_WEBHOOK_URL"
+          mkdir -p /tmp/discord-latest-posted
+          touch /tmp/discord-latest-posted/sent
+
+      - name: Remember the posted Latest release
+        if: steps.latest.outputs.should_post == 'true' && steps.posted.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/discord-latest-posted
+          key: discord-latest-${{ steps.latest.outputs.latest_id }}
