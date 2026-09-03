@@ -2,7 +2,8 @@ name: Post stable release to Discord
 
 on:
   schedule:
-    - cron: '*/5 * * * *'
+    # Avoid the busiest start-of-hour boundary, where GitHub may delay/drop runs.
+    - cron: '3-58/5 * * * *'
   release:
     # "released" covers converting an existing prerelease to a full release.
     types: [published, released, edited]
