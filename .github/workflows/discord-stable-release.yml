@@ -1,7 +1,6 @@
 name: Post stable release to Discord
 
 on:
-  workflow_dispatch:
   release:
     # "released" covers converting an existing prerelease to a full release.
     types: [published, released, edited]
@@ -26,7 +25,7 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" \
             | tee /tmp/latest-release.json \
             | jq -r '.id')
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$latest_id" = "$RELEASE_ID" ]; then
+          if [ "$latest_id" = "$RELEASE_ID" ]; then
             echo "is_latest=true" >> "$GITHUB_OUTPUT"
           else
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
