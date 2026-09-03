@@ -2,7 +2,8 @@ name: Post stable release to Discord
 
 on:
   release:
-    types: [published]
+    # "released" covers converting an existing prerelease to a full release.
+    types: [published, released]
 
 permissions:
   contents: read
