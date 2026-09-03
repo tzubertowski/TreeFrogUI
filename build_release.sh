@@ -80,7 +80,11 @@ declare -A STOCK=(
 declare -A HJ=(
   [r36sx]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
   [r36hd]="   R36SX    640 480 4  3   0   fbwrite   driver_r36sx.so   stop"
-  [sf3000]="  SF3000   854 480 16 9   270 dispframe driver_sf3000.so  kill"
+  # SF3000's portrait framebuffer is presented clockwise by disp_frame. The
+  # standalone media decoders consume this value, so keep it at 90 degrees.
+  # FrogShell is now a libretro core and is rotated by picoarch's SF display
+  # path; the old 270-degree standalone-shell value double-rotates media.
+  [sf3000]="  SF3000   854 480 16 9   90  dispframe driver_sf3000.so  kill"
   [sf3500]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
   [sf3000hd]="SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
   [sf3100]="  SF3500   854 480 16 9   90  dispframe driver_sf3500.so  kill"
