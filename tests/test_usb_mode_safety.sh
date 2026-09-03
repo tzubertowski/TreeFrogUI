@@ -5,6 +5,7 @@ set -eu
 cd "$(dirname "$0")/.."
 SCRIPT=apps/usb_mode/usb_mode.sh
 MODULE=apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko
+EXIT_WATCHER=apps/usb_mode/usb_exit_watcher
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
@@ -19,6 +20,10 @@ strings "$MODULE" | grep -q '4.4.186-release preempt MIPS32_R2 32BIT' ||
     fail "mass-storage module has wrong vermagic"
 grep -q 'apps/usb_mode/usb_mode.sh' build_release.sh ||
     fail "release does not package runtime"
+grep -q 'apps/usb_mode/usb_exit_watcher' build_release.sh ||
+    fail "release does not package MTP exit watcher"
+file "$EXIT_WATCHER" | grep -q 'ELF 32-bit LSB.*MIPS' ||
+    fail "MTP exit watcher has wrong architecture"
 grep -q 'apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko' build_release.sh ||
     fail "release does not package module"
 

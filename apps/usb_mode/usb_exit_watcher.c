@@ -4,10 +4,35 @@
 #include <signal.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <stdint.h>
 
 /* Watch cubevol's shared button word while the MTP helper owns the UI.
- * Logical B is raw bit 14 (the same mapping used by FrogUI). */
+ * FrogUI may persist a device-specific B mapping, so use it when available.
+ * This helper deliberately reads the same shared-memory source as FrogUI: once
+ * the MTP helper has replaced the frontend, libretro button callbacks no longer
+ * reach the UI. */
+#define KEYMAP_FILE "/mnt/sdcard/frogui/keymap.txt"
+
+static int get_back_bit(void) {
+    FILE *f = fopen(KEYMAP_FILE, "r");
+    char line[64];
+    int bit = 14; /* TreeFrogUI's default logical B mapping. */
+
+    if (!f)
+        return bit;
+    while (fgets(line, sizeof(line), f)) {
+        int value;
+        if (sscanf(line, "B=%d", &value) == 1 && value >= 0 && value <= 15) {
+            bit = value;
+            break;
+        }
+    }
+    fclose(f);
+    return bit;
+}
+
 int main(int argc, char **argv) {
     if (argc < 2) return 2;
     pid_t responder = (pid_t)strtol(argv[1], NULL, 10);
@@ -17,19 +42,18 @@ int main(int argc, char **argv) {
     if (shmid < 0) return 4;
     volatile uint32_t *keys = (volatile uint32_t *)shmat(shmid, NULL, SHM_RDONLY);
     if (keys == (void *)-1) return 5;
-    /* B is often still asserted for a few frames after it has returned the
-     * previous USB session to FrogUI.  Do not treat that stale state as a
-     * request to immediately terminate the next session: arm only after B
-     * has been released continuously for 300ms, then require a fresh 100ms
-     * B hold. */
+    uint32_t back_mask = 1u << get_back_bit();
+    /* The MTP mode is entered with A, then the launch screen waits two seconds,
+     * so B cannot be stale here.  A short debounce makes a normal B tap work
+     * while still rejecting cubevol's one-sample input noise. */
     int released_samples = 0;
     int held_samples = 0;
     int armed = 0;
     for (;;) {
-        int down = ((*keys & (1u << 14)) != 0);
+        int down = ((*keys & back_mask) != 0);
         if (!armed) {
             if (down) released_samples = 0;
-            else if (++released_samples >= 15) armed = 1;
+            else if (++released_samples >= 3) armed = 1;
             usleep(20000);
             continue;
         }
@@ -38,7 +62,7 @@ int main(int argc, char **argv) {
         } else {
             held_samples = 0;
         }
-        if (held_samples >= 5) {
+        if (held_samples >= 2) {
             int fd = open("/tmp/treefrog_mtp_exit", O_WRONLY | O_CREAT | O_TRUNC, 0600);
             if (fd >= 0) close(fd);
             kill(responder, SIGTERM);
