@@ -1,0 +1,51 @@
+name: Post stable release to Discord
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  post-stable-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check that this release is marked Latest
+        id: latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_ID: ${{ github.event.release.id }}
+        run: |
+          latest_id=$(curl --fail-with-body --silent --show-error \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" \
+            | jq -r '.id')
+          if [ "$latest_id" = "$RELEASE_ID" ]; then
+            echo "is_latest=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_latest=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Post release and changelog
+        if: steps.latest.outputs.is_latest == 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_STABLE_RELEASE_WEBHOOK }}
+          RELEASE_NAME: ${{ github.event.release.name }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          title="${RELEASE_NAME:-$RELEASE_TAG}"
+          description=$(jq -Rn --arg body "$RELEASE_BODY" '$body[0:4000]')
+          payload=$(jq -n \
+            --arg title "TreeFrogUI $title released" \
+            --arg url "$RELEASE_URL" \
+            --argjson description "$description" \
+            '{embeds:[{title:$title,url:$url,description:$description,color:3066993,footer:{text:"Stable TreeFrogUI release"}}]}')
+          curl --fail-with-body \
+            -H 'Content-Type: application/json' \
+            --data "$payload" \
+            "$DISCORD_WEBHOOK_URL"
