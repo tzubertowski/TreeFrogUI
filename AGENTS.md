@@ -17,6 +17,10 @@
   in an update package. Configuration files listed in
   `update-force-include.txt` are intentionally replaced and backed up on-device.
 
+## Commit hygiene
+
+- Squash follow-up commits that correct the same change before pushing when practical; keep the final history focused instead of stacking incremental fix-ups.
+
 ## Privileged SD-card operations
 
 - Use `/home/tomaszz/bin/mount-sd-rw` to mount the inserted card read-write;
