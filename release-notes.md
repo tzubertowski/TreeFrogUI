@@ -1,5 +1,3 @@
-## TreeFrogUI v1.4.0
-
 ### What's new
 
 - **Cleaner SF-class audio:** mono output by default, steadier buffering, and fewer crackles on demanding cores.
@@ -8,8 +6,6 @@
 - **Cumulative updates:** this and later `1.x` update ZIPs can update any supported `1.x` installation from v1.1.0_c onward.
 - **USB MTP mode:** new guided USB MODE screen and PC file access for the SD card, with safe A/B entry and exit handling.
 - **MTP compatibility:** KDE/libmtp-compatible device identity, complete object metadata, and host-to-console file writes.
-- **Reliable USB re-entry:** exiting USB mode now fully resets the gadget controller, so MTP can be started again without rebooting the console.
-- **Quiet by default:** USB and FrogUI diagnostics now follow the existing `log.txt` opt-in switch; normal use no longer produces packet-level log spam.
 - **USB Mode in Apps:** USB Mode now lives with the other utilities instead of appearing in the Games library.
 - **OTG ROM library:** FAT32 USB storage with a `roms/` folder can be selected as a separate Games-library source. The UI clearly shows whether OTG storage is connected and falls back to SD when it is not.
 
@@ -28,6 +24,7 @@
 ### Contributors
 
 - **Jose Silva** and **[MartStartIV](https://github.com/MartStartIV)** — USB OTG storage and external-ROM-library work. [MartStartIV on YouTube](https://www.youtube.com/@MartStartIV)
+- **[@ozkaoz](https://github.com/ozkaoz)** — physical FN-button support in picoarch.
 
 ### Install or update
 
