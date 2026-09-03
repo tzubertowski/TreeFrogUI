@@ -7,7 +7,6 @@ on:
     types: [published, released, edited]
 
 permissions:
-  actions: write
   contents: read
 
 jobs:
@@ -19,7 +18,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_ID: ${{ github.event.release.id }}
-          LAST_POSTED_ID: ${{ vars.LAST_DISCORD_LATEST_RELEASE_ID }}
         run: |
           latest_id=$(curl --fail-with-body --silent --show-error \
             -H "Authorization: Bearer $GH_TOKEN" \
@@ -28,10 +26,8 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/releases/latest" \
             | tee /tmp/latest-release.json \
             | jq -r '.id')
-          if { [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$latest_id" = "$RELEASE_ID" ]; } \
-            && [ "$latest_id" != "$LAST_POSTED_ID" ]; then
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] || [ "$latest_id" = "$RELEASE_ID" ]; then
             echo "is_latest=true" >> "$GITHUB_OUTPUT"
-            echo "latest_id=$latest_id" >> "$GITHUB_OUTPUT"
           else
             echo "is_latest=false" >> "$GITHUB_OUTPUT"
           fi
@@ -54,13 +50,3 @@ jobs:
             -H 'Content-Type: application/json' \
             --data "$payload" \
             "$DISCORD_WEBHOOK_URL"
-
-      - name: Remember the posted release
-        if: steps.latest.outputs.is_latest == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          LATEST_ID: ${{ steps.latest.outputs.latest_id }}
-        run: |
-          gh variable set LAST_DISCORD_LATEST_RELEASE_ID \
-            --repo "$GITHUB_REPOSITORY" \
-            --body "$LATEST_ID"
