@@ -14,6 +14,9 @@
   ready.
 - Creating or uploading a GitHub release changes external state. Only run
   `publish_release.sh` when the user explicitly asks to publish.
+- Do not trigger GitHub Actions release/prerelease workflows without explicit
+  confirmation in the current conversation. Preparing a commit is fine; wait
+  for confirmation before starting the remote build.
 - Never put ROMs, BIOS files, saves, screenshots, or other personal SD-card data
   in an update package. Configuration files listed in
   `update-force-include.txt` are intentionally replaced and backed up on-device.
