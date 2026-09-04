@@ -45,17 +45,14 @@ case "$PROFILE" in
     r36sx)
         readonly EXPECTED_LABEL=R36SX
         readonly EXPECTED_TF_DEVICE=R36SX
-        readonly CLEAR_FORCE_SW=0
         ;;
     sf3000)
         readonly EXPECTED_LABEL=SF3000
         readonly EXPECTED_TF_DEVICE=SF3000
-        readonly CLEAR_FORCE_SW=1
         ;;
     sf3500)
         readonly EXPECTED_LABEL=SF3500
         readonly EXPECTED_TF_DEVICE=SF3500
-        readonly CLEAR_FORCE_SW=1
         ;;
     *) usage ;;
 esac
@@ -257,14 +254,6 @@ deploy_release() {
     [ ! -d "$RELEASE/docs" ] ||
         rsync -rltc "$RELEASE/docs" "$MOUNT/"
     rsync -rltc "$OVERLAY/" "$MOUNT/"
-
-    # SF-class devices use the hardware presentation watchdog. A marker from an
-    # older failed test must not pin a newly fixed build to software rendering.
-    if [ "$CLEAR_FORCE_SW" -eq 1 ] &&
-        [ -e "$MOUNT/cubegm/force_sw.flag" ]; then
-        rm -f -- "$MOUNT/cubegm/force_sw.flag"
-        echo "Removed stale cubegm/force_sw.flag."
-    fi
 
     sync
 

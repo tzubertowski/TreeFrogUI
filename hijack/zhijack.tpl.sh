@@ -185,7 +185,7 @@ while true; do
             sleep 0.3
             BIN="$PICOARCH"
             case "$CORE_PATH" in
-                *gpsp*|*pcsx*|*ps1*) [ -f "$PICOARCH_HI" ] && BIN="$PICOARCH_HI" ;;
+                *gpsp*|*pcsx*|*ps1*|*ppsspp*) [ -f "$PICOARCH_HI" ] && BIN="$PICOARCH_HI" ;;
             esac
             echo "--- iter $ITER: game [$CORE_PATH] via $BIN ---" >> "$LOG"
             echo "launcher pid=$$ exe=$(readlink /proc/$$/exe 2>/dev/null)" >> "$LOG"

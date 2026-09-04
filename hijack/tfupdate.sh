@@ -3,7 +3,11 @@
 # execution, so the installed copy can safely replace itself during an update.
 
 SDROOT=${TFUPDATE_ROOT:-/mnt/sdcard}
+USBROOT=${TFUPDATE_USB_ROOT:-/media/hdd}
 PACKAGE="$SDROOT/update.zip"
+# USB-host mode is mounted by mdev before the launcher runs. Prefer an update
+# on the external drive, while retaining the SD-root fallback for normal use.
+[ -f "$USBROOT/update.zip" ] && PACKAGE="$USBROOT/update.zip"
 WORK_DIR="$SDROOT/.treefrog-update"
 STAGE="$WORK_DIR/staging"
 LOG="$SDROOT/update.log"
@@ -64,7 +68,7 @@ install_tree() {
 mkdir -p "$WORK_DIR" || exit 1
 rm -rf "$STAGE"
 mkdir -p "$STAGE" || fail "cannot create staging directory"
-log "Applying $(basename "$PACKAGE") for $DEVICE"
+log "Applying $(basename "$PACKAGE") for $DEVICE from $(dirname "$PACKAGE")"
 
 extract_package >> "$LOG" 2>&1 \
     || fail "archive extraction failed; package kept for retry"
