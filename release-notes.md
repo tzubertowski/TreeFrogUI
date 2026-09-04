@@ -6,6 +6,11 @@
 - R36SX devices expose a 15-step mapping wizard ending in **FN**.
 - FN is gated by device detection, so other devices keep the normal 14-button mapping.
 
+### SF3000/SF3500 Integer scaling
+
+- Integer mode now keeps a cached 640×480 canvas with black bars and only rewrites the active game rectangle each frame.
+- The hot 2× path uses 32-bit pixel replication and duplicated rows use bulk copies, reducing CPU work on the 74KC while HCGE handles the panel mapping.
+
 ### Contributor
 
 - **[@ozkaoz](https://github.com/ozkaoz)** — R36SX FN-button implementation and physical validation.
