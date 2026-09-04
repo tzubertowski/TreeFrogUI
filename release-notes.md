@@ -13,6 +13,9 @@
   keeping the folder filter configurable.
 - Folder results and filter data are cached so entering Games and Apps does not
   rescan the SD card unnecessarily.
+- ROM names now use UTF-8 decoding with fallback fonts for Latin Extended
+  (including Polish), Cyrillic, Greek, Japanese, Korean, and Chinese text in
+  both FrogUI and picoarch menus.
 
 ### Experimental PSP support
 
