@@ -191,7 +191,7 @@ fi
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
 # (boot logos are NOT shipped here - install_first/<dev>/ provides the device-correct
 #  xgame-logo.bmp, so no fix_bootlogo script is needed.)
-for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer; do
+for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer ppsspp; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 install -m 0755 apps/usb_mode/usb_mode.sh "$OUT/cubegm/usb_mode.sh"

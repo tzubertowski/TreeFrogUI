@@ -108,5 +108,11 @@ clone TIC-80           https://github.com/nesbox/TIC-80
 clone sf2000-uae-amiga-emulator          https://github.com/angree/sf2000-uae-amiga-emulator
 clone sf2000-atarist-emulator            https://github.com/angree/sf2000-atarist-emulator
 
+# ── optional standalone ports ───────────────────────────────────────────────
+# Experimental Data Frog SF3000 PPSSPP port. The repository currently carries
+# the upstream source bundle; when a device-ready `ppsspp` executable is built,
+# place it at sdcard/cubegm/ppsspp and the PSP folder will prefer it at launch.
+clone ppsspp-datafrog-sf3000             https://github.com/DevBobby-REP/PPSSPP-DATAFROGSF3000
+
 echo ""
 echo "All cores cloned."

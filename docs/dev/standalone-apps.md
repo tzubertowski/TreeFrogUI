@@ -24,6 +24,7 @@ Current standalone apps:
 | `videos`         | `cubegm/video_player` | Hardware-decoded MP4/MKV/AVI/MOV video player |
 | `music`          | `cubegm/video_player` | Simple hardware-backed music player          |
 | `images`         | `cubegm/image_viewer` | Native hardware-decoded JPG/PNG/BMP/GIF/WebP/TIFF image viewer |
+| `psp`            | `cubegm/ppsspp`       | Optional standalone PPSSPP SF3000 port (falls back to libretro) |
 
 ## The launch contract
 
@@ -133,6 +134,13 @@ built binary in staging.
    `deploy.sh <device>` copies standalone binaries included by
    `build_release.sh`. For quick iteration, use a named payload when available,
    such as `deploy.sh r36sx pcsx4all`.
+
+For the experimental SF3000 PPSSPP port, clone
+`https://github.com/DevBobby-REP/PPSSPP-DATAFROGSF3000` with `clone_cores.sh`.
+Its device-ready executable is optional: place it at `cubegm/ppsspp`; PSP
+folders automatically use it when present and otherwise keep using the bundled
+`ppsspp_libretro.so` fallback. The upstream project reports very low early
+performance, so this is intentionally not enabled by default in releases.
 
 6. Rebuild FrogUI (`frogui/make -f Makefile.sf3000 frogui_libretro.so`), deploy.
 

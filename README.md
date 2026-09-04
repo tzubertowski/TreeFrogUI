@@ -104,6 +104,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **gpgx** | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
 | **segacd** | Sega CD / Mega CD | `genesis_plus_gx_libretro.so` |
 | **PS**, **ps1**, **psx** | PlayStation - 📖 [setup guide](docs/cores/ps1.md) | `pcsx_rearmed_libretro.so` |
+| **psp** | PSP - optional standalone SF3000 PPSSPP port, falls back to `ppsspp_libretro.so` | `ppsspp` / `ppsspp_libretro.so` |
 | **pce** | PC Engine / TurboGrafx-16 - 📖 [notes](docs/cores/pce.md) | `mednafen_pce_fast_libretro.so` |
 | **pcesgx** | PC Engine SuperGrafx | `mednafen_supergrafx_libretro.so` |
 | **pcfx** | PC-FX | `mednafen_pcfx_libretro.so` |
