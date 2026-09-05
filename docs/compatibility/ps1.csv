@@ -1,2 +1,3 @@
 Game,Region,Game ID,Format,Emulator/Core,Device,Hardware Revision,TreeFrogUI Version,Performance,Audio,Graphics,Status,Required Settings,Notes,Reported By
-Tekken 3,USA,SLUS-00402,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Regular,Regular,Good,Playable with Issues,Yes,Performance drops are observed in several game scenarios, but it is playable.,MartStartIV
+Tekken 3,USA,SLUS-00402,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Regular,Regular,Good,Playable with Issues,Yes,"Performance drops are observed in several game scenarios, but it is playable.",MartStartIV
+
