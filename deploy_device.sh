@@ -347,6 +347,10 @@ deploy_one() {
     fi
 
     rsync -tc "$src" "$dst"
+    if [ "$name" = frogui ]; then
+        mkdir -p "$MOUNT/frogui/lang"
+        rsync -rltc "$WORK/FrogUI/lang/" "$MOUNT/frogui/lang/"
+    fi
     sync
     hash_line="$(sha256sum "$dst")"
     dst_hash="${hash_line%% *}"

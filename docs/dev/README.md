@@ -8,3 +8,6 @@ Current hardware investigations include [MTP over USB](mtp.md),
 [USB-host storage](usb-host-storage.md), and the
 [R36SX second microSD socket](sd2-investigation.md). Emulator investigations
 include the parked [PPSSPP/PSP port](ppsspp-investigation.md).
+
+The shared runtime translation system is documented in the [runtime i18n
+design](i18n-design.md).

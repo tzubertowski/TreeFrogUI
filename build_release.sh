@@ -126,6 +126,10 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
+# Runtime language packs are FrogUI data, not compiled-in strings. Keep the
+# staged copy in sync so release archives and local deployments behave alike.
+mkdir -p "$STAGE/frogui/lang"
+rsync -rlt "$WORK/FrogUI/lang/" "$STAGE/frogui/lang/"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 # CI does not have the FrogShell checkout. Keep the tested libretro core
 # in-tree so release builds use the same picoarch display path as local builds.

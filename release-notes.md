@@ -16,6 +16,12 @@
 - ROM names now use UTF-8 decoding with fallback fonts for Latin Extended
   (including Polish), Cyrillic, Greek, Japanese, Korean, and Chinese text in
   both FrogUI and picoarch menus.
+- FrogUI and PicoArch now share editable runtime language packs. English and
+  Polish are translated; Spanish, Brazilian Portuguese, Japanese, Russian,
+  and Simplified Chinese are ready as community-editable starter packs.
+- When a selected language needs glyphs outside the chosen UI font, FrogUI
+  switches the complete UI to its heavier Unicode fallback face for a
+  consistent result.
 
 ### Experimental PSP support
 
