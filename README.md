@@ -481,6 +481,7 @@ Donations go straight toward buying the next device to port to.
 - **Jose Silva** — USB OTG storage and external-ROM-library work.
 - **[MartStartIV](https://github.com/MartStartIV)** — USB OTG storage work, testing, and the Spanish translation. [YouTube](https://www.youtube.com/@MartStartIV)
 - **[Maheshivara](https://github.com/Maheshivara)** — Brazilian Portuguese translation.
+- **@Q_ta** — Japanese translation.
 - **[@ozkaoz](https://github.com/ozkaoz)** — R36SX physical FN-button input support in [TreeFrogUI_picoarch#1](https://github.com/tzubertowski/TreeFrogUI_picoarch/pull/1).
 
 ## Credits
