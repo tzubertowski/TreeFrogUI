@@ -24,6 +24,8 @@
   consistent result.
 - Polish now uses the complete Latin Extended fallback across the whole UI, so
   accented letters such as `Ę`, `Ł`, and `Ź` render correctly and consistently.
+- Friendly System Names now come from the same editable language packs. Official
+  platform names remain canonical, while descriptive labels are localized.
 - Finishing Button Mapping now returns cleanly to Settings instead of dropping
   into a stale system-grid view; malformed hand-edited keymaps are rejected
   safely.
