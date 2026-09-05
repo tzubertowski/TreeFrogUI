@@ -130,6 +130,11 @@ cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"
 rsync -rlt "$(dirname "$FROGUI")/lang/" "$STAGE/frogui/lang/"
+# Polish and other Latin-Extended packs need DejaVu rather than the bundled
+# CJK face. Source it from FrogUI so CI releases do not depend on a stale SD
+# staging tree.
+mkdir -p "$STAGE/frogui/fonts"
+cp_if_diff "$(dirname "$FROGUI")/fonts/TreeFrogLatin.ttf" "$STAGE/frogui/fonts/TreeFrogLatin.ttf"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 # CI does not have the FrogShell checkout. Keep the tested libretro core
 # in-tree so release builds use the same picoarch display path as local builds.
