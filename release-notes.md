@@ -39,6 +39,9 @@
 
 - **[@ozkaoz](https://github.com/ozkaoz)** — R36SX FN-button implementation and
   physical validation.
+- **[MartStartIV](https://github.com/MartStartIV)** — Spanish translation.
+- **[Maheshivara](https://github.com/Maheshivara)** — Brazilian Portuguese
+  translation.
 
 ### Install or update
 
