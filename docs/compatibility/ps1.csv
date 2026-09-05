@@ -1,3 +1,1 @@
 Game,Region,Game ID,Format,Emulator/Core,Device,Hardware Revision,TreeFrogUI Version,Performance,Audio,Graphics,Status,Required Settings,Notes,Reported By
-Example Game,NTSC-U,SLUS-00000,CHD,PCSX-ReARMed,R36SX,v2.7,1.3.0,Full Speed,Good,Good,Playable,None,Example report,username
-Example Game 2,PAL,SLES-00000,BIN/CUE,PCSX-ReARMed,SF3000,,1.3.0,Minor Slowdowns,Good,Good,Playable with Issues,None,Minor slowdown in some areas,username
