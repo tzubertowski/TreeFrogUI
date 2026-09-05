@@ -1,4 +1,7 @@
 Game,Region,Game ID,Format,Emulator/Core,Device,Hardware Revision,TreeFrogUI Version,Performance,Audio,Graphics,Status,Required Settings,Notes,Reported By
 Tekken 3,USA,SLUS-00402,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Regular,Regular,Good,Playable with Issues,Yes,"Performance drops are observed in several game scenarios, but it is playable.",MartStartIV
 "007: The World is Not Enough",PAL,"SLES-03137",BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Good,Pefect,Good,Playable,Global,Good overall performance,MartStartIV
-
+2002 FIFA World Cup,PAL,SLES-03830,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Good,Good,Good,Playable,Global default,"Good performance, though with some FPS drops.",MartStartIV
+In Cold Blood,PAL,SCES-02153,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Good,Good,Regular,Playable,Global default,"Adequate performance, though it feels sluggish at times.",MartStartIV
+Aconcagua,NTSC,SCPS-10131,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Pefect,Good,Low,Pefect,Global default,"Based on my testing, the version I tried is translated into Spanish.",MartStartIV
+Alien Resurrection,PAL,SLES-02913,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX),V1.3.0_I,Good,Good,Good,Playable,Global default,Good overall performance,MartStartIV
