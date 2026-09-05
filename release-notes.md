@@ -22,6 +22,11 @@
 - When a selected language needs glyphs outside the chosen UI font, FrogUI
   switches the complete UI to its heavier Unicode fallback face for a
   consistent result.
+- Polish now uses the complete Latin Extended fallback across the whole UI, so
+  accented letters such as `Ę`, `Ł`, and `Ź` render correctly and consistently.
+- Finishing Button Mapping now returns cleanly to Settings instead of dropping
+  into a stale system-grid view; malformed hand-edited keymaps are rejected
+  safely.
 
 ### Experimental PSP support
 
