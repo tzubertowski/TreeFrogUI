@@ -1,12 +1,6 @@
 #!/bin/sh
+# Use the stock init/power-management route. The forced BusyBox poweroff
+# leaves these consoles with a dead display while CubeVol's PMIC path is
+# still running; reboot -p lets init run rcK and issue the normal power-off.
 sync
-sleep 1
-if command -v poweroff >/dev/null 2>&1; then
-    poweroff -f 2>/dev/null || poweroff
-elif [ -x /sbin/poweroff ]; then
-    /sbin/poweroff -f 2>/dev/null || /sbin/poweroff
-elif [ -x /bin/busybox ]; then
-    /bin/busybox poweroff -f 2>/dev/null || /bin/busybox poweroff
-else
-    /sbin/reboot -p
-fi
+exec /sbin/reboot -p
