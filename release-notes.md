@@ -10,6 +10,7 @@
   it as the fifteenth bindable button; other devices retain the normal layout.
 - **PicoArch in-game menu:** the physical FN button now opens the PicoArch menu directly on R36* devices.
 - **Shutdown app:** Apps now includes a one-step poweroff action that syncs the card before turning off the console.
+- Shutdown now simulates the tested physical power-button long press through the vendor GPIO path; SF3000 hides the software entry because it has a latching power switch, while SF3100/SF3500 and R36 devices keep it visible.
 - Settings categories are collapsible and remember their state across reboots.
 - Per-system extension whitelists hide non-launchable PS1 companion files while
   keeping the folder filter configurable.
