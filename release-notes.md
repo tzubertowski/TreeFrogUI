@@ -6,6 +6,15 @@
 
 ### UI and input
 
+- ROM list artwork lookups now keep a persistent negative cache, so ROMs without
+  artwork no longer repeat hundreds of SD-card probes after each reboot; the
+  cache invalidates automatically when artwork folders change.
+- Switching between Games, Apps, Settings, Activity, and search views now
+  redraws the complete screen immediately instead of leaving stale content
+  until another input event.
+- Latin locale typography keeps the selected UI font consistently while
+  Japanese, Korean, Chinese, Cyrillic, and other scripts continue using the
+  appropriate fallback glyphs.
 - **R36SX FN button:** the mapping wizard detects the physical FN key and adds
   it as the fifteenth bindable button; other devices retain the normal layout.
 - **PicoArch in-game menu:** the physical FN button now opens the PicoArch menu directly on R36* devices.
