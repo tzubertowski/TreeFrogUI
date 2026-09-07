@@ -133,7 +133,7 @@ without explicit authorization to publish.
 
 The `Build TreeFrogUI release` workflow in `.github/workflows/release.yml`
 repeats the cross-build and packaging process on an Ubuntu runner. It downloads
-the public SF3000 toolchain, checks out the FrogUI and picoarch `r36sx` sources,
+the public SF3000 toolchain, checks out the FrogUI `treefrogui` and picoarch `r36sx` sources,
 seeds ignored staging files from an existing full release, builds both
 frontends, and publishes the full ZIP plus `update.zip`.
 

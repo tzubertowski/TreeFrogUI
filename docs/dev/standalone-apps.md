@@ -80,7 +80,7 @@ job; picoarch and icube are untouched.
 
 ## How to add a new standalone app
 
-All edits are in `FrogUI/frogui_libretro.c` (branch `r36sx`), plus dropping the
+All edits are in `FrogUI/frogui_libretro.c` (branch `treefrogui`), plus dropping the
 built binary in staging.
 
 1. **Define the binary path** (near the other `*_BIN` defines):

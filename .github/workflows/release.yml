@@ -104,7 +104,7 @@ jobs:
           sudo mkdir -p /home/tomaszz
           sudo ln -sfn "$WORK_ROOT" /home/tomaszz/sf3000-work
           ln -sfn "$GITHUB_WORKSPACE" sf3000_treefrogui
-          git clone --depth 1 --branch r36sx https://github.com/tzubertowski/FrogUI.git FrogUI
+          git clone --depth 1 --branch treefrogui https://github.com/tzubertowski/FrogUI.git FrogUI
           git clone --depth 1 --branch r36sx https://github.com/tzubertowski/TreeFrogUI_picoarch.git picoarch
           # The media-player Makefiles refer to ../../../picoarch from the
           # checkout layout used by local development.
