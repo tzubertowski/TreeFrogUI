@@ -37,6 +37,7 @@ PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
 FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 FROGSHELL_ASSET="$(pwd)/assets/frogshell_libretro.so"
+EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
 # CI/release builders can provide the small per-device stock bootstrap files
 # from a previous full release instead of keeping proprietary stock SD images
@@ -121,6 +122,8 @@ make -C apps/video_player >/dev/null
 make -C apps/image_viewer >/dev/null
 if [ -d "$FROGSHELL" ]; then
     make -C "$FROGSHELL" TARGET="$(pwd)/sdcard/cubegm/cores/frogshell_libretro.so" >/dev/null
+else
+    cp "$FROGSHELL_ASSET" "$STAGE/cubegm/cores/frogshell_libretro.so"
 fi
 cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$2"; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
@@ -136,9 +139,7 @@ rsync -rlt "$(dirname "$FROGUI")/lang/" "$STAGE/frogui/lang/"
 mkdir -p "$STAGE/frogui/fonts"
 cp_if_diff "$(dirname "$FROGUI")/fonts/TreeFrogLatin.ttf" "$STAGE/frogui/fonts/TreeFrogLatin.ttf"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
-# CI does not have the FrogShell checkout. Keep the tested libretro core
-# in-tree so release builds use the same picoarch display path as local builds.
-cp_if_diff "$FROGSHELL_ASSET" "$STAGE/cubegm/cores/frogshell_libretro.so"
+cp_if_diff "$EBOOK" "$STAGE/cubegm/ebook"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null
 cp_if_diff "$HIJACK/nosleep" "$STAGE/cubegm/nosleep"
 

@@ -82,7 +82,7 @@ jobs:
           echo "update_base=$update_base" >> "$GITHUB_OUTPUT"
 
       - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install --yes build-essential cmake unzip zip jq
+        run: sudo apt-get update && sudo apt-get install --yes build-essential cmake unzip zip jq p7zip-full
 
       - name: Download SF3000 cross-toolchain
         run: |
@@ -106,6 +106,9 @@ jobs:
           ln -sfn "$GITHUB_WORKSPACE" sf3000_treefrogui
           git clone --depth 1 --branch treefrogui https://github.com/tzubertowski/FrogUI.git FrogUI
           git clone --depth 1 --branch r36sx https://github.com/tzubertowski/TreeFrogUI_picoarch.git picoarch
+          git clone --depth 1 --branch main https://github.com/tzubertowski/FrogShell.git FrogShell
+          git clone --depth 1 --branch main https://github.com/tzubertowski/TreeFrogUI_ebook_reader.git ebook
+          git clone --depth 1 --branch 1.24.10 --recurse-submodules --shallow-submodules https://github.com/ArtifexSoftware/mupdf.git mupdf
           # The media-player Makefiles refer to ../../../picoarch from the
           # checkout layout used by local development.
           ln -sfn "$WORK_ROOT/picoarch" "$GITHUB_WORKSPACE/../picoarch"
@@ -160,6 +163,14 @@ jobs:
           ./build_sf3000.sh
           ./build_picoarch_hi.sh
 
+      - name: Build and check ebook reader
+        working-directory: ${{ env.WORK_ROOT }}/ebook
+        run: |
+          gcc -I../mupdf/include -ffunction-sections -fdata-sections test_reader.c -Wl,--gc-sections -o /tmp/test-ebook-reader
+          /tmp/test-ebook-reader
+          ./build_mupdf_sf.sh
+          ./build_reader_sf.sh
+
       - name: Build unified release tree
         working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         env:
@@ -173,6 +184,8 @@ jobs:
         run: |
           set -euo pipefail
           current=release/latest/release
+          cmp "$WORK_ROOT/ebook/ebook" "$current/cubegm/ebook"
+          cmp sdcard/cubegm/cores/frogshell_libretro.so "$current/cubegm/cores/frogshell_libretro.so"
           # A CI build starts from the previous full release, so every shipped
           # core/resource must remain present unless it was deliberately
           # removed in the build script. Catch silent cp_if_diff omissions.
@@ -206,7 +219,10 @@ jobs:
           set -euo pipefail
           update_base_zip="$(find "$RUNNER_TEMP/update-base" -maxdepth 1 -name 'TreeFrogUI_*.zip' -print -quit)"
           TREEFROG_CUMULATIVE_UPDATE=1 ./pack_release.sh "$VERSION" "$update_base_zip"
+          ./tests/test_release_base_selection.sh
           ./tests/test_offline_update.sh release/latest/update.zip "$update_base_zip"
+          7z t "release/latest/TreeFrogUI_${VERSION}.zip" >/dev/null
+          7z t release/latest/update.zip >/dev/null
           if [[ "$VERSION" == v0.0.0-ci.* ]]; then
             cp "release/latest/TreeFrogUI_${VERSION}.zip" "$RUNNER_TEMP/TreeFrogUI_build.zip"
             cp release/latest/update.zip "$RUNNER_TEMP/update_build.zip"

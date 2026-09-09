@@ -1,63 +1,21 @@
-## What's new
+## TreeFrogUI v1.5.0 prerelease
 
-### Video and device fixes
+- FrogShell gains an optional Developer Mode with a terminal, command history,
+  script and executable launching, and USB keyboard input where supported.
+  Hold L1 + R1 + X + Y for about two seconds to toggle it, or create
+  `frogui/developer.flag` on the SD card.
+- FrogShell's on-screen keyboard adds caps, symbols, and modifier keys.
+- The ebook reader combines upstream progress-saving improvements with the
+  local fixes for page-turn freezes, hidden progress files, and page fit above
+  the status bar. Saves use checked atomic replacement and are deferred until
+  navigation settles; the MuPDF cache remains limited to 16 MB.
+- Updated PS1 compatibility reports.
+- Release builds now compile FrogShell and the ebook reader from source so the
+  packages include their latest changes.
 
-- SF3000/SF3500 integer scaling uses a cached 640×480 canvas with black bars; the hot 2× path keeps the work on the fast pixel-copy path while HCGE handles panel presentation.
+Thanks to [ozkaoz](https://github.com/ozkaoz) for FrogShell Developer Mode and
+[Maheshivara](https://github.com/Maheshivara) for ebook reader improvements.
 
-### UI and input
-
-- ROM list artwork lookups now keep a persistent negative cache, so ROMs without
-  artwork no longer repeat hundreds of SD-card probes after each reboot; the
-  cache invalidates automatically when artwork folders change.
-- Switching between Games, Apps, Settings, Activity, and search views now
-  redraws the complete screen immediately instead of leaving stale content
-  until another input event.
-- Latin locale typography keeps the selected UI font consistently while
-  Japanese, Korean, Chinese, Cyrillic, and other scripts continue using the
-  appropriate fallback glyphs.
-- **R36SX FN button:** the mapping wizard detects the physical FN key and adds
-  it as the fifteenth bindable button; other devices retain the normal layout.
-- **PicoArch in-game menu:** the physical FN button now opens the PicoArch menu directly on R36* devices.
-- **Shutdown app:** Apps now includes a one-step poweroff action that syncs the card before turning off the console.
-- Shutdown now simulates the tested physical power-button long press through the vendor GPIO path; SF3000 hides the software entry because it has a latching power switch, while SF3100/SF3500 and R36 devices keep it visible.
-- Settings categories are collapsible and remember their state across reboots.
-- Per-system extension whitelists hide non-launchable PS1 companion files while
-  keeping the folder filter configurable.
-- Folder results and filter data are cached so entering Games and Apps does not
-  rescan the SD card unnecessarily.
-- ROM names now use UTF-8 decoding with fallback fonts for Latin Extended
-  (including Polish), Cyrillic, Greek, Japanese, Korean, and Chinese text in
-  both FrogUI and picoarch menus.
-- FrogUI and PicoArch now share editable runtime language packs. English,
-  Polish, Spanish, Brazilian Portuguese, and Japanese are translated; Russian
-  and Simplified Chinese are ready as community-editable starter packs.
-- When a selected language needs glyphs outside the chosen UI font, FrogUI
-  switches the complete UI to its heavier Unicode fallback face for a
-  consistent result.
-- Polish now uses the complete Latin Extended fallback across the whole UI, so
-  accented letters such as `Ę`, `Ł`, and `Ź` render correctly and consistently.
-- Friendly System Names now come from the same editable language packs. Official
-  platform names remain canonical, while descriptive labels are localized.
-- Finishing Button Mapping now returns cleanly to Settings instead of dropping
-  into a stale system-grid view; malformed hand-edited keymaps are rejected
-  safely.
-
-### Contributors
-
-- **[@ozkaoz](https://github.com/ozkaoz)** — R36SX FN-button implementation and
-  physical validation.
-- **[MartStartIV](https://github.com/MartStartIV)** — Spanish translation.
-- **[Maheshivara](https://github.com/Maheshivara)** — Brazilian Portuguese
-  translation.
-- **@Q_ta** — Japanese translation.
-
-### Install or update
-
-Recommended: use the [TreeFrogUI Installer](https://github.com/tzubertowski/TreeFrogUI-installer/releases/latest).
-
-Manual fallback:
-
-- Fresh install: apply `install_first/<device>/` from the full package.
-- Update: copy `update.zip` to the SD-card root and reboot.
-
-Keep the original SD-card backup before applying an update.
+This is a prerelease for testing. Copy `update.zip` to the SD-card root and
+reboot, or use the full ZIP and the matching `install_first/<device>/` files
+for a fresh installation. Keep a backup of your card.
