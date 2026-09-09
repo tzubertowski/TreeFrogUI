@@ -1,5 +1,9 @@
 ## TreeFrogUI v1.5.0 prerelease
 
+- Audio fixes suppress idle speaker static, fix silent PS1 launches and media
+  playback after audio handoff, and make launcher menu ticks audible.
+- System volume is shared between FrogUI Settings, the in-game menu, and the
+  physical volume buttons, with changes followed live during gameplay.
 - FrogShell gains an optional Developer Mode with a terminal, command history,
   script and executable launching, and USB keyboard input where supported.
   Hold L1 + R1 + X + Y for about two seconds to toggle it, or create
@@ -13,7 +17,8 @@
 - Release builds now compile FrogShell and the ebook reader from source so the
   packages include their latest changes.
 
-Thanks to [ozkaoz](https://github.com/ozkaoz) for FrogShell Developer Mode and
+Thanks to [ozkaoz](https://github.com/ozkaoz) for the audio fixes and FrogShell
+Developer Mode, and
 [Maheshivara](https://github.com/Maheshivara) for ebook reader improvements.
 
 This is a prerelease for testing. Copy `update.zip` to the SD-card root and
