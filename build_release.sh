@@ -138,6 +138,9 @@ rsync -rlt "$(dirname "$FROGUI")/lang/" "$STAGE/frogui/lang/"
 # staging tree.
 mkdir -p "$STAGE/frogui/fonts"
 cp_if_diff "$(dirname "$FROGUI")/fonts/TreeFrogLatin.ttf" "$STAGE/frogui/fonts/TreeFrogLatin.ttf"
+cp_if_diff "$(dirname "$FROGUI")/fonts/alium_Nunito.ttf" "$STAGE/frogui/fonts/alium_Nunito.ttf"
+cp_if_diff "$(dirname "$FROGUI")/fonts/alium_Nunito-OFL.txt" "$STAGE/frogui/fonts/alium_Nunito-OFL.txt"
+cp_if_diff "$(dirname "$FROGUI")/fonts/alium_README.md" "$STAGE/frogui/fonts/alium_README.md"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 cp_if_diff "$EBOOK" "$STAGE/cubegm/ebook"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null

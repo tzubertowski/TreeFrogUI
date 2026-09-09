@@ -193,7 +193,7 @@ Dark, low-contrast images work best because menu text is drawn over them.
 
 ## Built-in colour themes
 
-TreeFrogUI includes 30 built-in themes:
+TreeFrogUI's built-in themes include:
 
 | Theme | Style |
 |---|---|
@@ -227,6 +227,15 @@ TreeFrogUI includes 30 built-in themes:
 | `Gruvbox` | Warm sand and yellow |
 | `Tokyo Night` | Blue, purple and cyan |
 | `Solarized Dark` | Dark teal and yellow |
+
+The Allium palette ports are `alium_default`, `alium_alliumboy`, `alium_blue`,
+`alium_boxart`, `alium_brown`, `alium_bubblegum`, `alium_eva_01`, `alium_min`,
+`alium_pastel`, `alium_snes`, `alium_spruceos`, and `alium_synthwave`.
+Select **alium_Nunito** under Font for Allium's default **Nunito Bold** face.
+Turn Background Images off to see the plain colors. These ports adapt the
+source RGB palette to RGB565; wallpapers, transparency, and layouts are not
+included. Credits and licenses ship in `frogui/fonts/alium_README.md` and
+`frogui/fonts/alium_Nunito-OFL.txt`.
 
 ---
 
