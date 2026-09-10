@@ -4,6 +4,10 @@
   playback after audio handoff, and make launcher menu ticks audible.
 - System volume is shared between FrogUI Settings, the in-game menu, and the
   physical volume buttons, with changes followed live during gameplay.
+- Appearance settings add optional Allium-inspired colour palettes, the Nunito
+  font used by Allium, and an adjustable UI font size from 18 to 26 px. The
+  existing default colour theme remains unchanged.
+- Updated Spanish translations and refined Japanese system names.
 - FrogShell gains an optional Developer Mode with a terminal, command history,
   script and executable launching, and USB keyboard input where supported.
   Hold L1 + R1 + X + Y for about two seconds to toggle it, or create
@@ -19,7 +23,10 @@
 
 Thanks to [ozkaoz](https://github.com/ozkaoz) for the audio fixes and FrogShell
 Developer Mode, and
-[Maheshivara](https://github.com/Maheshivara) for ebook reader improvements.
+[Maheshivara](https://github.com/Maheshivara) for ebook reader improvements,
+[MartStartIV](https://github.com/MartStartIV) for the Spanish translation
+updates, and [spanscape](https://github.com/spanscape) for the Japanese system
+name refinements.
 
 This is a prerelease for testing. Copy `update.zip` to the SD-card root and
 reboot, or use the full ZIP and the matching `install_first/<device>/` files
