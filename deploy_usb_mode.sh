@@ -3,7 +3,7 @@
 set -Eeuo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
-CORE=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
+CORE=/home/tomaszz/sf3000-work/FrogUI/out/frogui_libretro.so
 RUNTIME="$REPO/apps/usb_mode/usb_mode.sh"
 MTP_ENTRY="$REPO/apps/usb_mode/usb_mtp.sh"
 HOST_ENTRY="$REPO/apps/usb_mode/usb_host.sh"

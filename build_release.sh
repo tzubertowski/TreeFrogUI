@@ -34,11 +34,16 @@ DUMMY_ABS="/mnt/sdcard/$DUMMY_REL"        # rkgame needs the ABSOLUTE path
 
 PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
-FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
+FROGUI=/home/tomaszz/sf3000-work/FrogUI/out/frogui_libretro.so
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 FROGSHELL_ASSET="$(pwd)/assets/frogshell_libretro.so"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
+
+# Third party licenses
+HB_LICENSE=/home/tomaszz/sf3000-work/FrogUI/out/frogui_libretro.harfbuzz.LICENSE
+SB_LICENSE=/home/tomaszz/sf3000-work/FrogUI/out/frogui_libretro.sheenbidi.LICENSE
+
 # CI/release builders can provide the small per-device stock bootstrap files
 # from a previous full release instead of keeping proprietary stock SD images
 # in the workspace. Each directory must contain setting.xml.
@@ -129,6 +134,8 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
+cp_if_diff "$HB_LICENSE"      "$STAGE/cubegm/cores/frogui_libretro.harfbuzz.LICENSE"
+cp_if_diff "$SB_LICENSE"      "$STAGE/cubegm/cores/frogui_libretro.sheenbidi.LICENSE"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"
@@ -141,6 +148,8 @@ cp_if_diff "$(dirname "$FROGUI")/fonts/TreeFrogLatin.ttf" "$STAGE/frogui/fonts/T
 cp_if_diff "$(dirname "$FROGUI")/fonts/alium_Nunito.ttf" "$STAGE/frogui/fonts/alium_Nunito.ttf"
 cp_if_diff "$(dirname "$FROGUI")/fonts/alium_Nunito-OFL.txt" "$STAGE/frogui/fonts/alium_Nunito-OFL.txt"
 cp_if_diff "$(dirname "$FROGUI")/fonts/alium_README.md" "$STAGE/frogui/fonts/alium_README.md"
+cp_if_diff "$(dirname "$FROGUI")/fonts/CascadiaCode-Bold.ttf" "$STAGE/frogui/fonts/CascadiaCode-Bold.ttf"
+cp_if_diff "$(dirname "$FROGUI")/fonts/CascadiaCode-Bold.OFL.txt" "$STAGE/frogui/fonts/CascadiaCode-Bold.OFL.txt"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 cp_if_diff "$EBOOK" "$STAGE/cubegm/ebook"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null

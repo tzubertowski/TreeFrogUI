@@ -294,7 +294,7 @@ deploy_one() {
             dst="$MOUNT/cubegm/picoarch_hi"
             ;;
         frogui)
-            src="$WORK/FrogUI/frogui_libretro.so"
+            src="$WORK/FrogUI/out/frogui_libretro.so"
             dst="$MOUNT/cubegm/cores/frogui_libretro.so"
             ;;
         frogshell)
