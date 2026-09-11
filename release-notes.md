@@ -8,6 +8,8 @@
   font used by Allium, and an adjustable UI font size from 18 to 26 px. The
   existing default colour theme remains unchanged.
 - Updated Spanish translations and refined Japanese system names.
+- Arabic language support and improved complex Unicode text rendering via
+  HarfBuzz and SheenBidi, with the required font and license files bundled.
 - FrogShell gains an optional Developer Mode with a terminal, command history,
   script and executable launching, and USB keyboard input where supported.
   Hold L1 + R1 + X + Y for about two seconds to toggle it, or create

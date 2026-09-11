@@ -34,7 +34,8 @@ DUMMY_ABS="/mnt/sdcard/$DUMMY_REL"        # rkgame needs the ABSOLUTE path
 
 PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
-FROGUI=/home/tomaszz/sf3000-work/FrogUI/frogui_libretro.so
+FROGUI_ROOT=/home/tomaszz/sf3000-work/FrogUI
+FROGUI="$FROGUI_ROOT/out/frogui_libretro.so"
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 FROGSHELL_ASSET="$(pwd)/assets/frogshell_libretro.so"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
@@ -132,15 +133,20 @@ cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"
-rsync -rlt "$(dirname "$FROGUI")/lang/" "$STAGE/frogui/lang/"
+rsync -rlt "$FROGUI_ROOT/lang/" "$STAGE/frogui/lang/"
 # Polish and other Latin-Extended packs need DejaVu rather than the bundled
 # CJK face. Source it from FrogUI so CI releases do not depend on a stale SD
 # staging tree.
 mkdir -p "$STAGE/frogui/fonts"
-cp_if_diff "$(dirname "$FROGUI")/fonts/TreeFrogLatin.ttf" "$STAGE/frogui/fonts/TreeFrogLatin.ttf"
-cp_if_diff "$(dirname "$FROGUI")/fonts/alium_Nunito.ttf" "$STAGE/frogui/fonts/alium_Nunito.ttf"
-cp_if_diff "$(dirname "$FROGUI")/fonts/alium_Nunito-OFL.txt" "$STAGE/frogui/fonts/alium_Nunito-OFL.txt"
-cp_if_diff "$(dirname "$FROGUI")/fonts/alium_README.md" "$STAGE/frogui/fonts/alium_README.md"
+cp_if_diff "$FROGUI_ROOT/fonts/TreeFrogLatin.ttf" "$STAGE/frogui/fonts/TreeFrogLatin.ttf"
+cp_if_diff "$FROGUI_ROOT/fonts/alium_Nunito.ttf" "$STAGE/frogui/fonts/alium_Nunito.ttf"
+cp_if_diff "$FROGUI_ROOT/fonts/alium_Nunito-OFL.txt" "$STAGE/frogui/fonts/alium_Nunito-OFL.txt"
+cp_if_diff "$FROGUI_ROOT/fonts/alium_README.md" "$STAGE/frogui/fonts/alium_README.md"
+cp_if_diff "$FROGUI_ROOT/fonts/CascadiaCode-Bold.ttf" "$STAGE/frogui/fonts/CascadiaCode-Bold.ttf"
+cp_if_diff "$FROGUI_ROOT/fonts/CascadiaCode-Bold.OFL.txt" "$STAGE/frogui/fonts/CascadiaCode-Bold.OFL.txt"
+mkdir -p "$STAGE/frogui/licenses"
+cp_if_diff "$FROGUI_ROOT/out/frogui_libretro.harfbuzz.LICENSE" "$STAGE/frogui/licenses/harfbuzz.LICENSE"
+cp_if_diff "$FROGUI_ROOT/out/frogui_libretro.sheenbidi.LICENSE" "$STAGE/frogui/licenses/sheenbidi.LICENSE"
 cp_if_diff "$TYRQUAKE"    "$STAGE/cubegm/cores/tyrquake_libretro.so"
 cp_if_diff "$EBOOK" "$STAGE/cubegm/ebook"
 sh "$HIJACK/build_tfhijack.sh" >/dev/null
