@@ -1,70 +1,91 @@
 Game,Region,Game ID,Format,Emulator/Core,Device,Hardware Revision,TreeFrogUI Version,Performance,Audio,Graphics,Status,Required Settings,Notes,Reported By
-Tekken 3,USA,SLUS-00402,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Regular,Regular,Good,Playable with Issues,Yes,"Performance drops are observed in several game scenarios, but it is playable.",MartStartIV
-007: The World is Not Enough,PAL,SLES-03137,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Pefect,Good,Quite playable,Global default,"Good overall performance",MartStartIV
-2002 FIFA World Cup,PAL,SLES-03830,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Good performance, though with some FPS drops.",MartStartIV
-In Cold Blood,PAL,SCES-02153,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Regular,Playable,Global default,"Adequate performance, though it feels sluggish at times.",MartStartIV
-Aconcagua,NTSC,SCPS-10131,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Pefect,Good,Low,Pefect,Global default,"Based on my testing, the version I tried is translated into Spanish.",MartStartIV
-Alien Resurrection,PAL,SLES-02913,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Good overall performance",MartStartIV
-F1 2000,PAL,SLES-02722,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,None,None,None,Not Playable,None,"It only loads the EA GAMES intro video.",MartStartIV
-Alien Trilogy,PAL,SLES-00101,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Sometimes the game drops to around 4 fps, but only on occasion.",MartStartIV
-Alone in the dark - The New Nightmared,PAL,SLES-02801,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Pefect,Regular,Playable,Global default,"The performance is quite good.",MartStartIV
-Atlantis: The Lost Empire,PAL,SCES-03541,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"It feels a bit demanding for the console at times.",MartStartIV
-Batman & Robin,PAL,SLES-00102,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Regular,Good,Regular,Playable,Global default,"The FPS are a bit low but stable.",MartStartIV
-Blaster Master - Blasting Again,PAL,SLES-02273,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Perfect,Good,Perfect,Global default,"I haven't noticed any FPS drops.",MartStartIV
-C-12 Final Resistance,PAL,SCES-03366,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"This game performs well, despite reports on forums suggesting it generally wouldn't run.",MartStartIV
-Carmagedoon,PAL,SLES-01960,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Regular,Regular,Regular,Playable with Issues,Global default,"In the tests conducted, the game currently experiences FPS drops.",MartStartIV
-Castlevania: Symphony of the Night,USA,SLUS-00067,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Pefect,Pefect,Good,Perfect,Global default,"This game really runs very well :)",MartStartIV
-Chaos Break,PAL,SLES-03107,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Good performance and efficiency with TreeFrogUI",MartStartIV
-Covert Ops: Nuclear Dawn ,PAL,SCES-02816,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Good performance in this case.",MartStartIV
-Colin Mcrae Rally 2.0,PAL,SLES-02847,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Yes,"Good performance in this case, but with some FPS drops.",MartStartIV
-Colony Wars: Red Sun,PAL,SLES-02621,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Pefect,Playable,Global default,"Some FPS drops",MartStartIV
-Colony Wars: Vengeance,PAL,SLES-01382,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Some FPS drops",MartStartIV
-Countdown Vampires,PAL,SLES-02835,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Perfect,Global default,"good overall performance",MartStartIV
-Crash Bandicoot 1,PAL,SCES-00344,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"The game performs well with the mentioned TreeFrogUI version.",MartStartIV
-Crash Bandicoot 2: Cortex Strikes Back,PAL,SCES-00967,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"The game performs well with the mentioned TreeFrogUI version.",MartStartIV
-Crash Bandicoot 3: Warped,PAL,SCES-01420,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"The FPS fluctuates a bit.",MartStartIV
-Crash Bash,PAL,SCES-02834,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Perfect,Global default,"good overall performance",MartStartIV
-Crash Team Racing,PAL,SCES-02105,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"The FPS fluctuates a bit.",MartStartIV
-Destruction Derby Raw,PAL,SCES-02060,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Perfect,Good,Playable,Global default,"There are just a few issues with the menu.",MartStartIV
-Die Hard Trilogy,USA,SLUS-00119,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Regular,Good,Regular,Playable with Issues,Yes,"In one of the modes, there are FPS stutters.",MartStartIV
-Dino Crisis 1,PAL,SLES-02207,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Perfect,Good,Perfect,Global default,"good performance",MartStartIV
-Dino Crisis 2,PAL,SLES-03221,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Discworld Noir,PAL,SLES-01549,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Perfect,Global default,"No issues with its execution.",MartStartIV
-Disney's The Lion King: Simba's Mighty Adventure,PAL,SLES-03267,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"No issues with its execution.",MartStartIV
-Disney Tarzan,PAL,SCES-01519,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Regular,Playable,Global default,"No issues with its execution.",MartStartIV
-Dragon Ball - Final Bout,PAL,SLES-00512,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Pefect,Pefect,Pefect,Perfect,Global default,"This is one of the games that works best with pcsx4all.",MartStartIV
-Fade to black,USA,SLUS-00236,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Fear Effect 1,PAL,SLES-02685,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Fear Effect 2,PAL,SLES-03387,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-FIFA 2005,USA,SLUS-01585,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Regular,Good,Playable,Global default,"The audio fails occasionally.",MartStartIV
-Final Fantasy VII,PAL,SCES-00867,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Good performance",MartStartIV
-Five Night At Freddy's (V1.2.5),Multi,HOMEBREW,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Game developed/adapted by the community",MartStartIV
-Five Night At Freddy's 2 (V1.0.2),Multi,HOMEBREW,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Game developed/adapted by the community",MartStartIV
-Formula 1 98,USA,SLUS-00762,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Good performance",MartStartIV
-Fomula one 2001,PAL,SCES-03424,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,None,Good,Regular,Not Playable,Yes,"You can't play the game.",MartStartIV
-Formula one arcade,PAL,SCES-03886,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Regular,Playable,Global default,"Some clues might not work.",MartStartIV
-Galerians,PAL,SLES-02328,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Gran turismo,PAL,SCES-00984,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Gran turismo 2,PAL,SCES-02380,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Grand Theft Auto 2,PAL,SLES-02224,ISO,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"I haven't had any problems with this PS1 GTA.",MartStartIV
-HELLNIGHT,PAL,SLES-01562,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Regular,Good,Playable,Global default,"good performance",MartStartIV
-Pro evolution Soccer 2,PAL,SLES-03957,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Some slight FPS stutters",MartStartIV
-Italian JOB The,PAL,SLES-03626,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Regular,Good,Regular,Playable with Issues,Yes,"The in-game AI practically doesn't work with PCSX4All.",MartStartIV
-Legend of dragoon ,PAL,SCES-03043,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Lucky Luke,PAL,SLES-00943,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Medal of honor,PAL,SLES-02470,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Adequate in-game performance",MartStartIV
-Medal of honor - Underground,PAL,SLES-03124,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Adequate in-game performance",MartStartIV
-Medievil 1,PAL,SCES-01495,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Localized FPS drops in the game",MartStartIV
-Medievil 2,PAL,SCES-02545,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"Localized FPS drops in the game",MartStartIV
-Mega Man Legends,USA,SLUS-00603,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Regular,Regular,Good,Playable with Issues,Global default,"The game speeded up, but it remained playable.",MartStartIV
-MegaMan X4,PAL,SLES-01176,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Men in black the game,PAL,SLES-01047,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Regular,Playable,Global default,"good performance",MartStartIV
-Men in black The Series crashdown,PAL,SLES-03519,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Regular,Playable,Global default,"good performance",MartStartIV
-Metal Gear Solid,PAL,SCES-01509,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Perfect,Good,Playable,Global default,"It's a pretty well-liked game, but it runs quite well with TreeFrogUI ​​(pcsx4all).",MartStartIV
-Metal Gear Solid - Special Missions,PAL,SLES-02136,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-MGG - Manic game girl,NTSC-J,SLPM-88501,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Perfect,Global default,"good performance",MartStartIV
-Mizzurna Falls,NTSC-J,SLPS-01783,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
-Moolight Syndrome,NTSC-J,SLPS-01001,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"expected result (good performance)",MartStartIV
-Mortal Kombat Mythologies,PAL,SLES-00543,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"expected result (good performance)",MartStartIV
-Nascar Thunder 2004,USA,SLUS-01569,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Good,Good,Good,Playable,Global default,"For the last NASCAR game on the PS1, it runs quite well.",MartStartIV
-Need For Speed - High Stakes,USA,SLUS-00826,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.3.0_I,Regular,Regular,Good,Playable with Issues,Global default,"There are FPS drops.",MartStartIV
+Tekken 3,USA,SLUS-00402,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Regular,Good,Playable with Issues,Yes,"Performance drops are observed in several game scenarios, but it is playable.",MartStartIV
+007: The World is Not Enough,PAL,SLES-03137,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Pefect,Good,Quite playable,Global default,"Good overall performance",MartStartIV
+2002 FIFA World Cup,PAL,SLES-03830,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Good performance, though with some FPS drops.",MartStartIV
+In Cold Blood,PAL,SCES-02153,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Regular,Playable,Global default,"Adequate performance, though it feels sluggish at times.",MartStartIV
+Aconcagua,NTSC,SCPS-10131,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Pefect,Good,Low,Pefect,Global default,"Based on my testing, the version I tried is translated into Spanish.",MartStartIV
+Alien Resurrection,PAL,SLES-02913,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Good overall performance",MartStartIV
+F1 2000,PAL,SLES-02722,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,None,None,None,Not Playable,None,"It only loads the EA GAMES intro video.",MartStartIV
+Alien Trilogy,PAL,SLES-00101,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Sometimes the game drops to around 4 fps, but only on occasion.",MartStartIV
+Alone in the dark - The New Nightmared,PAL,SLES-02801,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Pefect,Regular,Playable,Global default,"The performance is quite good.",MartStartIV
+Atlantis: The Lost Empire,PAL,SCES-03541,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"It feels a bit demanding for the console at times.",MartStartIV
+Batman & Robin,PAL,SLES-00102,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Good,Regular,Playable,Global default,"The FPS are a bit low but stable.",MartStartIV
+Blaster Master - Blasting Again,PAL,SLES-02273,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Perfect,Good,Perfect,Global default,"I haven't noticed any FPS drops.",MartStartIV
+C-12 Final Resistance,PAL,SCES-03366,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"This game performs well, despite reports on forums suggesting it generally wouldn't run.",MartStartIV
+Carmagedoon,PAL,SLES-01960,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Regular,Regular,Playable with Issues,Global default,"In the tests conducted, the game currently experiences FPS drops.",MartStartIV
+Castlevania: Symphony of the Night,USA,SLUS-00067,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Pefect,Pefect,Good,Perfect,Global default,"This game really runs very well :)",MartStartIV
+Chaos Break,PAL,SLES-03107,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Good performance and efficiency with TreeFrogUI",MartStartIV
+Covert Ops: Nuclear Dawn ,PAL,SCES-02816,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Good performance in this case.",MartStartIV
+Colin Mcrae Rally 2.0,PAL,SLES-02847,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Yes,"Good performance in this case, but with some FPS drops.",MartStartIV
+Colony Wars: Red Sun,PAL,SLES-02621,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Pefect,Playable,Global default,"Some FPS drops",MartStartIV
+Colony Wars: Vengeance,PAL,SLES-01382,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Some FPS drops",MartStartIV
+Countdown Vampires,PAL,SLES-02835,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Perfect,Global default,"good overall performance",MartStartIV
+Crash Bandicoot 1,PAL,SCES-00344,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"The game performs well with the mentioned TreeFrogUI version.",MartStartIV
+Crash Bandicoot 2: Cortex Strikes Back,PAL,SCES-00967,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"The game performs well with the mentioned TreeFrogUI version.",MartStartIV
+Crash Bandicoot 3: Warped,PAL,SCES-01420,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"The FPS fluctuates a bit.",MartStartIV
+Crash Bash,PAL,SCES-02834,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Perfect,Global default,"good overall performance",MartStartIV
+Crash Team Racing,PAL,SCES-02105,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"The FPS fluctuates a bit.",MartStartIV
+Destruction Derby Raw,PAL,SCES-02060,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Perfect,Good,Playable,Global default,"There are just a few issues with the menu.",MartStartIV
+Die Hard Trilogy,USA,SLUS-00119,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Good,Regular,Playable with Issues,Yes,"In one of the modes, there are FPS stutters.",MartStartIV
+Dino Crisis 1,PAL,SLES-02207,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Perfect,Good,Perfect,Global default,"good performance",MartStartIV
+Dino Crisis 2,PAL,SLES-03221,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Discworld Noir,PAL,SLES-01549,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Perfect,Global default,"No issues with its execution.",MartStartIV
+Disney's The Lion King: Simba's Mighty Adventure,PAL,SLES-03267,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"No issues with its execution.",MartStartIV
+Disney Tarzan,PAL,SCES-01519,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Regular,Playable,Global default,"No issues with its execution.",MartStartIV
+Dragon Ball - Final Bout,PAL,SLES-00512,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Pefect,Pefect,Pefect,Perfect,Global default,"This is one of the games that works best with pcsx4all.",MartStartIV
+Fade to black,USA,SLUS-00236,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Fear Effect 1,PAL,SLES-02685,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Fear Effect 2,PAL,SLES-03387,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+FIFA 2005,USA,SLUS-01585,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Regular,Good,Playable,Global default,"The audio fails occasionally.",MartStartIV
+Final Fantasy VII,PAL,SCES-00867,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Good performance",MartStartIV
+Five Night At Freddy's (V1.2.5),Multi,HOMEBREW,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Game developed/adapted by the community",MartStartIV
+Five Night At Freddy's 2 (V1.0.2),Multi,HOMEBREW,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Game developed/adapted by the community",MartStartIV
+Formula 1 98,USA,SLUS-00762,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Good performance",MartStartIV
+Fomula one 2001,PAL,SCES-03424,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,None,Good,Regular,Not Playable,Yes,"You can't play the game.",MartStartIV
+Formula one arcade,PAL,SCES-03886,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Regular,Playable,Global default,"Some clues might not work.",MartStartIV
+Galerians,PAL,SLES-02328,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Gran turismo,PAL,SCES-00984,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Gran turismo 2,PAL,SCES-02380,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Grand Theft Auto 2,PAL,SLES-02224,ISO,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"I haven't had any problems with this PS1 GTA.",MartStartIV
+HELLNIGHT,PAL,SLES-01562,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Regular,Good,Playable,Global default,"good performance",MartStartIV
+Pro evolution Soccer 2,PAL,SLES-03957,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Some slight FPS stutters",MartStartIV
+Italian JOB The,PAL,SLES-03626,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Good,Regular,Playable with Issues,Yes,"The in-game AI practically doesn't work with PCSX4All.",MartStartIV
+Legend of dragoon ,PAL,SCES-03043,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Lucky Luke,PAL,SLES-00943,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Medal of honor,PAL,SLES-02470,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Adequate in-game performance",MartStartIV
+Medal of honor - Underground,PAL,SLES-03124,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Adequate in-game performance",MartStartIV
+Medievil 1,PAL,SCES-01495,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Localized FPS drops in the game",MartStartIV
+Medievil 2,PAL,SCES-02545,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Localized FPS drops in the game",MartStartIV
+Mega Man Legends,USA,SLUS-00603,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Regular,Good,Playable with Issues,Global default,"The game speeded up, but it remained playable.",MartStartIV
+MegaMan X4,PAL,SLES-01176,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Men in black the game,PAL,SLES-01047,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Regular,Playable,Global default,"good performance",MartStartIV
+Men in black The Series crashdown,PAL,SLES-03519,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Regular,Playable,Global default,"good performance",MartStartIV
+Metal Gear Solid,PAL,SCES-01509,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Perfect,Good,Playable,Global default,"It's a pretty well-liked game, but it runs quite well with TreeFrogUI ​​(pcsx4all).",MartStartIV
+Metal Gear Solid - Special Missions,PAL,SLES-02136,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+MGG - Manic game girl,NTSC-J,SLPM-88501,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Perfect,Global default,"good performance",MartStartIV
+Mizzurna Falls,NTSC-J,SLPS-01783,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Moolight Syndrome,NTSC-J,SLPS-01001,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"expected result (good performance)",MartStartIV
+Mortal Kombat Mythologies,PAL,SLES-00543,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"expected result (good performance)",MartStartIV
+Nascar Thunder 2004,USA,SLUS-01569,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"For the last NASCAR game on the PS1, it runs quite well.",MartStartIV
+Need For Speed - High Stakes,USA,SLUS-00826,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Regular,Good,Playable with Issues,Global default,"There are FPS drops.",MartStartIV
+Need For Speed Porsche 2000,PAL,SLES-02700,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Need For Speed 3,PAL,SLES-01140,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Good,Good,Playable with Issues,Yes,"A significant drop in FPS is expected in certain areas.",MartStartIV
+Overblood 2,PAL,SLES-01879,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Regular,Playable,Global default,"Low graphics resolution but stable.",MartStartIV
+Pac-Man World 20TH Anniversary,PAL,SCES-00934,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Perfect,Global default,"good performance",MartStartIV
+Parasite eve 1,USA,SLUS-00662,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Parasite eve 2,PAL,SLES-02559,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Yes,"A very good game with some graphical issues; enable the (RCntFix) option.",MartStartIV
+Doom,PAL,SLES-00132,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Perfect,Global default,"good performance",MartStartIV
+Rapid Racer,PAL,SCES-00780,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Regular,Good,Playable with Issues,Yes,"It looks good graphically with Hi-Res turned off, but there are significant frame rate drops.",MartStartIV
+Resident Evil (Deep Freeze) V0.1,USA,SLUS-00748,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Modded RE game with good performance",MartStartIV
+Resident Evil (Demake) V0.1,USA,SLUS-00748,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Modded RE game with good performance",MartStartIV
+Resident Evil The Prison V1.2,USA,SLUS-00748,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Modded RE game with good performance",MartStartIV
+Resident Evil Survivor,PAL,SLES-02732,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Resident Evil 1 Director's Cut,PAL,SLES-00970,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Resident Evil 2 Dual Shock,PAL,SLES-01514,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Resident Evil 3,PAL,SLES-02532,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Good performance, although you might experience specific FPS drops.",MartStartIV
+Runabout 2,USA,SLUS-01135,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"The resolution is a bit low, but performance is good.",MartStartIV
+Silent Hill,PAL,SLES-01514,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"Classic game, good performance.",MartStartIV
+Sled Storm,PAL,SLES-01931,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
+Spider-Man,PAL,SLES-02861,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Good,Good,Playable with Issues,Global default,"You get FPS drops there at times.",MartStartIV
+Spider-Man 2 Enter Electro,PAL,SLES-03619,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Regular,Good,Good,Playable with Issues,Global default,"You get FPS drops there at times.",MartStartIV
+Spyro The Dragon,PAL,SCES-01435,BIN/CUE,Pcsx4all,R36HD,R36HD (Backup 2.7 R36SX) - HiChip Mips 74Kc,V1.4.0_q,Good,Good,Good,Playable,Global default,"good performance",MartStartIV
