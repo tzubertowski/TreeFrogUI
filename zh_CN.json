@@ -23,6 +23,7 @@
   "settings.center_text": "文本居中",
   "settings.friendly_system_names": "显示全称机种名",
   "settings.font": "字体设置",
+  "settings.font_size": "字体大小",
   "settings.general": "通用设置",
   "settings.language": "语言选择",
   "settings.brightness": "屏幕亮度",
@@ -35,6 +36,7 @@
   "settings.background_image_fit": "背景图片填充方式",
   "settings.hide_extensions": "隐藏文件后缀",
   "settings.hide_empty_folders": "隐藏空文件夹",
+  "settings.custom_aspect_ratios": "所有宽高比",
   "settings.library": "游戏库管理",
   "settings.rom_source": "ROM来源",
   "settings.otg_storage": "OTG 外接存储",
@@ -63,6 +65,20 @@
   "header.add_extension": "添加扩展名",
   "header.usb_mode": "USB 连接模式",
   "remap.skip": "[B] = 跳过 / 保持默认值",
+  "remap.press": "按下  %s  (%d / %d)"
+ ,
+  "remap.saved": "按键映射已保存"
+  ,
+  "remap.save_failed": "无法保存按键映射"
+  ,
+  "button.up": "上"
+  ,
+  "button.down": "下"
+  ,
+  "button.left": "左"
+  ,
+  "button.right": "右"
+  ,
   "picker.cores": "核心列表",
   "picker.extensions": "扩展名列表",
   "picker.filter_files": "筛选文件",
@@ -132,6 +148,9 @@
   "pico.emu.load_state": "读取存档",
   "pico.emu.toggle_hud": "切换 FPS/CPU 显示",
   "pico.emu.fast_forward": "切换快进",
+  "emu.bios": "BIOS",
+  "emu.boot_mode": "启动模式",
+  "emu.dynamic_recompiler": "动态重编译器",
   "system.a26": "雅达利 2600",
   "system.a5200": "雅达利 5200",
   "system.a78": "雅达利 7800",
