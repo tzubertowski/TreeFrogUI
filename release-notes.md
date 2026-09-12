@@ -7,7 +7,8 @@
 - Appearance settings add optional Allium-inspired colour palettes, the Nunito
   font used by Allium, and an adjustable UI font size from 18 to 26 px. The
   existing default colour theme remains unchanged.
-- Updated Spanish translations and refined Japanese system names.
+- Added French and Italian translations, updated Brazilian Portuguese, and
+  expanded the Japanese locale with the custom-aspect-ratio setting.
 - Arabic language support and improved complex Unicode text rendering via
   HarfBuzz and SheenBidi, with the required font and license files bundled.
 - FrogShell gains an optional Developer Mode with a terminal, command history,
@@ -20,15 +21,20 @@
   the status bar. Saves use checked atomic replacement and are deferred until
   navigation settles; the MuPDF cache remains limited to 16 MB.
 - Updated PS1 compatibility reports.
+- Picoarch now uses portable build paths, restores core logging under `/logs`,
+  reduces log spam, and builds its PNG reader against libpng16.
 - Release builds now compile FrogShell and the ebook reader from source so the
   packages include their latest changes.
 
 Thanks to [ozkaoz](https://github.com/ozkaoz) for the audio fixes and FrogShell
 Developer Mode, and
-[Maheshivara](https://github.com/Maheshivara) for ebook reader improvements,
+[Maheshivara](https://github.com/Maheshivara) for ebook reader improvements and
+Brazilian Portuguese updates,
 [MartStartIV](https://github.com/MartStartIV) for the Spanish translation
-updates, and [spanscape](https://github.com/spanscape) for the Japanese system
-name refinements.
+updates plus the French and Italian translations,
+[spanscape](https://github.com/spanscape) for Japanese translation updates,
+and [Trademarked69](https://github.com/Trademarked69) for picoarch build and
+logging fixes.
 
 This is a prerelease for testing. Copy `update.zip` to the SD-card root and
 reboot, or use the full ZIP and the matching `install_first/<device>/` files
