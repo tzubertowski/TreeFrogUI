@@ -39,14 +39,15 @@ if [ -z "$BASE" ]; then
         }
         set -- $current_line
         current_major=$1 current_minor=$2 current_release=$3
-        BASE_TAG=$(gh release list --limit 100 --json tagName --jq '.[].tagName' \
+        BASE_TAG=$(gh release list --limit 100 --json tagName,isPrerelease --jq '.[] | select(.isPrerelease == false) | .tagName' \
             | while IFS= read -r candidate; do
                 line=$(printf '%s\n' "$candidate" \
                     | sed -nE 's/^v([0-9]+)\.([0-9]+)\.([0-9]+)([^0-9].*)?$/\1 \2 \3/p')
                 [ -n "$line" ] || continue
                 set -- $line
                 if [ "$1" -eq "$current_major" ] && [ "$2" -eq "$current_minor" ] \
-                    && [ "$3" -lt "$current_release" ]; then
+                    && { [ "$3" -lt "$current_release" ] || \
+                         { [ "$3" -eq "$current_release" ] && [ "$candidate" = "v$current_major.$current_minor.$current_release" ]; }; }; then
                     printf '%s\n' "$candidate"
                 fi
               done | sort -V | tail -1)

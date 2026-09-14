@@ -4,9 +4,8 @@
 
 - Start a fresh `release-notes.md` for every minor or major release; do not inherit or carry forward the previous release's changelog.
 - Follow [`docs/RELEASING.md`](docs/RELEASING.md) as the canonical release procedure.
-- Never choose another suffix build from the same numeric release line as the
-  delta base. For example, `v1.0.13_b` is based on the newest `v1.0.12*`, not
-  `v1.0.13_a`.
+- Prefer the stable archive for the same numeric release as the delta base;
+  otherwise use the newest stable archive from the preceding numeric line.
 - Keep retained comparison ZIPs in `release/artifact/`. Keep current staging,
   the full ZIP, and `update.zip` in `release/latest/`.
 - Do not hand-edit generated content under `release/` and do not commit it.

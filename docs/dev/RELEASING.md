@@ -37,9 +37,10 @@ major line is passed to `pack_release.sh` with
 | `v1.0.13_z` | newest `v1.0.12*` |
 | `v1.0.14_a` | newest `v1.0.13*` |
 
-This makes every suffix build in a line upgrade the same previous numeric
-release. `select_release_base.sh` implements this rule; do not replace it with
-"latest ZIP" selection.
+Suffix builds use the stable archive for their numeric version when available;
+otherwise they use the newest stable archive from the preceding numeric line.
+`select_release_base.sh` implements this rule; do not replace it with "latest
+ZIP" selection, which can select an unstable rebuild.
 
 Full releases contain `cubegm/version.txt`. Ordinary deltas require an exact
 base version. Cumulative updates carry a major-version constraint; their
