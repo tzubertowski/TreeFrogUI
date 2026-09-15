@@ -1,11 +1,15 @@
-## TreeFrogUI v1.5.0_f prerelease
+## TreeFrogUI v1.5.0_h prerelease
+
+User-facing changes since the stable `v1.4.0_q` release:
 
 - Battery status uses the calibrated curve and adds an option to restore the stock battery indicator.
 - Fixed localized Picoarch player-control labels, the missing volume percent sign, and volume value alignment.
+- Picoarch reports the fail count correctly when audio starvation is detected.
 
 - Nintendo DS is available in the new `roms/nds` folder through the
-  experimental standalone DSperate emulator. It uses the interpreter by
-  default; Select + Start exits back to TreeFrogUI.
+  experimental standalone DSperate emulator. It uses the bounded MIPS JIT
+  with safe native ALU forms and interpreter fallback for unsupported forms;
+  Select + Start exits back to TreeFrogUI.
 - Audio fixes suppress idle speaker static, fix silent PS1 launches and media
   playback after audio handoff, and make launcher menu ticks audible.
 - System volume is shared between FrogUI Settings, the in-game menu, and the
@@ -27,6 +31,7 @@
   the status bar. Saves use checked atomic replacement and are deferred until
   navigation settles; the MuPDF cache remains limited to 16 MB.
 - Updated PS1 compatibility reports.
+- Added 117 newly tested PS1 games to the compatibility list.
 - Picoarch now uses portable build paths, restores core logging under `/logs`,
   reduces log spam, and builds its PNG reader against libpng16.
 - Release builds now compile FrogShell and the ebook reader from source so the
