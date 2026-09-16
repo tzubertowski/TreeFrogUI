@@ -3,9 +3,15 @@
 ## Releases
 
 - Start a fresh `release-notes.md` for every minor or major release; do not inherit or carry forward the previous release's changelog.
+- Before every prerelease, compare the selected base release with the current
+  source and submodule history and document every user-facing change in
+  `release-notes.md`; do not publish a one-line delta when the release includes
+  accumulated changes.
 - Follow [`docs/RELEASING.md`](docs/RELEASING.md) as the canonical release procedure.
-- Prefer the stable archive for the same numeric release as the delta base;
-  otherwise use the newest stable archive from the preceding numeric line.
+- Always build prereleases from the v1.0 stable line: use the newest v1.0.x
+  stable archive as the full-build base, and use the appropriate v1.0.x archive
+  as the cumulative-update base. Do not select a later minor line such as v1.4
+  or v1.5 as the base.
 - Keep retained comparison ZIPs in `release/artifact/`. Keep current staging,
   the full ZIP, and `update.zip` in `release/latest/`.
 - Do not hand-edit generated content under `release/` and do not commit it.

@@ -25,22 +25,18 @@ commit it.
 Versions must begin with `vMAJOR.MINOR.RELEASE`, optionally followed by a
 suffix, such as `v1.0.14_a`.
 
-Normal local builds select the newest archive from the preceding numeric line.
-Published cumulative builds instead use two archives: the latest release seeds
-the complete build tree, while the oldest update-capable release in the current
-major line is passed to `pack_release.sh` with
+TreeFrogUI prereleases are based on the v1.0 stable line, regardless of the
+current minor version. Published cumulative builds use two v1.0.x archives: the
+newest stable v1.0.x release seeds the complete build tree, while the selected
+v1.0.x update-capable release is passed to `pack_release.sh` with
 `TREEFROG_CUMULATIVE_UPDATE=1`.
 
 | New version | Selected base |
 |---|---|
-| `v1.0.13_b` | newest `v1.0.12*` |
-| `v1.0.13_z` | newest `v1.0.12*` |
-| `v1.0.14_a` | newest `v1.0.13*` |
+| `v1.5.0_k` | newest stable `v1.0.x` |
 
-Suffix builds use the stable archive for their numeric version when available;
-otherwise they use the newest stable archive from the preceding numeric line.
-`select_release_base.sh` implements this rule; do not replace it with "latest
-ZIP" selection, which can select an unstable rebuild.
+Do not replace this with "latest ZIP" selection, which can select an unstable
+rebuild or the wrong minor line.
 
 Full releases contain `cubegm/version.txt`. Ordinary deltas require an exact
 base version. Cumulative updates carry a major-version constraint; their
@@ -144,9 +140,8 @@ It can be started in either of these ways:
   prerelease automatically.
 - Run it from **Actions → Build TreeFrogUI release → Run workflow**. Enter a
   `tag` to publish a release, or leave it blank to produce downloadable
-  build-only artifacts. Set `base_tag` to the latest full release used to seed
-  the build and `update_base_tag` to the oldest compatible release in the
-  current major line.
+  build-only artifacts. Set both base inputs to the appropriate v1.0.x stable
+  archives; normally `base_tag` is the newest v1.0.x release.
 
 Manual runs without a tag never mutate GitHub releases; they upload the ZIPs as
 workflow artifacts for testing.
