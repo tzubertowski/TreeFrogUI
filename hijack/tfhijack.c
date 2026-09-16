@@ -21,6 +21,7 @@
 #define LAUNCHER "/mnt/sdcard/cubegm/zhijack.sh"
 
 static void hlog(const char *msg) {
+    if (access("/mnt/sdcard/log.txt", F_OK) != 0) return;
     int fd = open("/mnt/sdcard/tfhijack.log", O_WRONLY | O_CREAT | O_APPEND, 0644);
     if (fd < 0) return;
     write(fd, msg, strlen(msg));
