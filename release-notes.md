@@ -1,4 +1,13 @@
-## TreeFrogUI v1.5.0_j prerelease
+## TreeFrogUI v1.5.0_k prerelease
+
+Changes since the v1.5.0_j build:
+
+- Completed the built-in translations across all 10 supported locales. Every
+  locale now contains the full 250-string catalog, including the Picoarch
+  player controls, emulator menu labels, settings, remapping prompts, and
+  language names.
+- Corrected remaining untranslated or wrong-language labels in the French,
+  Italian, Portuguese, Spanish, Russian, and Chinese catalogs.
 
 Changes since the v1.5.0_i build:
 

@@ -7,6 +7,10 @@
   source and submodule history and document every user-facing change in
   `release-notes.md`; do not publish a one-line delta when the release includes
   accumulated changes.
+- Before every CPG release, add a clearly labeled `Changes since the
+  v<previous-build>` section to `release-notes.md`. Compare against the actual
+  previous build, including companion repositories such as FrogUI, and update
+  the GitHub release body if the workflow was started before the notes changed.
 - Follow [`docs/RELEASING.md`](docs/RELEASING.md) as the canonical release procedure.
 - Always build prereleases from the v1.0 stable line: use the newest v1.0.x
   stable archive as the full-build base, and use the appropriate v1.0.x archive
