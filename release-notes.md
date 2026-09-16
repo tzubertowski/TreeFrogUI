@@ -1,14 +1,9 @@
-## TreeFrogUI v1.5.0_i prerelease
+## TreeFrogUI v1.5.0_j prerelease
 
-Changes since the v1.5.0_h build:
+Changes since the v1.5.0_i build:
 
-- Fixed Load State for PICO-8/fake-08 games by restoring Lua persistence
-  initialization before the cart runs.
-- Completed Picoarch player-control translations, including the mapping-menu
-  prompts and save confirmation, plus missing custom-aspect-ratio translations.
-- Fixed Picoarch volume percentage display and right-aligned volume values.
-- Improved live system-volume synchronization between FrogUI Settings,
-  Picoarch, and the hardware volume buttons.
+- Restored opt-in diagnostics on SF3000: `log.txt` is no longer created or
+  written unless the user creates it first.
 
 User-facing changes since the stable `v1.4.0_q` release:
 
