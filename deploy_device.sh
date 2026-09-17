@@ -4,7 +4,7 @@
 #
 # Usage:
 #   ./build_release.sh
-#   pkexec ./deploy.sh <r36sx|sf3000|sf3500> [payload ...]
+#   pkexec ./deploy.sh <r36sx|r36hd|sf3000|sf3500> [payload ...]
 #
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
@@ -29,7 +29,7 @@ die() {
 
 usage() {
     cat >&2 <<EOF
-usage: $0 <r36sx|sf3000|sf3500> [payload ...]
+usage: $0 <r36sx|r36hd|sf3000|sf3500> [payload ...]
 payloads: release clean-themes picoarch picoarch-hi frogui frogshell ebook pcsx4all pcsx4all-config tic80 vecx o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
@@ -46,6 +46,10 @@ case "$PROFILE" in
         readonly EXPECTED_LABEL=R36SX
         readonly EXPECTED_TF_DEVICE=R36SX
         ;;
+    r36hd)
+        readonly EXPECTED_LABEL=R36HD
+        readonly EXPECTED_TF_DEVICE=R36SX
+        ;;
     sf3000)
         readonly EXPECTED_LABEL=SF3000
         readonly EXPECTED_TF_DEVICE=SF3000
@@ -58,7 +62,7 @@ case "$PROFILE" in
 esac
 
 readonly MOUNT="/mnt/treefrog-$PROFILE"
-readonly OVERLAY="$RELEASE/install_first/$PROFILE"
+readonly OVERLAY="$RELEASE/install_first/$([ "$PROFILE" = r36hd ] && echo r36sx || echo "$PROFILE")"
 
 if [ "$#" -eq 0 ]; then
     set -- release
