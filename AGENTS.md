@@ -16,6 +16,10 @@
   stable archive as the full-build base, and use the appropriate v1.0.x archive
   as the cumulative-update base. Do not select a later minor line such as v1.4
   or v1.5 as the base.
+- Before dispatching GHA, inspect both selected full-release archives/metadata and
+  reject any archive whose `base_version` is `unknown`; old v1.0 archives may
+  predate the cumulative updater. Use the newest valid v1.0.x archive for both
+  `base_tag` and `update_base_tag` when no older update-capable archive exists.
 - Keep retained comparison ZIPs in `release/artifact/`. Keep current staging,
   the full ZIP, and `update.zip` in `release/latest/`.
 - Do not hand-edit generated content under `release/` and do not commit it.
