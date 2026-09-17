@@ -194,6 +194,7 @@ fi
 mkdir -p "$OUT/roms/images"
 mkdir -p "$OUT/roms/music"
 mkdir -p "$OUT/roms/nds"
+mkdir -p "$OUT/roms/qpsx"
 
 # Canvas ships hundreds of ES-DE targets and a second high-resolution mirror.
 # FrogUI requests only exact ROM-folder names plus its four built-in screens.
