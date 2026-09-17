@@ -30,6 +30,7 @@ _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch uae-sf3000-fixes.patch    sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
+_apply_patch qpsx-sf3000.patch qpsx
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
 _apply_patch ardens-sf3000.patch       Ardens
 _apply_patch pico286-sf3000.patch      pico-286
@@ -494,6 +495,19 @@ if [ -f "$CORES/pcsx_rearmed/pcsx_rearmed_libretro.so" ]; then
     echo "→ $OUT/pcsx_rearmed_libretro.so"
 else
     echo "WARNING: .so not found for pcsx_rearmed"
+fi
+
+echo "-- qpsx make (PS1, MIPS recompiler) --"
+make -C "$CORES/qpsx" -f Makefile.libretro clean 2>/dev/null || true
+make -C "$CORES/qpsx" -f Makefile.libretro platform=sf3000 \
+    CC="$WRAP/mips-gcc" CXX="$WRAP/mips-g++" \
+    AR="$AR" RANLIB="$RANLIB" LDFLAGS="$LDFLAGS_S" -j"$(nproc)" 2>&1
+if [ -f "$CORES/qpsx/pcsx4all_libretro.so" ]; then
+    cp "$CORES/qpsx/pcsx4all_libretro.so" "$OUT/pcsx4all_libretro.so"
+    "$STRIP" "$OUT/pcsx4all_libretro.so"
+    echo "→ $OUT/pcsx4all_libretro.so"
+else
+    echo "WARNING: .so not found for qpsx"
 fi
 
 echo "-- gong make --"

@@ -1,0 +1,379 @@
+diff --git a/Makefile.libretro b/Makefile.libretro
+index 9a0e4b5..f42878e 100644
+--- a/Makefile.libretro
++++ b/Makefile.libretro
+@@ -31,6 +31,10 @@ ifeq ($(platform), sf2000)
+     CFLAGS += -fno-use-cxa-atexit
+     CFLAGS += -DSF2000 -DNO_THREADS
+     STATIC_LINKING = 1
++else ifeq ($(platform), sf3000)
++    TARGET = $(NAME)_libretro.so
++    CFLAGS += -EL -mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -fPIC -DNO_THREADS -DNO_ZLIB -DSF3000
++    STATIC_LINKING = 0
+ else
+     TARGET = $(NAME)_libretro.so
+     CC = gcc
+@@ -139,6 +143,13 @@ OBJS += \
+ 	src/psxmem_asm.o
+ endif
+ 
++ifeq ($(platform), sf3000)
++OBJS += \
++	src/gpu/$(GPU)/gpu_inner_mips32.o \
++	src/psxmem_asm.o \
++	src/recompiler/mips/host_asm.o
++endif
++
+ # SPU - pcsxrearmed with libretro audio backend
+ OBJS += \
+ 	src/spu/$(SPU)/spu.o \
+@@ -155,6 +166,11 @@ OBJS += \
+ 	src/spu/$(SPU)/cdda_mix_asm.o
+ endif
+ 
++ifeq ($(platform), sf3000)
++OBJS += \
++	src/spu/$(SPU)/cdda_mix_asm.o
++endif
++
+ # Plugin lib
+ OBJS += \
+ 	src/plugin_lib/plugin_lib.o \
+diff --git a/libretro/core/libretro-core.cpp b/libretro/core/libretro-core.cpp
+index 5419027..adc1a95 100644
+--- a/libretro/core/libretro-core.cpp
++++ b/libretro/core/libretro-core.cpp
+@@ -50,6 +50,18 @@
+ #include <stdarg.h>
+ #include <time.h>       /* v283: For time() in CD swap */
+ #include <sys/time.h>
++#ifndef SF2000
++#include <dirent.h>
++#include <fcntl.h>
++#include <sys/stat.h>
++#include <unistd.h>
++#endif
++
++#ifdef SF2000
++#define QPSX_SDCARD "/mnt/sda1"
++#else
++#define QPSX_SDCARD "/mnt/sdcard"
++#endif
+ 
+ /* SF2000 xlog and timer */
+ #ifdef SF2000
+@@ -58,6 +70,13 @@ extern "C" {
+     extern void xlog_clear(void);
+     extern uint32_t os_get_tick_count(void);  /* v267: for ETA calculation */
+ }
++#else
++static uint32_t os_get_tick_count(void)
++{
++    struct timeval tv;
++    gettimeofday(&tv, NULL);
++    return (uint32_t)(tv.tv_sec * 1000u + tv.tv_usec / 1000u);
++}
+ #endif
+ 
+ /*
+@@ -67,10 +86,11 @@ extern "C" {
+  * When enabled via menu, writes to /mnt/sda1/log.txt
+  */
+ static FILE *debug_log_file = NULL;
+-static const char *DEBUG_LOG_PATH = "/mnt/sda1/log.txt";
++static const char *DEBUG_LOG_PATH = QPSX_SDCARD "/logs/qpsx.log";
+ 
+ /* Global flag for debug logging (set from qpsx_config.debug_log) */
+-static int g_debug_log_enabled = 0;
++/* Temporary SF3000 dynarec diagnosis; remove after the failing block is known. */
++static int g_debug_log_enabled = 1;
+ 
+ static void debug_log_write(const char *prefix, const char *fmt, ...)
+ {
+@@ -98,7 +118,12 @@ static void debug_log_write(const char *prefix, const char *fmt, ...)
+ /* Called when debug_log option changes */
+ static void update_debug_log_state(int enabled)
+ {
++#ifdef SF3000
++    (void)enabled;
++    g_debug_log_enabled = 1;  /* temporary dynarec diagnosis */
++#else
+     g_debug_log_enabled = enabled;
++#endif
+     if (!enabled && debug_log_file) {
+         fclose(debug_log_file);
+         debug_log_file = NULL;
+@@ -116,7 +141,7 @@ static void update_debug_log_state(int enabled)
+ #define DEBUG_LOG(fmt, ...) debug_log_write("QPSX: ", fmt, ##__VA_ARGS__)
+ 
+ /* Export debug log function for port.cpp */
+-extern "C" void port_debug_log(const char *fmt, ...)
++extern "C" void xlog(const char *fmt, ...)
+ {
+     if (!g_debug_log_enabled) return;
+ 
+@@ -136,6 +161,23 @@ extern "C" void port_debug_log(const char *fmt, ...)
+     fflush(debug_log_file);
+ }
+ 
++/* Keep the existing libretro port hook while sharing the xlog implementation. */
++extern "C" void port_debug_log(const char *fmt, ...)
++{
++    if (!g_debug_log_enabled) return;
++    if (!debug_log_file) {
++        debug_log_file = fopen(DEBUG_LOG_PATH, "a");
++        if (!debug_log_file) return;
++    }
++    fprintf(debug_log_file, "PORT: ");
++    va_list args;
++    va_start(args, fmt);
++    vfprintf(debug_log_file, fmt, args);
++    va_end(args);
++    fputc('\n', debug_log_file);
++    fflush(debug_log_file);
++}
++
+ /* PSX includes */
+ #include "psxcommon.h"
+ #include "r3000a.h"
+@@ -683,11 +725,11 @@ extern "C" void retro_audio_cb(int16_t *buf, int samples)
+ }
+ 
+ #define QPSX_VERSION "400"
+-#define QPSX_GLOBAL_CONFIG_PATH "/mnt/sda1/cores/config/pcsx4all.cfg"
+-#define QPSX_NATIVE_CONFIG_PATH "/mnt/sda1/cores/config/psx_native.cfg"
+-#define QPSX_ASM_CONFIG_PATH "/mnt/sda1/cores/config/psx_asm.cfg"
+-#define QPSX_CRASH_MARKER_PATH "/mnt/sda1/cores/config/psx_crash.tmp"
+-#define QPSX_STARTUP_CONFIG_PATH "/mnt/sda1/cores/config/psx_startup.cfg"
++#define QPSX_GLOBAL_CONFIG_PATH QPSX_SDCARD "/cores/config/pcsx4all.cfg"
++#define QPSX_NATIVE_CONFIG_PATH QPSX_SDCARD "/cores/config/psx_native.cfg"
++#define QPSX_ASM_CONFIG_PATH QPSX_SDCARD "/cores/config/psx_asm.cfg"
++#define QPSX_CRASH_MARKER_PATH QPSX_SDCARD "/cores/config/psx_crash.tmp"
++#define QPSX_STARTUP_CONFIG_PATH QPSX_SDCARD "/cores/config/psx_startup.cfg"
+ 
+ /* v395: Global startup option - whether to open menu at startup */
+ static int g_menu_at_start = 1;  /* default: show menu at start */
+@@ -770,6 +812,48 @@ extern "C" int fs_opendir(const char *path);
+ extern "C" int fs_readdir(int fd, void *buf);
+ extern "C" int fs_closedir(int fd);
+ extern "C" int fs_mkdir(const char *path, int mode);  /* v396: Create directory */
++#ifndef SF2000
++extern "C" int fs_open(const char *path, int flags, int perms)
++{
++    int host_flags = flags & 3;
++    if (flags & 0x0100) host_flags |= O_CREAT;
++    if (flags & 0x0200) host_flags |= O_TRUNC;
++    return open(path, host_flags, (mode_t)perms);
++}
++extern "C" ssize_t fs_write(int fd, const void *buf, size_t count) { return write(fd, buf, count); }
++extern "C" ssize_t fs_read(int fd, void *buf, size_t count) { return read(fd, buf, count); }
++extern "C" int fs_close(int fd) { return close(fd); }
++extern "C" int fs_sync(const char *path) { (void)path; return 0; }
++extern "C" int64_t fs_lseek(int fd, int64_t offset, int whence) { return (int64_t)lseek(fd, (off_t)offset, whence); }
++static DIR *qpsx_dirs[8];
++extern "C" int fs_opendir(const char *path)
++{
++    DIR *dir = opendir(path);
++    if (!dir) return -1;
++    for (int i = 0; i < 8; i++) {
++        if (!qpsx_dirs[i]) { qpsx_dirs[i] = dir; return i + 1; }
++    }
++    closedir(dir);
++    return -1;
++}
++extern "C" int fs_readdir(int fd, void *buf)
++{
++    if (fd < 1 || fd > 8 || !qpsx_dirs[fd - 1]) return -1;
++    struct dirent *entry = readdir(qpsx_dirs[fd - 1]);
++    if (!entry) return -1;
++    strcpy((char *)buf + 4, entry->d_name);
++    strcpy((char *)buf + 0x22, entry->d_name);
++    return 1;
++}
++extern "C" int fs_closedir(int fd)
++{
++    if (fd < 1 || fd > 8 || !qpsx_dirs[fd - 1]) return -1;
++    closedir(qpsx_dirs[fd - 1]);
++    qpsx_dirs[fd - 1] = NULL;
++    return 0;
++}
++extern "C" int fs_mkdir(const char *path, int mode) { return mkdir(path, (mode_t)mode); }
++#endif
+ 
+ /* v396: Check if file exists (using fopen - works on SF2000) */
+ static int file_exists(const char* path) {
+@@ -1042,9 +1126,9 @@ static int menu_scroll = 0;
+ static int menu_first_frame = 0;
+ static int menu_entry_delay = 0;
+ 
+-/* 1.5-second START hold detection */
++/* 1-second START hold detection */
+ static int start_hold_frames = 0;
+-#define MENU_HOLD_FRAMES 90
++#define MENU_HOLD_FRAMES 60
+ 
+ /* Feedback message */
+ static char feedback_msg[64] = "";
+@@ -1537,7 +1621,7 @@ static void fb_init_game_dir(void) {
+         *last_slash = '\0';
+     } else {
+         /* Fallback if no slash found */
+-        strcpy(fb_game_dir, "/mnt/sda1/ROMS");
++        strcpy(fb_game_dir, QPSX_SDCARD "/roms/qpsx");
+     }
+     XLOG("CD swap dir: %s", fb_game_dir);
+ }
+@@ -1914,14 +1998,14 @@ static void get_game_config_path(char *path, int maxlen)
+     const char *base = strrchr(game_path, '/');
+     if (!base) base = strrchr(game_path, '\\');
+     if (base) base++; else base = game_path;
+-    snprintf(path, maxlen, "/mnt/sda1/cores/config/%s.cfg", base);
++    snprintf(path, maxlen, QPSX_SDCARD "/cores/config/%s.cfg", base);
+ }
+ 
+ static void get_slus_config_path(char *path, int maxlen)
+ {
+     /* Secondary: SLUS/SCES/SLES-based config */
+     if (CdromId[0] != '\0') {
+-        snprintf(path, maxlen, "/mnt/sda1/cores/config/%s.cfg", CdromId);
++        snprintf(path, maxlen, QPSX_SDCARD "/cores/config/%s.cfg", CdromId);
+     } else {
+         path[0] = '\0';
+     }
+@@ -2125,7 +2209,7 @@ static int find_matching_slus_config(char *result_path, int maxlen)
+ 
+     XLOG("v340: Scanning for SLUS config matching CdromId=%s, game=%s", CdromId, game_name);
+ 
+-    int dir = fs_opendir("/mnt/sda1/cores/config");
++    int dir = fs_opendir(QPSX_SDCARD "/cores/config");
+     if (dir < 0) {
+         XLOG("v340: Cannot open config directory");
+         return 0;
+@@ -2149,7 +2233,7 @@ static int find_matching_slus_config(char *result_path, int maxlen)
+ 
+         /* Build full path and read config */
+         char cfg_path[300];
+-        snprintf(cfg_path, sizeof(cfg_path), "/mnt/sda1/cores/config/%s", entry.d_name);
++        snprintf(cfg_path, sizeof(cfg_path), QPSX_SDCARD "/cores/config/%s", entry.d_name);
+ 
+         FILE *f = fopen(cfg_path, "r");
+         if (!f) continue;
+@@ -2224,6 +2308,8 @@ static int find_matching_slus_config(char *result_path, int maxlen)
+ 
+ static int write_config_file(const char *path, const char *orig_name)
+ {
++    fs_mkdir(QPSX_SDCARD "/cores", 0755);
++    fs_mkdir(QPSX_SDCARD "/cores/config", 0755);
+     FILE *f = fopen(path, "w");
+     if (!f) return 0;
+ 
+@@ -3847,7 +3933,7 @@ bool retro_load_game(const struct retro_game_info *info)
+     Config.FrameLimit = 0;
+     Config.Cpu = 0;
+ 
+-    snprintf(Config.BiosDir, sizeof(Config.BiosDir), "/mnt/sda1/bios");
++    snprintf(Config.BiosDir, sizeof(Config.BiosDir), QPSX_SDCARD "/bios");
+     snprintf(Config.Bios, sizeof(Config.Bios), "%s", qpsx_config.bios_file);
+     XLOG("BIOS: %s/%s", Config.BiosDir, Config.Bios);
+ 
+@@ -3864,7 +3950,7 @@ bool retro_load_game(const struct retro_game_info *info)
+      *       No migration - each game starts fresh with per-game saves.
+      */
+     {
+-        static const char* PSX_SAVE_DIR = "/mnt/sda1/ROMS/SAVE/PSX";
++        static const char* PSX_SAVE_DIR = QPSX_SDCARD "/roms/SAVE/PSX";
+         char game_name_buf[256];
+ 
+         /* Get game name from loaded game path */
+@@ -3872,7 +3958,7 @@ bool retro_load_game(const struct retro_game_info *info)
+         XLOG("v396: Game name for memcard: %s", game_name_buf);
+ 
+         /* Create save directories if they don't exist */
+-        fs_mkdir("/mnt/sda1/ROMS/SAVE", 0755);
++        fs_mkdir(QPSX_SDCARD "/roms/SAVE", 0755);
+         fs_mkdir(PSX_SAVE_DIR, 0755);
+ 
+         /* Build per-game memory card path */
+diff --git a/src/recompiler/mips/mips_codegen.h b/src/recompiler/mips/mips_codegen.h
+index 25357ce..116e015 100644
+--- a/src/recompiler/mips/mips_codegen.h
++++ b/src/recompiler/mips/mips_codegen.h
+@@ -354,13 +354,22 @@ do { \
+ #define SLTU(rd, rs, rt) \
+ 	write32(0x0000002b | ((rs) << 21) | ((rt) << 16) | ((rd) << 11))
+ 
++#ifdef SF3000
++#define JAL_TARGET(addr) \
++	LI32(MIPSREG_T9, (u32)(addr)); \
++	write32(0x00000009 | (MIPSREG_T9 << 21) | (MIPSREG_RA << 11)) /* jalr $ra, $t9 */
++#else
++#define JAL_TARGET(addr) \
++	write32(0x0c000000 | (((u32)(addr) & 0x0fffffff) >> 2))
++#endif
++
+ #define JAL(addr)                                                              \
+ do {                                                                           \
+     /* Function call overwrites values in 'unsaved' regs */                    \
+ 	lsu_tmp_cache_valid = false;                                               \
+     host_v0_reg_is_const = false;                                              \
+     host_ra_reg_has_block_retaddr = false;                                     \
+-    write32(0x0c000000 | (((u32)(addr) & 0x0fffffff) >> 2));                   \
++	JAL_TARGET(addr);                                                           \
+ } while (0)
+ 
+ #define JR(rs) \
+diff --git a/src/recompiler/mips/recompiler.cpp b/src/recompiler/mips/recompiler.cpp
+index d65eff5..19c4c0d 100644
+--- a/src/recompiler/mips/recompiler.cpp
++++ b/src/recompiler/mips/recompiler.cpp
+@@ -82,7 +82,9 @@ extern "C" void xlog(const char *fmt, ...);
+ #define USE_CONST_FUZZY_ADDRESSES
+ 
+ /* Generate inline memory access or call psxMemRead/Write C functions */
++#ifndef SF3000
+ #define USE_DIRECT_MEM_ACCESS
++#endif
+ 
+ /* Virtual memory mapping options: */
+ #if defined(SHMEM_MIRRORING) || defined(TMPFS_MIRRORING)
+@@ -389,6 +391,10 @@ do { \
+ #if !defined(HAVE_MIPS32R2_CACHE_OPS) && !defined(SF2000)
+ #include <sys/cachectl.h>
+ #endif
++#ifdef SF3000
++#include <sys/mman.h>
++#include <unistd.h>
++#endif
+ 
+ static inline void clear_insn_cache(void *start, void *end, int flags)
+ {
+@@ -448,6 +454,10 @@ static void rec_set_options()
+ 
+ static void recRecompile()
+ {
++	static unsigned sf3000_recompile_count;
++	if (++sf3000_recompile_count <= 32 || (sf3000_recompile_count % 256) == 0)
++		xlog("QPSXREC recompile #%u pc=%08x cache=%p", sf3000_recompile_count,
++		     psxRegs.pc, recMem);
+ 	// Notify plugin_lib that we're recompiling (affects frameskip timing)
+ 	pl_dynarec_notify();
+ 
+@@ -543,6 +553,18 @@ static int recInit()
+ {
+ 	REC_LOG("Initializing\n");
+ 
++#ifdef SF3000
++	/* Linux keeps the static code cache in a non-executable data segment. */
++	long page_size = sysconf(_SC_PAGESIZE);
++	uintptr_t page = (uintptr_t)recMemBase & ~((uintptr_t)page_size - 1);
++	size_t length = ((uintptr_t)recMemBase + RECMEM_SIZE - page + page_size - 1)
++		/ page_size * page_size;
++	if (mprotect((void *)page, length, PROT_READ | PROT_WRITE | PROT_EXEC) < 0) {
++		perror("QPSX: mprotect dynarec cache");
++		return -1;
++	}
++#endif
++
+ 	recMem = (u32*)recMemBase;
+ 
+ 	// Init code buffer, to allocate the RAM we need in advance. Filling with

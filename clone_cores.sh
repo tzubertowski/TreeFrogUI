@@ -107,6 +107,7 @@ clone TIC-80           https://github.com/nesbox/TIC-80
 # ── angree SF2000 ports (Amiga/Atari ST) ────────────────────────────────────
 clone sf2000-uae-amiga-emulator          https://github.com/angree/sf2000-uae-amiga-emulator
 clone sf2000-atarist-emulator            https://github.com/angree/sf2000-atarist-emulator
+clone qpsx                                  https://github.com/angree/sf2000-qpsx-playstation-emulator
 
 # ── optional standalone ports ───────────────────────────────────────────────
 # Experimental Data Frog SF3000 PPSSPP port. The repository currently carries

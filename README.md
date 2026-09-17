@@ -100,6 +100,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **gpgx** | Mega Drive (accurate) | `genesis_plus_gx_libretro.so` |
 | **segacd** | Sega CD / Mega CD | `genesis_plus_gx_libretro.so` |
 | **PS**, **ps1**, **psx** | PlayStation - 📖 [setup guide](docs/cores/ps1.md) | `pcsx_rearmed_libretro.so` |
+| **qpsx** | PlayStation (experimental QPSX MIPS recompiler; not fully integrated) | `pcsx4all_libretro.so` |
 | **psp** | PSP - optional standalone SF3000 PPSSPP port, falls back to `ppsspp_libretro.so` | `ppsspp` / `ppsspp_libretro.so` |
 | **nds** | Nintendo DS - experimental standalone DSperate port with HCGE scaling | `dsperate/run_sf3000.sh` |
 | **pce** | PC Engine / TurboGrafx-16 - 📖 [notes](docs/cores/pce.md) | `mednafen_pce_fast_libretro.so` |
@@ -268,6 +269,10 @@ While playing a game, **SELECT** is the function key (like the MENU button on ot
 > Fast-forward and rewind are now **per-core toggles** (menu, Audio and video). They stay off until you enable them, so cores that don't need them keep full RAM and speed.
 
 PCSX4ALL (PS1) is a standalone emulator with its own menu and hotkeys.
+
+The experimental **QPSX** core uses the `roms/qpsx` folder and is not fully
+integrated yet. While a QPSX game is running, hold **START for about one
+second** to open the QPSX menu.
 
 ---
 
@@ -440,7 +445,7 @@ treefrog-ui/
 > **Right analog stick.** The right stick **cannot** work as a real analog stick, and no software update can change that. On this console it's physically wired to act **exactly like the X / A / B / Y face buttons**: nudging it is the same as pressing those buttons, just on/off, with no "how far" or "which angle" info. The console never hands analog data to apps like TreeFrogUI. So the right stick simply **mirrors the face buttons** (tiny accidental movements are ignored, so it won't fire on its own). Hardware limitation, not a bug or missing feature.
 
 > [!NOTE]
-> **TreeFrogUI gives you true hibernation instead of sleep.** Turn on **Quick Resume** (Settings → Quick Resume) with **Auto-Save/Auto-Load** and the device boots straight back into your game at the exact moment you left off - pick up mid-race, mid-battle, anywhere. It survives a full power-off, so it's better than sleep: zero battery drain while it's off. Stock power-button sleep/standby itself is **not supported and won't be** (it can hang the display on wake on R36SX and SF3500-class devices), so **Disable Sleep is on by default** - you're not missing anything, hibernation covers the "put it down, pick it back up" use case completely.
+> **TreeFrogUI supports normal sleep by default.** If your device has unreliable wake behavior, enable **Disable Sleep** in Settings and restart. Alternatively, turn on **Quick Resume** with **Auto-Save/Auto-Load** to resume from a full power-off with zero battery drain.
 
 ### SF3000 family
 

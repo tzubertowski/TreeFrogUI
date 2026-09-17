@@ -2,6 +2,10 @@
 
 Changes since the v1.5.0_j build:
 
+- Added the experimental QPSX PlayStation core in `roms/qpsx`. It is not fully
+  integrated yet; hold **START for about one second** while playing to open
+  its core menu.
+
 - Completed the built-in translations across all 10 supported locales. Every
   locale now contains the full 250-string catalog, including the Picoarch
   player controls, emulator menu labels, settings, remapping prompts, and

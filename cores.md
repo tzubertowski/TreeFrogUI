@@ -141,6 +141,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `gong` | Pong clone | `gong_libretro.so` | [libretro/gong](https://github.com/libretro/gong) |
 | `pico8` (or legacy `fake08`) | PICO-8 | `fake08_libretro.so` | [tzubertowski/fake-08](https://github.com/tzubertowski/fake-08) (branch `sf3000`) |
 | `ps1r` | PlayStation (lightrec JIT) | `pcsx_rearmed_libretro.so` | [libretro/pcsx_rearmed](https://github.com/libretro/pcsx_rearmed) + `patches/pcsx_rearmed-sf3000-lightrec.patch` |
+| `qpsx` | PlayStation (QPSX MIPS recompiler) | `pcsx4all_libretro.so` | [angree/sf2000-qpsx-playstation-emulator](https://github.com/angree/sf2000-qpsx-playstation-emulator) + `patches/qpsx-sf3000.patch` |
 | `retro8` | PICO-8 compat | `retro8_libretro.so` | [libretro/retro8](https://github.com/libretro/retro8) |
 | `lowres-nx` | LowRes NX | `lowresnx_libretro.so` | [timoinutilis/lowres-nx](https://github.com/timoinutilis/lowres-nx) |
 | `tic80` | TIC-80 fantasy console (.tic carts) | `tic80_libretro.so` | [nesbox/TIC-80](https://github.com/nesbox/TIC-80) |
