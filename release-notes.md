@@ -73,3 +73,15 @@ logging fixes.
 This is a prerelease for testing. Copy `update.zip` to the SD-card root and
 reboot, or use the full ZIP and the matching `install_first/<device>/` files
 for a fresh installation. Keep a backup of your card.
+## TreeFrogUI v1.6.0_b prerelease
+
+Changes since the v1.6.0_a build:
+
+- Added **Java Games** support through the FroggyKVM J2ME / MIDP 2.0 emulator.
+  Put `.jar` or `.jad` files in `roms/j2me/`; the release includes the
+  `j2me_libretro.so` core, runtime classes, Java Games artwork, and the
+  `roms/j2me/` folder.
+- Added FluidLite MIDI synthesis for J2ME games, with the SoundFont accepted
+  from either `bios/` or `cubegm/bios/`.
+
+J2ME emulator credit: [Sajnaps / FroggyKVM](https://github.com/Synaps33/FroggyKVM).

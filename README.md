@@ -33,7 +33,7 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 | Component | What it does |
 |-----------|-------------|
 | **TreeFrogUI** (`frogui_libretro.so`) | ROM browser and launcher, runs inside picoarch |
-| **57 emulator cores** | NES, SNES, GBA, Mega Drive, PC Engine, Amiga, Atari ST, and more |
+| **58 emulator cores** | NES, SNES, GBA, Mega Drive, PC Engine, Amiga, Atari ST, J2ME, and more |
 | **build system** | Cross-compile everything from source using the SF3000 toolchain |
 
 See [cores.md](cores.md) for the full folder→core mapping table.
@@ -43,7 +43,7 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 ## Why TreeFrogUI?
 
 - **Minimalistic but powerful UI** - Clean, fast game selection screen with quick navigation.
-- **57 emulator cores** - Now supports 57 emulator cores compared to only 14 in the stock OS. This includes standout additions such as **PICO-8** (via Fake08/Retro8), **Quake** (via Tyrquake), **Cave Story** (via NXEngine), **Doom** (via PrBoom), **PlayStation 1** (via PCSX ReArmed), plus classic computer systems like Commodore Amiga and Atari ST.
+- **58 emulator cores** - Now supports 58 emulator cores compared to only 14 in the stock OS. This includes **Java Games** (J2ME / MIDP 2.0), **PICO-8** (via Fake08/Retro8), **Quake** (via Tyrquake), **Cave Story** (via NXEngine), **Doom** (via PrBoom), **PlayStation 1** (via PCSX ReArmed), plus classic computer systems like Commodore Amiga and Atari ST.
 - **Highly configurable cores** - Configurable settings for all cores, allowing for retro features like console palette swaps, LCD ghosting emulation, and more.
 - **In-game saves** - Fully supported across all compatible cores for seamless session saving and loading.
 - **Quick Resume** - Automatically boots back into the last played game upon device boot, skipping the frontend.
