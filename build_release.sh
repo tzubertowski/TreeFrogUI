@@ -39,7 +39,6 @@ FROGUI="$FROGUI_ROOT/out/frogui_libretro.so"
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 FROGSHELL_ASSET="$(pwd)/assets/frogshell_libretro.so"
 J2ME_CLASSES="$(pwd)/assets/j2me/classes.zip"
-J2ME_BANNER="$(pwd)/assets/j2me/java-games.png"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 DSPERATE=/home/tomaszz/sf3000-work/dsperate/build/sf3000-package
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
@@ -131,7 +130,6 @@ else
 fi
 cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$2"; }
 [ -f "$J2ME_CLASSES" ] || { echo "missing required J2ME runtime: $J2ME_CLASSES" >&2; exit 1; }
-[ -f "$J2ME_BANNER" ] || { echo "missing required J2ME artwork: $J2ME_BANNER" >&2; exit 1; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
@@ -139,11 +137,6 @@ cp_if_diff "$(pwd)/build/qpsx_libretro.so" "$STAGE/cubegm/cores/qpsx_libretro.so
 cp_if_diff "$(pwd)/build/j2me_libretro.so" "$STAGE/cubegm/cores/j2me_libretro.so"
 mkdir -p "$STAGE/cubegm/bios"
 cp_if_diff "$J2ME_CLASSES" "$STAGE/cubegm/bios/classes.zip"
-cp_if_diff "$J2ME_BANNER" "$STAGE/frogui/j2me.png"
-for theme_dir in "$STAGE/frogui/theme-packs"/*; do
-    [ -d "$theme_dir" ] || continue
-    cp_if_diff "$J2ME_BANNER" "$theme_dir/j2me.png"
-done
 mkdir -p "$STAGE/roms/j2me"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.

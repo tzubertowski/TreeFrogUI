@@ -357,11 +357,6 @@ deploy_one() {
     if [ "$name" = frogui ]; then
         mkdir -p "$MOUNT/frogui/lang"
         rsync -rltc "$REPO/frogui/lang/" "$MOUNT/frogui/lang/"
-        rsync -tc "$REPO/assets/j2me/java-games.png" "$MOUNT/frogui/j2me.png"
-        for theme_dir in "$MOUNT/frogui/theme-packs"/*; do
-            [ -d "$theme_dir" ] || continue
-            rsync -tc "$REPO/assets/j2me/java-games.png" "$theme_dir/j2me.png"
-        done
     fi
     sync
     hash_line="$(sha256sum "$dst")"
