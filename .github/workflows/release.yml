@@ -211,12 +211,13 @@ jobs:
           prefix="$toolchain/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
           sysroot="$toolchain/mipsel-buildroot-linux-gnu/sysroot"
           make -C cores/FroggyKVM clean
+          # FroggyKVM's legacy generated-source rules are not safe to build in parallel.
           make -C cores/FroggyKVM platform=sf3000 \
             CC="${prefix}gcc" CXX="${prefix}g++" \
             AR="${prefix}ar" RANLIB="${prefix}ranlib" \
             LD="${prefix}g++" \
             LDFLAGS="-mips32r2 -mhard-float -mfp32 -EL --sysroot=$sysroot -L$sysroot/usr/lib -lm -lc -lstdc++" \
-            -j"$(nproc)"
+            -j1
           mkdir -p build
           test -f cores/FroggyKVM/j2me_libretro.so
           cp cores/FroggyKVM/j2me_libretro.so build/j2me_libretro.so
