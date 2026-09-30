@@ -93,18 +93,21 @@ index ecf4a2c..f4b1116 100644
    int cp_len = (int)strlen(sys_cp_ascii);
    JvmPathChar sys_cp_unicode[512];
 diff --git a/pspkvm/platform_gb300/audio.c b/pspkvm/platform_gb300/audio.c
-index 28ca968..b617066 100644
+index 28ca968..fd9389c 100644
 --- a/pspkvm/platform_gb300/audio.c
 +++ b/pspkvm/platform_gb300/audio.c
-@@ -4,6 +4,7 @@
+@@ -2,8 +2,10 @@
+ #include <stdlib.h>
+ #include <string.h>
  #include <stdint.h>
++#include <stdarg.h>
  #include "psp_compat.h"
  #include <kni.h>
 +#include "fluidlite.h"
  
  #define AUDIO_SAMPLE_RATE 22050
  #define AUDIO_BUFFER_SIZE 4096
-@@ -23,7 +24,54 @@ typedef struct {
+@@ -23,7 +25,74 @@ typedef struct {
      int16_t amplitude;
  } ToneState;
  
@@ -123,23 +126,41 @@ index 28ca968..b617066 100644
 +
 +static fluid_settings_t *g_midi_settings;
 +static fluid_synth_t *g_midi_synth;
++static FILE *g_audio_trace;
 +
 +#ifndef FROGGY_SD_ROOT
 +#define FROGGY_SD_ROOT "/mnt/sdcard"
 +#endif
 +
++static void audio_trace(const char *fmt, ...) {
++    va_list ap;
++    if (!g_audio_trace) {
++        char path[128];
++        snprintf(path, sizeof(path), "%s/cubegm/logs/j2me_audio.log", FROGGY_SD_ROOT);
++        g_audio_trace = fopen(path, "w");
++    }
++    if (!g_audio_trace) return;
++    va_start(ap, fmt);
++    vfprintf(g_audio_trace, fmt, ap);
++    va_end(ap);
++    fputc('\n', g_audio_trace);
++    fflush(g_audio_trace);
++}
++
 +static void midi_fluid_init(void) {
 +    char sf2[128];
 +    if (g_midi_synth) return;
++    audio_trace("init begin");
 +    g_midi_settings = new_fluid_settings();
-+    if (!g_midi_settings) return;
++    if (!g_midi_settings) { audio_trace("settings failed"); return; }
 +    fluid_settings_setnum(g_midi_settings, "synth.sample-rate", AUDIO_SAMPLE_RATE);
 +    fluid_settings_setint(g_midi_settings, "synth.polyphony", 32);
 +    g_midi_synth = new_fluid_synth(g_midi_settings);
-+    if (!g_midi_synth) return;
++    if (!g_midi_synth) { audio_trace("synth failed"); return; }
 +    fluid_synth_set_gain(g_midi_synth, 0.65f);
 +    snprintf(sf2, sizeof(sf2), "%s/cubegm/bios/Roland_SC-55.sf2", FROGGY_SD_ROOT);
 +    if (fluid_synth_sfload(g_midi_synth, sf2, 1) < 0) {
++        audio_trace("soundfont failed: %s", sf2);
 +        xlog("[AUDIO] MIDI SoundFont missing: %s\n", sf2);
 +        delete_fluid_synth(g_midi_synth);
 +        g_midi_synth = NULL;
@@ -147,10 +168,12 @@ index 28ca968..b617066 100644
 +        g_midi_settings = NULL;
 +        return;
 +    }
++    audio_trace("soundfont loaded: %s", sf2);
 +    xlog("[AUDIO] FluidLite SoundFont loaded: %s\n", sf2);
 +}
 +
 +static void midi_fluid_deinit(void) {
++    audio_trace("deinit");
 +    if (g_midi_synth) delete_fluid_synth(g_midi_synth);
 +    if (g_midi_settings) delete_fluid_settings(g_midi_settings);
 +    g_midi_synth = NULL;
@@ -159,7 +182,7 @@ index 28ca968..b617066 100644
  
  /* 16.16 fixed-point phase increment per sample at 22050 Hz for MIDI notes 0..127 */
  static const uint32_t midi_note_phase_step[128] = {
-@@ -50,21 +98,24 @@ void gb300_audio_init(void) {
+@@ -50,21 +119,24 @@ void gb300_audio_init(void) {
      audio_buffer_tail = 0;
      memset(audio_ring_buffer, 0, sizeof(audio_ring_buffer));
      memset(&g_tone, 0, sizeof(g_tone));
@@ -189,7 +212,7 @@ index 28ca968..b617066 100644
      if (volume > 100) volume = 100;
  
      g_tone.phase = 0;
-@@ -75,8 +126,45 @@ void gb300_audio_play_tone(int note, int duration_ms, int volume) {
+@@ -75,8 +147,45 @@ void gb300_audio_play_tone(int note, int duration_ms, int volume) {
      g_tone.active = 1;
  }
  
@@ -235,7 +258,7 @@ index 28ca968..b617066 100644
  }
  
  /* ===================== WAV (PCM) playback =====================
-@@ -371,6 +459,21 @@ static void midi_add_event(midi_event_t **pev, int *pnev, int *pcap, int tick,
+@@ -371,6 +480,21 @@ static void midi_add_event(midi_event_t **pev, int *pnev, int *pcap, int tick,
  
  static void midi_synth(midi_voice_t *voices, int16_t *out, int frames) {
      int i, j;
@@ -257,7 +280,7 @@ index 28ca968..b617066 100644
      for (i = 0; i < frames; i++) {
          int32_t acc = 0;
          for (j = 0; j < MIDI_MAX_VOICES; j++) {
-@@ -477,6 +580,7 @@ static int midi_render(wav_player_t *p) {
+@@ -477,6 +601,7 @@ static int midi_render(wav_player_t *p) {
      qsort(ev, nev, sizeof(midi_event_t), midi_cmp);
  
      midi_init_waves();
@@ -265,7 +288,7 @@ index 28ca968..b617066 100644
      for (i = 0; i < MIDI_MAX_VOICES; i++) memset(&voices[i], 0, sizeof(midi_voice_t));
      for (i = 0; i < 16; i++) { chanProg[i] = 0; chanVol[i] = 100; chanExpr[i] = 127; }
  
-@@ -502,6 +606,7 @@ static int midi_render(wav_player_t *p) {
+@@ -502,6 +627,7 @@ static int midi_render(wav_player_t *p) {
              if (e->d1 == 0x51 && e->value > 0) tempo = e->value;
          } else if (e->type == 0x90) {
              int ch = e->ch, note = e->d1 & 0x7F, vel = e->d2 & 0x7F;
@@ -273,7 +296,7 @@ index 28ca968..b617066 100644
              midi_voice_t *v = NULL;
              for (j = 0; j < MIDI_MAX_VOICES; j++) {
                  if (voices[j].active && voices[j].ch == ch && voices[j].note == note) { v = &voices[j]; break; }
-@@ -531,6 +636,7 @@ static int midi_render(wav_player_t *p) {
+@@ -531,6 +657,7 @@ static int midi_render(wav_player_t *p) {
              v->order = order++;
          } else if (e->type == 0x80) {
              int ch = e->ch, note = e->d1 & 0x7F;
@@ -281,7 +304,7 @@ index 28ca968..b617066 100644
              for (j = 0; j < MIDI_MAX_VOICES; j++) {
                  if (voices[j].active && voices[j].ch == ch && voices[j].note == note) {
                      voices[j].release = 1;
-@@ -538,13 +644,23 @@ static int midi_render(wav_player_t *p) {
+@@ -538,13 +665,23 @@ static int midi_render(wav_player_t *p) {
              }
          } else if (e->type == 0xC0) {
              chanProg[e->ch & 0x0F] = e->d1 & 0x7F;
@@ -305,18 +328,22 @@ index 28ca968..b617066 100644
      free(ev);
      if (outPos <= 0) { free(out); return 0; }
      p->pcm = out;
-@@ -685,6 +801,10 @@ int gb300_audio_write(const int16_t *samples, int num_frames) {
+@@ -685,6 +822,14 @@ int gb300_audio_write(const int16_t *samples, int num_frames) {
  
  int gb300_audio_read(int16_t *dst, int num_frames) {
      if (!dst || num_frames <= 0) return 0;
 +    static int16_t midi_stereo[2048 * 2];
++    static int trace_reads;
++    if (trace_reads < 16) audio_trace("read begin: %d frames fluid=%d", num_frames, g_midi_synth != NULL);
 +    if (g_midi_synth && num_frames <= 2048)
 +        fluid_synth_write_s16(g_midi_synth, num_frames,
 +                              midi_stereo, 0, 2, midi_stereo + 1, 0, 2);
++    if (trace_reads < 16) audio_trace("read synth done");
++    trace_reads++;
  
      for (int i = 0; i < num_frames; i++) {
          int32_t mix_l = 0;
-@@ -714,9 +834,20 @@ int gb300_audio_read(int16_t *dst, int num_frames) {
+@@ -714,9 +859,20 @@ int gb300_audio_read(int16_t *dst, int num_frames) {
              g_tone.samples_remaining--;
              if (g_tone.samples_remaining <= 0) {
                  g_tone.active = 0;
@@ -337,7 +364,7 @@ index 28ca968..b617066 100644
          // Mix WAV players (JSR-135 DirectPlayer)
          wav_mix_frame(&mix_l, &mix_r);
  
-@@ -1056,14 +1187,22 @@ Java_com_sun_mmedia_DirectMIDIControl_nShortMidiEvent(void) {
+@@ -1056,14 +1212,22 @@ Java_com_sun_mmedia_DirectMIDIControl_nShortMidiEvent(void) {
      jint data2  = KNI_GetParameterAsInt(4);
  
      int cmd = status & 0xF0;
