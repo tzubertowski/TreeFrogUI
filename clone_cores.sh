@@ -110,6 +110,10 @@ clone sf2000-atarist-emulator            https://github.com/angree/sf2000-ataris
 clone qpsx                                  https://github.com/angree/sf2000-qpsx-playstation-emulator
 
 # ── optional standalone ports ───────────────────────────────────────────────
+# FroggyKVM's sf3000 target is maintained locally for TreeFrogUI; the upstream
+# sf2000 target remains the bare-metal core_87000000 build.
+clone FroggyKVM             git@github.com:Synaps33/FroggyKVM.git
+
 # Experimental Data Frog SF3000 PPSSPP port. The repository currently carries
 # the upstream source bundle; when a device-ready `ppsspp` executable is built,
 # place it at sdcard/cubegm/ppsspp and the PSP folder will prefer it at launch.

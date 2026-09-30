@@ -163,6 +163,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | `cdg` | CD+G Karaoke | `pocketcdg_libretro.so` | [libretro/libretro-pocketcdg](https://github.com/libretro/libretro-pocketcdg) |
 | `gme` | Game Music Emu | `gme_libretro.so` | [libretro/libretro-gme](https://github.com/libretro/libretro-gme) |
 | `Ebook` | Ebook / document reader (EPUB/MOBI/PDF/CBZ/FB2) - **standalone** binary, MuPDF - 📖 [guide](docs/cores/ebook.md) | `cubegm/ebook` | [tzubertowski/TreeFrogUI_ebook_reader](https://github.com/tzubertowski/TreeFrogUI_ebook_reader) |
+| `j2me` | J2ME / MIDP 2.0 (`.jar` / `.jad`) | `j2me_libretro.so` | [Synaps33/FroggyKVM](https://github.com/Synaps33/FroggyKVM) - TreeFrogUI `sf3000` target |
 | `nds` | Nintendo DS - **standalone**, experimental | `cubegm/dsperate/run_sf3000.sh` | [beebono/DSperate](https://github.com/beebono/DSperate) |
 
 ---
@@ -182,3 +183,5 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 - Folders are case-sensitive on picoarch - match exactly
 - Multiple folders can map to same core (e.g. `nes` and `FC` both → fceumm)
 - ❌ cores not in `build/` - either missing dependency or not cloned
+- FroggyKVM's `sf3000` target produces a Linux/MIPS `.so`; the upstream
+  `sf2000` target still produces its separate static multicore archive.

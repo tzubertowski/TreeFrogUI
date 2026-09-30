@@ -189,6 +189,18 @@ make -C "$CORES/gpsp_upstream" platform=sf3000 \
     cp "$CORES/gpsp_upstream/gpsp_libretro.so" "$OUT/gpsp_libretro.so" && \
     "$STRIP" "$OUT/gpsp_libretro.so" && echo "→ $OUT/gpsp_libretro.so"
 
+# FroggyKVM J2ME / MIDP 2.0. The upstream sf2000 target creates a bare-metal
+# archive; the sf3000 target emits the Linux/MIPS shared object picoarch loads.
+echo "-- FroggyKVM J2ME make --"
+make -C "$CORES/FroggyKVM" clean 2>/dev/null || true
+make -C "$CORES/FroggyKVM" platform=sf3000 \
+    CC="$WRAP/mips-gcc" CXX="$WRAP/mips-g++" \
+    AR="$AR" RANLIB="$RANLIB" LD="$WRAP/mips-g++" \
+    LDFLAGS="$LDFLAGS" -j$(nproc) 2>&1
+[ -f "$CORES/FroggyKVM/j2me_libretro.so" ] && \
+    cp "$CORES/FroggyKVM/j2me_libretro.so" "$OUT/j2me_libretro.so" && \
+    "$STRIP" "$OUT/j2me_libretro.so" && echo "→ $OUT/j2me_libretro.so"
+
 # ── standard cores ────────────────────────────────────────────────────────────
 echo "-- picodrive make --"
 _b picodrive         picodrive                 "-f Makefile.libretro"
