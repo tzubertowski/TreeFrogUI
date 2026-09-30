@@ -104,10 +104,18 @@ index a028cde..af15105 100644
          "configs/j2me",
          "/media/Sajnaps/GB300/config/j2me",
 diff --git a/pspkvm/platform_gb300/platform.c b/pspkvm/platform_gb300/platform.c
-index 5b7e3d7..acc720e 100644
+index 5b7e3d7..2bb97f5 100644
 --- a/pspkvm/platform_gb300/platform.c
 +++ b/pspkvm/platform_gb300/platform.c
-@@ -61,7 +61,25 @@ static retro_environment_t environ_cb = NULL;
+@@ -58,10 +58,33 @@ static retro_input_poll_t input_poll_cb = NULL;
+ static retro_input_state_t input_state_cb = NULL;
+ static retro_environment_t environ_cb = NULL;
+ 
++static void request_libretro_shutdown(void) {
++    if (environ_cb)
++        environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, NULL);
++}
++
  static bool game_loaded = false;
  static bool jvm_started = false;
  
@@ -134,7 +142,7 @@ index 5b7e3d7..acc720e 100644
  extern volatile uint32_t g_joy_task_state;
  extern volatile uint32_t g_joy_state;
  extern void frontend_check_hotkeys(void);
-@@ -197,14 +215,18 @@ RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
+@@ -197,14 +220,18 @@ RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
  }
  
  RETRO_API bool retro_load_game(const struct retro_game_info *game) {
@@ -155,7 +163,7 @@ index 5b7e3d7..acc720e 100644
      }
      game_loaded = true;
      jvm_started = false;
-@@ -240,7 +262,7 @@ void gb300_poll_events(void) {
+@@ -240,7 +267,7 @@ void gb300_poll_events(void) {
          last_input_time = now;
          
          if (input_poll_cb) input_poll_cb();
@@ -164,6 +172,22 @@ index 5b7e3d7..acc720e 100644
          frontend_check_hotkeys();
  #endif
          uint32_t buttons = poll_gb300_buttons();
+@@ -372,6 +399,7 @@ RETRO_API void retro_run(void) {
+ 
+         if (s_exit_requested) {
+             dly_tsk(16);
++            request_libretro_shutdown();
+             return;
+         }
+ 
+@@ -379,6 +407,7 @@ RETRO_API void retro_run(void) {
+         gb300_hacker_exit(0);
+         s_exit_requested = 1;
+         dly_tsk(16);
++        request_libretro_shutdown();
+         return;
+     }
+ 
 diff --git a/pspkvm/platform_gb300/psp_compat.h b/pspkvm/platform_gb300/psp_compat.h
 index 56be5c1..3a2d8f1 100644
 --- a/pspkvm/platform_gb300/psp_compat.h
