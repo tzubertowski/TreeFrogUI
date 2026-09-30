@@ -61,6 +61,48 @@ index ecf4a2c..f4b1116 100644
    }
    int cp_len = (int)strlen(sys_cp_ascii);
    JvmPathChar sys_cp_unicode[512];
+diff --git a/pspkvm/midp/src/media/reference/classes/javax/microedition/media/Manager.java b/pspkvm/midp/src/media/reference/classes/javax/microedition/media/Manager.java
+index cb42c17..1cdf9ad 100644
+--- a/pspkvm/midp/src/media/reference/classes/javax/microedition/media/Manager.java
++++ b/pspkvm/midp/src/media/reference/classes/javax/microedition/media/Manager.java
+@@ -26,8 +26,9 @@
+ package javax.microedition.media;
+ 
+ 
+-import java.io.InputStream;
+-import java.io.IOException;
++import java.io.InputStream;
++import java.io.IOException;
++import com.sun.mmedia.NativeTonePlayer;
+ 
+ 
+ 
+@@ -416,7 +417,9 @@ import java.io.IOException;
+  * @see        TimeBase
+  */
+ 
+-public final class Manager {
++public final class Manager {
++
++    private static final NativeTonePlayer tonePlayer = new NativeTonePlayer();
+     
+     /**
+      * The locator to create a tone <code>Player</code>
+@@ -639,8 +642,9 @@ public final class Manager {
+     public static void playTone(int note, int duration, int volume)
+          throws MediaException {
+         
+-        if (note < 0 || note > 127 || duration <= 0) {
+-            throw new IllegalArgumentException("bad param");
+-        }
+-    }
+-}
++        if (note < 0 || note > 127 || duration <= 0) {
++            throw new IllegalArgumentException("bad param");
++        }
++        tonePlayer.playTone(note, duration, volume);
++    }
++}
 diff --git a/pspkvm/platform_gb300/audio.c b/pspkvm/platform_gb300/audio.c
 index 28ca968..1482adf 100644
 --- a/pspkvm/platform_gb300/audio.c
