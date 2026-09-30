@@ -104,19 +104,47 @@ index a028cde..af15105 100644
          "configs/j2me",
          "/media/Sajnaps/GB300/config/j2me",
 diff --git a/pspkvm/platform_gb300/platform.c b/pspkvm/platform_gb300/platform.c
-index 5b7e3d7..c4f6df7 100644
+index 5b7e3d7..9f85525 100644
 --- a/pspkvm/platform_gb300/platform.c
 +++ b/pspkvm/platform_gb300/platform.c
-@@ -61,7 +61,7 @@ static retro_environment_t environ_cb = NULL;
+@@ -61,7 +61,25 @@ static retro_environment_t environ_cb = NULL;
  static bool game_loaded = false;
  static bool jvm_started = false;
  
 -#if defined(SF2000) || defined(__mips__)
++static bool j2me_classes_available(void) {
++    static const char *paths[] = {
++        FROGGY_SD_ROOT "/bios/classes.zip",
++        FROGGY_SD_ROOT "/BIOS/classes.zip",
++        FROGGY_SD_ROOT "/cubegm/cores/j2me/classes.zip",
++        FROGGY_SD_ROOT "/roms/j2me/classes.zip",
++        NULL
++    };
++    for (int i = 0; paths[i]; i++) {
++        FILE *f = fopen(paths[i], "rb");
++        if (f) {
++            fclose(f);
++            return true;
++        }
++    }
++    return false;
++}
++
 +#if defined(SF2000) || defined(GB300)
  extern volatile uint32_t g_joy_task_state;
  extern volatile uint32_t g_joy_state;
  extern void frontend_check_hotkeys(void);
-@@ -203,8 +203,8 @@ RETRO_API bool retro_load_game(const struct retro_game_info *game) {
+@@ -197,14 +215,18 @@ RETRO_API void retro_get_system_av_info(struct retro_system_av_info *info) {
+ }
+ 
+ RETRO_API bool retro_load_game(const struct retro_game_info *game) {
++    if (!j2me_classes_available()) {
++        xlog("[PSPKVM-GB300] Missing classes.zip; install it in /bios/classes.zip\n");
++        return false;
++    }
+     if (game && game->path) {
+         xlog("[PSPKVM-GB300] retro_load_game: Loading ROM file '%s'\n", game->path);
+         gb300_fs_set_rom(game->path);
          gb300_input_load_config(game->path);
      } else {
          xlog("[PSPKVM-GB300] retro_load_game: Running in standalone/stub mode\n");
@@ -127,7 +155,7 @@ index 5b7e3d7..c4f6df7 100644
      }
      game_loaded = true;
      jvm_started = false;
-@@ -240,7 +240,7 @@ void gb300_poll_events(void) {
+@@ -240,7 +262,7 @@ void gb300_poll_events(void) {
          last_input_time = now;
          
          if (input_poll_cb) input_poll_cb();
