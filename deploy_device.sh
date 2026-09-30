@@ -350,7 +350,6 @@ deploy_one() {
         dst_hash="${hash_line%% *}"
         if [ "$src_hash" = "$dst_hash" ]; then
             echo "$name already current: $src_hash"
-            return
         fi
     fi
 
