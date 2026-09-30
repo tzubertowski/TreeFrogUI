@@ -62,7 +62,7 @@ index ecf4a2c..f4b1116 100644
    int cp_len = (int)strlen(sys_cp_ascii);
    JvmPathChar sys_cp_unicode[512];
 diff --git a/pspkvm/platform_gb300/audio.c b/pspkvm/platform_gb300/audio.c
-index 28ca968..5129518 100644
+index 28ca968..9f92156 100644
 --- a/pspkvm/platform_gb300/audio.c
 +++ b/pspkvm/platform_gb300/audio.c
 @@ -23,7 +23,18 @@ typedef struct {
@@ -158,7 +158,22 @@ index 28ca968..5129518 100644
  }
  
  /* ===================== WAV (PCM) playback =====================
-@@ -714,6 +763,12 @@ int gb300_audio_read(int16_t *dst, int num_frames) {
+@@ -545,6 +594,14 @@ static int midi_render(wav_player_t *p) {
+         }
+     }
+ 
++    /* Let the final notes release instead of cutting the track at its last event. */
++    if (outPos < outCap) {
++        int tail = WAV_PCM_RATE / 2;
++        if (tail > outCap - outPos) tail = outCap - outPos;
++        midi_synth(voices, out + outPos, tail);
++        outPos += tail;
++    }
++
+     free(ev);
+     if (outPos <= 0) { free(out); return 0; }
+     p->pcm = out;
+@@ -714,6 +771,12 @@ int gb300_audio_read(int16_t *dst, int num_frames) {
              g_tone.samples_remaining--;
              if (g_tone.samples_remaining <= 0) {
                  g_tone.active = 0;
@@ -171,7 +186,7 @@ index 28ca968..5129518 100644
              }
          }
  
-@@ -1060,10 +1115,10 @@ Java_com_sun_mmedia_DirectMIDIControl_nShortMidiEvent(void) {
+@@ -1060,10 +1123,10 @@ Java_com_sun_mmedia_DirectMIDIControl_nShortMidiEvent(void) {
          if (data2 > 0) {
              gb300_audio_play_tone((int)data1, 300, (int)((data2 * 100) / 127));
          } else {
