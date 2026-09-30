@@ -357,6 +357,10 @@ deploy_one() {
     if [ "$name" = frogui ]; then
         mkdir -p "$MOUNT/frogui/lang"
         rsync -rltc "$REPO/frogui/lang/" "$MOUNT/frogui/lang/"
+        rsync -tc "$REPO/assets/j2me/java-games-artbook-nextui.png" "$MOUNT/frogui/j2me.png"
+        rsync -tc "$REPO/assets/j2me/java-games-artbook-nextui.png" "$MOUNT/frogui/theme-packs/Art_Book_NextUI/j2me.png"
+        rsync -tc "$REPO/assets/j2me/java-games-artbook-next.png" "$MOUNT/frogui/theme-packs/Art_Book_Next/j2me.png"
+        rsync -tc "$REPO/assets/j2me/java-games-nao-black.png" "$MOUNT/frogui/theme-packs/Nao_Black/j2me.png"
     fi
     sync
     hash_line="$(sha256sum "$dst")"
