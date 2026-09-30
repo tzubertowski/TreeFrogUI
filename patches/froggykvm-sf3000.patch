@@ -61,6 +61,106 @@ index ecf4a2c..f4b1116 100644
    }
    int cp_len = (int)strlen(sys_cp_ascii);
    JvmPathChar sys_cp_unicode[512];
+diff --git a/pspkvm/platform_gb300/audio.c b/pspkvm/platform_gb300/audio.c
+index 28ca968..1482adf 100644
+--- a/pspkvm/platform_gb300/audio.c
++++ b/pspkvm/platform_gb300/audio.c
+@@ -23,7 +23,18 @@ typedef struct {
+     int16_t amplitude;
+ } ToneState;
+ 
++typedef struct {
++    int note;
++    int duration_ms;
++    int volume;
++} ToneEvent;
++
+ static ToneState g_tone = {0};
++#define TONE_QUEUE_SIZE 32
++static ToneEvent g_tone_queue[TONE_QUEUE_SIZE];
++static int g_tone_queue_head = 0;
++static int g_tone_queue_count = 0;
++void gb300_audio_stop_tone(void);
+ 
+ /* 16.16 fixed-point phase increment per sample at 22050 Hz for MIDI notes 0..127 */
+ static const uint32_t midi_note_phase_step[128] = {
+@@ -50,21 +61,22 @@ void gb300_audio_init(void) {
+     audio_buffer_tail = 0;
+     memset(audio_ring_buffer, 0, sizeof(audio_ring_buffer));
+     memset(&g_tone, 0, sizeof(g_tone));
++    memset(g_tone_queue, 0, sizeof(g_tone_queue));
++    g_tone_queue_head = 0;
++    g_tone_queue_count = 0;
+ }
+ 
+ void gb300_audio_deinit(void) {
+     audio_buffer_head = 0;
+     audio_buffer_tail = 0;
+     memset(&g_tone, 0, sizeof(g_tone));
++    g_tone_queue_head = 0;
++    g_tone_queue_count = 0;
+ }
+ 
+-void gb300_audio_play_tone(int note, int duration_ms, int volume) {
++static void tone_start(int note, int duration_ms, int volume) {
+     if (note < 0 || note > 127) return;
+     if (duration_ms <= 0) duration_ms = 100;
+-    if (volume <= 0) {
+-        g_tone.active = 0;
+-        return;
+-    }
+     if (volume > 100) volume = 100;
+ 
+     g_tone.phase = 0;
+@@ -75,8 +87,35 @@ void gb300_audio_play_tone(int note, int duration_ms, int volume) {
+     g_tone.active = 1;
+ }
+ 
++void gb300_audio_play_tone(int note, int duration_ms, int volume) {
++    if (note < 0 || note > 127) return;
++    if (volume <= 0) {
++        gb300_audio_stop_tone();
++        return;
++    }
++    if (duration_ms <= 0) duration_ms = 100;
++    if (volume > 100) volume = 100;
++
++    if (!g_tone.active && g_tone_queue_count == 0) {
++        tone_start(note, duration_ms, volume);
++        return;
++    }
++
++    /* Java games commonly send note events faster than the audio callback
++     * drains them. Queue short tones instead of cutting the current tone off. */
++    if (g_tone_queue_count < TONE_QUEUE_SIZE) {
++        int slot = (g_tone_queue_head + g_tone_queue_count) % TONE_QUEUE_SIZE;
++        g_tone_queue[slot].note = note;
++        g_tone_queue[slot].duration_ms = duration_ms;
++        g_tone_queue[slot].volume = volume;
++        g_tone_queue_count++;
++    }
++}
++
+ void gb300_audio_stop_tone(void) {
+     g_tone.active = 0;
++    g_tone_queue_head = 0;
++    g_tone_queue_count = 0;
+ }
+ 
+ /* ===================== WAV (PCM) playback =====================
+@@ -714,6 +753,12 @@ int gb300_audio_read(int16_t *dst, int num_frames) {
+             g_tone.samples_remaining--;
+             if (g_tone.samples_remaining <= 0) {
+                 g_tone.active = 0;
++                if (g_tone_queue_count > 0) {
++                    ToneEvent next = g_tone_queue[g_tone_queue_head];
++                    g_tone_queue_head = (g_tone_queue_head + 1) % TONE_QUEUE_SIZE;
++                    g_tone_queue_count--;
++                    tone_start(next.note, next.duration_ms, next.volume);
++                }
+             }
+         }
+ 
 diff --git a/pspkvm/platform_gb300/filesystem.c b/pspkvm/platform_gb300/filesystem.c
 index d813db0..18de670 100644
 --- a/pspkvm/platform_gb300/filesystem.c
