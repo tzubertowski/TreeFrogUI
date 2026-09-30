@@ -1,3 +1,14 @@
+## TreeFrogUI v1.6.0_c prerelease
+
+Changes since the v1.6.0_a build:
+
+- Fixed release CI so FroggyKVM is built and packaged as
+  `cubegm/cores/j2me_libretro.so`.
+- Bundled the J2ME runtime classes, `roms/j2me/`, theme artwork, and the
+  `Roland_SC-55.sf2` SoundFont at `cubegm/bios/Roland_SC-55.sf2`.
+- Fixed the FluidLite build dependency ordering so clean release builds are
+  reproducible.
+
 ## TreeFrogUI v1.6.0_a prerelease
 
 Changes since the v1.5.0 release:
