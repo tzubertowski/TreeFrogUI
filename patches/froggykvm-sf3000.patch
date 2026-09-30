@@ -204,7 +204,7 @@ index a028cde..af15105 100644
          "configs/j2me",
          "/media/Sajnaps/GB300/config/j2me",
 diff --git a/pspkvm/platform_gb300/platform.c b/pspkvm/platform_gb300/platform.c
-index 5b7e3d7..2bb97f5 100644
+index 5b7e3d7..b1788e9 100644
 --- a/pspkvm/platform_gb300/platform.c
 +++ b/pspkvm/platform_gb300/platform.c
 @@ -58,10 +58,33 @@ static retro_input_poll_t input_poll_cb = NULL;
@@ -272,7 +272,34 @@ index 5b7e3d7..2bb97f5 100644
          frontend_check_hotkeys();
  #endif
          uint32_t buttons = poll_gb300_buttons();
-@@ -372,6 +399,7 @@ RETRO_API void retro_run(void) {
+@@ -256,7 +283,8 @@ void gb300_poll_events(void) {
+         }
+     }
+ 
+-    /* 3. Output audio dynamically, batched to at least ~5ms to avoid overhead */
++    /* 3. Feed the frontend in stable, frame-sized batches. The VM can poll
++     * very frequently; 5ms batches underfill the 48kHz device queue. */
+     static uint64_t last_audio_time = 0;
+     if (last_audio_time == 0 || now < last_audio_time) last_audio_time = now;
+     
+@@ -267,12 +295,12 @@ void gb300_poll_events(void) {
+         delta_us = 0;
+     }
+     
+-    if (delta_us > 5000) {
++    if (delta_us >= 20000) {
+         int frames = (int)((delta_us * 22050) / 1000000LL);
+         if (frames > 0) {
+-            if (frames > 2048) {
+-                frames = 2048; /* cap */
+-                last_audio_time = now - (2048 * 1000000LL) / 22050; /* Snap time to avoid debt accumulation */
++            if (frames > 1024) {
++                frames = 1024;
++                last_audio_time = now - (1024 * 1000000LL) / 22050;
+             }
+             static int16_t pcm_samples[2048 * 2];
+             int frames_read = gb300_audio_read(pcm_samples, frames);
+@@ -372,6 +400,7 @@ RETRO_API void retro_run(void) {
  
          if (s_exit_requested) {
              dly_tsk(16);
@@ -280,7 +307,7 @@ index 5b7e3d7..2bb97f5 100644
              return;
          }
  
-@@ -379,6 +407,7 @@ RETRO_API void retro_run(void) {
+@@ -379,6 +408,7 @@ RETRO_API void retro_run(void) {
          gb300_hacker_exit(0);
          s_exit_requested = 1;
          dly_tsk(16);
