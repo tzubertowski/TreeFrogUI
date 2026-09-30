@@ -133,6 +133,7 @@ cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 cp_if_diff "$(pwd)/build/qpsx_libretro.so" "$STAGE/cubegm/cores/qpsx_libretro.so"
 cp_if_diff "$(pwd)/build/j2me_libretro.so" "$STAGE/cubegm/cores/j2me_libretro.so"
+mkdir -p "$STAGE/roms/j2me"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"
@@ -197,6 +198,7 @@ mkdir -p "$OUT/roms/images"
 mkdir -p "$OUT/roms/music"
 mkdir -p "$OUT/roms/nds"
 mkdir -p "$OUT/roms/qpsx"
+mkdir -p "$OUT/roms/j2me"
 
 # Canvas ships hundreds of ES-DE targets and a second high-resolution mirror.
 # FrogUI requests only exact ROM-folder names plus its four built-in screens.
