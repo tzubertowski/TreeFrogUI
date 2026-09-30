@@ -364,6 +364,20 @@ deploy_one() {
     dst_hash="${hash_line%% *}"
     [ "$src_hash" = "$dst_hash" ] || die "$name verification failed"
     echo "$name deployed: $dst_hash"
+
+    if [ "$name" = j2me ]; then
+        local classes_src="$REPO/assets/j2me/classes.zip"
+        local classes_dst="$MOUNT/cubegm/bios/classes.zip"
+        [ -f "$classes_src" ] || die "source missing: $classes_src"
+        mkdir -p "$(dirname "$classes_dst")"
+        rsync -tc "$classes_src" "$classes_dst"
+        hash_line="$(sha256sum "$classes_src")"
+        src_hash="${hash_line%% *}"
+        hash_line="$(sha256sum "$classes_dst")"
+        dst_hash="${hash_line%% *}"
+        [ "$src_hash" = "$dst_hash" ] || die "classes.zip verification failed"
+        echo "j2me classes deployed: $dst_hash"
+    fi
 }
 
 deploy_mame2000_mslug() {

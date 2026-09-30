@@ -15,7 +15,7 @@ index 370b26a..f456001 100644
      TARGET = $(NAME)_libretro.so
      CC = gcc
 diff --git a/pspkvm/cldc/src/vm/share/handles/Universe.cpp b/pspkvm/cldc/src/vm/share/handles/Universe.cpp
-index ecf4a2c..5f1ec8f 100644
+index ecf4a2c..f4b1116 100644
 --- a/pspkvm/cldc/src/vm/share/handles/Universe.cpp
 +++ b/pspkvm/cldc/src/vm/share/handles/Universe.cpp
 @@ -25,7 +25,11 @@
@@ -37,7 +37,7 @@ index ecf4a2c..5f1ec8f 100644
      static const char* const candidates[] = {
 -        "/mnt/sda1/bios/classes.zip",
 -        "/mnt/sda1/BIOS/classes.zip",
-+        FROGGY_SD_ROOT "/bios/classes.zip",
++        FROGGY_SD_ROOT "/cubegm/bios/classes.zip",
 +        FROGGY_SD_ROOT "/BIOS/classes.zip",
          "/home/Sajnaps/gb300/bios/classes.zip",
          "/home/Sajnaps/gb300/froggykvm/classes.zip",
@@ -57,7 +57,7 @@ index ecf4a2c..5f1ec8f 100644
          }
      }
 -    if (!sys_cp_ascii) sys_cp_ascii = "/mnt/sda1/bios/classes.zip";
-+    if (!sys_cp_ascii) sys_cp_ascii = FROGGY_SD_ROOT "/bios/classes.zip";
++    if (!sys_cp_ascii) sys_cp_ascii = FROGGY_SD_ROOT "/cubegm/bios/classes.zip";
    }
    int cp_len = (int)strlen(sys_cp_ascii);
    JvmPathChar sys_cp_unicode[512];
@@ -104,7 +104,7 @@ index a028cde..af15105 100644
          "configs/j2me",
          "/media/Sajnaps/GB300/config/j2me",
 diff --git a/pspkvm/platform_gb300/platform.c b/pspkvm/platform_gb300/platform.c
-index 5b7e3d7..9f85525 100644
+index 5b7e3d7..acc720e 100644
 --- a/pspkvm/platform_gb300/platform.c
 +++ b/pspkvm/platform_gb300/platform.c
 @@ -61,7 +61,25 @@ static retro_environment_t environ_cb = NULL;
@@ -114,7 +114,7 @@ index 5b7e3d7..9f85525 100644
 -#if defined(SF2000) || defined(__mips__)
 +static bool j2me_classes_available(void) {
 +    static const char *paths[] = {
-+        FROGGY_SD_ROOT "/bios/classes.zip",
++        FROGGY_SD_ROOT "/cubegm/bios/classes.zip",
 +        FROGGY_SD_ROOT "/BIOS/classes.zip",
 +        FROGGY_SD_ROOT "/cubegm/cores/j2me/classes.zip",
 +        FROGGY_SD_ROOT "/roms/j2me/classes.zip",
@@ -139,7 +139,7 @@ index 5b7e3d7..9f85525 100644
  
  RETRO_API bool retro_load_game(const struct retro_game_info *game) {
 +    if (!j2me_classes_available()) {
-+        xlog("[PSPKVM-GB300] Missing classes.zip; install it in /bios/classes.zip\n");
++        xlog("[PSPKVM-GB300] Missing classes.zip; install it in /cubegm/bios/classes.zip\n");
 +        return false;
 +    }
      if (game && game->path) {
