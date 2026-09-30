@@ -117,6 +117,7 @@ jobs:
           git clone --depth 1 --branch main https://github.com/tzubertowski/FrogShell.git FrogShell
           git clone --depth 1 --branch main https://github.com/tzubertowski/TreeFrogUI_ebook_reader.git ebook
           git clone --depth 1 --branch 1.24.10 --recurse-submodules --shallow-submodules https://github.com/ArtifexSoftware/mupdf.git mupdf
+          git clone --depth 1 --branch treefrogui-sf3000-midi https://github.com/tzubertowski/FroggyKVM.git "$GITHUB_WORKSPACE/cores/FroggyKVM"
           # The media-player Makefiles refer to ../../../picoarch from the
           # checkout layout used by local development.
           ln -sfn "$WORK_ROOT/picoarch" "$GITHUB_WORKSPACE/../picoarch"
@@ -202,6 +203,36 @@ jobs:
           cp cores/qpsx/pcsx4all_libretro.so build/qpsx_libretro.so
           "${prefix}strip" build/qpsx_libretro.so
 
+      - name: Build FroggyKVM J2ME core
+        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
+        run: |
+          set -euo pipefail
+          toolchain="$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
+          prefix="$toolchain/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
+          sysroot="$toolchain/mipsel-buildroot-linux-gnu/sysroot"
+          make -C cores/FroggyKVM clean
+          make -C cores/FroggyKVM platform=sf3000 \
+            CC="${prefix}gcc" CXX="${prefix}g++" \
+            AR="${prefix}ar" RANLIB="${prefix}ranlib" \
+            LD="${prefix}g++" \
+            LDFLAGS="-mips32r2 -mhard-float -mfp32 -EL --sysroot=$sysroot -L$sysroot/usr/lib -lm -lc -lstdc++" \
+            -j"$(nproc)"
+          mkdir -p build
+          test -f cores/FroggyKVM/j2me_libretro.so
+          cp cores/FroggyKVM/j2me_libretro.so build/j2me_libretro.so
+          "${prefix}strip" build/j2me_libretro.so
+
+      - name: Fetch J2ME SoundFont
+        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
+        run: |
+          set -euo pipefail
+          soundfont="cores/scummvm/dists/soundfonts/Roland_SC-55.sf2"
+          mkdir -p "$(dirname "$soundfont")"
+          curl --fail --location --retry 3 \
+            "https://raw.githubusercontent.com/libretro/scummvm/660e13b0764fe2be39b6d723345ecabfbb318cc5/dists/soundfonts/Roland_SC-55.sf2" \
+            -o "$soundfont"
+          echo "fca3e514b635a21789d4224e84865d2954a2a914d46b64aa8219ddb565c44869  $soundfont" | sha256sum -c -
+
       - name: Build and check ebook reader
         working-directory: ${{ env.WORK_ROOT }}/ebook
         run: |
@@ -225,6 +256,8 @@ jobs:
           current=release/latest/release
           cmp "$WORK_ROOT/ebook/ebook" "$current/cubegm/ebook"
           cmp sdcard/cubegm/cores/frogshell_libretro.so "$current/cubegm/cores/frogshell_libretro.so"
+          test -s "$current/cubegm/cores/j2me_libretro.so"
+          test -s "$current/cubegm/bios/Roland_SC-55.sf2"
           # A CI build starts from the previous full release, so every shipped
           # core/resource must remain present unless it was deliberately
           # removed in the build script. Catch silent cp_if_diff omissions.
