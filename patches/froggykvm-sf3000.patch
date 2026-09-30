@@ -62,7 +62,7 @@ index ecf4a2c..f4b1116 100644
    int cp_len = (int)strlen(sys_cp_ascii);
    JvmPathChar sys_cp_unicode[512];
 diff --git a/pspkvm/platform_gb300/audio.c b/pspkvm/platform_gb300/audio.c
-index 28ca968..1482adf 100644
+index 28ca968..5129518 100644
 --- a/pspkvm/platform_gb300/audio.c
 +++ b/pspkvm/platform_gb300/audio.c
 @@ -23,7 +23,18 @@ typedef struct {
@@ -112,7 +112,7 @@ index 28ca968..1482adf 100644
      if (volume > 100) volume = 100;
  
      g_tone.phase = 0;
-@@ -75,8 +87,35 @@ void gb300_audio_play_tone(int note, int duration_ms, int volume) {
+@@ -75,8 +87,45 @@ void gb300_audio_play_tone(int note, int duration_ms, int volume) {
      g_tone.active = 1;
  }
  
@@ -145,10 +145,20 @@ index 28ca968..1482adf 100644
      g_tone.active = 0;
 +    g_tone_queue_head = 0;
 +    g_tone_queue_count = 0;
++}
++
++static void gb300_audio_release_midi_note(void) {
++    g_tone.active = 0;
++    if (g_tone_queue_count > 0) {
++        ToneEvent next = g_tone_queue[g_tone_queue_head];
++        g_tone_queue_head = (g_tone_queue_head + 1) % TONE_QUEUE_SIZE;
++        g_tone_queue_count--;
++        tone_start(next.note, next.duration_ms, next.volume);
++    }
  }
  
  /* ===================== WAV (PCM) playback =====================
-@@ -714,6 +753,12 @@ int gb300_audio_read(int16_t *dst, int num_frames) {
+@@ -714,6 +763,12 @@ int gb300_audio_read(int16_t *dst, int num_frames) {
              g_tone.samples_remaining--;
              if (g_tone.samples_remaining <= 0) {
                  g_tone.active = 0;
@@ -161,6 +171,19 @@ index 28ca968..1482adf 100644
              }
          }
  
+@@ -1060,10 +1115,10 @@ Java_com_sun_mmedia_DirectMIDIControl_nShortMidiEvent(void) {
+         if (data2 > 0) {
+             gb300_audio_play_tone((int)data1, 300, (int)((data2 * 100) / 127));
+         } else {
+-            gb300_audio_stop_tone();
++            gb300_audio_release_midi_note();
+         }
+     } else if (cmd == 0x80) { // Note Off
+-        gb300_audio_stop_tone();
++        gb300_audio_release_midi_note();
+     }
+     KNI_ReturnVoid();
+ }
 diff --git a/pspkvm/platform_gb300/filesystem.c b/pspkvm/platform_gb300/filesystem.c
 index d813db0..18de670 100644
 --- a/pspkvm/platform_gb300/filesystem.c
