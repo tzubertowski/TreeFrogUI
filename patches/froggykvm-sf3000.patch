@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 370b26a..ec4b946 100644
+index 370b26a..1c352ff 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -13,6 +13,11 @@ ifeq ($(platform), sf2000)
@@ -23,11 +23,12 @@ index 370b26a..ec4b946 100644
  	-Ilibretro/core \
  	-Ipspkvm/javacall/interface \
  	-Ipspkvm/javacall/interface/common \
-@@ -124,6 +131,20 @@ MORE_CFLAGS = -O3 -fomit-frame-pointer -finline-functions -fno-strict-aliasing -
+@@ -124,6 +131,21 @@ MORE_CFLAGS = -O3 -fomit-frame-pointer -finline-functions -fno-strict-aliasing -
  OBJS = \
  	pspkvm/platform_gb300/video.o \
  	pspkvm/platform_gb300/audio.o \
 +	pspkvm/platform_gb300/fluidlite/src/fluid_chan.o \
++	pspkvm/platform_gb300/fluidlite/src/fluid_chorus.o \
 +	pspkvm/platform_gb300/fluidlite/src/fluid_conv.o \
 +	pspkvm/platform_gb300/fluidlite/src/fluid_defsfont.o \
 +	pspkvm/platform_gb300/fluidlite/src/fluid_dsp_float.o \
