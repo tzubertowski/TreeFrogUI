@@ -18,8 +18,8 @@ _apply_patch() {
     # "patches/..." would resolve inside the core (wrong) and silently skip.
     local patch="$(pwd)/patches/$1" dir="cores/$2"
     [ -f "$patch" ] || return
-    if git -C "$dir" apply --check "$patch" 2>/dev/null; then
-        git -C "$dir" apply "$patch" && echo "patched $2"
+    if git -C "$dir" apply --ignore-whitespace --check "$patch" 2>/dev/null; then
+        git -C "$dir" apply --ignore-whitespace "$patch" && echo "patched $2"
     else
         echo "patch already applied or conflict: $1 (skipping)"
     fi
@@ -35,6 +35,7 @@ _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
 _apply_patch ardens-sf3000.patch       Ardens
 _apply_patch pico286-sf3000.patch      pico-286
 _apply_patch gw-sf3000-no-zoom.patch   libretro-gw
+_apply_patch froggykvm-sf3000.patch      FroggyKVM
 
 TOOLCHAIN="$HOME/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
 MIPS="$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-"

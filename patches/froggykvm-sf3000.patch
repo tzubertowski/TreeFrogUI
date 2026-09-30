@@ -1,0 +1,186 @@
+diff --git a/Makefile b/Makefile
+index 370b26a..f456001 100644
+--- a/Makefile
++++ b/Makefile
+@@ -13,6 +13,11 @@ ifeq ($(platform), sf2000)
+     override CFLAGS += $(MIPS_FLAGS)
+     override CXXFLAGS += $(MIPS_FLAGS) -fno-use-cxa-atexit -fno-exceptions -fno-rtti
+     STATIC_LINKING = 1
++else ifeq ($(platform), sf3000)
++    TARGET := $(NAME)_libretro.so
++    MIPS_FLAGS = -EL -mips32r2 -march=mips32r2 -mtune=74kc -mdspr2 -mfp32 -mhard-float -mlong-calls -fPIC -ffunction-sections -fdata-sections -DSF3000 -DFROGGY_SD_ROOT=\"/mnt/sdcard\"
++    override CFLAGS += $(MIPS_FLAGS)
++    override CXXFLAGS += $(MIPS_FLAGS) -fno-use-cxa-atexit -fno-exceptions -fno-rtti
+ else
+     TARGET = $(NAME)_libretro.so
+     CC = gcc
+diff --git a/pspkvm/cldc/src/vm/share/handles/Universe.cpp b/pspkvm/cldc/src/vm/share/handles/Universe.cpp
+index ecf4a2c..5f1ec8f 100644
+--- a/pspkvm/cldc/src/vm/share/handles/Universe.cpp
++++ b/pspkvm/cldc/src/vm/share/handles/Universe.cpp
+@@ -25,7 +25,11 @@
+  */
+ 
+ # include "incls/_precompiled.incl"
+-# include "incls/_Universe.cpp.incl"
++# include "incls/_Universe.cpp.incl"
++
++#ifndef FROGGY_SD_ROOT
++#define FROGGY_SD_ROOT "/mnt/sda1"
++#endif
+ 
+ OopDesc* persistent_handles[Universe::__number_of_persistent_handles];
+ 
+@@ -2290,15 +2294,15 @@ void Universe::create_first_task(const JvmPathChar* classpath JVM_TRAPS) {
+   static const char* sys_cp_ascii = NULL;
+   if (!sys_cp_ascii) {
+     static const char* const candidates[] = {
+-        "/mnt/sda1/bios/classes.zip",
+-        "/mnt/sda1/BIOS/classes.zip",
++        FROGGY_SD_ROOT "/bios/classes.zip",
++        FROGGY_SD_ROOT "/BIOS/classes.zip",
+         "/home/Sajnaps/gb300/bios/classes.zip",
+         "/home/Sajnaps/gb300/froggykvm/classes.zip",
+-        "/mnt/sda1/cores/j2me/classes.zip",
++        FROGGY_SD_ROOT "/cubegm/cores/j2me/classes.zip",
+         "bios/classes.zip",
+         "classes.zip",
+-        "/mnt/sda1/ROMS/J2ME/classes.zip",
+-        "/mnt/sda1/ROMS/j2me/classes.zip",
++        FROGGY_SD_ROOT "/roms/J2ME/classes.zip",
++        FROGGY_SD_ROOT "/roms/j2me/classes.zip",
+         "/media/Sajnaps/GB300/bios/classes.zip",
+         "/media/Sajnaps/GB300/cores/j2me/classes.zip",
+         NULL
+@@ -2311,7 +2315,7 @@ void Universe::create_first_task(const JvmPathChar* classpath JVM_TRAPS) {
+             break;
+         }
+     }
+-    if (!sys_cp_ascii) sys_cp_ascii = "/mnt/sda1/bios/classes.zip";
++    if (!sys_cp_ascii) sys_cp_ascii = FROGGY_SD_ROOT "/bios/classes.zip";
+   }
+   int cp_len = (int)strlen(sys_cp_ascii);
+   JvmPathChar sys_cp_unicode[512];
+diff --git a/pspkvm/platform_gb300/filesystem.c b/pspkvm/platform_gb300/filesystem.c
+index d813db0..18de670 100644
+--- a/pspkvm/platform_gb300/filesystem.c
++++ b/pspkvm/platform_gb300/filesystem.c
+@@ -6,18 +6,18 @@
+ #include "dirent.h"
+ #include "psp_compat.h"
+ 
+-#define J2ME_ROM_DIR  "/mnt/sda1/ROMS/J2ME"
+-#define J2ME_SAVE_DIR "/mnt/sda1/SAVES/J2ME"
++#define J2ME_ROM_DIR  FROGGY_SD_ROOT "/roms/j2me"
++#define J2ME_SAVE_DIR FROGGY_SD_ROOT "/saves/j2me"
+ 
+ static char current_rom_path[512] = {0};
+ static char current_jar_path[512] = {0};
+ 
+ void gb300_fs_init(void) {
+ #if defined(_WIN32)
+-    mkdir("/mnt/sda1/SAVES");
++    mkdir(FROGGY_SD_ROOT "/saves");
+     mkdir(J2ME_SAVE_DIR);
+ #else
+-    mkdir("/mnt/sda1/SAVES", 0777);
++    mkdir(FROGGY_SD_ROOT "/saves", 0777);
+     mkdir(J2ME_SAVE_DIR, 0777);
+ #endif
+ }
+diff --git a/pspkvm/platform_gb300/input.c b/pspkvm/platform_gb300/input.c
+index a028cde..af15105 100644
+--- a/pspkvm/platform_gb300/input.c
++++ b/pspkvm/platform_gb300/input.c
+@@ -328,8 +328,8 @@ void gb300_input_load_config(const char *jar_path) {
+ 
+     /* 1. Check game-specific configs in /config/j2me and /configs/j2me */
+     const char *config_dirs[] = {
+-        "/mnt/sda1/config/j2me",
+-        "/mnt/sda1/configs/j2me",
++        FROGGY_SD_ROOT "/config/j2me",
++        FROGGY_SD_ROOT "/configs/j2me",
+         "config/j2me",
+         "configs/j2me",
+         "/media/Sajnaps/GB300/config/j2me",
+diff --git a/pspkvm/platform_gb300/platform.c b/pspkvm/platform_gb300/platform.c
+index 5b7e3d7..c4f6df7 100644
+--- a/pspkvm/platform_gb300/platform.c
++++ b/pspkvm/platform_gb300/platform.c
+@@ -61,7 +61,7 @@ static retro_environment_t environ_cb = NULL;
+ static bool game_loaded = false;
+ static bool jvm_started = false;
+ 
+-#if defined(SF2000) || defined(__mips__)
++#if defined(SF2000) || defined(GB300)
+ extern volatile uint32_t g_joy_task_state;
+ extern volatile uint32_t g_joy_state;
+ extern void frontend_check_hotkeys(void);
+@@ -203,8 +203,8 @@ RETRO_API bool retro_load_game(const struct retro_game_info *game) {
+         gb300_input_load_config(game->path);
+     } else {
+         xlog("[PSPKVM-GB300] retro_load_game: Running in standalone/stub mode\n");
+-        gb300_fs_set_rom("/mnt/sda1/ROMS/J2ME/stub.jar");
+-        gb300_input_load_config("/mnt/sda1/ROMS/J2ME/stub.jar");
++        gb300_fs_set_rom(FROGGY_SD_ROOT "/roms/j2me/stub.jar");
++        gb300_input_load_config(FROGGY_SD_ROOT "/roms/j2me/stub.jar");
+     }
+     game_loaded = true;
+     jvm_started = false;
+@@ -240,7 +240,7 @@ void gb300_poll_events(void) {
+         last_input_time = now;
+         
+         if (input_poll_cb) input_poll_cb();
+-#if defined(SF2000) || defined(__mips__)
++#if defined(SF2000) || defined(GB300)
+         frontend_check_hotkeys();
+ #endif
+         uint32_t buttons = poll_gb300_buttons();
+diff --git a/pspkvm/platform_gb300/psp_compat.h b/pspkvm/platform_gb300/psp_compat.h
+index 56be5c1..3a2d8f1 100644
+--- a/pspkvm/platform_gb300/psp_compat.h
++++ b/pspkvm/platform_gb300/psp_compat.h
+@@ -8,6 +8,10 @@
+ #include <time.h>
+ #include <sys/time.h>
+ 
++#ifndef FROGGY_SD_ROOT
++#define FROGGY_SD_ROOT "/mnt/sda1"
++#endif
++
+ #ifdef __cplusplus
+ extern "C" {
+ #endif
+diff --git a/pspkvm/platform_gb300/vm_stubs.c b/pspkvm/platform_gb300/vm_stubs.c
+index 794b9e1..fcaa85a 100644
+--- a/pspkvm/platform_gb300/vm_stubs.c
++++ b/pspkvm/platform_gb300/vm_stubs.c
+@@ -34,8 +34,8 @@ char* midpRemoveCommandOption(const char* opt, char** argv, int* argc) {
+ }
+ char* midpFixMidpHome(const char* prog) {
+     (void)prog;
+-    xlog("[GB300-STUB] midpFixMidpHome returning '/mnt/sda1/ROMS/J2ME'\n");
+-    return "/mnt/sda1/ROMS/J2ME";
++    xlog("[GB300-STUB] midpFixMidpHome returning J2ME ROM directory\n");
++    return FROGGY_SD_ROOT "/roms/j2me";
+ }
+ 
+ void midpMIDletProxyListReset(void) {
+@@ -44,7 +44,7 @@ void midpMIDletProxyListReset(void) {
+ 
+ const char* midp_suite_get_suite_storage(int id) {
+     (void)id;
+-    return "/mnt/sda1/SAVES/J2ME";
++    return FROGGY_SD_ROOT "/saves/j2me";
+ }
+ const char* midp_suite_get_class_path(int id) { (void)id; return NULL; }
+ char storageGetPathSeparator(void) { return ':'; }
+@@ -286,7 +286,7 @@ KNIDECL(com_sun_midp_util_ResourceHandler_loadRomizedResource0) {
+             name[len] = '\0';
+ 
+             static const char *dirs[] = {
+-                "/mnt/sda1/system/skin/",
++                FROGGY_SD_ROOT "/cubegm/skin/",
+                 "/tmp/",
+                 NULL
+             };
