@@ -1,3 +1,9 @@
+## TreeFrogUI v1.6.0_d prerelease
+
+Changes since v1.6.0_c:
+
+- Language selection now discovers locales from the installed translation JSON files, restoring Arabic, French, and Italian automatically.
+
 ## TreeFrogUI v1.6.0_c prerelease
 
 Changes since the v1.6.0_a build:
