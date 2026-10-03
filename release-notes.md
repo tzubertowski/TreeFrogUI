@@ -1,3 +1,14 @@
+## TreeFrogUI v1.6.0_e prerelease
+
+Changes since v1.6.0_d:
+
+- Added the ClassiCube / Minecraft SF3000 core and `roms/classicube/` launch
+  entry, with friendly localized system naming.
+- Added ClassiCube backgrounds for the default, Art Book Next, Art Book NextUI,
+  and Nao Black themes.
+- Fixed a ClassiCube startup crash caused by unresolved SF2000 firmware-only
+  logging, sync, and timer symbols.
+
 ## TreeFrogUI v1.6.0_d prerelease
 
 Changes since v1.6.0_c:
