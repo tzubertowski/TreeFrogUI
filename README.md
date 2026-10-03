@@ -133,7 +133,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **xmil** | Sharp X68000 | `x68k_libretro.so` |
 | **pico286** | DOS / PC (8086-286, standalone) - 📖 [setup guide](docs/cores/pico286.md) | `pico286` + `x86BOOT.img` |
 | **j2me** | J2ME / MIDP 2.0 games (`.jar` / `.jad`) - 📖 [setup guide](docs/cores/j2me.md) | `j2me_libretro.so` |
-| **classicube** | ClassiCube Minecraft Classic worlds (`.cw`) - 📖 [setup guide](docs/cores/classicube.md) | `classicube_libretro.so` |
+| **classicube** | ClassiCube Minecraft Classic worlds (`.cw`) - 📖 [setup guide](docs/cores/classicube.md), based on [Sajnaps / FroggyCraft](https://github.com/Synaps33/FroggyCraft) | `classicube_libretro.so` |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **quake2** | Quake II (heavy) - 📖 [setup guide](docs/cores/quake2.md) | `vitaquake2_libretro.so` |
 | **prboom** | Doom / Doom II / Final Doom / Heretic / Hexen | `prboom_libretro.so` |
