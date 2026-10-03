@@ -43,6 +43,8 @@ J2ME_SOUNDFONT="${J2ME_SOUNDFONT:-$(pwd)/cores/scummvm/dists/soundfonts/Roland_S
 J2ME_BANNER_NEXTUI="$(pwd)/assets/j2me/java-games-artbook-nextui.png"
 J2ME_BANNER_NEXT="$(pwd)/assets/j2me/java-games-artbook-next.png"
 J2ME_BANNER_NAO="$(pwd)/assets/j2me/java-games-nao-black.png"
+FROGGYCRAFT_ROOT="${FROGGYCRAFT_ROOT:-/home/tomaszz/sf3000-work/FroggyCraft}"
+CLASSICUBE_CORE="$FROGGYCRAFT_ROOT/source/classicube_sf2000/classicube_libretro.so"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 DSPERATE=/home/tomaszz/sf3000-work/dsperate/build/sf3000-package
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
@@ -137,11 +139,13 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -f "$J2ME_BANNER_NEXTUI" ] || { echo "missing J2ME NextUI artwork: $J2ME_BANNER_NEXTUI" >&2; exit 1; }
 [ -f "$J2ME_BANNER_NEXT" ] || { echo "missing J2ME Next artwork: $J2ME_BANNER_NEXT" >&2; exit 1; }
 [ -f "$J2ME_BANNER_NAO" ] || { echo "missing J2ME Nao artwork: $J2ME_BANNER_NAO" >&2; exit 1; }
+[ -f "$CLASSICUBE_CORE" ] || { echo "missing ClassiCube core: $CLASSICUBE_CORE" >&2; exit 1; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 cp_if_diff "$(pwd)/build/qpsx_libretro.so" "$STAGE/cubegm/cores/qpsx_libretro.so"
 cp_if_diff "$(pwd)/build/j2me_libretro.so" "$STAGE/cubegm/cores/j2me_libretro.so"
+cp_if_diff "$CLASSICUBE_CORE" "$STAGE/cubegm/cores/classicube_libretro.so"
 mkdir -p "$STAGE/cubegm/bios"
 cp_if_diff "$J2ME_CLASSES" "$STAGE/cubegm/bios/classes.zip"
 cp_if_diff "$J2ME_SOUNDFONT" "$STAGE/cubegm/bios/Roland_SC-55.sf2"
@@ -150,6 +154,7 @@ cp_if_diff "$J2ME_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/j2me
 cp_if_diff "$J2ME_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/j2me.png"
 cp_if_diff "$J2ME_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/j2me.png"
 mkdir -p "$STAGE/roms/j2me"
+mkdir -p "$STAGE/roms/classicube"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"

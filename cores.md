@@ -4,6 +4,12 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 
 ---
 
+## ClassiCube
+
+| Folder | System | Core .so | Source |
+|--------|--------|----------|--------|
+| `classicube` | ClassiCube / Minecraft Classic | `classicube_libretro.so` | [tzubertowski/FroggyCraft](https://github.com/tzubertowski/FroggyCraft) |
+
 ## Nintendo
 
 | Folder | System | Core .so | Source |

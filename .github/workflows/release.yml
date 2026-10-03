@@ -116,6 +116,7 @@ jobs:
           git clone --depth 1 --branch r36sx https://github.com/tzubertowski/TreeFrogUI_picoarch.git picoarch
           git clone --depth 1 --branch main https://github.com/tzubertowski/FrogShell.git FrogShell
           git clone --depth 1 --branch main https://github.com/tzubertowski/TreeFrogUI_ebook_reader.git ebook
+          git clone --depth 1 --branch feature/sf3000-treefrogui https://github.com/tzubertowski/FroggyCraft.git FroggyCraft
           git clone --depth 1 --branch 1.24.10 --recurse-submodules --shallow-submodules https://github.com/ArtifexSoftware/mupdf.git mupdf
           git clone --depth 1 --branch treefrogui-sf3000-midi https://github.com/tzubertowski/FroggyKVM.git "$GITHUB_WORKSPACE/cores/FroggyKVM"
           # The media-player Makefiles refer to ../../../picoarch from the
@@ -223,6 +224,13 @@ jobs:
           cp cores/FroggyKVM/j2me_libretro.so build/j2me_libretro.so
           "${prefix}strip" build/j2me_libretro.so
 
+      - name: Build FroggyCraft ClassiCube core
+        working-directory: ${{ env.WORK_ROOT }}/FroggyCraft/source/classicube_sf2000
+        env:
+          SF3000_MIPS: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/opt/ext-toolchain/bin/mips-mti-linux-gnu-
+          SF3000_SYSROOT: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot
+        run: make clean && make SF2000_PLATFORM=sf3000 -j2
+
       - name: Fetch J2ME SoundFont
         working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         run: |
@@ -245,6 +253,7 @@ jobs:
       - name: Build unified release tree
         working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         env:
+          FROGGYCRAFT_ROOT: ${{ env.WORK_ROOT }}/FroggyCraft
           TREEFROG_STOCK_ROOT: ${{ runner.temp }}/base/unpacked/release/install_first
         run: ./build_release.sh
 
@@ -275,6 +284,7 @@ jobs:
           required=(
             cubegm/picoarch cubegm/picoarch_hi
             cubegm/cores/frogui_libretro.so cubegm/cores/tyrquake_libretro.so
+            cubegm/cores/classicube_libretro.so
             cubegm/lib/libSDL-1.2.so.0 cubegm/lib/libpng12.so.0
             cubegm/lib/libpng16.so.16
           )
