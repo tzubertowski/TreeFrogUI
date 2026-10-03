@@ -4,6 +4,9 @@ Changes since v1.6.0_d:
 
 - Added the ClassiCube / Minecraft SF3000 core and `roms/classicube/` launch
   entry, with friendly localized system naming.
+- Added ClassiCube / Minecraft support based on
+  [Sajnaps / FroggyCraft](https://github.com/Synaps33/FroggyCraft). Many thanks
+  to Sajnaps for the upstream Minecraft Classic port.
 - Added ClassiCube backgrounds for the default, Art Book Next, Art Book NextUI,
   and Nao Black themes.
 - Fixed a ClassiCube startup crash caused by unresolved SF2000 firmware-only
@@ -101,6 +104,7 @@ logging fixes.
 This is a prerelease for testing. Copy `update.zip` to the SD-card root and
 reboot, or use the full ZIP and the matching `install_first/<device>/` files
 for a fresh installation. Keep a backup of your card.
+
 ## TreeFrogUI v1.6.0_b prerelease
 
 Changes since the v1.6.0_a build:
