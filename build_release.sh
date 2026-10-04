@@ -45,6 +45,7 @@ J2ME_BANNER_NEXT="$(pwd)/assets/j2me/java-games-artbook-next.png"
 J2ME_BANNER_NAO="$(pwd)/assets/j2me/java-games-nao-black.png"
 FROGGYCRAFT_ROOT="${FROGGYCRAFT_ROOT:-/home/tomaszz/sf3000-work/FroggyCraft}"
 CLASSICUBE_CORE="$FROGGYCRAFT_ROOT/source/classicube_sf2000/classicube_libretro.so"
+CLASSICUBE_TEXPACK="$FROGGYCRAFT_ROOT/source/classicube_sf2000/texpacks/default.zip"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 DSPERATE=/home/tomaszz/sf3000-work/dsperate/build/sf3000-package
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
@@ -140,6 +141,7 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -f "$J2ME_BANNER_NEXT" ] || { echo "missing J2ME Next artwork: $J2ME_BANNER_NEXT" >&2; exit 1; }
 [ -f "$J2ME_BANNER_NAO" ] || { echo "missing J2ME Nao artwork: $J2ME_BANNER_NAO" >&2; exit 1; }
 [ -f "$CLASSICUBE_CORE" ] || { echo "missing ClassiCube core: $CLASSICUBE_CORE" >&2; exit 1; }
+[ -f "$CLASSICUBE_TEXPACK" ] || { echo "missing ClassiCube texture pack: $CLASSICUBE_TEXPACK" >&2; exit 1; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
@@ -154,7 +156,8 @@ cp_if_diff "$J2ME_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/j2me
 cp_if_diff "$J2ME_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/j2me.png"
 cp_if_diff "$J2ME_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/j2me.png"
 mkdir -p "$STAGE/roms/j2me"
-mkdir -p "$STAGE/roms/classicube"
+mkdir -p "$STAGE/roms/classicube/texpacks"
+cp_if_diff "$CLASSICUBE_TEXPACK" "$STAGE/roms/classicube/texpacks/default.zip"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"

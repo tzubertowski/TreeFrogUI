@@ -11,6 +11,8 @@ Changes since v1.6.0_d:
   and Nao Black themes.
 - Fixed a ClassiCube startup crash caused by unresolved SF2000 firmware-only
   logging, sync, and timer symbols.
+- Fixed release packaging so ClassiCube includes
+  `roms/classicube/texpacks/default.zip`.
 
 ## TreeFrogUI v1.6.0_d prerelease
 

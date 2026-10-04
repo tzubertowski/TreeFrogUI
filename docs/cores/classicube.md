@@ -8,6 +8,9 @@ Put ClassiCube world files in:
 roms/classicube/
 ```
 
+The release also includes the default texture pack at
+`roms/classicube/texpacks/default.zip`.
+
 The port accepts `.cw` ClassicWorld maps. It starts a single-player world and
 saves the generated world/player state beside the selected system data. The
 console port has no networking or audio support.
