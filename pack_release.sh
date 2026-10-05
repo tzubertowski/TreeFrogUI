@@ -120,7 +120,9 @@ fi
 MANIFEST_BASE_VERSION=$BASE_VERSION
 MANIFEST_BASE_MAJOR=
 if [ "${TREEFROG_CUMULATIVE_UPDATE:-0}" = 1 ]; then
-    MANIFEST_BASE_MAJOR=$(printf '%s\n' "$BASE_VERSION" \
+    BASE_ARCHIVE_VERSION=$(basename "$BASE_ZIP" .zip \
+        | sed -nE 's/^TreeFrogUI_(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
+    MANIFEST_BASE_MAJOR=$(printf '%s\n' "${BASE_ARCHIVE_VERSION:-$BASE_VERSION}" \
         | sed -nE 's/^v([0-9]+)\..*$/\1/p')
     [ -n "$MANIFEST_BASE_MAJOR" ] || {
         echo "ERROR: cumulative update base has no valid major version: $BASE_VERSION" >&2
