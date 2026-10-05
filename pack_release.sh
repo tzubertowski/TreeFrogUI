@@ -109,6 +109,12 @@ extract_zip "$BASE_ZIP" "$BASE_STAGE"
     exit 1
 }
 BASE_VERSION=$(cat "$BASE_STAGE/release/cubegm/version.txt" 2>/dev/null || true)
+if ! printf '%s\n' "$BASE_VERSION" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+'; then
+    # Older full archives may not carry version.txt. Their validated archive
+    # name still provides the numeric release line needed by cumulative updates.
+    BASE_VERSION=$(basename "$BASE_ZIP" .zip \
+        | sed -nE 's/^TreeFrogUI_(v[0-9]+\.[0-9]+\.[0-9]+).*/\1/p')
+fi
 [ -n "$BASE_VERSION" ] || BASE_VERSION=unknown
 
 MANIFEST_BASE_VERSION=$BASE_VERSION
