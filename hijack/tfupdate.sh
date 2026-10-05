@@ -103,6 +103,10 @@ if [ -n "$BASE_VERSION" ] && [ "$BASE_VERSION" != unknown ]; then
 fi
 if [ -n "$BASE_MAJOR" ]; then
     case "$INSTALLED_VERSION" in
+        ''|unknown)
+            # Early major-line releases did not write version.txt. The signed
+            # base_major is the best compatibility check available for them.
+            ;;
         v"$BASE_MAJOR".*) ;;
         *) fail "requires major v$BASE_MAJOR, installed version is ${INSTALLED_VERSION:-unknown}" ;;
     esac
