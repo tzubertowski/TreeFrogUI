@@ -14,10 +14,6 @@ on:
         description: Latest full release used to seed the build
         required: true
         type: string
-      update_base_tag:
-        description: Oldest compatible release used for the cumulative update
-        required: true
-        type: string
       prerelease:
         description: Mark the GitHub release as a prerelease
         required: true
@@ -36,6 +32,10 @@ permissions:
 env:
   WORK_ROOT: /home/runner/sf3000-work
   TOOLCHAIN_URL: https://github.com/game-de-it/sf3000/releases/download/sf3000_toolchain_v0.1/mipsel-buildroot-linux-gnu_sdk-buildroot.tar.gz
+  # update.zip is always cumulative from the last major stable baseline.
+  # Change this deliberately when the product moves to a new major baseline;
+  # never replace it with the latest prerelease.
+  LAST_MAJOR_UPDATE_BASE: v1.0.12
 
 jobs:
   build:
@@ -55,7 +55,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           INPUT_TAG: ${{ inputs.tag }}
           INPUT_BASE: ${{ inputs.base_tag }}
-          INPUT_UPDATE_BASE: ${{ inputs.update_base_tag }}
           EVENT_NAME: ${{ github.event_name }}
           PUSH_TAG: ${{ github.ref_name }}
           RUN_NUMBER: ${{ github.run_number }}
@@ -74,13 +73,12 @@ jobs:
             version="v0.0.0-ci.${RUN_NUMBER}"
           fi
           base="$INPUT_BASE"
-          update_base="$INPUT_UPDATE_BASE"
+          update_base="$LAST_MAJOR_UPDATE_BASE"
           if [[ "$EVENT_NAME" == push && -z "$base" ]]; then
             base=$(gh release list --limit 100 --json tagName,isPrerelease,publishedAt \
               | jq -r --arg current "$tag" '
                   map(select((.isPrerelease | not) and .tagName != $current))
                   | sort_by(.publishedAt) | last.tagName // empty')
-            update_base="$base"
           fi
           [[ -n "$base" ]] || { echo 'base_tag is required for release builds' >&2; exit 1; }
           [[ -n "$update_base" ]] || { echo 'update_base_tag is required for release builds' >&2; exit 1; }
