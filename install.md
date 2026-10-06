@@ -242,9 +242,9 @@ much slower; `.hex` only).
   instead. Turn on **Quick Resume** + **Auto-Save/Auto-Load** (Settings) and the
   device boots straight back into your game exactly where you left off, surviving
   a full power-off with zero battery drain - better than sleep. Stock sleep/
-  standby is **not supported and won't be** (it can hang the display on wake on
-  R36SX and SF3500-class), so **Disable Sleep is on by default**. You're not
-  missing anything.
+  standby is normally enabled. If wake is unreliable on your device, enable
+  **Disable Sleep** in Settings and restart. Quick Resume + Auto-Save/Auto-Load
+  remains available for resuming after a full power-off.
 - **PC Engine (`pce`) crashes or resets when returning from the in-game menu**
   (seen on some devices, e.g. SF3000 HD - not universal): turn on **Disable
   Soft Reset** in the core's options (SELECT+START → Core Options). The stock

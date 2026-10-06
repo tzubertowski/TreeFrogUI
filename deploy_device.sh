@@ -277,7 +277,7 @@ deploy_release() {
         cubegm/picoarch \
         cubegm/picoarch_hi \
         cubegm/cores/frogui_libretro.so \
-        cubegm/cores/fheroes2_libretro.so \
+        cubegm/cores/mcpe_libretro.so \
         cubegm/cores/classicube_libretro.so \
         cubegm/cores/j2me_libretro.so \
         cubegm/cores/libemu_md.so \
@@ -364,6 +364,12 @@ deploy_one() {
         rsync -tc "$REPO/assets/j2me/java-games-artbook-nextui.png" "$MOUNT/frogui/theme-packs/Art_Book_NextUI/j2me.png"
         rsync -tc "$REPO/assets/j2me/java-games-artbook-next.png" "$MOUNT/frogui/theme-packs/Art_Book_Next/j2me.png"
         rsync -tc "$REPO/assets/j2me/java-games-nao-black.png" "$MOUNT/frogui/theme-packs/Nao_Black/j2me.png"
+        for system in classicube mcpe; do
+            rsync -tc "$REPO/assets/minecraft/minecraft-artbook-nextui.jpg" "$MOUNT/frogui/$system.jpg"
+            rsync -tc "$REPO/assets/minecraft/minecraft-artbook-nextui.jpg" "$MOUNT/frogui/theme-packs/Art_Book_NextUI/$system.jpg"
+            rsync -tc "$REPO/assets/minecraft/minecraft-artbook-next.jpg" "$MOUNT/frogui/theme-packs/Art_Book_Next/$system.jpg"
+            rsync -tc "$REPO/assets/minecraft/minecraft-nao-black.jpg" "$MOUNT/frogui/theme-packs/Nao_Black/$system.jpg"
+        done
     fi
     sync
     hash_line="$(sha256sum "$dst")"

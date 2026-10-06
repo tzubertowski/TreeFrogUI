@@ -9,7 +9,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 | Folder | System | Core .so | Source |
 |--------|--------|----------|--------|
 | `classicube` | ClassiCube / Minecraft Classic | `classicube_libretro.so` | [tzubertowski/FroggyCraft](https://github.com/tzubertowski/FroggyCraft) |
-| `fheroes2` | Heroes II / Free Heroes II | `fheroes2_libretro.so` | [tzubertowski/FroggyHeroes2](https://github.com/tzubertowski/FroggyHeroes2) |
+| `mcpe` | Minecraft Pocket Edition 0.6.1 | `mcpe_libretro.so` | [Synaps33/FroggyPE](https://github.com/Synaps33/FroggyPE) |
 
 ## Nintendo
 

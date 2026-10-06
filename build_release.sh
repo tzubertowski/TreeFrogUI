@@ -43,11 +43,14 @@ J2ME_SOUNDFONT="${J2ME_SOUNDFONT:-$(pwd)/cores/scummvm/dists/soundfonts/Roland_S
 J2ME_BANNER_NEXTUI="$(pwd)/assets/j2me/java-games-artbook-nextui.png"
 J2ME_BANNER_NEXT="$(pwd)/assets/j2me/java-games-artbook-next.png"
 J2ME_BANNER_NAO="$(pwd)/assets/j2me/java-games-nao-black.png"
+MINECRAFT_BANNER_NEXTUI="$(pwd)/assets/minecraft/minecraft-artbook-nextui.jpg"
+MINECRAFT_BANNER_NEXT="$(pwd)/assets/minecraft/minecraft-artbook-next.jpg"
+MINECRAFT_BANNER_NAO="$(pwd)/assets/minecraft/minecraft-nao-black.jpg"
 FROGGYCRAFT_ROOT="${FROGGYCRAFT_ROOT:-/home/tomaszz/sf3000-work/FroggyCraft}"
 CLASSICUBE_CORE="$FROGGYCRAFT_ROOT/source/classicube_sf2000/classicube_libretro.so"
 CLASSICUBE_TEXPACK="$FROGGYCRAFT_ROOT/source/classicube_sf2000/texpacks/default.zip"
-FROGGYHEROES2_ROOT="${FROGGYHEROES2_ROOT:-/home/tomaszz/sf3000-work/FroggyHeroes2}"
-FHeroes2_CORE="$FROGGYHEROES2_ROOT/core/fheroes2_libretro.so"
+FROGGYPE_ROOT="${FROGGYPE_ROOT:-/home/tomaszz/sf3000-work/FroggyPE}"
+MCPE_CORE="$FROGGYPE_ROOT/mcpe_libretro.so"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 DSPERATE=/home/tomaszz/sf3000-work/dsperate/build/sf3000-package
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
@@ -142,16 +145,20 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -f "$J2ME_BANNER_NEXTUI" ] || { echo "missing J2ME NextUI artwork: $J2ME_BANNER_NEXTUI" >&2; exit 1; }
 [ -f "$J2ME_BANNER_NEXT" ] || { echo "missing J2ME Next artwork: $J2ME_BANNER_NEXT" >&2; exit 1; }
 [ -f "$J2ME_BANNER_NAO" ] || { echo "missing J2ME Nao artwork: $J2ME_BANNER_NAO" >&2; exit 1; }
+[ -f "$MINECRAFT_BANNER_NEXTUI" ] || { echo "missing Minecraft NextUI artwork: $MINECRAFT_BANNER_NEXTUI" >&2; exit 1; }
+[ -f "$MINECRAFT_BANNER_NEXT" ] || { echo "missing Minecraft Next artwork: $MINECRAFT_BANNER_NEXT" >&2; exit 1; }
+[ -f "$MINECRAFT_BANNER_NAO" ] || { echo "missing Minecraft Nao artwork: $MINECRAFT_BANNER_NAO" >&2; exit 1; }
 [ -f "$CLASSICUBE_CORE" ] || { echo "missing ClassiCube core: $CLASSICUBE_CORE" >&2; exit 1; }
 [ -f "$CLASSICUBE_TEXPACK" ] || { echo "missing ClassiCube texture pack: $CLASSICUBE_TEXPACK" >&2; exit 1; }
-[ -f "$FHeroes2_CORE" ] || { echo "missing Free Heroes II core: $FHeroes2_CORE" >&2; exit 1; }
+[ -f "$MCPE_CORE" ] || { echo "missing Minecraft PE core: $MCPE_CORE" >&2; exit 1; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 cp_if_diff "$(pwd)/build/qpsx_libretro.so" "$STAGE/cubegm/cores/qpsx_libretro.so"
 cp_if_diff "$(pwd)/build/j2me_libretro.so" "$STAGE/cubegm/cores/j2me_libretro.so"
 cp_if_diff "$CLASSICUBE_CORE" "$STAGE/cubegm/cores/classicube_libretro.so"
-cp_if_diff "$FHeroes2_CORE" "$STAGE/cubegm/cores/fheroes2_libretro.so"
+cp_if_diff "$MCPE_CORE" "$STAGE/cubegm/cores/mcpe_libretro.so"
+rm -f "$STAGE/cubegm/cores/fheroes2_libretro.so"
 mkdir -p "$STAGE/cubegm/bios"
 cp_if_diff "$J2ME_CLASSES" "$STAGE/cubegm/bios/classes.zip"
 cp_if_diff "$J2ME_SOUNDFONT" "$STAGE/cubegm/bios/Roland_SC-55.sf2"
@@ -159,10 +166,18 @@ cp_if_diff "$J2ME_BANNER_NEXTUI" "$STAGE/frogui/j2me.png"
 cp_if_diff "$J2ME_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/j2me.png"
 cp_if_diff "$J2ME_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/j2me.png"
 cp_if_diff "$J2ME_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/j2me.png"
+for name in classicube mcpe; do
+    cp_if_diff "$MINECRAFT_BANNER_NEXTUI" "$STAGE/frogui/$name.jpg"
+    cp_if_diff "$MINECRAFT_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/$name.jpg"
+    cp_if_diff "$MINECRAFT_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/$name.jpg"
+    cp_if_diff "$MINECRAFT_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/$name.jpg"
+done
 mkdir -p "$STAGE/roms/j2me"
 mkdir -p "$STAGE/roms/classicube/texpacks"
-mkdir -p "$STAGE/roms/fheroes2/DATA" "$STAGE/roms/fheroes2/MAPS" "$STAGE/roms/fheroes2/GAMES"
-cp_if_diff "$FROGGYHEROES2_ROOT/config/fheroes2.cfg" "$STAGE/roms/fheroes2/fheroes2.cfg"
+rm -rf "$STAGE/roms/fheroes2"
+mkdir -p "$STAGE/roms/mcpe/data"
+rsync -rlt --delete "$FROGGYPE_ROOT/data/" "$STAGE/roms/mcpe/data/"
+cp_if_diff "$(pwd)/assets/mcpe/Start Minecraft PE.mcpe" "$STAGE/roms/mcpe/Start Minecraft PE.mcpe"
 cp_if_diff "$CLASSICUBE_TEXPACK" "$STAGE/roms/classicube/texpacks/default.zip"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
@@ -229,6 +244,7 @@ mkdir -p "$OUT/roms/music"
 mkdir -p "$OUT/roms/nds"
 mkdir -p "$OUT/roms/qpsx"
 mkdir -p "$OUT/roms/j2me"
+mkdir -p "$OUT/roms/mcpe"
 
 # Canvas ships hundreds of ES-DE targets and a second high-resolution mirror.
 # FrogUI requests only exact ROM-folder names plus its four built-in screens.
