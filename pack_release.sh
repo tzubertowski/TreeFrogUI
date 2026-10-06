@@ -77,6 +77,7 @@ protected_delete() {
 
 # Stamp the full installation so future deltas can enforce their exact base.
 printf '%s\n' "$VERSION" > "$CURRENT/cubegm/version.txt"
+python3 scripts/pack_zip.py --normalize-tree "$CURRENT"
 pack_zip "$FULL_OUT" "$LATEST_DIR" release
 
 mkdir -p "$BUNDLE/payload" "$BUNDLE/device"
