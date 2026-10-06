@@ -43,30 +43,7 @@ pack_zip() {
     entry=$3
     mkdir -p "$(dirname "$output")"
     rm -f "$output"
-    output_abs="$PWD/$output"
-    if command -v 7z >/dev/null 2>&1; then
-        # Keep packaging reliable on build hosts with constrained memory. The
-        # release tree contains many already-compressed assets, so maximum ZIP
-        # compression costs a lot of RAM for negligible size savings.
-        (cd "$parent" && 7z a -tzip -mx=1 -mfb=64 -mpass=1 "$output_abs" "$entry" >/dev/null)
-    elif command -v zip >/dev/null 2>&1; then
-        (cd "$parent" && zip -9qr "$output_abs" "$entry")
-    else
-        python3 - "$output_abs" "$parent" "$entry" <<'PY'
-import os, sys, zipfile
-output, parent, entry = sys.argv[1:]
-with zipfile.ZipFile(output, 'w', zipfile.ZIP_DEFLATED, compresslevel=9) as zf:
-    top = os.path.join(parent, entry)
-    for root, dirs, files in os.walk(top):
-        for directory in dirs:
-            full = os.path.join(root, directory)
-            if not os.listdir(full):
-                zf.writestr(os.path.relpath(full, parent) + '/', '')
-        for filename in files:
-            full = os.path.join(root, filename)
-            zf.write(full, os.path.relpath(full, parent))
-PY
-    fi
+    python3 scripts/pack_zip.py "$PWD/$output" "$parent" "$entry"
 }
 
 extract_zip() {
