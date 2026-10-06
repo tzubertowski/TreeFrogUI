@@ -277,6 +277,9 @@ deploy_release() {
         cubegm/picoarch \
         cubegm/picoarch_hi \
         cubegm/cores/frogui_libretro.so \
+        cubegm/cores/fheroes2_libretro.so \
+        cubegm/cores/classicube_libretro.so \
+        cubegm/cores/j2me_libretro.so \
         cubegm/cores/libemu_md.so \
         cubegm/zhijack.sh; do
         hash_line="$(sha256sum "$MOUNT/$rel")"
