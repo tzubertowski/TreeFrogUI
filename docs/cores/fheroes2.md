@@ -16,12 +16,13 @@ installer, Windows executable, or other Windows-specific files:
 
 ```text
 roms/fheroes2/DATA/HEROES2.AGG
+roms/fheroes2/DATA/HEROES2X.AGG
 roms/fheroes2/MAPS/*.MP2 and *.MX2
 roms/fheroes2/GAMES/*.GM1
 roms/fheroes2/fheroes2.cfg
 ```
 
-For the GOG release, the source paths are `app/DATA/HEROES2.AGG`,
+For the GOG release, the source paths are `app/DATA/*.AGG`,
 `app/MAPS/*.(MP2|MX2)`, and `app/GAMES/*.GM1`. The included `fheroes2.cfg`
 already uses the correct SF3000 paths; keep it in the `fheroes2` folder.
 
