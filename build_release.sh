@@ -34,7 +34,7 @@ DUMMY_ABS="/mnt/sdcard/$DUMMY_REL"        # rkgame needs the ABSOLUTE path
 
 PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
-FROGUI_ROOT="${FROGUI_ROOT:-/home/tomaszz/sf3000-work/FrogUI}"
+FROGUI_ROOT="${FROGUI_ROOT:-$(pwd)/frogui}"
 FROGUI="$FROGUI_ROOT/out/frogui_libretro.so"
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 FROGSHELL_ASSET="$(pwd)/assets/frogshell_libretro.so"
