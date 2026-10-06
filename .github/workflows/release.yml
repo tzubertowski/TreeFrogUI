@@ -115,6 +115,7 @@ jobs:
           git clone --depth 1 --branch main https://github.com/tzubertowski/FrogShell.git FrogShell
           git clone --depth 1 --branch main https://github.com/tzubertowski/TreeFrogUI_ebook_reader.git ebook
           git clone --depth 1 --branch feature/sf3000-treefrogui https://github.com/tzubertowski/FroggyCraft.git FroggyCraft
+          git clone --depth 1 --branch feature/sf3000 https://github.com/tzubertowski/FroggyHeroes2.git FroggyHeroes2
           git clone --depth 1 --branch 1.24.10 --recurse-submodules --shallow-submodules https://github.com/ArtifexSoftware/mupdf.git mupdf
           git clone --depth 1 --branch treefrogui-sf3000-midi https://github.com/tzubertowski/FroggyKVM.git "$GITHUB_WORKSPACE/cores/FroggyKVM"
           # The media-player Makefiles refer to ../../../picoarch from the
@@ -229,6 +230,21 @@ jobs:
           SF3000_SYSROOT: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot
         run: make clean && make SF2000_PLATFORM=sf3000 -j2
 
+      - name: Build FroggyHeroes2 core
+        working-directory: ${{ env.WORK_ROOT }}/FroggyHeroes2/core
+        env:
+          SF3000_MIPS: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/opt/ext-toolchain/bin/mips-mti-linux-gnu-
+          SF3000_SYSROOT: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot
+        run: |
+          set -euo pipefail
+          make clean
+          make platform=sf3000 MIPS="$SF3000_MIPS" \
+            LDFLAGS="-mips32r2 -mhard-float -mfp32 -EL --sysroot=$SF3000_SYSROOT -L$SF3000_SYSROOT/usr/lib -lc -lstdc++" \
+            -j2
+          mkdir -p "$WORK_ROOT/sf3000_treefrogui/build"
+          cp fheroes2_libretro.so "$WORK_ROOT/sf3000_treefrogui/build/fheroes2_libretro.so"
+          "${SF3000_MIPS}strip" "$WORK_ROOT/sf3000_treefrogui/build/fheroes2_libretro.so"
+
       - name: Fetch J2ME SoundFont
         working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         run: |
@@ -265,6 +281,7 @@ jobs:
           cmp "$WORK_ROOT/ebook/ebook" "$current/cubegm/ebook"
           cmp sdcard/cubegm/cores/frogshell_libretro.so "$current/cubegm/cores/frogshell_libretro.so"
           test -s "$current/cubegm/cores/j2me_libretro.so"
+          test -s "$current/cubegm/cores/fheroes2_libretro.so"
           test -s "$current/cubegm/bios/Roland_SC-55.sf2"
           # A CI build starts from the previous full release, so every shipped
           # core/resource must remain present unless it was deliberately
@@ -282,7 +299,7 @@ jobs:
           required=(
             cubegm/picoarch cubegm/picoarch_hi
             cubegm/cores/frogui_libretro.so cubegm/cores/tyrquake_libretro.so
-            cubegm/cores/classicube_libretro.so
+            cubegm/cores/classicube_libretro.so cubegm/cores/fheroes2_libretro.so
             cubegm/lib/libSDL-1.2.so.0 cubegm/lib/libpng12.so.0
             cubegm/lib/libpng16.so.16
           )
