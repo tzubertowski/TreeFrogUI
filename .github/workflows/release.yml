@@ -129,10 +129,10 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$WORK_ROOT/dsperate/build/sf3000-package" "$RUNNER_TEMP/dsperate"
-          gh release download v1.15.2-rc.2 --repo tzubertowski/TreeFrogUI_DSperate \
-            --pattern 'dsperate-v1.15.2-rc.2-sf3000.tar.gz' --dir "$RUNNER_TEMP/dsperate"
-          echo '667c8c420a2f64a9dcad79e490c797d9453e132a7c33686c015f9e8358adcec0  '"$RUNNER_TEMP/dsperate/dsperate-v1.15.2-rc.2-sf3000.tar.gz" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/dsperate/dsperate-v1.15.2-rc.2-sf3000.tar.gz" \
+          gh release download v1.15.2-rc.3 --repo tzubertowski/TreeFrogUI_DSperate \
+            --pattern 'dsperate-v1.15.2-rc.3-sf3000.tar.gz' --dir "$RUNNER_TEMP/dsperate"
+          echo 'dc6db7612a251911d9d6775b1973edba4ebca495173e7816a90ce5566f61e1ce  '"$RUNNER_TEMP/dsperate/dsperate-v1.15.2-rc.3-sf3000.tar.gz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/dsperate/dsperate-v1.15.2-rc.3-sf3000.tar.gz" \
             -C "$WORK_ROOT/dsperate/build/sf3000-package"
           test -x "$WORK_ROOT/dsperate/build/sf3000-package/dsperate"
           grep -Fq 'DS_MIPS_JIT=${DS_MIPS_JIT:-1}' "$WORK_ROOT/dsperate/build/sf3000-package/run_sf3000.sh"
