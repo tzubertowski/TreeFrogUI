@@ -32,7 +32,9 @@ def main() -> None:
     root = os.path.join(parent, entry)
     selected = files_by_casefolded_path(root)
 
-    with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED, compresslevel=9) as archive:
+    with zipfile.ZipFile(
+        output, "w", zipfile.ZIP_DEFLATED, compresslevel=9, strict_timestamps=False
+    ) as archive:
         for path in sorted(selected.values(), key=lambda item: os.path.relpath(item, parent).casefold()):
             archive.write(path, os.path.relpath(path, parent).replace(os.sep, "/"))
 

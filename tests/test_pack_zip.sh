@@ -8,6 +8,7 @@ mkdir -p "$TMP/release"
 printf 'old\n' > "$TMP/release/install.md"
 sleep 1
 printf 'new\n' > "$TMP/release/INSTALL.md"
+touch -d @0 "$TMP/release/INSTALL.md"
 python3 scripts/pack_zip.py --normalize-tree "$TMP/release"
 [ ! -e "$TMP/release/install.md" ]
 python3 scripts/pack_zip.py "$TMP/out.zip" "$TMP" release
