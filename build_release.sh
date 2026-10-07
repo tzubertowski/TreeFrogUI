@@ -52,7 +52,7 @@ CLASSICUBE_TEXPACK="$FROGGYCRAFT_ROOT/source/classicube_sf2000/texpacks/default.
 FROGGYPE_ROOT="${FROGGYPE_ROOT:-/home/tomaszz/sf3000-work/FroggyPE}"
 MCPE_CORE="$FROGGYPE_ROOT/mcpe_libretro.so"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
-DSPERATE=/home/tomaszz/sf3000-work/dsperate/build/sf3000-package
+DSPERATE=${DSPERATE:-/home/tomaszz/sf3000-work/dsperate/build/sf3000-package}
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
 # CI/release builders can provide the small per-device stock bootstrap files
 # from a previous full release instead of keeping proprietary stock SD images

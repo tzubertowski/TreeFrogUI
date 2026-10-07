@@ -159,10 +159,17 @@ while true; do
     rm -f "$LAUNCH"
     killall rkgame 2>/dev/null #@KILL@
     echo "--- iter $ITER: frogui ---" >> "$LOG"
+    : > /tmp/treefrog_ui.log
     # Keep child stdout off the SD.  USB mode must be able to unmount even
     # when diagnostics are enabled via /mnt/sdcard/log.txt.
     "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> /tmp/treefrog_ui.log 2>&1
     RC=$?
+    if [ "$RC" != 0 ]; then
+        mkdir -p /mnt/sdcard/cubegm/logs
+        cp /tmp/treefrog_ui.log /mnt/sdcard/cubegm/logs/last_picoarch_crash.log
+        [ -f /tmp/j2me_memory.log ] && cp /tmp/j2me_memory.log /mnt/sdcard/cubegm/logs/j2me_memory.log
+        sync
+    fi
     echo "frogui exited rc=$RC" >> "$LOG"
     # SIGBUS in the menu with the full driver → count, and after 2 strikes    #@R36@
     # flip to the safe driver for this and every future boot.                 #@R36@

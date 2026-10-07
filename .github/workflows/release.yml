@@ -10,10 +10,6 @@ on:
         description: Release tag to create (leave blank for build-only)
         required: false
         type: string
-      base_tag:
-        description: Latest full release used to seed the build
-        required: true
-        type: string
       prerelease:
         description: Mark the GitHub release as a prerelease
         required: true
@@ -30,8 +26,11 @@ permissions:
   contents: write
 
 env:
-  WORK_ROOT: /home/runner/sf3000-work
-  TOOLCHAIN_URL: https://github.com/game-de-it/sf3000/releases/download/sf3000_toolchain_v0.1/mipsel-buildroot-linux-gnu_sdk-buildroot.tar.gz
+  # This archive is built and tested locally. CI only verifies, packages, and
+  # publishes it; changing any of these values is a deliberate release action.
+  LOCAL_BUNDLE_TAG: local-build-v1.6.0-k
+  LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v1.6.0-k.tar.gz
+  LOCAL_BUNDLE_SHA256: 697fa7f13ffbb4c79f14ad28a413dbcd7c3a440707e73b62361dca8e72086f99
   # update.zip is always cumulative from the last major stable baseline.
   # Change this deliberately when the product moves to a new major baseline;
   # never replace it with the latest prerelease.
@@ -39,7 +38,7 @@ env:
 
 jobs:
   build:
-    name: Cross-build and package
+    name: Verify and package local build
     runs-on: ubuntu-latest
     steps:
       - name: Check out TreeFrogUI
@@ -54,7 +53,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           INPUT_TAG: ${{ inputs.tag }}
-          INPUT_BASE: ${{ inputs.base_tag }}
           EVENT_NAME: ${{ github.event_name }}
           PUSH_TAG: ${{ github.ref_name }}
           RUN_NUMBER: ${{ github.run_number }}
@@ -72,99 +70,32 @@ jobs:
           else
             version="v0.0.0-ci.${RUN_NUMBER}"
           fi
-          base="$INPUT_BASE"
           update_base="$LAST_MAJOR_UPDATE_BASE"
-          if [[ "$EVENT_NAME" == push && -z "$base" ]]; then
-            base=$(gh release list --limit 100 --json tagName,isPrerelease,publishedAt \
-              | jq -r --arg current "$tag" '
-                  map(select((.isPrerelease | not) and .tagName != $current))
-                  | sort_by(.publishedAt) | last.tagName // empty')
-          fi
-          [[ -n "$base" ]] || { echo 'base_tag is required for release builds' >&2; exit 1; }
           [[ -n "$update_base" ]] || { echo 'update_base_tag is required for release builds' >&2; exit 1; }
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "base=$base" >> "$GITHUB_OUTPUT"
           echo "update_base=$update_base" >> "$GITHUB_OUTPUT"
 
-      - name: Install build dependencies
-        run: sudo apt-get update && sudo apt-get install --yes build-essential cmake unzip zip jq p7zip-full
+      - name: Install packaging dependencies
+        run: sudo apt-get update && sudo apt-get install --yes unzip zip jq p7zip-full
 
-      - name: Download SF3000 cross-toolchain
-        run: |
-          set -euo pipefail
-          mkdir -p "$WORK_ROOT/sf3000toolchain"
-          curl --fail --location --retry 3 "$TOOLCHAIN_URL" \
-            | tar -xz -C "$WORK_ROOT/sf3000toolchain"
-          # The public SDK archive contains the runtime SONAME but some
-          # versions omit the development symlink used by picoarch's linker.
-          sysroot="$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot/usr/lib"
-          if [[ ! -e "$sysroot/libpng12.so" && -e "$sysroot/libpng12.so.0" ]]; then
-            ln -s libpng12.so.0 "$sysroot/libpng12.so"
-          fi
-
-      - name: Fetch companion source repositories
-        working-directory: ${{ env.WORK_ROOT }}
-        run: |
-          set -euo pipefail
-          sudo mkdir -p /home/tomaszz
-          sudo ln -sfn "$WORK_ROOT" /home/tomaszz/sf3000-work
-          ln -sfn "$GITHUB_WORKSPACE" sf3000_treefrogui
-          git clone --depth 1 --branch feature/sf3000-treefrogui --recurse-submodules --shallow-submodules https://github.com/tzubertowski/FrogUI.git FrogUI
-          git clone --depth 1 --branch r36sx https://github.com/tzubertowski/TreeFrogUI_picoarch.git picoarch
-          git clone --depth 1 --branch main https://github.com/tzubertowski/FrogShell.git FrogShell
-          git clone --depth 1 --branch main https://github.com/tzubertowski/TreeFrogUI_ebook_reader.git ebook
-          git clone --depth 1 --branch feature/sf3000-treefrogui https://github.com/tzubertowski/FroggyCraft.git FroggyCraft
-          git clone --depth 1 --branch main https://github.com/tzubertowski/FroggyPE.git FroggyPE
-          git clone --depth 1 --branch 1.24.10 --recurse-submodules --shallow-submodules https://github.com/ArtifexSoftware/mupdf.git mupdf
-          git clone --depth 1 --branch treefrogui-sf3000-midi https://github.com/tzubertowski/FroggyKVM.git "$GITHUB_WORKSPACE/cores/FroggyKVM"
-          # The media-player Makefiles refer to ../../../picoarch from the
-          # checkout layout used by local development.
-          ln -sfn "$WORK_ROOT/picoarch" "$GITHUB_WORKSPACE/../picoarch"
-          git -C picoarch submodule update --init --depth 1 libretro-common
-
-      - name: Fetch DSperate SF3000 package
+      - name: Download and verify local build bundle
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p "$WORK_ROOT/dsperate/build/sf3000-package" "$RUNNER_TEMP/dsperate"
-          gh release download v1.15.2-rc.3 --repo tzubertowski/TreeFrogUI_DSperate \
-            --pattern 'dsperate-v1.15.2-rc.3-sf3000.tar.gz' --dir "$RUNNER_TEMP/dsperate"
-          echo 'dc6db7612a251911d9d6775b1973edba4ebca495173e7816a90ce5566f61e1ce  '"$RUNNER_TEMP/dsperate/dsperate-v1.15.2-rc.3-sf3000.tar.gz" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/dsperate/dsperate-v1.15.2-rc.3-sf3000.tar.gz" \
-            -C "$WORK_ROOT/dsperate/build/sf3000-package"
-          test -x "$WORK_ROOT/dsperate/build/sf3000-package/dsperate"
-          grep -Fq 'DS_MIPS_JIT=${DS_MIPS_JIT:-1}' "$WORK_ROOT/dsperate/build/sf3000-package/run_sf3000.sh"
-
-      - name: Download previous full release as build base
-        env:
-          GH_TOKEN: ${{ github.token }}
-          BASE_TAG: ${{ steps.names.outputs.base }}
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/base"
-          gh release download "$BASE_TAG" --repo "$GITHUB_REPOSITORY" \
-            --pattern 'TreeFrogUI_*.zip' --dir "$RUNNER_TEMP/base"
-          base_zip="$(find "$RUNNER_TEMP/base" -maxdepth 1 -name 'TreeFrogUI_*.zip' -print -quit)"
-          [[ -n "$base_zip" ]] || { echo 'Base full release archive not found' >&2; exit 1; }
-          unzip -q "$base_zip" -d "$RUNNER_TEMP/base/unpacked"
-          [[ -d "$RUNNER_TEMP/base/unpacked/release" ]] || {
-            echo 'Base archive does not contain release/' >&2; exit 1;
-          }
-          # The SDK's libpng12 development files are not consistently present;
-          # the previous release already carries the exact target runtime.
-          sysroot="$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot/usr/lib"
-          png_runtime="$RUNNER_TEMP/base/unpacked/release/cubegm/lib/libpng12.so.0"
-          if [[ ! -e "$sysroot/libpng12.so.0" && -f "$png_runtime" ]]; then
-            cp "$png_runtime" "$sysroot/libpng12.so.0"
-          fi
-          if [[ ! -e "$sysroot/libpng12.so" && -e "$sysroot/libpng12.so.0" ]]; then
-            ln -s libpng12.so.0 "$sysroot/libpng12.so"
-          fi
-          # Seed ignored staging files (cores, binaries, FrogShell, BIOS, etc.)
-          # from the last full release. New builds replace the binaries they own.
-          cp -a "$RUNNER_TEMP/base/unpacked/release/." "$GITHUB_WORKSPACE/sdcard/"
+          mkdir -p "$RUNNER_TEMP/local-bundle"
+          gh release download "$LOCAL_BUNDLE_TAG" --repo "$GITHUB_REPOSITORY" \
+            --pattern "$LOCAL_BUNDLE_ASSET" --dir "$RUNNER_TEMP/local-bundle"
+          echo "$LOCAL_BUNDLE_SHA256  $RUNNER_TEMP/local-bundle/$LOCAL_BUNDLE_ASSET" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/local-bundle/$LOCAL_BUNDLE_ASSET" -C "$RUNNER_TEMP/local-bundle"
+          test -d "$RUNNER_TEMP/local-bundle/release"
+          (
+            cd "$RUNNER_TEMP/local-bundle/release"
+            sha256sum -c ../SHA256SUMS
+          )
+          mkdir -p release/latest
+          cp -a "$RUNNER_TEMP/local-bundle/release" release/latest/release
 
       - name: Download cumulative update base
         env:
@@ -176,130 +107,19 @@ jobs:
           gh release download "$UPDATE_BASE_TAG" --repo "$GITHUB_REPOSITORY" \
             --pattern 'TreeFrogUI_*.zip' --dir "$RUNNER_TEMP/update-base"
 
-      - name: Build FrogUI core
-        working-directory: ${{ env.WORK_ROOT }}/FrogUI
-        run: ./build_libretro.sh
-
-      - name: Build picoarch frontends
-        working-directory: ${{ env.WORK_ROOT }}/picoarch
-        run: |
-          ./build_sf3000.sh
-          ./build_picoarch_hi.sh
-
-      - name: Build QPSX core
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
-        run: |
-          set -euo pipefail
-          git clone --depth 1 https://github.com/angree/sf2000-qpsx-playstation-emulator.git cores/qpsx
-          git -C cores/qpsx apply "$GITHUB_WORKSPACE/patches/qpsx-sf3000.patch"
-          toolchain="$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
-          prefix="$toolchain/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
-          sysroot="$toolchain/mipsel-buildroot-linux-gnu/sysroot"
-          make -C cores/qpsx -f Makefile.libretro platform=sf3000 \
-            CC="${prefix}gcc" CXX="${prefix}g++" \
-            AR="${prefix}ar" RANLIB="${prefix}ranlib" \
-            LDFLAGS="-shared -Wl,--no-undefined -mips32r2 -mhard-float -mfp32 -EL --sysroot=$sysroot -L$sysroot/usr/lib -lm -lc -lstdc++" \
-            -j"$(nproc)"
-          mkdir -p build
-          cp cores/qpsx/pcsx4all_libretro.so build/qpsx_libretro.so
-          "${prefix}strip" build/qpsx_libretro.so
-
-      - name: Build FroggyKVM J2ME core
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
-        run: |
-          set -euo pipefail
-          toolchain="$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot"
-          prefix="$toolchain/opt/ext-toolchain/bin/mips-mti-linux-gnu-"
-          sysroot="$toolchain/mipsel-buildroot-linux-gnu/sysroot"
-          make -C cores/FroggyKVM clean
-          # FroggyKVM's legacy generated-source rules are not safe to build in parallel.
-          make -C cores/FroggyKVM platform=sf3000 \
-            CC="${prefix}gcc" CXX="${prefix}g++" \
-            AR="${prefix}ar" RANLIB="${prefix}ranlib" \
-            LD="${prefix}g++" \
-            LDFLAGS="-mips32r2 -mhard-float -mfp32 -EL --sysroot=$sysroot -L$sysroot/usr/lib -lm -lc -lstdc++" \
-            -j1
-          mkdir -p build
-          test -f cores/FroggyKVM/j2me_libretro.so
-          cp cores/FroggyKVM/j2me_libretro.so build/j2me_libretro.so
-          "${prefix}strip" build/j2me_libretro.so
-
-      - name: Build FroggyCraft ClassiCube core
-        working-directory: ${{ env.WORK_ROOT }}/FroggyCraft/source/classicube_sf2000
-        env:
-          SF3000_MIPS: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/opt/ext-toolchain/bin/mips-mti-linux-gnu-
-          SF3000_SYSROOT: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot
-        run: make clean && make SF2000_PLATFORM=sf3000 -j2
-
-      - name: Build FroggyPE Minecraft PE core
-        working-directory: ${{ env.WORK_ROOT }}/FroggyPE
-        env:
-          SF3000_MIPS: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/opt/ext-toolchain/bin/mips-mti-linux-gnu-
-          SF3000_SYSROOT: ${{ env.WORK_ROOT }}/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot
-        run: |
-          set -euo pipefail
-          make -f Makefile.sf2000 clean
-          make -f Makefile.sf2000 platform=sf3000 MIPS="$SF3000_MIPS" SYSROOT="$SF3000_SYSROOT" -j2
-          "${SF3000_MIPS}strip" mcpe_libretro.so
-
-      - name: Fetch J2ME SoundFont
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
-        run: |
-          set -euo pipefail
-          soundfont="cores/scummvm/dists/soundfonts/Roland_SC-55.sf2"
-          mkdir -p "$(dirname "$soundfont")"
-          curl --fail --location --retry 3 \
-            "https://raw.githubusercontent.com/libretro/scummvm/660e13b0764fe2be39b6d723345ecabfbb318cc5/dists/soundfonts/Roland_SC-55.sf2" \
-            -o "$soundfont"
-          echo "fca3e514b635a21789d4224e84865d2954a2a914d46b64aa8219ddb565c44869  $soundfont" | sha256sum -c -
-
-      - name: Build and check ebook reader
-        working-directory: ${{ env.WORK_ROOT }}/ebook
-        run: |
-          gcc -I../mupdf/include -ffunction-sections -fdata-sections test_reader.c -Wl,--gc-sections -o /tmp/test-ebook-reader
-          /tmp/test-ebook-reader
-          ./build_mupdf_sf.sh
-          ./build_reader_sf.sh
-
-      - name: Build unified release tree
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
-        env:
-          FROGGYCRAFT_ROOT: ${{ env.WORK_ROOT }}/FroggyCraft
-          FROGGYPE_ROOT: ${{ env.WORK_ROOT }}/FroggyPE
-          FROGUI_ROOT: ${{ env.WORK_ROOT }}/FrogUI
-          TREEFROG_STOCK_ROOT: ${{ runner.temp }}/base/unpacked/release/install_first
-        run: ./build_release.sh
-
       - name: Sanity-check cores and resources
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
-        env:
-          BASE_TREE: ${{ runner.temp }}/base/unpacked/release
         run: |
           set -euo pipefail
           current=release/latest/release
-          cmp "$WORK_ROOT/ebook/ebook" "$current/cubegm/ebook"
-          cmp sdcard/cubegm/cores/frogshell_libretro.so "$current/cubegm/cores/frogshell_libretro.so"
           test -s "$current/cubegm/cores/j2me_libretro.so"
           test -s "$current/cubegm/cores/mcpe_libretro.so"
           test -s "$current/cubegm/bios/Roland_SC-55.sf2"
-          # A CI build starts from the previous full release, so every shipped
-          # core/resource must remain present unless it was deliberately
-          # removed in the build script. Catch silent cp_if_diff omissions.
-          for subtree in cubegm/cores cubegm/bios cubegm/lib frogui; do
-            [[ -d "$BASE_TREE/$subtree" ]] || continue
-            while IFS= read -r -d '' file; do
-              rel=${file#"$BASE_TREE/"}
-              [[ "$rel" == cubegm/cores/fheroes2_libretro.so ]] && continue
-              [[ -f "$current/$rel" ]] || {
-                echo "Missing release payload: $rel" >&2
-                exit 1
-              }
-            done < <(find "$BASE_TREE/$subtree" -type f -print0)
-          done
+          echo '705d8af897d7c8b5ca968bd8171497fc0f4099e8c9c24b62a0acbdabb2ce3419  '"$current/cubegm/dsperate/dsperate" | sha256sum -c -
           required=(
             cubegm/picoarch cubegm/picoarch_hi
             cubegm/cores/frogui_libretro.so cubegm/cores/tyrquake_libretro.so
             cubegm/cores/classicube_libretro.so cubegm/cores/mcpe_libretro.so
+            cubegm/ebook cubegm/dsperate/dsperate
             cubegm/lib/libSDL-1.2.so.0 cubegm/lib/libpng12.so.0
             cubegm/lib/libpng16.so.16
           )
@@ -310,7 +130,6 @@ jobs:
 
       - name: Package full install and update
         id: package
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         env:
           VERSION: ${{ steps.names.outputs.version }}
         run: |
@@ -346,7 +165,6 @@ jobs:
           RELEASE_TAG: ${{ steps.names.outputs.tag }}
           VERSION: ${{ steps.names.outputs.version }}
           PRERELEASE: ${{ inputs.prerelease || 'true' }}
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         run: |
           set -euo pipefail
           args=("$RELEASE_TAG" "release/latest/TreeFrogUI_${VERSION}.zip" "release/latest/update.zip" --repo "$GITHUB_REPOSITORY" --title "TreeFrogUI ${VERSION}" --notes-file release-notes.md)
@@ -364,7 +182,6 @@ jobs:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_GITHUB_UPDATES_WEBHOOK }}
           RELEASE_TAG: ${{ steps.names.outputs.tag }}
           VERSION: ${{ steps.names.outputs.version }}
-        working-directory: ${{ env.WORK_ROOT }}/sf3000_treefrogui
         run: |
           set -euo pipefail
 
