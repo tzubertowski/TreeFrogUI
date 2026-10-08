@@ -16,6 +16,7 @@ Changes since v1.5.0:
 - Fixed idle speaker static, silent PS1 launches, media playback after audio handoff, and inaudible launcher menu ticks.
 - Shared system volume between FrogUI Settings, the in-game menu, and physical volume buttons.
 - Added a selectable stock or TreeFrogUI battery indicator shared by FrogUI and PicoArch; the stock overlay now appears in menus without covering gameplay.
+- Restored the calibrated TreeFrogUI battery curve from v1.5.0_l so the custom indicator reports gradual percentages consistently in FrogUI and PicoArch.
 - Improved offline-update recovery with explicit same-version repair installs and safe FAT32 document-name migration that only removes a case-conflicting file when its verified replacement is present.
 - Added an optional FrogShell Developer Mode with a terminal, command history, script and executable launching, and USB keyboard input where supported.
 - Added caps, symbols, and modifier keys to FrogShell's on-screen keyboard.
