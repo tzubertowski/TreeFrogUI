@@ -35,6 +35,7 @@ env:
   # Change this deliberately when the product moves to a new major baseline;
   # never replace it with the latest prerelease.
   LAST_MAJOR_UPDATE_BASE: v1.0.12
+  LAST_MAJOR_UPDATE_ASSET: TreeFrogUI_v1.0.12_c.zip
 
 jobs:
   build:
@@ -105,7 +106,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/update-base"
           gh release download "$UPDATE_BASE_TAG" --repo "$GITHUB_REPOSITORY" \
-            --pattern 'TreeFrogUI_*.zip' --dir "$RUNNER_TEMP/update-base"
+            --pattern "$LAST_MAJOR_UPDATE_ASSET" --dir "$RUNNER_TEMP/update-base"
 
       - name: Sanity-check cores and resources
         run: |
@@ -134,7 +135,8 @@ jobs:
           VERSION: ${{ steps.names.outputs.version }}
         run: |
           set -euo pipefail
-          update_base_zip="$(find "$RUNNER_TEMP/update-base" -maxdepth 1 -name 'TreeFrogUI_*.zip' -print -quit)"
+          update_base_zip="$RUNNER_TEMP/update-base/$LAST_MAJOR_UPDATE_ASSET"
+          test -f "$update_base_zip"
           TREEFROG_CUMULATIVE_UPDATE=1 ./pack_release.sh "$VERSION" "$update_base_zip"
           ./tests/test_release_base_selection.sh
           ./tests/test_offline_update.sh release/latest/update.zip "$update_base_zip"
