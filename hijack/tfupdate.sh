@@ -65,6 +65,25 @@ install_tree() {
     done < "$STAGE/files.list"
 }
 
+# A few older archives could leave root documentation with different casing.
+# Remove an old variant only when the verified payload is about to replace it.
+# Migration idea credited to MartStartIV (PR #75).
+remove_replaced_root_doc_variants() {
+    for SRC in "$BUNDLE/payload"/*.md; do
+        [ -f "$SRC" ] || continue
+        SOURCE_NAME=${SRC##*/}
+        SOURCE_FOLDED=$(printf '%s' "$SOURCE_NAME" | tr '[:upper:]' '[:lower:]')
+        for EXISTING in "$SDROOT"/*; do
+            [ -f "$EXISTING" ] || continue
+            EXISTING_NAME=${EXISTING##*/}
+            [ "$EXISTING_NAME" = "$SOURCE_NAME" ] && continue
+            EXISTING_FOLDED=$(printf '%s' "$EXISTING_NAME" | tr '[:upper:]' '[:lower:]')
+            [ "$EXISTING_FOLDED" = "$SOURCE_FOLDED" ] || continue
+            rm -f "$EXISTING" || return 1
+        done
+    done
+}
+
 mkdir -p "$WORK_DIR" || exit 1
 rm -rf "$STAGE"
 mkdir -p "$STAGE" || fail "cannot create staging directory"
@@ -97,19 +116,23 @@ case "$BASE_MAJOR" in
     ''|*[!0-9]*) [ -z "$BASE_MAJOR" ] || fail "invalid base major" ;;
 esac
 INSTALLED_VERSION=$(cat "$SDROOT/cubegm/version.txt" 2>/dev/null)
-if [ -n "$BASE_VERSION" ] && [ "$BASE_VERSION" != unknown ]; then
-    [ "$INSTALLED_VERSION" = "$BASE_VERSION" ] \
-        || fail "requires $BASE_VERSION, installed version is ${INSTALLED_VERSION:-unknown}"
-fi
-if [ -n "$BASE_MAJOR" ]; then
-    case "$INSTALLED_VERSION" in
-        ''|unknown)
-            # Early major-line releases did not write version.txt. The signed
-            # base_major is the best compatibility check available for them.
-            ;;
-        v"$BASE_MAJOR".*) ;;
-        *) fail "requires major v$BASE_MAJOR, installed version is ${INSTALLED_VERSION:-unknown}" ;;
-    esac
+if [ "$INSTALLED_VERSION" = "$VERSION" ]; then
+    log "Reinstalling TreeFrogUI $VERSION"
+else
+    if [ -n "$BASE_VERSION" ] && [ "$BASE_VERSION" != unknown ]; then
+        [ "$INSTALLED_VERSION" = "$BASE_VERSION" ] \
+            || fail "requires $BASE_VERSION, installed version is ${INSTALLED_VERSION:-unknown}"
+    fi
+    if [ -n "$BASE_MAJOR" ]; then
+        case "$INSTALLED_VERSION" in
+            ''|unknown)
+                # Early major-line releases did not write version.txt. The signed
+                # base_major is the best compatibility check available for them.
+                ;;
+            v"$BASE_MAJOR".*) ;;
+            *) fail "requires major v$BASE_MAJOR, installed version is ${INSTALLED_VERSION:-unknown}" ;;
+        esac
+    fi
 fi
 
 # Configs are intentionally authoritative: releases may add options, migrate
@@ -133,6 +156,7 @@ done
 # ROMs, BIOS, saves, histories and media are never deleted. Release configs are
 # authoritative and replace installed configs after the backup above. Device
 # files are applied last so the launcher is the final boot-critical change.
+remove_replaced_root_doc_variants || fail "cannot migrate root documentation names"
 install_tree "$BUNDLE/payload" || fail "installing universal payload failed"
 install_tree "$BUNDLE/device/$DEVICE" || fail "installing device payload failed"
 

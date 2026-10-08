@@ -18,10 +18,13 @@ printf 'old-emu-config\n' > "$SD/cubegm/cores/.pcsx4all/pcsx4all.cfg"
 printf 'test-0\n' > "$SD/cubegm/version.txt"
 printf 'personal-rom\n' > "$SD/roms/gb/personal.gb"
 printf 'obsolete\n' > "$SD/cubegm/obsolete.so"
+printf 'old-install\n' > "$SD/INSTALL.md"
+printf 'keep-license\n' > "$SD/LICENSE.md"
 
 cp hijack/tfupdate.sh "$PKG/payload/cubegm/tfupdate.sh"
 printf 'new-settings\n' > "$PKG/payload/frogui/settings.txt"
 printf 'new-emu-config\n' > "$PKG/payload/cubegm/cores/.pcsx4all/pcsx4all.cfg"
+printf 'new-install\n' > "$PKG/payload/install.md"
 printf 'new-r36sx-launcher\n' > "$PKG/device/r36sx/cubegm/zhijack.sh"
 printf 'new-hijack-core\n' > "$PKG/device/r36sx/cubegm/cores/libemu_md.so"
 printf 'cubegm/obsolete.so\n' > "$PKG/delete.txt"
@@ -48,8 +51,25 @@ grep -qx 'personal-rom' "$SD/roms/gb/personal.gb"
 [ ! -e "$SD/cubegm/obsolete.so" ] || { echo "obsolete release file was not deleted"; exit 1; }
 grep -qx 'new-r36sx-launcher' "$SD/cubegm/zhijack.sh"
 grep -qx 'test-1' "$SD/cubegm/version.txt"
+grep -qx 'new-install' "$SD/install.md"
+[ ! -e "$SD/INSTALL.md" ] || { echo "old case-conflicting document survived"; exit 1; }
+grep -qx 'keep-license' "$SD/LICENSE.md"
 
-# A valid delta for a different installed base must be retained and rejected.
+# Reinstalling the exact same version repairs files and consumes the package.
+printf 'damaged-settings\n' > "$SD/frogui/settings.txt"
+cp "$TMP/good-update.zip" "$SD/update.zip"
+set +e
+TFUPDATE_ROOT="$SD" sh hijack/tfupdate.sh r36sx
+STATUS=$?
+set -e
+[ "$STATUS" = 10 ] || { echo "expected reinstall status 10, got $STATUS"; exit 1; }
+[ ! -e "$SD/update.zip" ] || { echo "successful reinstall package was not deleted"; exit 1; }
+grep -qx 'test-1' "$SD/cubegm/version.txt"
+grep -qx 'new-settings' "$SD/frogui/settings.txt"
+grep -qx 'keep-license' "$SD/LICENSE.md"
+
+# A valid delta for a genuinely different installed base remains rejected.
+printf 'test-2\n' > "$SD/cubegm/version.txt"
 cp "$TMP/good-update.zip" "$SD/update.zip"
 set +e
 TFUPDATE_ROOT="$SD" sh hijack/tfupdate.sh r36sx
@@ -57,8 +77,9 @@ STATUS=$?
 set -e
 [ "$STATUS" = 1 ] || { echo "expected base mismatch status 1, got $STATUS"; exit 1; }
 [ -f "$SD/update.zip" ] || { echo "wrong-base package was incorrectly deleted"; exit 1; }
-grep -qx 'test-1' "$SD/cubegm/version.txt"
+grep -qx 'test-2' "$SD/cubegm/version.txt"
 rm -f "$SD/update.zip"
+printf 'test-1\n' > "$SD/cubegm/version.txt"
 
 # A ZIP that extracts successfully but fails its signed file list must be kept,
 # and the installed version must remain untouched.
