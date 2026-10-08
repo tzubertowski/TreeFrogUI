@@ -3,6 +3,19 @@
 Running list of reported quirks worth a proper look, with the current
 understanding. Not blocking; parked here so they aren't lost.
 
+## Low-RAM devices: zRAM plus optional SD swap
+
+- Measure real OOM cases first: capture `MemAvailable`, `/proc/swaps`, process
+  RSS and kernel OOM messages around failing cores.
+- Verify the existing stock `cubegm/pagefile.sys` swap path before adding
+  another one; USB mode already detects, disables and restores it safely.
+- Check whether the shipped kernel supports a usable zRAM module, then compare
+  zRAM-only, SD-swap-only and hybrid configurations on 32 MB devices.
+- Treat SD swap as opt-in if testing shows a benefit: it can prevent an OOM but
+  cannot make RAM-heavy software fast, and sustained paging adds SD-card wear.
+- Do not special-case individual cores as being “loaded into virtual RAM”;
+  normal Linux paging should decide which anonymous/file-backed pages move.
+
 ## gpsp_multicore: saves fail on ZIP ROMs with multi-byte (e.g. Japanese) filenames
 
 **Reported cause / workaround (from a user, self-diagnosed):**
