@@ -5,7 +5,7 @@ TreeFrogUI includes the open-source OpenClaw libretro core from [FroggyClaw](htt
 Copy your legally obtained `CLAW.REZ` game archive to:
 
 ```text
-sd:/roms/claw/CLAW.REZ
+sd:/roms/openclaw/CLAW.REZ
 ```
 
-The release supplies the engine assets, font, and a launcher entry. Start **Captain Claw** from the `roms/claw/` folder.
+The release supplies the engine assets, font, and a launcher entry. Start **Captain Claw** from the `roms/openclaw/` folder. The older `roms/claw/` alias is also supported.
