@@ -151,7 +151,7 @@ fi
 PICOARCH=/mnt/sdcard/cubegm/picoarch
 PICOARCH_HI=/mnt/sdcard/cubegm/picoarch_hi
 FROGUI_CORE=/mnt/sdcard/cubegm/cores/frogui_libretro.so
-LAUNCH=/tmp/frogui_launch.txt
+LAUNCH=/mnt/sdcard/cubegm/frogui_launch.txt
 
 ITER=0
 while true; do
@@ -162,7 +162,22 @@ while true; do
     : > /tmp/treefrog_ui.log
     # Keep child stdout off the SD.  USB mode must be able to unmount even
     # when diagnostics are enabled via /mnt/sdcard/log.txt.
-    "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> /tmp/treefrog_ui.log 2>&1
+    # FrogUI asks for shutdown after writing LAUNCH, but some R36HD PicoArch
+    # builds do not return from RETRO_ENVIRONMENT_SHUTDOWN. Watch the shared
+    # request while the UI is alive so a stuck frontend cannot block every game.
+    "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> /tmp/treefrog_ui.log 2>&1 &
+    UI_PID=$!
+    while kill -0 "$UI_PID" 2>/dev/null; do
+        if [ -s "$LAUNCH" ]; then
+            echo "frogui launch request detected while pid=$UI_PID is alive" >> "$LOG"
+            kill "$UI_PID" 2>/dev/null
+            sleep 0.1
+            kill -9 "$UI_PID" 2>/dev/null
+            break
+        fi
+        sleep 0.05
+    done
+    wait "$UI_PID"
     RC=$?
     if [ "$RC" != 0 ]; then
         mkdir -p /mnt/sdcard/cubegm/logs
@@ -183,9 +198,10 @@ while true; do
         fi #@R36@
     fi #@R36@
 
-    if [ -f "$LAUNCH" ]; then
-        LAUNCH_KIND=$(sed -n '1p' "$LAUNCH")
-        if [ "$LAUNCH_KIND" = standalone ]; then
+        if [ -f "$LAUNCH" ]; then
+            LAUNCH_KIND=$(sed -n '1p' "$LAUNCH")
+            echo "launch payload kind=$LAUNCH_KIND line2=$(sed -n '2p' \"$LAUNCH\") line3=$(sed -n '3p' \"$LAUNCH\")" >> "$LOG"
+            if [ "$LAUNCH_KIND" = standalone ]; then
             BIN_PATH=$(sed -n '2p' "$LAUNCH")
             ARG_PATH=$(sed -n '3p' "$LAUNCH")
             rm -f "$LAUNCH"
@@ -221,13 +237,33 @@ while true; do
             # messages in the shared log.
             "$BIN" "$CORE_PATH" "$ROM_PATH" >> /tmp/treefrog_ui.log 2>&1 &
             GAME_PID=$!
+            # Keep diagnostics available while a core is still in startup.
+            # A hung/OOM-prone core otherwise leaves only the launcher PID
+            # snapshot and its useful libretro log is lost in /tmp.
+            mkdir -p /mnt/sdcard/cubegm/logs
+            : > /mnt/sdcard/cubegm/logs/last_game_status.log
+            : > /mnt/sdcard/cubegm/logs/last_game_live.log
+            (
+                while kill -0 "$GAME_PID" 2>/dev/null; do
+                    echo "--- game monitor $(date +%s 2>/dev/null) pid=$GAME_PID ---" >> /mnt/sdcard/cubegm/logs/last_game_status.log
+                    tr '\n' ' ' < "/proc/$GAME_PID/status" >> /mnt/sdcard/cubegm/logs/last_game_status.log 2>/dev/null
+                    echo >> /mnt/sdcard/cubegm/logs/last_game_status.log
+                    cp /tmp/treefrog_ui.log /mnt/sdcard/cubegm/logs/last_game_live.log 2>/dev/null
+                    sleep 2
+                done
+            ) &
+            GAME_MONITOR_PID=$!
             GAME_EXE=$(readlink "/proc/$GAME_PID/exe" 2>/dev/null)
             echo "game pid=$GAME_PID exe=$GAME_EXE" >> "$LOG"
             echo "game cmdline: $(tr '\0' ' ' < /proc/$GAME_PID/cmdline 2>/dev/null)" >> "$LOG"
             echo "game status: $(tr '\n' ' ' < /proc/$GAME_PID/status 2>/dev/null)" >> "$LOG"
             wait "$GAME_PID"
             GRC=$?
+            kill "$GAME_MONITOR_PID" 2>/dev/null
+            wait "$GAME_MONITOR_PID" 2>/dev/null
             echo "game exited rc=$GRC" >> "$LOG"
+            cp /tmp/treefrog_ui.log /mnt/sdcard/cubegm/logs/last_game.log 2>/dev/null
+            sync
         fi
     fi
     sleep 0.2

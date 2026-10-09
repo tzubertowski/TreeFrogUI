@@ -8,7 +8,7 @@
 #
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
-#   release, clean-themes, picoarch, picoarch-hi, frogui, frogshell, ebook, pcsx4all, pcsx4all-config,
+#   release, clean-themes, picoarch, picoarch-hi, frogui, openclaw, frogshell, ebook, pcsx4all, pcsx4all-config,
 #   tic80, vecx, j2me, j2me-debug, o2em, o2em-test, c64-test,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
@@ -30,7 +30,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|r36hd|sf3000|sf3500> [payload ...]
-    payloads: release clean-themes picoarch picoarch-hi frogui frogshell ebook pcsx4all pcsx4all-config tic80 vecx j2me j2me-debug o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
+    payloads: release clean-themes picoarch picoarch-hi frogui openclaw frogshell ebook pcsx4all pcsx4all-config tic80 vecx j2me j2me-debug o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -71,7 +71,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|clean-themes|picoarch|picoarch-hi|frogui|frogshell|ebook|pcsx4all|pcsx4all-config|tic80|vecx|j2me|j2me-debug|o2em|o2em-test|c64-test|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|clean-themes|picoarch|picoarch-hi|frogui|openclaw|frogshell|ebook|pcsx4all|pcsx4all-config|tic80|vecx|j2me|j2me-debug|o2em|o2em-test|c64-test|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -304,6 +304,10 @@ deploy_one() {
             src="$REPO/frogui/out/frogui_libretro.so"
             dst="$MOUNT/cubegm/cores/frogui_libretro.so"
             ;;
+        openclaw)
+            src="$WORK/FroggyClaw/openclaw_libretro.so"
+            dst="$MOUNT/cubegm/cores/openclaw_libretro.so"
+            ;;
         frogshell)
             src="$STAGE/cubegm/frogshell"
             dst="$MOUNT/cubegm/frogshell"
@@ -360,6 +364,26 @@ deploy_one() {
     if [ "$name" = frogui ]; then
         mkdir -p "$MOUNT/frogui/lang"
         rsync -rltc "$REPO/frogui/lang/" "$MOUNT/frogui/lang/"
+        # Captain Claw is named openclaw everywhere. Remove files from the
+        # retired claw alias so an older install cannot select stale artwork.
+        rm -f "$MOUNT/frogui/claw.png" \
+              "$MOUNT/frogui/theme-packs/Art_Book_NextUI/claw.png" \
+              "$MOUNT/frogui/theme-packs/Art_Book_Next/claw.png" \
+              "$MOUNT/frogui/theme-packs/Nao_Black/claw.png"
+        rsync -tc "$REPO/assets/claw/openclaw-artbook-nextui.png" "$MOUNT/frogui/openclaw.png"
+        rsync -tc "$REPO/assets/claw/openclaw-artbook-nextui.png" "$MOUNT/frogui/theme-packs/Art_Book_NextUI/openclaw.png"
+        rsync -tc "$REPO/assets/claw/openclaw-artbook-next.png" "$MOUNT/frogui/theme-packs/Art_Book_Next/openclaw.png"
+        rsync -tc "$REPO/assets/claw/openclaw-nao-black.png" "$MOUNT/frogui/theme-packs/Nao_Black/openclaw.png"
+        # The asset name is stable across devices. R36HD receives its native
+        # 640x480 composition under the normal openclaw.png name.
+        rsync -tc "$REPO/assets/claw/openclaw-artbook-nextui-r36hd.png" "$MOUNT/frogui/openclaw.png"
+        rsync -tc "$REPO/assets/claw/openclaw-artbook-nextui-r36hd.png" "$MOUNT/frogui/theme-packs/Art_Book_NextUI/openclaw.png"
+        rsync -tc "$REPO/assets/claw/openclaw-artbook-next-r36hd.png" "$MOUNT/frogui/theme-packs/Art_Book_Next/openclaw.png"
+        rsync -tc "$REPO/assets/claw/openclaw-nao-black-r36hd.png" "$MOUNT/frogui/theme-packs/Nao_Black/openclaw.png"
+        rm -f "$MOUNT/frogui/openclaw-r36hd.png" \
+              "$MOUNT/frogui/theme-packs/Art_Book_NextUI/openclaw-r36hd.png" \
+              "$MOUNT/frogui/theme-packs/Art_Book_Next/openclaw-r36hd.png" \
+              "$MOUNT/frogui/theme-packs/Nao_Black/openclaw-r36hd.png"
         rsync -tc "$REPO/assets/j2me/java-games-artbook-nextui.png" "$MOUNT/frogui/j2me.png"
         rsync -tc "$REPO/assets/j2me/java-games-artbook-nextui.png" "$MOUNT/frogui/theme-packs/Art_Book_NextUI/j2me.png"
         rsync -tc "$REPO/assets/j2me/java-games-artbook-next.png" "$MOUNT/frogui/theme-packs/Art_Book_Next/j2me.png"
