@@ -28,9 +28,9 @@ permissions:
 env:
   # This archive is built and tested locally. CI only verifies, packages, and
   # publishes it; changing any of these values is a deliberate release action.
-  LOCAL_BUNDLE_TAG: local-build-v1.6.0-n
-  LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v1.6.0-n.tar.gz
-  LOCAL_BUNDLE_SHA256: 402a2c54c2ee2f10eea54243eb24cd689c00daf2b0a28c664edd680fb00ae881
+  LOCAL_BUNDLE_TAG: local-build-v1.6.0-o
+  LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v1.6.0-o.tar.gz
+  LOCAL_BUNDLE_SHA256: f2df29875c74ada319cf355a156d5d13a0718fbad90886c30833da4e65c48b43
   # update.zip is always cumulative from the last major stable baseline.
   # Change this deliberately when the product moves to a new major baseline;
   # never replace it with the latest prerelease.
