@@ -7,6 +7,7 @@ Changes since v1.5.0:
 - Added **Java Games** support through the FroggyKVM J2ME / MIDP 2.0 emulator. Put `.jar` or `.jad` files in `roms/j2me/`; the release includes the core, runtime classes, artwork, and ROM folder.
 - Added FluidLite MIDI synthesis for Java Games, with the SoundFont accepted from either `bios/` or `cubegm/bios/`.
 - Fixed Java Games crashes caused by unsupported SF3000 CPU instructions, reduced launcher and Java heap memory pressure, and added centered aspect-preserving scaling for portrait and low-resolution games.
+- Fixed Java Games RMS save enumeration on SF3000 so existing Doom RPG and other J2ME saves are visible and load correctly; removed temporary RMS diagnostics from the release build.
 - Added the experimental QPSX PlayStation core as `cubegm/cores/qpsx_libretro.so`.
 - Added Nintendo DS through the latest locally tested DSperate SF3000 package in `roms/nds`, with the audited MIPS JIT enabled by default.
 - Language selection now discovers locales from installed translation JSON files, so adding a locale no longer requires C registration. German and Turkish translations are included.

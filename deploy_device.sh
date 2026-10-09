@@ -9,7 +9,7 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, clean-themes, picoarch, picoarch-hi, frogui, frogshell, ebook, pcsx4all, pcsx4all-config,
-#   tic80, vecx, j2me, o2em, o2em-test, c64-test,
+#   tic80, vecx, j2me, j2me-debug, o2em, o2em-test, c64-test,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
 # This script never formats a card and never uses rsync --delete.
@@ -30,7 +30,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|r36hd|sf3000|sf3500> [payload ...]
-    payloads: release clean-themes picoarch picoarch-hi frogui frogshell ebook pcsx4all pcsx4all-config tic80 vecx j2me o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
+    payloads: release clean-themes picoarch picoarch-hi frogui frogshell ebook pcsx4all pcsx4all-config tic80 vecx j2me j2me-debug o2em o2em-test c64-test mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -71,7 +71,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|clean-themes|picoarch|picoarch-hi|frogui|frogshell|ebook|pcsx4all|pcsx4all-config|tic80|vecx|j2me|o2em|o2em-test|c64-test|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|clean-themes|picoarch|picoarch-hi|frogui|frogshell|ebook|pcsx4all|pcsx4all-config|tic80|vecx|j2me|j2me-debug|o2em|o2em-test|c64-test|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -328,7 +328,7 @@ deploy_one() {
             src="$STAGE/cubegm/cores/vecx_libretro.so"
             dst="$MOUNT/cubegm/cores/vecx_libretro.so"
             ;;
-        j2me)
+        j2me|j2me-debug)
             src="$REPO/build/j2me_libretro.so"
             dst="$MOUNT/cubegm/cores/j2me_libretro.so"
             ;;
@@ -377,7 +377,12 @@ deploy_one() {
     [ "$src_hash" = "$dst_hash" ] || die "$name verification failed"
     echo "$name deployed: $dst_hash"
 
-    if [ "$name" = j2me ]; then
+    if [ "$name" = j2me-debug ]; then
+        : > "$MOUNT/log.txt"
+        echo "J2ME RMS diagnostics enabled."
+    fi
+
+    if [ "$name" = j2me ] || [ "$name" = j2me-debug ]; then
         local classes_src="$REPO/assets/j2me/classes.zip"
         local classes_dst="$MOUNT/cubegm/bios/classes.zip"
         [ -f "$classes_src" ] || die "source missing: $classes_src"
@@ -618,6 +623,23 @@ deploy_c64_test() {
     echo "C64 test ready: Bruce Lee.d64 through VICE x64 with warp autostart."
 }
 
+migrate_j2me_saves() {
+    local legacy="$MOUNT/picoarch/j2me" target="$MOUNT/saves/j2me"
+    local game migrated=0
+
+    [ -d "$legacy" ] || return 0
+    mkdir -p "$target"
+    for game in "$legacy"/*; do
+        [ -d "$game" ] || continue
+        mkdir -p "$target/$(basename "$game")"
+        rsync -rltc "$game/" "$target/$(basename "$game")/"
+        verify_tree "$game/" "$target/$(basename "$game")/" \
+            "J2ME save migration for $(basename "$game")"
+        migrated=$((migrated + 1))
+    done
+    [ "$migrated" -eq 0 ] || echo "Migrated and verified $migrated J2ME save directories."
+}
+
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
         release) deploy_release ;;
@@ -629,6 +651,8 @@ for payload in "${PAYLOADS[@]}"; do
         *) deploy_one "$payload" ;;
     esac
 done
+
+migrate_j2me_saves
 
 for rel in "${STOCK_FILES[@]}"; do
     hash_line="$(sha256sum "$MOUNT/$rel")"
