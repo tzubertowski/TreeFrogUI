@@ -18,9 +18,9 @@
 set -e
 cd "$(dirname "$0")"
 
-STAGE=sdcard
+STAGE=${TREEFROG_STAGE:-sdcard}
 HIJACK=hijack
-RELEASE_ROOT=release
+RELEASE_ROOT=${TREEFROG_RELEASE_ROOT:-release}
 OUT="$RELEASE_ROOT/latest/release"
 # WORKING autoboot recipe (confirmed on SF3500 hardware, see project_sf3500_hijack):
 #   - autorun rom path must be ABSOLUTE (relative is silently ignored by rkgame)

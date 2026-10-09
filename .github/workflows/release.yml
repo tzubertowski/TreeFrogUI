@@ -28,9 +28,9 @@ permissions:
 env:
   # This archive is built and tested locally. CI only verifies, packages, and
   # publishes it; changing any of these values is a deliberate release action.
-  LOCAL_BUNDLE_TAG: local-build-v1.6.0-o
-  LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v1.6.0-o.tar.gz
-  LOCAL_BUNDLE_SHA256: f2df29875c74ada319cf355a156d5d13a0718fbad90886c30833da4e65c48b43
+  LOCAL_BUNDLE_TAG: local-build-v1.6.0-p
+  LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v1.6.0-p.tar.gz
+  LOCAL_BUNDLE_SHA256: 6ac28c85a7956e517473aee706dec33a6503e805a79a0a2ee0bbcf73ea133bd5
   # update.zip is always cumulative from the last major stable baseline.
   # Change this deliberately when the product moves to a new major baseline;
   # never replace it with the latest prerelease.
@@ -116,7 +116,7 @@ jobs:
           test -s "$current/cubegm/cores/mcpe_libretro.so"
           test -s "$current/cubegm/cores/openclaw_libretro.so"
           test -s "$current/cubegm/bios/Roland_SC-55.sf2"
-          echo '705d8af897d7c8b5ca968bd8171497fc0f4099e8c9c24b62a0acbdabb2ce3419  '"$current/cubegm/dsperate/dsperate" | sha256sum -c -
+          echo 'c08e0e0646d45b5ab17c75c0f9bd6ef43766658061eb34846fe02ddce69190d3  '"$current/cubegm/dsperate/dsperate" | sha256sum -c -
           required=(
             cubegm/picoarch cubegm/picoarch_hi
             cubegm/cores/frogui_libretro.so cubegm/cores/tyrquake_libretro.so

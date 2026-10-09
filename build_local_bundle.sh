@@ -16,7 +16,7 @@ DSPERATE_ROOT=${DSPERATE_ROOT:-$WORK_ROOT/dsperate/build/sf3000-package}
 TOOLCHAIN=$WORK_ROOT/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot
 PREFIX=$TOOLCHAIN/opt/ext-toolchain/bin/mips-mti-linux-gnu-
 SYSROOT=$TOOLCHAIN/mipsel-buildroot-linux-gnu/sysroot
-DSPERATE_SHA256=${DSPERATE_SHA256:-705d8af897d7c8b5ca968bd8171497fc0f4099e8c9c24b62a0acbdabb2ce3419}
+DSPERATE_SHA256=${DSPERATE_SHA256:-c08e0e0646d45b5ab17c75c0f9bd6ef43766658061eb34846fe02ddce69190d3}
 J2ME_HEAP_BYTES=${J2ME_HEAP_BYTES:-8388608}
 SOURCE_ID=$(git -C "$ROOT" rev-parse --short=7 HEAD)
 OUTPUT=${1:-/tmp/TreeFrogUI-local-build-$SOURCE_ID.tar.gz}
