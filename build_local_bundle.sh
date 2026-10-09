@@ -9,6 +9,7 @@ FROGUI_ROOT=${FROGUI_ROOT:-$WORK_ROOT/FrogUI}
 PICOARCH_ROOT=${PICOARCH_ROOT:-$WORK_ROOT/picoarch}
 FROGGYCRAFT_ROOT=${FROGGYCRAFT_ROOT:-$WORK_ROOT/FroggyCraft}
 FROGGYPE_ROOT=${FROGGYPE_ROOT:-$WORK_ROOT/FroggyPE}
+FROGGYCLAW_ROOT=${FROGGYCLAW_ROOT:-$WORK_ROOT/FroggyClaw}
 EBOOK_ROOT=${EBOOK_ROOT:-$WORK_ROOT/ebook}
 MUPDF_ROOT=${MUPDF_ROOT:-$WORK_ROOT/mupdf}
 DSPERATE_ROOT=${DSPERATE_ROOT:-$WORK_ROOT/dsperate/build/sf3000-package}
@@ -26,6 +27,7 @@ for file in \
   "$PICOARCH_ROOT/build_sf3000.sh" \
   "$FROGGYCRAFT_ROOT/source/classicube_sf2000/Makefile" \
   "$FROGGYPE_ROOT/Makefile.sf2000" \
+  "$FROGGYCLAW_ROOT/Makefile" \
   "$EBOOK_ROOT/build_reader_sf.sh" \
   "$DSPERATE_ROOT/dsperate"; do
   [[ -e "$file" ]] || { echo "Missing local build input: $file" >&2; exit 1; }
@@ -72,6 +74,12 @@ make -C "$FROGGYPE_ROOT" -f Makefile.sf2000 platform=sf3000 \
   MIPS="$PREFIX" SYSROOT="$SYSROOT" -j2
 "${PREFIX}strip" "$FROGGYPE_ROOT/mcpe_libretro.so"
 
+echo 'Building Captain Claw...'
+make -C "$FROGGYCLAW_ROOT" SF2000_PLATFORM=sf3000 clean
+make -C "$FROGGYCLAW_ROOT" SF2000_PLATFORM=sf3000 \
+  SF3000_MIPS="$PREFIX" SF3000_SYSROOT="$SYSROOT" -j2
+"${PREFIX}strip" "$FROGGYCLAW_ROOT/openclaw_libretro.so"
+
 echo 'Building MuPDF and ebook reader...'
 make -C "$MUPDF_ROOT" clean
 "$EBOOK_ROOT/build_mupdf_sf.sh"
@@ -81,6 +89,7 @@ echo 'Assembling release tree...'
 FROGUI_ROOT="$FROGUI_ROOT" \
 FROGGYCRAFT_ROOT="$FROGGYCRAFT_ROOT" \
 FROGGYPE_ROOT="$FROGGYPE_ROOT" \
+FROGGYCLAW_ROOT="$FROGGYCLAW_ROOT" \
 DSPERATE="$DSPERATE_ROOT" \
   "$ROOT/build_release.sh"
 

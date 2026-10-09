@@ -114,12 +114,14 @@ jobs:
           current=release/latest/release
           test -s "$current/cubegm/cores/j2me_libretro.so"
           test -s "$current/cubegm/cores/mcpe_libretro.so"
+          test -s "$current/cubegm/cores/openclaw_libretro.so"
           test -s "$current/cubegm/bios/Roland_SC-55.sf2"
           echo '705d8af897d7c8b5ca968bd8171497fc0f4099e8c9c24b62a0acbdabb2ce3419  '"$current/cubegm/dsperate/dsperate" | sha256sum -c -
           required=(
             cubegm/picoarch cubegm/picoarch_hi
             cubegm/cores/frogui_libretro.so cubegm/cores/tyrquake_libretro.so
             cubegm/cores/classicube_libretro.so cubegm/cores/mcpe_libretro.so
+            cubegm/cores/openclaw_libretro.so
             cubegm/ebook cubegm/dsperate/dsperate
             cubegm/lib/libSDL-1.2.so.0 cubegm/lib/libpng12.so.0
             cubegm/lib/libpng16.so.16

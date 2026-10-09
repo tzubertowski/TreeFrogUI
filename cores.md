@@ -10,6 +10,7 @@ ROM folder name → core .so file. Built = present in `build/`. ❌ = not built 
 |--------|--------|----------|--------|
 | `classicube` | ClassiCube / Minecraft Classic | `classicube_libretro.so` | [tzubertowski/FroggyCraft](https://github.com/tzubertowski/FroggyCraft) |
 | `mcpe` | Minecraft Pocket Edition 0.6.1 | `mcpe_libretro.so` | [Synaps33/FroggyPE](https://github.com/Synaps33/FroggyPE) |
+| `claw` | Captain Claw | `openclaw_libretro.so` | [tzubertowski/FroggyClaw](https://github.com/tzubertowski/FroggyClaw) |
 
 ## Nintendo
 

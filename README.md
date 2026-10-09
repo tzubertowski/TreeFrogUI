@@ -135,6 +135,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **j2me** | J2ME / MIDP 2.0 games (`.jar` / `.jad`) - 📖 [setup guide](docs/cores/j2me.md) | `j2me_libretro.so` |
 | **classicube** | ClassiCube Minecraft Classic worlds (`.cw`) - 📖 [setup guide](docs/cores/classicube.md), based on [Sajnaps / FroggyCraft](https://github.com/Synaps33/FroggyCraft) | `classicube_libretro.so` |
 | **mcpe** | Minecraft Pocket Edition 0.6.1, based on [Synaps33 / FroggyPE](https://github.com/Synaps33/FroggyPE) | `mcpe_libretro.so` |
+| **claw** | Captain Claw - 📖 [setup guide](docs/cores/claw.md), based on [tzubertowski / FroggyClaw](https://github.com/tzubertowski/FroggyClaw) | `openclaw_libretro.so` |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **quake2** | Quake II (heavy) - 📖 [setup guide](docs/cores/quake2.md) | `vitaquake2_libretro.so` |
 | **prboom** | Doom / Doom II / Final Doom / Heretic / Hexen | `prboom_libretro.so` |

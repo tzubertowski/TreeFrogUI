@@ -51,6 +51,11 @@ CLASSICUBE_CORE="$FROGGYCRAFT_ROOT/source/classicube_sf2000/classicube_libretro.
 CLASSICUBE_TEXPACK="$FROGGYCRAFT_ROOT/source/classicube_sf2000/texpacks/default.zip"
 FROGGYPE_ROOT="${FROGGYPE_ROOT:-/home/tomaszz/sf3000-work/FroggyPE}"
 MCPE_CORE="$FROGGYPE_ROOT/mcpe_libretro.so"
+FROGGYCLAW_ROOT="${FROGGYCLAW_ROOT:-/home/tomaszz/sf3000-work/FroggyClaw}"
+CLAW_CORE="$FROGGYCLAW_ROOT/openclaw_libretro.so"
+CLAW_ASSETS="$FROGGYCLAW_ROOT/Build_Release/ASSETS.ZIP"
+CLAW_FONT="$FROGGYCLAW_ROOT/Build_Release/clacon.ttf"
+CLAW_BANNER="$FROGGYCLAW_ROOT/ClawLauncher/Resources/ClawLauncher_Background.png"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 DSPERATE=${DSPERATE:-/home/tomaszz/sf3000-work/dsperate/build/sf3000-package}
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
@@ -151,6 +156,10 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -f "$CLASSICUBE_CORE" ] || { echo "missing ClassiCube core: $CLASSICUBE_CORE" >&2; exit 1; }
 [ -f "$CLASSICUBE_TEXPACK" ] || { echo "missing ClassiCube texture pack: $CLASSICUBE_TEXPACK" >&2; exit 1; }
 [ -f "$MCPE_CORE" ] || { echo "missing Minecraft PE core: $MCPE_CORE" >&2; exit 1; }
+[ -f "$CLAW_CORE" ] || { echo "missing Captain Claw core: $CLAW_CORE" >&2; exit 1; }
+[ -f "$CLAW_ASSETS" ] || { echo "missing Captain Claw assets: $CLAW_ASSETS" >&2; exit 1; }
+[ -f "$CLAW_FONT" ] || { echo "missing Captain Claw font: $CLAW_FONT" >&2; exit 1; }
+[ -f "$CLAW_BANNER" ] || { echo "missing Captain Claw artwork: $CLAW_BANNER" >&2; exit 1; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
@@ -158,6 +167,7 @@ cp_if_diff "$(pwd)/build/qpsx_libretro.so" "$STAGE/cubegm/cores/qpsx_libretro.so
 cp_if_diff "$(pwd)/build/j2me_libretro.so" "$STAGE/cubegm/cores/j2me_libretro.so"
 cp_if_diff "$CLASSICUBE_CORE" "$STAGE/cubegm/cores/classicube_libretro.so"
 cp_if_diff "$MCPE_CORE" "$STAGE/cubegm/cores/mcpe_libretro.so"
+cp_if_diff "$CLAW_CORE" "$STAGE/cubegm/cores/openclaw_libretro.so"
 rm -f "$STAGE/cubegm/cores/fheroes2_libretro.so"
 mkdir -p "$STAGE/cubegm/bios"
 cp_if_diff "$J2ME_CLASSES" "$STAGE/cubegm/bios/classes.zip"
@@ -176,6 +186,14 @@ mkdir -p "$STAGE/roms/j2me"
 mkdir -p "$STAGE/roms/classicube/texpacks"
 rm -rf "$STAGE/roms/fheroes2"
 mkdir -p "$STAGE/roms/mcpe/data"
+mkdir -p "$STAGE/roms/claw"
+cp_if_diff "$CLAW_ASSETS" "$STAGE/roms/claw/ASSETS.ZIP"
+cp_if_diff "$CLAW_FONT" "$STAGE/roms/claw/clacon.ttf"
+cp_if_diff "$CLAW_BANNER" "$STAGE/frogui/claw.png"
+cp_if_diff "$CLAW_BANNER" "$STAGE/frogui/theme-packs/Art_Book_NextUI/claw.png"
+cp_if_diff "$CLAW_BANNER" "$STAGE/frogui/theme-packs/Art_Book_Next/claw.png"
+cp_if_diff "$CLAW_BANNER" "$STAGE/frogui/theme-packs/Nao_Black/claw.png"
+cp_if_diff "$(pwd)/assets/claw/Start Captain Claw.claw" "$STAGE/roms/claw/Start Captain Claw.claw"
 rsync -rlt --delete "$FROGGYPE_ROOT/data/" "$STAGE/roms/mcpe/data/"
 cp_if_diff "$(pwd)/assets/mcpe/Start Minecraft PE.mcpe" "$STAGE/roms/mcpe/Start Minecraft PE.mcpe"
 cp_if_diff "$CLASSICUBE_TEXPACK" "$STAGE/roms/classicube/texpacks/default.zip"
