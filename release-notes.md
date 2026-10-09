@@ -1,5 +1,11 @@
 ## TreeFrogUI v1.6.0 prerelease
 
+Changes since v1.6.0_m:
+
+- Improved SF3000 PicoArch audio delivery with a larger buffer, longer prefill, and best-effort real-time audio-thread scheduling to reduce underruns under CPU load.
+- Disabled automatic frameskip by default in PCSX-ReARMed, PicoDrive, Beetle PCE Fast, SNES9x 2002, and SNES9x 2005; it remains available as a manual option.
+- Fixed Activity Tracker long ROM titles so they marquee within their available row width without covering the play-time bar.
+
 Changes since v1.5.0:
 
 - Added **Minecraft Pocket Edition 0.6.1** through the [FroggyPE](https://github.com/Synaps33/FroggyPE) libretro core, with a one-click `roms/mcpe/` launcher, packaged assets, localized system naming, and theme-matched Minecraft artwork.
