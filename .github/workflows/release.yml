@@ -30,7 +30,7 @@ env:
   # publishes it; changing any of these values is a deliberate release action.
   LOCAL_BUNDLE_TAG: local-build-v1.6.0-p
   LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v1.6.0-p.tar.gz
-  LOCAL_BUNDLE_SHA256: 6ac28c85a7956e517473aee706dec33a6503e805a79a0a2ee0bbcf73ea133bd5
+  LOCAL_BUNDLE_SHA256: b571b5eb95c64db31764aebe38c2f482ea9f75a66cb70f5b6582058ebc45deae
   # update.zip is always cumulative from the last major stable baseline.
   # Change this deliberately when the product moves to a new major baseline;
   # never replace it with the latest prerelease.
