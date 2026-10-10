@@ -42,6 +42,22 @@ else
     LOG=/dev/null
 fi
 
+# --- FAKE-RTC: COLD BOOT CLOCK RESTORATION ---
+TIME_FILE_REG="/mnt/sdcard/cubegm/time_save.txt"
+if [ -f "$TIME_FILE_REG" ]; then
+    LAST_SAVED_CLK=$(cat "$TIME_FILE_REG" 2>/dev/null)
+    date -s "$LAST_SAVED_CLK" 2>/dev/null
+    echo "=== Fake-RTC: System clock restored to: ($LAST_SAVED_CLK) ===" >> "$LOG"
+else
+    INIT_CLK_BASE="2026-10-10 12:00:00"
+    echo "$INIT_CLK_BASE" > "$TIME_FILE_REG"
+    date -s "$INIT_CLK_BASE" 2>/dev/null
+    echo "=== Fake-RTC: Save file missing. Initialized base: ($INIT_CLK_BASE) ===" >> "$LOG"
+    sync
+fi
+
+rm -f /tmp/usb_checked.txt 2>/dev/null
+
 # Offline updates: users drop the official update.zip into the SD-card root.
 # Run a /tmp copy so the updater can atomically replace its own
 # installed file. Status 10 means success: restart through the newly installed
@@ -116,7 +132,6 @@ fi #@R36@
 echo "processes at boot:" >> "$LOG"; ps >> "$LOG" 2>&1; [ "$LOG" = /dev/null ] || sync
 
 export LD_LIBRARY_PATH=/mnt/sdcard/cubegm/lib:/mnt/sdcard/cubegm/usr/lib:$LD_LIBRARY_PATH
-
 # CPU: force max-performance governor (helps every emulator).
 for g in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do
     [ -w "$g" ] && echo performance > "$g" 2>/dev/null
@@ -159,11 +174,41 @@ while true; do
     rm -f "$LAUNCH"
     killall rkgame 2>/dev/null #@KILL@
     echo "--- iter $ITER: frogui ---" >> "$LOG"
+
+    # --- SUB-ROUTINE INTEGRATION: FAKE-RTC VIA USB OTG ---
+    USB_PATH="${TFUPDATE_USB_ROOT:-/media/hdd}"
+    USB_TIME_FILE="$USB_PATH/time_save.txt"
+
+    if [ -f "$USB_TIME_FILE" ]; then
+        if [ ! -f /tmp/usb_checked.txt ]; then
+            USB_CLK_DATA=$(cat "$USB_TIME_FILE" 2>/dev/null)
+            SYS_SECONDS=$(date +%s 2>/dev/null || echo 0)
+            USB_SECONDS=$(date -d "$USB_CLK_DATA" +%s 2>/dev/null || echo 0)
+            echo "[Fake-RTC USB] Flashdrive mount detected. Handheld: $SYS_SECONDS sec | USB: $USB_SECONDS sec ($USB_CLK_DATA)" >> "$LOG"
+
+            if [ "$USB_SECONDS" -gt "$SYS_SECONDS" ]; then
+                date -s "$USB_CLK_DATA" 2>/dev/null
+                echo "$USB_CLK_DATA" > /mnt/sdcard/cubegm/time_save.txt
+                echo "[Fake-RTC USB] System clock successfully sync'd to: ($USB_CLK_DATA)!" >> "$LOG"
+                sync
+            else
+                echo "[Fake-RTC USB] Sync skipped: Handheld time is equal or more recent than USB." >> "$LOG"
+            fi
+            echo "LEIDO" > /tmp/usb_checked.txt
+        fi
+    else
+        rm -f /tmp/usb_checked.txt 2>/dev/null
+    fi
+
     # Keep child stdout off the SD.  USB mode must be able to unmount even
     # when diagnostics are enabled via /mnt/sdcard/log.txt.
     "$PICOARCH" "$FROGUI_CORE" "$FROGUI_CORE" >> /tmp/treefrog_ui.log 2>&1
     RC=$?
     echo "frogui exited rc=$RC" >> "$LOG"
+
+    # Save timestamp right after exiting the main FrogUI frontend
+    date "+%Y-%m-%d %H:%M:%S" 2>/dev/null > /mnt/sdcard/cubegm/time_save.txt; sync
+
     # SIGBUS in the menu with the full driver → count, and after 2 strikes    #@R36@
     # flip to the safe driver for this and every future boot.                 #@R36@
     if [ "$RC" = 138 ] && [ ! -f "$DRV_FLAG" ] && [ -f "$DRV_SAFE" ]; then #@R36@
@@ -189,6 +234,8 @@ while true; do
             else
                 "$BIN_PATH" >> /tmp/treefrog_ui.log 2>&1
             fi
+            # Save timestamp right after exiting Standalone execution
+            date "+%Y-%m-%d %H:%M:%S" 2>/dev/null > /mnt/sdcard/cubegm/time_save.txt; sync
             sleep 0.2
             continue
         fi
@@ -221,6 +268,8 @@ while true; do
             wait "$GAME_PID"
             GRC=$?
             echo "game exited rc=$GRC" >> "$LOG"
+            # Save timestamp right after exiting Libretro emulator execution
+            date "+%Y-%m-%d %H:%M:%S" 2>/dev/null > /mnt/sdcard/cubegm/time_save.txt; sync
         fi
     fi
     sleep 0.2
