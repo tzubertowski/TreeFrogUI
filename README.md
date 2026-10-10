@@ -135,7 +135,8 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **j2me** | J2ME / MIDP 2.0 games (`.jar` / `.jad`) - 📖 [setup guide](docs/cores/j2me.md) | `j2me_libretro.so` |
 | **classicube** | ClassiCube Minecraft Classic worlds (`.cw`) - 📖 [setup guide](docs/cores/classicube.md), based on [Sajnaps / FroggyCraft](https://github.com/Synaps33/FroggyCraft) | `classicube_libretro.so` |
 | **mcpe** | Minecraft Pocket Edition 0.6.1, based on [Synaps33 / FroggyPE](https://github.com/Synaps33/FroggyPE) | `mcpe_libretro.so` |
-| **openclaw** | Captain Claw - 📖 [setup guide](docs/cores/claw.md), based on [tzubertowski / FroggyClaw](https://github.com/tzubertowski/FroggyClaw) | `openclaw_libretro.so` |
+| **openclaw** | Captain Claw - 📖 [setup guide](docs/cores/openclaw.md), based on [Synaps33 / FroggyClaw](https://github.com/Synaps33/FroggyClaw) | `openclaw_libretro.so` |
+| **diablo** | Diablo 1 / DevilutionX (standalone) - 📖 [setup guide](docs/cores/diablo.md), based on [DevilutionX](https://github.com/diasurgical/DevilutionX) and [FroggyDiablo](https://github.com/tzubertowski/FroggyDiablo) | `devilutionx` |
 | **Quake** | Quake | `tyrquake_libretro.so` |
 | **quake2** | Quake II (heavy) - 📖 [setup guide](docs/cores/quake2.md) | `vitaquake2_libretro.so` |
 | **prboom** | Doom / Doom II / Final Doom / Heretic / Hexen | `prboom_libretro.so` |
@@ -497,7 +498,8 @@ Donations go straight toward buying the next device to port to.
 - **angree** - Amiga (UAE4ALL) and Atari ST (castaway) ports for SF-series handhelds
 - **goph-R** - [SF3000-RE](https://github.com/goph-R/SF3000-RE) reverse engineering project and boot logo specs
 - **SjslTech** - [YouTube](https://www.youtube.com/@SjslTech) - R36SX testing & contributions
-- **[Synaps33](https://github.com/Synaps33)** - original [FroggyPE](https://github.com/Synaps33/FroggyPE), [FroggyCraft](https://github.com/Synaps33/FroggyCraft), and [FroggyKVM](https://github.com/Synaps33/FroggyKVM) cores
+- **[Synaps33](https://github.com/Synaps33)** - original [FroggyPE](https://github.com/Synaps33/FroggyPE), [FroggyCraft](https://github.com/Synaps33/FroggyCraft), [FroggyKVM](https://github.com/Synaps33/FroggyKVM), and [FroggyClaw](https://github.com/Synaps33/FroggyClaw) cores
+- **[diasurgical](https://github.com/diasurgical)** and the [DevilutionX contributors](https://github.com/diasurgical/DevilutionX/graphs/contributors) - original Diablo 1 engine and open-source port
 - All libretro core authors
 
 ---
