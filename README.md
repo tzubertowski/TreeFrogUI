@@ -192,6 +192,7 @@ A few systems need more than "drop the ROM in the folder" - either extra compani
 | Wolfenstein 3D (`wolf3d`) | Needs the game data **and** the engine's own resource pack | 📖 [docs/cores/wolf3d.md](docs/cores/wolf3d.md) |
 | Doom / Heretic / Hexen (`prboom`) | Supply a legally obtained IWAD (`doom1.wad`, `heretic1.wad`, `hexen.wad`, etc.) | Put the IWAD in `roms/prboom/` |
 | Quake II (`quake2`) | Game data goes in a required `baseq2/` subfolder | 📖 [docs/cores/quake2.md](docs/cores/quake2.md) |
+| Diablo 1 (`diablo`) | Requires the legally owned `DIABDAT.MPQ` game data file | 📖 [docs/cores/diablo.md](docs/cores/diablo.md) |
 | PlayStation 1 (`PS`/`ps1`/`psx`/`ps1r`) | Two cores, BIOS strongly recommended | 📖 [docs/cores/ps1.md](docs/cores/ps1.md) |
 
 ---
