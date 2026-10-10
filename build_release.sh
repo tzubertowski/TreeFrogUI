@@ -58,6 +58,17 @@ CLAW_FONT="$FROGGYCLAW_ROOT/Build_Release/clacon.ttf"
 CLAW_BANNER_NEXTUI="$(pwd)/assets/claw/openclaw-artbook-nextui.png"
 CLAW_BANNER_NEXT="$(pwd)/assets/claw/openclaw-artbook-next.png"
 CLAW_BANNER_NAO="$(pwd)/assets/claw/openclaw-nao-black.png"
+DIABLO_BIN="${DIABLO_BIN:-/home/tomaszz/sf3000-work/FroggyDiablo-sf3000-build/devilutionx}"
+DIABLO_LAUNCHER="$(pwd)/assets/diablo/launch_diablo.sh"
+DIABLO_MARKER="$(pwd)/assets/diablo/Start Diablo 1.diablo"
+DIABLO_ENGINE_ASSET="$(pwd)/assets/diablo/devilutionx.mpq"
+DIABLO_BANNER_NEXTUI="$(pwd)/assets/diablo/diablo-artbook-nextui.png"
+DIABLO_BANNER_NEXT="$(pwd)/assets/diablo/diablo-artbook-next.png"
+DIABLO_BANNER_NAO="$(pwd)/assets/diablo/diablo-nao-black.png"
+NDS_BANNER_NEXTUI="$(pwd)/assets/nds/nds-artbook-nextui.jpg"
+NDS_BANNER_NEXT="$(pwd)/assets/nds/nds-artbook-next.jpg"
+NDS_BANNER_NAO="$(pwd)/assets/nds/nds-nao-black.jpg"
+DIABLO_SDL_IMAGE="${DIABLO_SDL_IMAGE:-/home/tomaszz/sf3000-work/sf3000toolchain/mipsel-buildroot-linux-gnu_sdk-buildroot/mipsel-buildroot-linux-gnu/sysroot/usr/lib/libSDL_image-1.2.so.0}"
 EBOOK=/home/tomaszz/sf3000-work/ebook/ebook
 DSPERATE=${DSPERATE:-/home/tomaszz/sf3000-work/dsperate/build/sf3000-package}
 TYRQUAKE=/home/tomaszz/sf3000-work/tyrquake-og/tyrquake_libretro.so
@@ -164,6 +175,17 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -f "$CLAW_BANNER_NEXTUI" ] || { echo "missing Captain Claw NextUI artwork: $CLAW_BANNER_NEXTUI" >&2; exit 1; }
 [ -f "$CLAW_BANNER_NEXT" ] || { echo "missing Captain Claw Next artwork: $CLAW_BANNER_NEXT" >&2; exit 1; }
 [ -f "$CLAW_BANNER_NAO" ] || { echo "missing Captain Claw Nao artwork: $CLAW_BANNER_NAO" >&2; exit 1; }
+[ -x "$DIABLO_BIN" ] || { echo "missing executable Diablo SF3000 build: $DIABLO_BIN" >&2; exit 1; }
+[ -f "$DIABLO_LAUNCHER" ] || { echo "missing Diablo launcher: $DIABLO_LAUNCHER" >&2; exit 1; }
+[ -f "$DIABLO_MARKER" ] || { echo "missing Diablo launcher marker: $DIABLO_MARKER" >&2; exit 1; }
+[ -f "$DIABLO_ENGINE_ASSET" ] || { echo "missing Diablo engine asset: $DIABLO_ENGINE_ASSET" >&2; exit 1; }
+[ -f "$DIABLO_BANNER_NEXTUI" ] || { echo "missing Diablo NextUI artwork: $DIABLO_BANNER_NEXTUI" >&2; exit 1; }
+[ -f "$DIABLO_BANNER_NEXT" ] || { echo "missing Diablo Next artwork: $DIABLO_BANNER_NEXT" >&2; exit 1; }
+[ -f "$DIABLO_BANNER_NAO" ] || { echo "missing Diablo Nao artwork: $DIABLO_BANNER_NAO" >&2; exit 1; }
+[ -f "$NDS_BANNER_NEXTUI" ] || { echo "missing NDS NextUI artwork: $NDS_BANNER_NEXTUI" >&2; exit 1; }
+[ -f "$NDS_BANNER_NEXT" ] || { echo "missing NDS Next artwork: $NDS_BANNER_NEXT" >&2; exit 1; }
+[ -f "$NDS_BANNER_NAO" ] || { echo "missing NDS Nao artwork: $NDS_BANNER_NAO" >&2; exit 1; }
+[ -f "$DIABLO_SDL_IMAGE" ] || { echo "missing Diablo SDL_image runtime: $DIABLO_SDL_IMAGE" >&2; exit 1; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
@@ -172,6 +194,10 @@ cp_if_diff "$(pwd)/build/j2me_libretro.so" "$STAGE/cubegm/cores/j2me_libretro.so
 cp_if_diff "$CLASSICUBE_CORE" "$STAGE/cubegm/cores/classicube_libretro.so"
 cp_if_diff "$MCPE_CORE" "$STAGE/cubegm/cores/mcpe_libretro.so"
 cp_if_diff "$CLAW_CORE" "$STAGE/cubegm/cores/openclaw_libretro.so"
+cp_if_diff "$DIABLO_BIN" "$STAGE/cubegm/devilutionx"
+cp_if_diff "$DIABLO_LAUNCHER" "$STAGE/cubegm/devilutionx.sh"
+cp_if_diff "$DIABLO_SDL_IMAGE" "$STAGE/cubegm/lib/libSDL_image-1.2.so.0"
+chmod +x "$STAGE/cubegm/devilutionx" "$STAGE/cubegm/devilutionx.sh"
 rm -f "$STAGE/cubegm/cores/fheroes2_libretro.so"
 mkdir -p "$STAGE/cubegm/bios"
 cp_if_diff "$J2ME_CLASSES" "$STAGE/cubegm/bios/classes.zip"
@@ -196,6 +222,17 @@ rm -f "$STAGE/frogui/claw.png" \
       "$STAGE/frogui/theme-packs/Art_Book_Next/claw.png" \
       "$STAGE/frogui/theme-packs/Nao_Black/claw.png"
 mkdir -p "$STAGE/roms/openclaw"
+mkdir -p "$STAGE/roms/diablo"
+cp_if_diff "$DIABLO_MARKER" "$STAGE/roms/diablo/Start Diablo 1.diablo"
+cp_if_diff "$DIABLO_ENGINE_ASSET" "$STAGE/roms/diablo/devilutionx.mpq"
+cp_if_diff "$DIABLO_BANNER_NEXTUI" "$STAGE/frogui/diablo.png"
+cp_if_diff "$DIABLO_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/diablo.png"
+cp_if_diff "$DIABLO_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/diablo.png"
+cp_if_diff "$DIABLO_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/diablo.png"
+cp_if_diff "$NDS_BANNER_NEXTUI" "$STAGE/frogui/nds.jpg"
+cp_if_diff "$NDS_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/nds.jpg"
+cp_if_diff "$NDS_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/nds.jpg"
+cp_if_diff "$NDS_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/nds.jpg"
 cp_if_diff "$CLAW_ASSETS" "$STAGE/roms/openclaw/ASSETS.ZIP"
 cp_if_diff "$CLAW_FONT" "$STAGE/roms/openclaw/clacon.ttf"
 cp_if_diff "$CLAW_BANNER_NEXTUI" "$STAGE/frogui/openclaw.png"
@@ -248,6 +285,7 @@ chmod +x "$OUT/cubegm/tfupdate.sh"
 # REAL libSDL-1.2.so.0 (the soname the binaries link), cp -L dereferences the
 # staging symlink. The .0.11.4 target name is not needed by anything.
 cp -L "$STAGE/cubegm/lib/libSDL-1.2.so.0" "$OUT/cubegm/lib/libSDL-1.2.so.0"
+cp    "$STAGE/cubegm/lib/libSDL_image-1.2.so.0" "$OUT/cubegm/lib/libSDL_image-1.2.so.0"
 cp    "$STAGE/cubegm/lib/libpng12.so.0"   "$OUT/cubegm/lib/libpng12.so.0"
 # ppsspp_libretro.so links libpng16 (not the png12 the rest of the world uses);
 # its assets ride along automatically via the cubegm/bios/PPSSPP staging copy.
@@ -272,6 +310,7 @@ mkdir -p "$OUT/roms/nds"
 mkdir -p "$OUT/roms/qpsx"
 mkdir -p "$OUT/roms/j2me"
 mkdir -p "$OUT/roms/mcpe"
+mkdir -p "$OUT/roms/diablo"
 
 # Canvas ships hundreds of ES-DE targets and a second high-resolution mirror.
 # FrogUI requests only exact ROM-folder names plus its four built-in screens.
@@ -294,7 +333,7 @@ fi
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
 # (boot logos are NOT shipped here - install_first/<dev>/ provides the device-correct
 #  xgame-logo.bmp, so no fix_bootlogo script is needed.)
-for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer ppsspp dsperate; do
+for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer ppsspp dsperate devilutionx devilutionx.sh; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 install -m 0755 apps/usb_mode/usb_mode.sh "$OUT/cubegm/usb_mode.sh"

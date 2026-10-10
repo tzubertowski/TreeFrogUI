@@ -26,11 +26,14 @@ Current standalone apps:
 | `images`         | `cubegm/image_viewer` | Native hardware-decoded JPG/PNG/BMP/GIF/WebP/TIFF image viewer |
 | `psp`            | `cubegm/ppsspp`       | Optional standalone PPSSPP SF3000 port (falls back to libretro) |
 | `nds`            | `cubegm/dsperate/run_sf3000.sh` | Nintendo DS via DSperate (experimental) |
+| `diablo`         | `cubegm/devilutionx.sh` | DevilutionX wrapper; sets runtime paths before launching `cubegm/devilutionx` |
 
 ## The launch contract
 
-Everything hinges on one file: `/tmp/frogui_launch.txt`, written by FrogUI when
-the user picks a game, then read by picoarch after FrogUI shuts down.
+Everything hinges on one file: `/mnt/sdcard/cubegm/frogui_launch.txt`, written
+by FrogUI when the user picks a game, then read by picoarch after FrogUI shuts
+down. Do not move this back to `/tmp`: FrogUI and the outer launcher do not
+necessarily share the same temporary filesystem on R36HD firmware.
 
 **libretro core launch** - 2 lines:
 
@@ -158,6 +161,67 @@ picoarch hands the binary one argv: the ROM/project path. The binary owns:
 - **Audio** - ALSA (`libasound`) directly, or SDL_audio.
 - **Return cleanly** - exit when the user quits so the icube loop returns to
   FrogUI.
+
+## SF3000 porting checklist: input, audio and display
+
+Use the working `pcsx4all`, PicoArch and DevilutionX ports as references. Do
+not assume desktop SDL behaviour maps directly onto the firmware hardware.
+
+### Input
+
+- Keep SF2000 and SF3000 input implementations/configuration separate. Their
+  button sources and bit mappings are not interchangeable.
+- On SF3000-class devices, read the same shared key state used by the working
+  ports (`/tmp/joy_key`) and map every physical button explicitly. Do not rely
+  on an SDL joystick appearing.
+- Edge-detect presses and releases; do not emit a held key as a new press on
+  every poll.
+- Implement the standard standalone exit chord, Start + Select, as an
+  `SDL_QUIT`/clean application exit. Test D-pad, face buttons, shoulders,
+  Start, Select and the exit chord on hardware before calling input complete.
+- Never replace the known-working event loop wholesale just to add controls.
+  Add the smallest input adapter at the platform boundary.
+
+### Audio
+
+- Load the device-selected driver path from `/tmp/tfdevice.env` (`TF_DRIVER`),
+  not a hard-coded generic `driver.so`.
+- Follow the proven driver lifecycle: `dlopen(..., RTLD_LAZY)`, resolve
+  `sound_driver_init`, `sound_driver_playframe` and `sound_driver_deinit`, then
+  initialize at 48 kHz stereo. Keep initialization, playback and deinit on the
+  same audio thread because firmware driver state can be thread-local.
+- If the engine produces 44.1 kHz audio, use a stateful resampler with phase
+  carried between buffers. The PCSX4ALL SF3000 output module is the reference.
+- Do **not** call `video_drivers_init()` to make audio work. It owns display
+  state; doing so from an already-running SDL app produced four duplicated
+  mini-screens and did nothing for audio.
+- PicoArch releases its DAC and opens the speaker line before executing a
+  standalone. SDL video/audio startup may mute that physical amp again. On the
+  validated R36SX/R36HD board, reopen it only after SDL initialization by
+  reading `/proc/device-tree/panel/speaker-output`, validating pin `0..31`,
+  configuring GPIO_L as output and driving it LOW. Fail closed on every other
+  board or missing/invalid device-tree data.
+- An SDL audio replacement must preserve SDL locking semantics. SDL's audio
+  lock is recursive: SDL_audiolib may finish a sample inside its callback,
+  destroy the stream, and call `SDL_LockAudio()` again. A normal pthread mutex
+  deadlocks the game; use a recursive mutex.
+- Validate the whole path with a short diagnostic tone only while debugging,
+  then remove it. A successful `sound_driver_playframe()` return proves only
+  that the API accepted samples, not that the physical amplifier is live.
+
+### Display and test discipline
+
+- Keep audio and video driver initialization independent. Never initialize or
+  tear down a second display backend underneath a working SDL framebuffer.
+- Test in this order: boot, controls, enter gameplay, audio, run beyond sample
+  completion, Start + Select exit, and return to FrogUI. Menu-only testing
+  misses audio callback deadlocks and gameplay allocations.
+- Capture runtime logs and process memory/context-switch counters on the SD.
+  A process whose RSS stays stable while all context-switch counters stop is
+  probably deadlocked, not out of memory.
+- After every deployment: `sync`, unmount, remount, and compare SHA-256 hashes
+  of the local and SD binaries. A successful copy command alone is not proof
+  that the console will boot the new file.
 
 ## Video player
 
