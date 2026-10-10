@@ -49,6 +49,7 @@ MINECRAFT_BANNER_NAO="$(pwd)/assets/minecraft/minecraft-nao-black.jpg"
 FROGGYCRAFT_ROOT="${FROGGYCRAFT_ROOT:-/home/tomaszz/sf3000-work/FroggyCraft}"
 CLASSICUBE_CORE="$FROGGYCRAFT_ROOT/source/classicube_sf2000/classicube_libretro.so"
 CLASSICUBE_TEXPACK="$FROGGYCRAFT_ROOT/source/classicube_sf2000/texpacks/default.zip"
+CLASSICUBE_AUDIO_ZIP="${CLASSICUBE_AUDIO_ZIP:-$FROGGYCRAFT_ROOT/audio.zip}"
 FROGGYPE_ROOT="${FROGGYPE_ROOT:-/home/tomaszz/sf3000-work/FroggyPE}"
 MCPE_CORE="$FROGGYPE_ROOT/mcpe_libretro.so"
 FROGGYCLAW_ROOT="${FROGGYCLAW_ROOT:-/home/tomaszz/sf3000-work/FroggyClaw}"
@@ -168,6 +169,7 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -f "$MINECRAFT_BANNER_NAO" ] || { echo "missing Minecraft Nao artwork: $MINECRAFT_BANNER_NAO" >&2; exit 1; }
 [ -f "$CLASSICUBE_CORE" ] || { echo "missing ClassiCube core: $CLASSICUBE_CORE" >&2; exit 1; }
 [ -f "$CLASSICUBE_TEXPACK" ] || { echo "missing ClassiCube texture pack: $CLASSICUBE_TEXPACK" >&2; exit 1; }
+[ -f "$CLASSICUBE_AUDIO_ZIP" ] || { echo "missing ClassiCube audio pack: $CLASSICUBE_AUDIO_ZIP" >&2; exit 1; }
 [ -f "$MCPE_CORE" ] || { echo "missing Minecraft PE core: $MCPE_CORE" >&2; exit 1; }
 [ -f "$CLAW_CORE" ] || { echo "missing Captain Claw core: $CLAW_CORE" >&2; exit 1; }
 [ -f "$CLAW_ASSETS" ] || { echo "missing Captain Claw assets: $CLAW_ASSETS" >&2; exit 1; }
@@ -214,6 +216,7 @@ for name in classicube mcpe; do
 done
 mkdir -p "$STAGE/roms/j2me"
 mkdir -p "$STAGE/roms/classicube/texpacks"
+mkdir -p "$STAGE/roms/classicube/audio"
 rm -rf "$STAGE/roms/fheroes2"
 mkdir -p "$STAGE/roms/mcpe/data"
 rm -rf "$STAGE/roms/claw"
@@ -243,6 +246,7 @@ cp_if_diff "$(pwd)/assets/claw/Start Captain Claw.claw" "$STAGE/roms/openclaw/St
 rsync -rlt --delete "$FROGGYPE_ROOT/data/" "$STAGE/roms/mcpe/data/"
 cp_if_diff "$(pwd)/assets/mcpe/Start Minecraft PE.mcpe" "$STAGE/roms/mcpe/Start Minecraft PE.mcpe"
 cp_if_diff "$CLASSICUBE_TEXPACK" "$STAGE/roms/classicube/texpacks/default.zip"
+cp_if_diff "$CLASSICUBE_AUDIO_ZIP" "$STAGE/roms/classicube/audio/default.zip"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"
