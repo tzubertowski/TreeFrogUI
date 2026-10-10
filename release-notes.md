@@ -6,13 +6,15 @@ Changes since v1.6.0_m:
 - Improved SF3000 PicoArch audio delivery with a larger buffer, longer prefill, and best-effort real-time audio-thread scheduling to reduce underruns under CPU load.
 - Disabled automatic frameskip by default in PCSX-ReARMed, PicoDrive, Beetle PCE Fast, SNES9x 2002, and SNES9x 2005; it remains available as a manual option.
 - Fixed Activity Tracker long ROM titles so they marquee within their available row width without covering the play-time bar.
-- Added Captain Claw through the [FroggyClaw](https://github.com/tzubertowski/FroggyClaw) libretro core; place a legally obtained `CLAW.REZ` in `roms/openclaw/`.
+- Added Captain Claw through the [FroggyClaw](https://github.com/Synaps33/FroggyClaw) libretro core; place a legally obtained `CLAW.REZ` in `roms/openclaw/`.
+- Added standalone Diablo 1 through [FroggyDiablo](https://github.com/tzubertowski/FroggyDiablo), based on the original [DevilutionX](https://github.com/diasurgical/devilutionX), including its open-source engine asset; place legally obtained `DIABDAT.MPQ` data in `roms/diablo/`.
 - Fixed OpenClaw SF3000 loading by isolating its SDL compatibility layer from PicoArch's host SDL and removing firmware-only runtime symbol dependencies.
 
 Changes since v1.5.0:
 
 - Added **Minecraft Pocket Edition 0.6.1** through the [FroggyPE](https://github.com/Synaps33/FroggyPE) libretro core, with a one-click `roms/mcpe/` launcher, packaged assets, localized system naming, and theme-matched Minecraft artwork.
 - Added **ClassiCube / Minecraft** support based on [Synaps33 / FroggyCraft](https://github.com/Synaps33/FroggyCraft), with a `roms/classicube/` launch entry, friendly localized system naming, themed backgrounds, and the packaged `texpacks/default.zip`.
+- Enabled ClassiCube sound effects on SF3000 through the libretro audio callback, with the official ClassiCube audio pack packaged at `roms/classicube/audio/default.zip`.
 - Added **Java Games** support through the FroggyKVM J2ME / MIDP 2.0 emulator. Put `.jar` or `.jad` files in `roms/j2me/`; the release includes the core, runtime classes, artwork, and ROM folder.
 - Added FluidLite MIDI synthesis for Java Games, with the SoundFont accepted from either `bios/` or `cubegm/bios/`.
 - Fixed Java Games crashes caused by unsupported SF3000 CPU instructions, reduced launcher and Java heap memory pressure, and added centered aspect-preserving scaling for portrait and low-resolution games.
@@ -35,6 +37,6 @@ Changes since v1.5.0:
 - Release builds now compile FrogShell and the ebook reader from source.
 - Fixed release CI dependency ordering and packaging for new cores, runtime assets, fonts, artwork, and licenses.
 
-Thanks to [Synaps33](https://github.com/Synaps33) for FroggyPE, FroggyCraft, and FroggyKVM; [MartStartIV](https://github.com/MartStartIV) for the German and Turkish translations in [PR #43](https://github.com/tzubertowski/FrogUI/pull/43) and [PR #44](https://github.com/tzubertowski/FrogUI/pull/44), and for the updater recovery ideas in [PR #75](https://github.com/tzubertowski/TreeFrogUI/pull/75); [ozkaoz](https://github.com/ozkaoz) for audio fixes and FrogShell Developer Mode; [Maheshivara](https://github.com/Maheshivara) for ebook-reader improvements and translation updates; [spanscape](https://github.com/spanscape) for Japanese translation updates; and [Trademarked69](https://github.com/Trademarked69) for Picoarch build and logging fixes.
+Thanks to [Synaps33](https://github.com/Synaps33) for FroggyPE, FroggyCraft, FroggyKVM, and the original [FroggyClaw](https://github.com/Synaps33/FroggyClaw) port; [diasurgical](https://github.com/diasurgical) and the DevilutionX contributors for the original Diablo engine; [MartStartIV](https://github.com/MartStartIV) for the German and Turkish translations in [PR #43](https://github.com/tzubertowski/FrogUI/pull/43) and [PR #44](https://github.com/tzubertowski/FrogUI/pull/44), and for the updater recovery ideas in [PR #75](https://github.com/tzubertowski/TreeFrogUI/pull/75); [ozkaoz](https://github.com/ozkaoz) for audio fixes and FrogShell Developer Mode; [Maheshivara](https://github.com/Maheshivara) for ebook-reader improvements and translation updates; [spanscape](https://github.com/spanscape) for Japanese translation updates; and [Trademarked69](https://github.com/Trademarked69) for Picoarch build and logging fixes.
 
 This is a prerelease for testing. Copy `update.zip` to the SD-card root and reboot, or use the full ZIP with the matching `install_first/<device>/` files for a fresh installation. Keep a backup of your card.

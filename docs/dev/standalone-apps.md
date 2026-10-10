@@ -26,7 +26,7 @@ Current standalone apps:
 | `images`         | `cubegm/image_viewer` | Native hardware-decoded JPG/PNG/BMP/GIF/WebP/TIFF image viewer |
 | `psp`            | `cubegm/ppsspp`       | Optional standalone PPSSPP SF3000 port (falls back to libretro) |
 | `nds`            | `cubegm/dsperate/run_sf3000.sh` | Nintendo DS via DSperate (experimental) |
-| `diablo`         | `cubegm/devilutionx.sh` | DevilutionX wrapper; sets runtime paths before launching `cubegm/devilutionx` |
+| `diablo`         | `cubegm/devilutionx.sh` | DevilutionX wrapper; sets runtime paths before launching `cubegm/devilutionx` - [setup guide](../cores/diablo.md) |
 
 ## The launch contract
 
