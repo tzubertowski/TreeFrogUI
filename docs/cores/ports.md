@@ -1,9 +1,11 @@
 # Ports
 
-Standalone and game-specific ports live under `roms/ports/` and appear under one
-**Ports** entry in the Games view. Put each port's game files in its named data
-folder; leave the supplied launcher at the root. The UI shows only the launcher
-name (not `.sh`) and hides data folders:
+Ports are distributed separately by the TreeFrogUI Ports Collection and installed
+with TreeFrogUI Installer. Select either standalone ports or ports requiring
+game data during installation or update. They appear under one **Ports** entry
+in the Games view. Put each port's required files in its named folder; leave the
+supplied launcher at the root. The UI shows only the launcher name (not `.sh`)
+and hides data folders:
 
 ```text
 roms/ports/
