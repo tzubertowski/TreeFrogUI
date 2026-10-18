@@ -444,6 +444,13 @@ for dev in "${!STOCK[@]}"; do
     [ -x "$OUT/install_first/$dev/cubegm/zhijack.sh" ] || fail "missing zhijack for $dev"
     [ -f "$OUT/install_first/$dev/cubegm/cores/$OVERRIDE_CORE" ] || fail "missing hijack core for $dev"
 done
+# Remove port artwork after all themes and icon packs have been copied.
+for art in diablo openclaw mcpe duke3d undertale classicube openlara vvvvvv; do
+    rm -f "$OUT/frogui/$art.png" "$OUT/frogui/$art.jpg" "$OUT/frogui/$art-"*.png "$OUT/frogui/$art-"*.jpg \
+          "$OUT/frogui/system-icons/$art.png"
+    [ ! -d "$OUT/frogui/theme-packs" ] || find "$OUT/frogui/theme-packs" -type f \( -name "$art.png" -o -name "$art.jpg" -o -name "$art-*.png" -o -name "$art-*.jpg" \) -delete
+    [ ! -d "$OUT/frogui/icon-packs" ] || find "$OUT/frogui/icon-packs" -type f -name "$art.png" -delete
+done
 [ -f "$OUT/$DUMMY_REL" ] || fail "missing autorun dummy rom $DUMMY_REL"
 [ -x "$OUT/cubegm/tfupdate.sh" ] || fail "missing offline updater"
 for port_core in classicube mcpe openclaw duke3d butterscotch openlara vvvvvv; do
