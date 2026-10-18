@@ -22,11 +22,10 @@ floppy-disk box art in the active theme's standard artwork panel.
 
 ## Setup
 
-1. Install the TreeFrogUI release, which supplies the launchers and port
-   binaries. Do not replace these with older launcher files.
-2. Copy any required game data into the exact folder and filenames listed in
-   that port's guide below. These commercial files are not included unless the
-   guide explicitly says otherwise.
+1. Install a port category from TreeFrogUI Installer or download an archive from
+   the [Ports Collection releases](https://github.com/tzubertowski/TreeFrogUI_PortsCollection/releases).
+2. Copy any required game data into the exact folder and filenames shown by the
+   missing-files screen. Commercial game files are not included.
 3. Open **Games → Ports** and select the port's friendly name. If required files
    are missing, the device displays the missing filenames and a QR code to the
    matching setup guide.
@@ -41,13 +40,5 @@ user game data (not old launchers or binaries), and keeps release-provided files
 authoritative on name conflicts. The old folder is removed only after its data
 has merged successfully. If migration is interrupted, reboot to let it resume.
 
-Current guides:
-
-- [Diablo 1](diablo.md)
-- [Duke Nukem 3D](duke3d.md)
-- [Minecraft Pocket Edition](mcpe.md)
-- [OpenLara (Tomb Raider I)](openlara.md)
-- [Captain Claw](openclaw.md)
-- [Undertale](undertale.md)
-- [ClassiCube](classicube.md)
-- [VVVVVV](vvvvvv.md)
+Each launcher's missing-files prompt links to its setup guide in the Ports
+Collection.
