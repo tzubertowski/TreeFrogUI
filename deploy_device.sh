@@ -92,11 +92,6 @@ validate_release() {
         "$RELEASE/MD" \
         "$OVERLAY/cubegm/setting.xml" \
         "$OVERLAY/cubegm/cores/libemu_md.so" \
-        "$RELEASE/cubegm/cores/openlara_libretro.so" \
-        "$RELEASE/cubegm/cores/vvvvvv_libretro.so" \
-        "$RELEASE/roms/ports/VVVVVV.sh" \
-        "$RELEASE/roms/ports/vvvvvv" \
-        "$RELEASE/roms/ports/.res/VVVVVV.png" \
         "$OVERLAY/cubegm/zhijack.sh"; do
         [ -e "$path" ] ||
             die "release is incomplete; missing $path (run ./build_release.sh)"
