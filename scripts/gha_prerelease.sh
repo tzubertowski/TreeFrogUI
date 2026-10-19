@@ -82,7 +82,7 @@ git diff --check
 gh release create "$bundle_tag" "$bundle" --repo "$repo" --prerelease \
     --title "Internal build bundle for TreeFrogUI $version" \
     --notes "Checksummed local build for the TreeFrogUI $version GitHub Actions prerelease."
-git add "$workflow" release-notes.md "$0"
+git add "$workflow" build_local_bundle.sh release-notes.md "$0"
 git commit -m "Prepare $version prerelease"
 git push origin "HEAD:refs/heads/$branch"
 git tag -a "$version" -m "TreeFrogUI $version prerelease"

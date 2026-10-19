@@ -145,7 +145,7 @@ jobs:
           test ! -e "$current/roms/ports"
           test ! -e "$current/cubegm/devilutionx"
           test -s "$current/cubegm/bios/Roland_SC-55.sf2"
-          echo '44634976a75b4734a5545e96c9bc10147181c100ff580946296df8c1b5334e93  '"$current/cubegm/dsperate/dsperate" | sha256sum -c -
+          echo '2d05de8b0998dbc24e9df1149d56f84bd1f454cf8822edbe28379ba5b4e6dddd  '"$current/cubegm/dsperate/dsperate" | sha256sum -c -
           required=(
             cubegm/picoarch cubegm/picoarch_hi
             cubegm/port_check.sh
