@@ -186,7 +186,7 @@ while true; do
                 process_running "$UI_PID" && kill -KILL "$UI_PID" 2>/dev/null
                 break
             fi
-            sleep 0.05
+            sleep 0.2
         done
         wait "$UI_PID"
         RC=$?
@@ -221,7 +221,6 @@ while true; do
             sleep 0.3
             log_event "--- iter $ITER: standalone [$BIN_PATH] ---"
             log_event "standalone stat: $(ls -l "$BIN_PATH" 2>/dev/null)"
-            : > /mnt/sdcard/cubegm/logs/last_standalone_status.log
             if [ -n "$ARG_PATH" ]; then
                 case "$BIN_PATH" in
                     *.sh) /bin/sh "$BIN_PATH" "$ARG_PATH" >> /tmp/treefrog_ui.log 2>&1 & STANDALONE_PID=$! ;;
@@ -233,19 +232,22 @@ while true; do
                     *)    "$BIN_PATH" >> /tmp/treefrog_ui.log 2>&1 & STANDALONE_PID=$! ;;
                 esac
             fi
-            (
-                while kill -0 "$STANDALONE_PID" 2>/dev/null; do
-                    echo "--- standalone monitor $(date +%s 2>/dev/null) pid=$STANDALONE_PID ---" >> /mnt/sdcard/cubegm/logs/last_standalone_status.log
-                    tr '\n' ' ' < "/proc/$STANDALONE_PID/status" >> /mnt/sdcard/cubegm/logs/last_standalone_status.log 2>/dev/null
-                    echo >> /mnt/sdcard/cubegm/logs/last_standalone_status.log
-                    sleep 2
-                done
-            ) &
-            STANDALONE_MONITOR_PID=$!
+            while process_running "$STANDALONE_PID"; do
+                if [ -s "$LAUNCH" ]; then
+                    log_event "standalone frontend requested next launch; stopping pid=$STANDALONE_PID"
+                    kill -TERM "$STANDALONE_PID" 2>/dev/null
+                    sleep 0.1
+                    process_running "$STANDALONE_PID" && kill -KILL "$STANDALONE_PID" 2>/dev/null
+                    break
+                fi
+                sleep 0.2
+            done
             wait "$STANDALONE_PID"
             STANDALONE_RC=$?
-            kill "$STANDALONE_MONITOR_PID" 2>/dev/null
-            wait "$STANDALONE_MONITOR_PID" 2>/dev/null
+            if [ -s "$LAUNCH" ]; then
+                LAUNCH_PENDING=1
+                log_event "standalone frontend returned a FrogUI launch request; handling it without another UI start"
+            fi
             log_event "standalone child exited pid=$STANDALONE_PID rc=$STANDALONE_RC"
             cp /tmp/treefrog_ui.log /mnt/sdcard/cubegm/logs/last_standalone.log 2>/dev/null
             sleep 0.2
@@ -273,48 +275,29 @@ while true; do
             # messages in the shared log.
             "$BIN" "$CORE_PATH" "$ROM_PATH" >> /tmp/treefrog_ui.log 2>&1 &
             GAME_PID=$!
-            # Keep diagnostics available while a core is still in startup.
-            # A hung/OOM-prone core otherwise leaves only the launcher PID
-            # snapshot and its useful libretro log is lost in /tmp.
-            mkdir -p /mnt/sdcard/cubegm/logs
-            : > /mnt/sdcard/cubegm/logs/last_game_status.log
-            : > /mnt/sdcard/cubegm/logs/last_game_live.log
-            (
-                MONITOR_TICKS=0
-                while kill -0 "$GAME_PID" 2>/dev/null; do
-                    if [ -s "$LAUNCH" ]; then
-                        log_event "game frontend requested next launch; stopping pid=$GAME_PID"
-                        kill -TERM "$GAME_PID" 2>/dev/null
-                        sleep 0.1
-                        process_running "$GAME_PID" && kill -KILL "$GAME_PID" 2>/dev/null
-                        break
-                    fi
-                    if [ "$((MONITOR_TICKS % 40))" -eq 0 ]; then
-                        echo "--- game monitor $(date +%s 2>/dev/null) pid=$GAME_PID ---" >> /mnt/sdcard/cubegm/logs/last_game_status.log
-                        tr '\n' ' ' < "/proc/$GAME_PID/status" >> /mnt/sdcard/cubegm/logs/last_game_status.log 2>/dev/null
-                        echo >> /mnt/sdcard/cubegm/logs/last_game_status.log
-                        cp /tmp/treefrog_ui.log /mnt/sdcard/cubegm/logs/last_game_live.log 2>/dev/null
-                    fi
-                    MONITOR_TICKS=$((MONITOR_TICKS+1))
-                    sleep 0.05
-                done
-            ) &
-            GAME_MONITOR_PID=$!
             GAME_EXE=$(readlink "/proc/$GAME_PID/exe" 2>/dev/null)
             log_event "game pid=$GAME_PID exe=$GAME_EXE"
             log_event "game cmdline: $(tr '\0' ' ' < /proc/$GAME_PID/cmdline 2>/dev/null)"
             log_event "game status: $(tr '\n' ' ' < /proc/$GAME_PID/status 2>/dev/null)"
+            while process_running "$GAME_PID"; do
+                if [ -s "$LAUNCH" ]; then
+                    log_event "game frontend requested next launch; stopping pid=$GAME_PID"
+                    kill -TERM "$GAME_PID" 2>/dev/null
+                    sleep 0.1
+                    process_running "$GAME_PID" && kill -KILL "$GAME_PID" 2>/dev/null
+                    break
+                fi
+                sleep 0.2
+            done
             wait "$GAME_PID"
             GRC=$?
-            kill "$GAME_MONITOR_PID" 2>/dev/null
-            wait "$GAME_MONITOR_PID" 2>/dev/null
             if [ -s "$LAUNCH" ]; then
                 LAUNCH_PENDING=1
                 log_event "game frontend returned a FrogUI launch request; handling it without another UI start"
             fi
             log_event "core child exited pid=$GAME_PID rc=$GRC core=$CORE_PATH rom=$ROM_PATH"
+            mkdir -p /mnt/sdcard/cubegm/logs
             cp /tmp/treefrog_ui.log /mnt/sdcard/cubegm/logs/last_game.log 2>/dev/null
-            sync
         fi
     fi
     sleep 0.2
