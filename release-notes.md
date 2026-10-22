@@ -1,4 +1,12 @@
-# TreeFrogUI v1.8.0_d prerelease
+# TreeFrogUI v1.8.0_j prerelease
+
+## Launcher fix: PicoArch ports return to FrogUI
+
+Exiting a PicoArch-based standalone port such as ClassiCube now returns control to FrogUI. The launcher watches for FrogUI's next launch request while the port process is alive, then hands off to the selected game. This fixes the ClassiCube → PicoArch Exit → GB game path.
+
+**Testers:** launch ClassiCube from Ports, open the PicoArch menu with Select + Start, choose Exit, then launch a GB game. Also try another standalone app followed by a normal game.
+
+The launcher checks every 200 ms and no longer writes repeated process snapshots to the SD card. v1.8.0_d audio improvements are included unchanged.
 
 ## AUDIO TEST: LESS CRACKLY AUDIO
 
