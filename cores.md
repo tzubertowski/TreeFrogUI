@@ -22,6 +22,7 @@ Emulator systems retain their normal `roms/<system>/` folders.
 | `nest` | NES (accurate) | `nestopia_libretro.so` | [libretro/nestopia](https://github.com/libretro/nestopia) |
 | `snes`, `SFC` | SNES | `snes9x2005_plus_libretro.so` | [tzubertowski/snes9x2005](https://github.com/tzubertowski/snes9x2005) |
 | `snes02` | SNES (2002) | `snes9x2002_libretro.so` | [tzubertowski/snes9x2002](https://github.com/tzubertowski/snes9x2002) |
+| `snesz` | SNES (newer, compatibility-oriented alternative; slower than Snes9x 2005 on R36SX) | `snes9x-Z_libretro.so` | [andrezaiats/snes9x-Z](https://github.com/andrezaiats/snes9x-Z) |
 | `gb` | Game Boy | `gambatte_libretro.so` | [tzubertowski/libretro-gambatte](https://github.com/tzubertowski/libretro-gambatte) |
 | `gbgb` | Game Boy | `gearboy_libretro.so` | [drhelius/Gearboy](https://github.com/drhelius/Gearboy) |
 | `gbb`, `dblcherrygb` | GB (link cable) | `tgbdual_libretro.so` | [libretro/tgbdual-libretro](https://github.com/libretro/tgbdual-libretro) |

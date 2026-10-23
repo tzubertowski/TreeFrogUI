@@ -1,0 +1,181 @@
+diff --git a/bml.cpp b/bml.cpp
+index 413afa8..6e159c9 100644
+--- a/bml.cpp
++++ b/bml.cpp
+@@ -3,6 +3,7 @@
+ #include <fstream>
+ #include <stack>
+ #include <cstdio>
++#include <cstring>
+ 
+ #include "port.h"
+ #include "bml.h"
+@@ -13,18 +14,9 @@ bml_node::bml_node()
+     depth = -1;
+ }
+ 
+-static inline bool starts_with(const std::string_view &s, const std::string_view &prefix)
++static inline bool starts_with(const std::string &s, const char *prefix)
+ {
+-    if (s.length() < prefix.length())
+-        return false;
+-
+-    for (size_t i = 0; i < prefix.length(); i++)
+-    {
+-        if (s[i] != prefix[i])
+-            return false;
+-    }
+-
+-    return true;
++    return s.compare(0, std::strlen(prefix), prefix) == 0;
+ }
+ 
+ static inline bool islf(const char c)
+@@ -54,71 +46,71 @@ static inline bool bml_valid(char c)
+     return (isalnum(c) || c == '-');
+ }
+ 
+-static std::string trim(std::string_view sv)
++static std::string trim(std::string sv)
+ {
+     while (!sv.empty() && isblank(sv.front()))
+-        sv.remove_prefix(1);
++        sv.erase(0, 1);
+     while (!sv.empty() && isblankorlf(sv.back()))
+-        sv.remove_suffix(1);
+-    return std::string(sv);
++        sv.pop_back();
++    return sv;
+ }
+ 
+-static std::string trim_comments(std::string_view sv)
++static std::string trim_comments(std::string sv)
+ {
+     auto comment_location = sv.find("//");
+     if (comment_location != std::string::npos)
+-        sv.remove_suffix(sv.length() - comment_location);
++        sv.resize(comment_location);
+     while (!sv.empty() && isblankorlf(sv.back()))
+-        sv.remove_suffix(1);
+-    return std::string(sv);
++        sv.pop_back();
++    return sv;
+ }
+ 
+-static inline int bml_read_depth(const std::string_view &str)
++static inline int bml_read_depth(const std::string &str)
+ {
+     auto depth = str.find_first_not_of("\t ");
+     return depth == std::string::npos ? -1 : static_cast<int>(depth);
+ }
+ 
+-static void bml_parse_depth(bml_node &node, std::string_view &line)
++static void bml_parse_depth(bml_node &node, std::string &line)
+ {
+     auto depth = bml_read_depth(line);
+-    line.remove_prefix(depth);
++    line.erase(0, depth);
+     node.depth = depth;
+ }
+ 
+-static void bml_parse_name(bml_node &node, std::string_view &line)
++static void bml_parse_name(bml_node &node, std::string &line)
+ {
+     int len;
+     for (len = 0; len < line.length() && bml_valid(line[len]); len++) {};
+ 
+     node.name = trim(line.substr(0, len));
+-    line.remove_prefix(len);
++    line.erase(0, len);
+ }
+ 
+-static void bml_parse_data(bml_node &node, std::string_view &line)
++static void bml_parse_data(bml_node &node, std::string &line)
+ {
+     if (!line.length()) {
+         return;
+     }
+     if (starts_with(line, "=\"")) {
+-        line.remove_prefix(2);
++        line.erase(0, 2);
+         auto quote_pos = line.find_first_of("\"\n\r");
+         if (quote_pos != std::string::npos && line[quote_pos] == '\"') {
+             node.data = line.substr(0, quote_pos);
+-            line.remove_prefix(quote_pos + 1);
++            line.erase(0, quote_pos + 1);
+         }
+     }
+     else if (line[0] == '=') {
+-        line.remove_prefix(1);
++        line.erase(0, 1);
+         auto end_pos = line.find_first_of("\n\r ");
+         node.data = trim(line.substr(0, end_pos));
+         if (end_pos != std::string::npos)
+-            line.remove_prefix(end_pos);
++            line.erase(0, end_pos);
+     }
+     else if (line[0] == ':') {
+-        line.remove_prefix(1);
++        line.erase(0, 1);
+         node.data = trim(line);
+-        line = {};
++        line.clear();
+     }
+ }
+ 
+@@ -139,7 +131,7 @@ static std::string bml_read_line(std::ifstream &fd)
+     return {};
+ }
+ 
+-static void bml_parse_attr(bml_node &node, std::string_view &line)
++static void bml_parse_attr(bml_node &node, std::string &line)
+ {
+     while (!line.empty())
+     {
+@@ -147,7 +139,7 @@ static void bml_parse_attr(bml_node &node, std::string_view &line)
+             return;
+ 
+         while (isblank(line[0]))
+-            line.remove_prefix(1);
++            line.erase(0, 1);
+ 
+         bml_node n;
+         int len = 0;
+@@ -156,7 +148,7 @@ static void bml_parse_attr(bml_node &node, std::string_view &line)
+         if (len == 0)
+             return;
+         n.name = trim(line.substr(0, len));
+-        line.remove_prefix(len);
++        line.erase(0, len);
+         bml_parse_data(n, line);
+         n.depth = node.depth + 1;
+         n.type = bml_node::ATTRIBUTE;
+@@ -231,7 +223,7 @@ void bml_node::parse(std::ifstream &fd)
+     {
+         bml_node new_node;
+         std::string line = bml_read_line(fd);
+-        std::string_view sv(line);
++        std::string sv(line);
+         if (line.empty())
+             return;
+ 
+diff --git a/libretro/libretro_core_options.h b/libretro/libretro_core_options.h
+index b83054a..b24c2e9 100644
+--- a/libretro/libretro_core_options.h
++++ b/libretro/libretro_core_options.h
+@@ -708,13 +708,13 @@ struct retro_core_option_definition option_defs_us[] = {
+    {
+       "snes9x_threaded_render",
+       "Threaded Renderer (restart required)",
+-      "Run the PPU pixel renderer on a dedicated thread. Enabled by default: every game in this fork's bench corpus measured a positive, statistically significant gain (95% CI excludes a regression worse than -2%), from +6.9% to +57.5% on x86-64. May cost more than it buys on a single-core system; requires a core restart to take effect.",
++      "Run the PPU pixel renderer on a dedicated thread. May cost more than it saves on single-core systems; requires a core restart to take effect.",
+       {
+          { "enabled",  NULL },
+          { "disabled", NULL },
+          { NULL, NULL},
+       },
+-      "enabled"
++      "disabled"
+    },
+    { NULL, NULL, NULL, {{0}}, NULL },
+ };

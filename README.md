@@ -90,6 +90,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **fds** | Famicom Disk System | `fceumm_libretro.so` |
 | **SFC**, **snes** | Super Famicom / SNES | `snes9x2005_plus_libretro.so` |
 | **snes02** | SNES (accurate / alt) | `snes9x2002_libretro.so` |
+| **snesz** | SNES (newer, compatibility-oriented alternative; slower than default on R36SX) | `snes9x-Z_libretro.so` |
 | **GBA**, **gba** | Game Boy Advance | `gpsp_libretro.so` |
 | **mgba**, **gbaf** | Game Boy Advance (accurate) | `mgba_libretro.so` |
 | **gbav** | Game Boy Advance (alt) | `vba_next_libretro.so` |

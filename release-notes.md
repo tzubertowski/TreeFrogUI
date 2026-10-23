@@ -3,6 +3,7 @@
 ## Changes since v1.8.0_k
 
 - **FrogUI:** System background images now warm into the existing render cache in a background worker after launch and when the active background settings change. Later system navigation can use pre-rendered images instead of waiting for image decode and resizing.
+- **SNES:** Added Snes9x-Z in `roms/snesz` as a newer, compatibility-oriented alternative. It runs slower than the default Snes9x 2005 core on R36SX.
 
 ## Other changes included since the v1.0.15 stable base
 

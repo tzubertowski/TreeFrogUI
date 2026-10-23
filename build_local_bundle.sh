@@ -24,6 +24,8 @@ for file in \
   "$FROGUI_ROOT/build_libretro.sh" \
   "$ROOT/hijack/build_tfhijack.sh" \
   "$PICOARCH_ROOT/build_sf3000.sh" \
+  "$ROOT/patches/snes9x-z-mips.patch" \
+  "$ROOT/scripts/build_snes9x_z.sh" \
   "$PICANTE8_ROOT/Makefile" \
   "$EBOOK_ROOT/build_reader_sf.sh" \
   "$DSPERATE_ROOT/dsperate"; do
@@ -39,6 +41,9 @@ rm -rf "$FROGUI_ROOT/out"
 echo 'Building picoarch frontends...'
 "$PICOARCH_ROOT/build_sf3000.sh"
 "$PICOARCH_ROOT/build_picoarch_hi.sh"
+
+echo 'Building Snes9x-Z...'
+WORK_ROOT="$WORK_ROOT" "$ROOT/scripts/build_snes9x_z.sh"
 
 echo 'Building QPSX...'
 mkdir -p "$ROOT/build"

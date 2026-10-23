@@ -9,14 +9,14 @@
 # With no payload, the complete release plus the selected install_first overlay
 # is deployed. Optional development payloads:
 #   release, test-games, test-media, perf-test-roms, duke3d-data, undertale-data, openlara-data, vvvvvv, openbor, vvvvvv-data, clean-themes, picoarch, picoarch-hi, frogui, duke3d, butterscotch, picante8, openclaw, dsperate, frogshell, ebook, pcsx4all, pcsx4all-test-game, ps1-bios, pcsx4all-config,
-#   tic80, vecx, j2me, j2me-debug, o2em, o2em-test, c64-test, launcher,
+#   tic80, vecx, j2me, j2me-debug, o2em, o2em-test, c64-test, launcher, snesz-comparison,
 #   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test
 #
 # This script never formats a card and never uses rsync --delete.
 set -euo pipefail
 
 readonly WORK=/home/tomaszz/sf3000-work
-readonly REPO="$WORK/sf3000_treefrogui"
+readonly REPO="${TREEFROG_REPO:-$WORK/sf3000_treefrogui}"
 readonly OPENBOR="$WORK/OpenBOR-TreeFrogUI"
 readonly OPENBOR_GAMES=/home/tomaszz/Roms/openbor
 readonly RELEASE="$REPO/release/latest/release"
@@ -32,7 +32,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|r36hd|sf3000|sf3000hd_nohdmi|sf3500> [payload ...]
-    payloads: release test-games test-media perf-test-roms duke3d-data undertale-data openlara-data vvvvvv openbor vvvvvv-data clean-themes picoarch picoarch-hi frogui duke3d butterscotch picante8 openclaw dsperate frogshell ebook pcsx4all pcsx4all-test-game ps1-bios pcsx4all-config tic80 vecx j2me j2me-debug o2em o2em-test c64-test launcher mame2000 mame2000-mslug mame-test amstrad-cap32-test
+    payloads: release test-games test-media perf-test-roms duke3d-data undertale-data openlara-data vvvvvv openbor vvvvvv-data clean-themes picoarch picoarch-hi frogui duke3d butterscotch picante8 openclaw dsperate frogshell ebook pcsx4all pcsx4all-test-game ps1-bios pcsx4all-config tic80 vecx j2me j2me-debug o2em o2em-test c64-test launcher snesz-comparison mame2000 mame2000-mslug mame-test amstrad-cap32-test
 default:  release
 EOF
     exit 2
@@ -77,7 +77,7 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|test-games|test-media|perf-test-roms|duke3d-data|undertale-data|openlara-data|vvvvvv|openbor|vvvvvv-data|clean-themes|picoarch|picoarch-hi|frogui|duke3d|butterscotch|picante8|openclaw|dsperate|frogshell|ebook|pcsx4all|pcsx4all-test-game|ps1-bios|pcsx4all-config|tic80|vecx|j2me|j2me-debug|o2em|o2em-test|c64-test|launcher|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
+        release|test-games|test-media|perf-test-roms|snesz-comparison|duke3d-data|undertale-data|openlara-data|vvvvvv|openbor|vvvvvv-data|clean-themes|picoarch|picoarch-hi|frogui|duke3d|butterscotch|picante8|openclaw|dsperate|frogshell|ebook|pcsx4all|pcsx4all-test-game|ps1-bios|pcsx4all-config|tic80|vecx|j2me|j2me-debug|o2em|o2em-test|c64-test|launcher|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test) ;;
         *) usage ;;
     esac
 done
@@ -118,6 +118,20 @@ validate_release() {
 
 for payload in "${PAYLOADS[@]}"; do
     [ "$payload" != release ] || validate_release
+    if [ "$payload" = snesz-comparison ]; then
+        for source in \
+            "$REPO/build/snes9x-Z_libretro.so" \
+            "$REPO/build/Snes9x-Z.LICENSE" \
+            "$REPO/frogui/out/frogui_libretro.so" \
+            "/home/tomaszz/Roms/snes/Star Fox (USA) (Rev 2).sfc" \
+            "/home/tomaszz/Roms/snes/Donkey Kong Country (USA) (Rev 2).sfc" \
+            "/home/tomaszz/Roms/snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).sfc" \
+            "/home/tomaszz/Roms/snes/Super Mario World 2 - Yoshi's Island (USA) (Rev 1).sfc" \
+            "/home/tomaszz/Roms/snes/F-Zero (USA).sfc" \
+            "/home/tomaszz/Roms/snes/Super Mario World (USA).sfc"; do
+            [ -s "$source" ] || die "Snes9x-Z comparison input is missing: $source"
+        done
+    fi
     if [ "$payload" = launcher ]; then
         launcher_src="$OVERLAY/cubegm/zhijack.sh"
         [ -f "$launcher_src" ] || die "profile launcher missing: $launcher_src"
@@ -979,6 +993,48 @@ deploy_perf_test_roms() {
     sync
 }
 
+deploy_snesz_comparison() {
+    local src rel dst hash_line src_hash dst_hash system item name
+    local -a games=(
+        "Star Fox.sfc|/home/tomaszz/Roms/snes/Star Fox (USA) (Rev 2).sfc"
+        "Donkey Kong Country.sfc|/home/tomaszz/Roms/snes/Donkey Kong Country (USA) (Rev 2).sfc"
+        "Donkey Kong Country 2.sfc|/home/tomaszz/Roms/snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).sfc"
+        "Yoshi's Island.sfc|/home/tomaszz/Roms/snes/Super Mario World 2 - Yoshi's Island (USA) (Rev 1).sfc"
+        "F-Zero.sfc|/home/tomaszz/Roms/snes/F-Zero (USA).sfc"
+        "Super Mario World.sfc|/home/tomaszz/Roms/snes/Super Mario World (USA).sfc"
+    )
+
+    install_file() {
+        src="$1"
+        rel="$2"
+        dst="$MOUNT/$rel"
+        mkdir -p "$(dirname "$dst")"
+        if [[ "$rel" == roms/* && -e "$dst" ]]; then
+            hash_line="$(sha256sum "$src")"; src_hash="${hash_line%% *}"
+            hash_line="$(sha256sum "$dst")"; dst_hash="${hash_line%% *}"
+            [ "$src_hash" = "$dst_hash" ] || die "refusing to replace a different ROM: $rel"
+        else
+            rsync -tc "$src" "$dst"
+        fi
+        hash_line="$(sha256sum "$src")"; src_hash="${hash_line%% *}"
+        hash_line="$(sha256sum "$dst")"; dst_hash="${hash_line%% *}"
+        [ "$src_hash" = "$dst_hash" ] || die "Snes9x-Z comparison verification failed: $rel"
+        echo "Verified Snes9x-Z comparison file: $rel  $dst_hash"
+    }
+
+    install_file "$REPO/build/snes9x-Z_libretro.so" cubegm/cores/snes9x-Z_libretro.so
+    install_file "$REPO/build/Snes9x-Z.LICENSE" frogui/licenses/Snes9x-Z.LICENSE
+    install_file "$REPO/frogui/out/frogui_libretro.so" cubegm/cores/frogui_libretro.so
+    for item in "${games[@]}"; do
+        name="${item%%|*}"
+        src="${item#*|}"
+        for system in snes snesz; do
+            install_file "$src" "roms/$system/Snes9x-Z Compare - $name"
+        done
+    done
+    sync
+}
+
 deploy_duke3d_data() {
     local src_dir=/home/tomaszz/Pobrane/DUKE3D/DUKE3D
     local file src dst hash_line src_hash dst_hash
@@ -1077,6 +1133,7 @@ for payload in "${PAYLOADS[@]}"; do
         test-games) deploy_test_games ;;
         test-media) deploy_test_media ;;
         perf-test-roms) deploy_perf_test_roms ;;
+        snesz-comparison) deploy_snesz_comparison ;;
         duke3d-data) deploy_duke3d_data ;;
         undertale-data) deploy_undertale_data ;;
         openlara-data) deploy_openlara_data ;;
@@ -1093,7 +1150,7 @@ for payload in "${PAYLOADS[@]}"; do
 done
 
 case "${PAYLOADS[*]}" in
-    vvvvvv|openbor) ;;
+    vvvvvv|openbor|snesz-comparison) ;;
     *) migrate_j2me_saves ;;
 esac
 
