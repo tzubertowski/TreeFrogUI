@@ -1,8 +1,9 @@
-# TreeFrogUI v1.8.0_o prerelease
+# TreeFrogUI v1.8.0_p prerelease
 
-## Changes since v1.8.0_n
+## Changes since v1.8.0_o
 
-- **PocketStation:** Added Pokket in `roms/pokket` for `.mcd`, `.gme`, `.mcs`, `.pss`, and `.bin` content. It requires a user-supplied `cubegm/bios/pocketstation.bin`; see the setup guide. Added matching backgrounds for the default, Art Book NextUI, Art Book Next, and Nao Black themes.
+- **FrogUI:** The selected-item pill now animates consistently through the system list and nested menus. System backgrounds begin loading in the background at startup, so browsing no longer has to trigger image loads. PICO-8 aliases use the PICO-8 artwork. The `zsnes` folder selects Snes9x-Z, shows a friendly system name, and reuses SNES artwork and backgrounds. Startup avoids a theme-color flash while backgrounds load; when background images are disabled, the theme color appears immediately.
+- **PicoArch:** Fixed pill alignment and width in submenus, and made long option labels scroll smoothly at a slower pace.
 
 ## Other changes included since the v1.0.15 stable base
 
