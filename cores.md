@@ -126,8 +126,6 @@ Emulator systems retain their normal `roms/<system>/` folders.
 
 | Folder | System | Core .so | Source |
 |--------|--------|----------|--------|
-| `Quake` | Quake | `tyrquake_libretro.so` | [libretro/tyrquake](https://github.com/libretro/tyrquake) |
-| `quake2` | Quake II (software renderer, heavy; data in `baseq2/`) | `vitaquake2_libretro.so` | [tzubertowski/treefrogui_vitaquake2](https://github.com/tzubertowski/treefrogui_vitaquake2) |
 | `scummvm` | ScummVM adventures - 📖 [setup guide](docs/cores/scummvm.md) | `scummvm_libretro.so` | [TreeFrogUI_FroggyScummvm](https://github.com/tzubertowski/TreeFrogUI_FroggyScummvm) |
 | `wolf3d` | Wolfenstein 3D | `ecwolf_libretro.so` | [libretro/ecwolf](https://github.com/libretro/ecwolf) |
 | `prboom` | Doom / Doom II / Final Doom / Heretic / Hexen | `prboom_libretro.so` | [libretro/libretro-prboom](https://github.com/libretro/libretro-prboom) |
