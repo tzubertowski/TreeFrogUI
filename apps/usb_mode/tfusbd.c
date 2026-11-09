@@ -251,6 +251,71 @@ static void start_responder(void) {
     L("responder started pid=%d (SCHED_IDLE)", (int)p);
 }
 
+/* ------------------------------------------------------------------ */
+/* RAM housekeeping: picoarch extracts zipped ROMs to /tmp/pa-<name>
+ * (tmpfs = RAM) and never deletes them, so after a game or two the 43 MB
+ * console has no memory left and the next game (e.g. pcsx4all) is killed
+ * by the OOM killer. Delete such files once no game is running (only the
+ * FrogUI menu, or nothing, runs in picoarch) and no process has them open. */
+static int file_in_use(const char *path) {
+    DIR *d = opendir("/proc"); struct dirent *e; char p[96], l[512];
+    if (!d) return 1;
+    int used = 0;
+    while (!used && (e = readdir(d))) {
+        if (e->d_name[0] < '1' || e->d_name[0] > '9') continue;
+        snprintf(p, sizeof p, "/proc/%s/fd", e->d_name);
+        DIR *fd = opendir(p); struct dirent *f;
+        if (fd) {
+            while ((f = readdir(fd))) {
+                char q[160]; snprintf(q, sizeof q, "%s/%s", p, f->d_name);
+                ssize_t n = readlink(q, l, sizeof l - 1);
+                if (n > 0) { l[n] = 0; if (!strcmp(l, path)) { used = 1; break; } }
+            }
+            closedir(fd);
+        }
+        if (!used) {                                   /* mmapped without an open fd */
+            snprintf(p, sizeof p, "/proc/%s/maps", e->d_name);
+            FILE *m = fopen(p, "r");
+            if (m) {
+                while (fgets(l, sizeof l, m)) if (strstr(l, path)) { used = 1; break; }
+                fclose(m);
+            }
+        }
+    }
+    closedir(d);
+    return used;
+}
+static int game_running(void) {
+    pid_t p[8]; int n = find_procs("picoarch", p, 8);
+    for (int i = 0; i < n; i++) {
+        char f[64], cl[512]; snprintf(f, sizeof f, "/proc/%d/cmdline", (int)p[i]);
+        int fd = open(f, O_RDONLY); if (fd < 0) continue;
+        ssize_t r = read(fd, cl, sizeof cl - 1); close(fd);
+        if (r <= 0) continue;
+        for (ssize_t k = 0; k < r; k++) if (!cl[k]) cl[k] = ' ';
+        cl[r] = 0;
+        if (!strstr(cl, "frogui_libretro")) return 1;      /* a core other than the menu */
+    }
+    return 0;
+}
+static void housekeeping(void) {
+    static double last;
+    double t = uptime();
+    if (t - last < 10) return;
+    last = t;
+    if (game_running()) return;
+    DIR *d = opendir("/tmp"); struct dirent *e; char path[300];
+    if (!d) return;
+    while ((e = readdir(d))) {
+        if (strncmp(e->d_name, "pa-", 3)) continue;
+        snprintf(path, sizeof path, "/tmp/%s", e->d_name);
+        struct stat st;
+        if (lstat(path, &st) != 0 || !S_ISREG(st.st_mode) || file_in_use(path)) continue;
+        if (unlink(path) == 0) L("housekeeping: freed %ld KB of RAM: %s", (long)(st.st_size / 1024), path);
+    }
+    closedir(d);
+}
+
 static void on_signal(int s) { (void)s; g_stop = 1; }
 
 /* ------------------------------------------------------------------ */
@@ -288,6 +353,7 @@ int main(int argc, char **argv) {
                 miss = frame_running() ? 0 : miss + 1;
                 msleep(1000);
                 start_responder();
+                housekeeping();
             }
             udc_state(us, sizeof us);
             L("PC gone (udc=%s)", us);
@@ -295,11 +361,12 @@ int main(int argc, char **argv) {
             continue;
         }
         if (state == DEV) {
-            while (host_devices() > 0 && !g_stop) msleep(1000);
+            while (host_devices() > 0 && !g_stop) { msleep(1000); housekeeping(); }
             L("USB device removed");
             state = IDLE; set_state("IDLE");
             continue;
         }
+        housekeeping();
         /* IDLE: give way to a session started from the TreeFrog menu */
         if (usb_mode_running()) {
             L("usb_mode.sh is running - taking over");
