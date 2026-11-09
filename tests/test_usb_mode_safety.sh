@@ -44,6 +44,16 @@ grep -q 'cubegm/tfusbd.on' hijack/zhijack.tpl.sh ||
     fail "zhijack template does not start tfusbd"
 grep -q 'tfusbd.pid' apps/usb_mode/usb_mtp.sh ||
     fail "usb_mtp.sh does not step aside for tfusbd"
+for b in tfrec tfshim_gb350.so tfshim.so; do
+    grep -q "apps/usb_mode/$b " build_release.sh ||
+        fail "release does not package $b"
+    file "apps/usb_mode/$b" | grep -q 'ELF 32-bit LSB.*MIPS' ||
+        fail "$b has wrong architecture"
+done
+grep -q 'PICOARCH_DRIVER=/mnt/sdcard/cubegm/tfshim_gb350.so' hijack/zhijack.tpl.sh ||
+    fail "zhijack template does not offer the capture layer"
+grep -q 'cubegm/tfshim.on' hijack/zhijack.tpl.sh ||
+    fail "capture layer must stay opt-in (cubegm/tfshim.on)"
 grep -q 'treefrog_mtp_exit' apps/usb_mode/tfusbd.c ||
     fail "tfusbd must end menu MTP sessions like the B button (SIGKILL blanks the display)"
 grep -q 'apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko' build_release.sh ||

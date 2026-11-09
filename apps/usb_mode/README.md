@@ -90,4 +90,15 @@ stock MTP driver (WPD MTP extension commands): shell, files, `tfkey` button
 presses, screenshots (`pc/fbshot.py`), reboot. **Any PC the console is plugged
 into gets root while that file exists**, so nothing creates it by default.
 
+### Recording (opt-in, GB350)
+
+With `cubegm/tfshim.on`, `zhijack.sh` exports
+`PICOARCH_DRIVER=/mnt/sdcard/cubegm/tfshim_gb350.so`. That layer has exactly the
+exports of `driver_gb350.so` (generated trampolines, `capture/gen/`, symbol names
+only), forwards every call, and copies frames and audio into `/dev/shm/tfcap`
+while `tfrec` runs. `pc/r36rec.py` (needs remote control and ffmpeg) turns the
+stream into an H.264/AAC MP4. Measured on Moonwalker (Mega Drive): 320x240 at
+30 fps, 3 of 398 frames lost, audio lossless, no stutter noticed. Sources and
+offline tests: `capture/` (`build.sh`). Details: docs/dev/mtp-background.md, section 12.
+
 Details and measurements: [docs/dev/mtp-background.md](../../docs/dev/mtp-background.md).

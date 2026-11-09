@@ -190,6 +190,13 @@ fi
 # optional remote control (apps/usb_mode/tfusbd.c). Opt-in: cubegm/tfusbd.on
 [ -f /mnt/sdcard/cubegm/tfusbd.on ] && [ -x /mnt/sdcard/cubegm/tfusbd.sh ] && \
     /mnt/sdcard/cubegm/tfusbd.sh start >/dev/null 2>&1
+# tfshim: screen+sound capture layer for recording (apps/usb_mode/capture).
+# Opt-in: cubegm/tfshim.on. Only GB350 is verified; other devices are skipped.
+if [ -f /mnt/sdcard/cubegm/tfshim.on ]; then
+    case "$(sed -n 's/^TF_DEVICE=//p' /tmp/tfdevice.env 2>/dev/null)" in
+        GB350) [ -f /mnt/sdcard/cubegm/tfshim_gb350.so ] && export PICOARCH_DRIVER=/mnt/sdcard/cubegm/tfshim_gb350.so ;;
+    esac
+fi
 
 PICOARCH=/mnt/sdcard/cubegm/picoarch
 PICOARCH_HI=/mnt/sdcard/cubegm/picoarch_hi

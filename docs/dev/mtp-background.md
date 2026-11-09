@@ -1,6 +1,6 @@
 # Background MTP service (tfusbd) and remote control
 
-> Enabling: create `cubegm/tfusbd.on` (background MTP) and, optionally, `cubegm/tfmtp.remote` (remote shell). Both are off by default. Code: `apps/usb_mode/tfusbd.c`, `tfusbd.sh`, `tfkey.c`, `tfmtp.c` (ops 0x9A00-0x9A04), `pc/`.
+> Enabling: create `cubegm/tfusbd.on` (background MTP) and, optionally, `cubegm/tfmtp.remote` (remote shell) and `cubegm/tfshim.on` (recording layer, GB350). All are off by default. Code: `apps/usb_mode/tfusbd.c`, `tfusbd.sh`, `tfkey.c`, `tfmtp.c` (ops 0x9A00-0x9A04), `pc/`.
 
 MTP now starts by itself when the console is plugged into a PC and runs in the background while the menu and games keep working. The OTG port still works with mice and flash drives, and the PC can control the console over the same MTP connection. The first part (why the stock MTP failed and how `tfmtp` works) is in [mtp.md](mtp.md) and [apps/usb_mode/README.md](../../apps/usb_mode/README.md); the full write-up is at https://github.com/kotekompotek/treefrogui-mtp-server/blob/main/docs/TECHNICAL.md.
 
@@ -168,15 +168,56 @@ marker cleared in 20/20 tries: min 4.97 ms avg 19.53 ms max 47.22 ms
 
 `cubegm/tfmtp.remote` gives **root access to any PC** the console is plugged into. Remote control is therefore off by default: nothing creates that file. Create it by hand only on consoles you plug into PCs you trust.
 
-## 12. Not done / not tested
+## 12. Recording video and sound (tfshim + tfrec)
+
+**Where the frames and sound come from.** Games do not output picture and sound themselves: picoarch loads a driver library (`driver_gb350.so` on the GB350) and calls its `video_driver_disp_frame` and `sound_driver_playframe`. A replacement library in front of the driver sees every frame and every audio chunk at the moment it is output, at the game's native resolution, without reading the screen back.
+
+What the picoarch sources (TreeFrogUI_picoarch, `plat_sdl.c`, `hwdisp.c`) say:
+- picoarch does **not** take the driver path from `TF_DRIVER` in `/tmp/tfdevice.env`; it is hard-coded per `TF_DEVICE` and overridden by the `PICOARCH_DRIVER` environment variable. Only the image and video viewers read `TF_DRIVER`;
+- `int video_driver_disp_frame(void *src, int w, int h, int pitch_bytes)`: an RGB565 frame;
+- `int sound_driver_init(void *dev, int rate, int channels)` is called with `(NULL, 48000, 2)`;
+- `int sound_driver_playframe(const void *buf, int n)`: `n` is a count of s16 stereo frames (usually 480 = 10 ms). A negative return makes picoarch re-initialise audio;
+- besides functions, picoarch also `dlsym`s the driver's `g_render` variable.
+
+**The layer, `tfshim_gb350.so`** ([`capture/tfshim.c`](../../apps/usb_mode/capture/tfshim.c)):
+- exports exactly the real driver's symbol set: 117 functions and 7 variables. The list comes from the driver's `.dynsym` via [`capture/gen_tramp.py`](../../apps/usb_mode/capture/gen_tramp.py); only names are read;
+- 114 functions are 8-instruction MIPS trampolines that jump into the real function with argument registers, stack and return address untouched;
+- only `video_driver_disp_frame`, `sound_driver_playframe` and `sound_driver_init` (for rate and channels) are intercepted;
+- at load the layer points the driver's variables in its own symbol table at the real ones, so `dlsym(…, "g_render")` returns the real driver's address;
+- while nothing records, an intercepted call costs 18 instructions, and every 16th call checks whether the capture file `/dev/shm/tfcap` has appeared;
+- if the real driver fails to load, the layer logs an error and does not crash the game.
+
+Enabling: with `cubegm/tfshim.on` and `TF_DEVICE=GB350`, the lines in `zhijack.sh` do `export PICOARCH_DRIVER=/mnt/sdcard/cubegm/tfshim_gb350.so`. Nothing on disk is replaced; the real `driver_gb350.so` stays where it is.
+
+**Recording.** [`tfrec`](../../apps/usb_mode/capture/tfrec.c) creates a shared segment `/dev/shm/tfcap` in RAM (2.3 MB: 3 frame slots up to 640×480 and a 2.7 s audio ring). The layer notices it and starts copying frames (capped at the requested fps) and audio there, never blocking: a late `tfrec` just skips overwritten frames. `tfrec` compresses frames losslessly (delta to the previous frame + RLE) and writes a stream to stdout. Remote control carries it to the PC, where [`pc/r36rec.py`](../../apps/usb_mode/pc/r36rec.py) lines it up by timestamps and feeds ffmpeg: H.264 + AAC in an MP4.
+
+Build traps (Zig 0.17):
+- a 64-bit division in the layer pulled in an import of a non-existent compiler-rt symbol, which would have made `dlopen` fail on the console. The layer has no 64-bit division, and a check rejects any import without a glibc version;
+- the linker wired `DT_INIT`/`DT_FINI` to the exported `_init`/`_fini` trampolines, which would have run them at load. [`capture/postlink.py`](../../apps/usb_mode/capture/postlink.py) removes those entries.
+
+Before the console, the layer passed PC checks: its export set equals the driver's, every trampoline jumps to its own function, and in a MIPS emulator (Unicorn) registers and stack are preserved and frames and audio reach the segment bit-exact.
+
+**Measured on the console** (Moonwalker, Mega Drive, 20 s requested):
+
+| | |
+|---|---|
+| recorded | 16.9 s: the first ~3 s went into starting `tfrec` and attaching the layer |
+| video | 320×240 (the game's native resolution), 30 fps, 398 frames received, 3 lost |
+| audio | 48 kHz stereo, nothing lost, in sync with the picture |
+| USB stream | ~0.6 MB/s; the MP4 is 0.85 MB |
+| game | no stutter noticed (checked by the console's owner) |
+
+The FrogUI menu outputs full 640×480 frames, and the low-priority `tfrec` keeps only part of them (8 of 126 while scrolling fast). A still menu outputs no new frames, so there is nothing to record.
+
+## 13. Not done / not tested
 
 - MTP on the DC port is impossible (no data lines).
 - Tested on one console (GB350) and with Windows 10 only. Plain MTP should work with Linux and macOS (libmtp), but remote control is implemented for Windows (WPD) only.
 - A flash drive on OTG with the service running was not tested, only a mouse. The service keeps the port in host mode while a device is attached, but working together with TreeFrog's `usb_host.sh` should be checked separately.
 - When the PC sleeps, the frame counter stops and the service returns to IDLE after ~3 s. After the PC wakes up, the console reconnects in the next device-mode window, i.e. within 4 s.
-- Video and audio recording (a layer between picoarch and the display driver) is work in progress and not part of this release.
+- Recording only covers games that run through picoarch (libretro cores); standalone programs (pcsx4all, PPSSPP, the video player) are not recorded. The capture layer is verified on the GB350 only.
 
-## 13. Reproducing the measurements
+## 14. Reproducing the measurements
 
 ```bat
 python apps\usb_mode\pc\r36.py sh "devmem 0x1884400C 16; sleep 0.01; devmem 0x1884400C 16"   & rem frame counter
