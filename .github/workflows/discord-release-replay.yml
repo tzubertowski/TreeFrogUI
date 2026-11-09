@@ -1,0 +1,75 @@
+name: Post existing release to Discord
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing GitHub release tag to announce
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  post-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check whether this release was already posted
+        id: posted
+        uses: actions/cache/restore@v4
+        with:
+          path: /tmp/discord-release-posted
+          key: discord-release-${{ inputs.tag }}
+
+      - name: Load existing release and its previous notes
+        if: steps.posted.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          releases=$(gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100")
+          release=$(jq -c --arg tag "$RELEASE_TAG" '[.[] | select(.tag_name == $tag)] | .[0] // empty' <<<"$releases")
+          [[ -n "$release" ]] || { echo "No GitHub release exists for $RELEASE_TAG" >&2; exit 1; }
+          printf '%s\n' "$release" > "$RUNNER_TEMP/release.json"
+          previous_body=$(jq -r --arg tag "$RELEASE_TAG" '
+            ([.[] | .tag_name] | index($tag)) as $index |
+            if $index != null and .[$index + 1] then .[$index + 1].body // "" else "" end
+          ' <<<"$releases")
+          printf '%s\n' "$previous_body" > "$RUNNER_TEMP/previous-release-notes.md"
+          printf '%s\n' "$(jq -r '.body // ""' "$RUNNER_TEMP/release.json")" > "$RUNNER_TEMP/release-notes.md"
+          diff -u "$RUNNER_TEMP/previous-release-notes.md" "$RUNNER_TEMP/release-notes.md" \
+            > "$RUNNER_TEMP/release-notes.diff" || test $? -eq 1
+          awk '
+            !/^\+\+\+ / && /^\+/ {
+              sub(/^\+/, "")
+              if (NF && shown < 12) { print; shown++ }
+            }
+          ' "$RUNNER_TEMP/release-notes.diff" > "$RUNNER_TEMP/new-release-lines.md"
+          if [[ ! -s "$RUNNER_TEMP/new-release-lines.md" ]]; then
+            printf '%s\n' 'No new release-note lines; open the release for details.' > "$RUNNER_TEMP/new-release-lines.md"
+          fi
+
+      - name: Post release update
+        if: steps.posted.outputs.cache-hit != 'true'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_GITHUB_UPDATES_WEBHOOK }}
+        run: |
+          set -euo pipefail
+          payload=$(jq -n \
+            --arg title "TreeFrogUI $(jq -r '.name // .tag_name' "$RUNNER_TEMP/release.json")" \
+            --arg url "$(jq -r '.html_url' "$RUNNER_TEMP/release.json")" \
+            --arg description "$(head -c 3800 "$RUNNER_TEMP/new-release-lines.md")" \
+            '{embeds:[{title:$title,url:$url,description:$description,color:3066993,footer:{text:"New lines since the previous release"}}]}')
+          curl --fail-with-body --silent --show-error \
+            -H 'Content-Type: application/json' --data "$payload" "$DISCORD_WEBHOOK_URL"
+          mkdir -p /tmp/discord-release-posted
+          touch /tmp/discord-release-posted/sent
+
+      - name: Remember the posted release
+        if: steps.posted.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: /tmp/discord-release-posted
+          key: discord-release-${{ inputs.tag }}
