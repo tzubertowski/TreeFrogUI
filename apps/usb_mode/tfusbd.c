@@ -368,7 +368,16 @@ int main(int argc, char **argv) {
     setpriority(PRIO_PROCESS, 0, 10);
     L("=== tfusbd (C) start pid=%d host=%dms peri=%dms ===", (int)getpid(), g_host_slice_ms, g_peri_slice_ms);
     if (map_regs() != 0) { L("FATAL cannot map MUSB registers: %s", strerror(errno)); return 1; }
-    msleep(1000);
+    /* Let the menu come up first: tfusbd starts right before FrogUI, and its
+       start-up work (initramfs cleanup, module loading, gadget) used to
+       compete with the menu for the single CPU core. Wait until picoarch
+       runs (max 8 s), then 2.5 s more. */
+    for (int i = 0; i < 80 && !g_stop; i++) {
+        pid_t pp[2];
+        if (find_procs("picoarch", pp, 2) > 0) break;
+        msleep(100);
+    }
+    msleep(2500);
     free_hidden_rootfs();
     takeover();
     if (setup_gadget() != 0) { L("FATAL gadget setup failed"); return 1; }
