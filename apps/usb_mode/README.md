@@ -62,3 +62,32 @@ it answers immediately.
   process/USB trace are appended to `log.txt`.
 - Full diagnosis, measurements and a standalone installer:
   https://github.com/kotekompotek/treefrogui-mtp-server
+
+## Background MTP service (`tfusbd`, opt-in)
+
+With `cubegm/tfusbd.on` on the SD card, `zhijack.sh` starts `tfusbd` at boot.
+MTP is then served in the background on the OTG port while FrogUI and games
+keep running, and the port still works as a USB host (mouse, pad, flash drive):
+
+- `tfusbd` alternates host (2 s) and peripheral with the MTP gadget bound
+  (2 s) until something answers. A PC is detected from the MUSB FRAME (SOF)
+  counter: on this board VBUS always reads valid (the console powers the port)
+  and the UDC state stays `configured` after an unplug, so neither works.
+- `tfmtp` runs with `SCHED_IDLE`, so transfers only use CPU time a game does
+  not need (24 MB during a GBA game: 1.7 MB/s to the console, 7.6 MB/s to the
+  PC, no visible stutter).
+- A session started from the USB (MTP) menu item is ended the way the B button
+  does it (exit flag + SIGTERM): SIGKILLing `usb_mode.sh` left the display
+  black until reboot. While `tfusbd` runs, `usb_mtp.sh` returns to the menu.
+- `tfusbd.sh start|stop|status`; log in `/tmp/tfusbd.log`. Idle CPU is 0 %.
+- Measured on the GB350: the DC port is charge-only, so MTP works on the OTG
+  port only.
+
+Optional remote control: with `cubegm/tfmtp.remote` present, `tfmtp` also
+accepts vendor operations 0x9A00-0x9A04 (run a shell command, read its output,
+write its stdin, signal it). `pc/r36.py` uses them from Windows through the
+stock MTP driver (WPD MTP extension commands): shell, files, `tfkey` button
+presses, screenshots (`pc/fbshot.py`), reboot. **Any PC the console is plugged
+into gets root while that file exists**, so nothing creates it by default.
+
+Details and measurements: [docs/dev/mtp-background.md](../../docs/dev/mtp-background.md).

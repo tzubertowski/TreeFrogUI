@@ -33,7 +33,12 @@
 #ifndef TFMTP_TEST
 #include <sys/ioctl.h>
 #include <sys/statvfs.h>
+#include <sys/wait.h>
 #include <signal.h>
+#include <poll.h>
+#include <sched.h>
+#include <sys/syscall.h>
+#include <sys/resource.h>
 #endif
 
 #ifdef _WIN32
@@ -75,6 +80,12 @@
 #define OP_SetObjectPropValue       0x9804
 #define OP_GetObjectPropList        0x9805
 #define OP_GetObjectReferences      0x9810
+/* vendor extension: remote shell (only when <root>/cubegm/tfmtp.remote exists) */
+#define OP_TF_Info                  0x9A00
+#define OP_TF_Exec                  0x9A01
+#define OP_TF_Read                  0x9A02
+#define OP_TF_Write                 0x9A03
+#define OP_TF_Signal                0x9A04
 
 #define RC_OK                       0x2001
 #define RC_GeneralError             0x2002
@@ -130,6 +141,8 @@ static const uint16_t g_ops[] = {
     OP_SendObjectInfo, OP_SendObject, OP_GetDevicePropDesc, OP_GetDevicePropValue,
     OP_GetPartialObject, OP_GetObjectPropsSupported, OP_GetObjectPropDesc, OP_GetObjectPropValue,
     OP_SetObjectPropValue, OP_GetObjectPropList, OP_GetObjectReferences };
+static const uint16_t g_remote_ops[] = { OP_TF_Info, OP_TF_Exec, OP_TF_Read, OP_TF_Write, OP_TF_Signal };
+static int g_remote;            /* remote shell enabled */
 static const uint16_t g_formats[] = {
     FMT_UNDEFINED, FMT_ASSOCIATION, 0x3004 /*text*/, 0x3008 /*wav*/, 0x3009 /*mp3*/,
     0x300A /*avi*/, 0x3801 /*jpeg*/, 0x3804 /*bmp*/, 0x3807 /*gif*/, 0x380B /*png*/,
@@ -171,6 +184,8 @@ static const char *op_name(uint16_t op) {
     case OP_GetObjectPropDesc: return "GetObjectPropDesc"; case OP_GetObjectPropValue: return "GetObjectPropValue";
     case OP_SetObjectPropValue: return "SetObjectPropValue"; case OP_GetObjectPropList: return "GetObjectPropList";
     case OP_GetObjectReferences: return "GetObjectReferences";
+    case OP_TF_Info: return "TF_Info";   case OP_TF_Exec: return "TF_Exec";   case OP_TF_Read: return "TF_Read";
+    case OP_TF_Write: return "TF_Write"; case OP_TF_Signal: return "TF_Signal";
     default: return "?";
     }
 }
@@ -534,12 +549,17 @@ static uint32_t g_pend_handle, g_pend_size; static int g_pend_valid;
 static uint16_t do_GetDeviceInfo(void) {
     data_begin();
     p16(100); p32(6); p16(100); pstr("microsoft.com: 1.0;"); p16(0);
-    parr16(g_ops, NELEM(g_ops));
+    {
+        uint32_t n = NELEM(g_ops) + (g_remote ? NELEM(g_remote_ops) : 0);
+        p32(n);
+        for (uint32_t i = 0; i < NELEM(g_ops); i++) p16(g_ops[i]);
+        if (g_remote) for (uint32_t i = 0; i < NELEM(g_remote_ops); i++) p16(g_remote_ops[i]);
+    }
     p32(0);                                      /* events supported: none */
     { uint16_t dp = DEVPROP_FriendlyName; parr16(&dp, 1); }
     parr16(g_formats, NELEM(g_formats));         /* capture */
     parr16(g_formats, NELEM(g_formats));         /* playback */
-    pstr("TreeFrogUI"); pstr("R36S handheld"); pstr("tfmtp 1.0"); pstr("TFMTP-0001");
+    pstr("TreeFrogUI"); pstr("R36S handheld"); pstr("tfmtp 1.2"); pstr("TFMTP-0001");
     data_send();
     return RC_OK;
 }
@@ -779,6 +799,191 @@ static uint16_t do_GetObjectPropList(uint32_t h, uint32_t fmt, uint32_t prop, ui
 }
 
 /* ------------------------------------------------------------------ */
+/* remote shell (vendor ops 0x9A00..0x9A04)                            */
+/*                                                                     */
+/*  TF_Info   ()                     data in : text "tfmtp 1.1 ..."    */
+/*  TF_Exec   (flags)                data out: /bin/sh -c command      */
+/*                                   resp    : job id                  */
+/*            flags bit0 = give the job a stdin pipe (else /dev/null)  */
+/*  TF_Read   (job, max, wait_ms)    data in : up to max bytes of      */
+/*                                   stdout+stderr (waits <= wait_ms)  */
+/*                                   resp    : state, code, buffered   */
+/*            state: 0 running, 1 exited, 2 killed by signal;          */
+/*                   +0x100 when the output pipe reached EOF           */
+/*  TF_Write  (job, flags)           data out: bytes for stdin         */
+/*                                   resp    : bytes accepted          */
+/*            flags bit0 = close stdin afterwards                      */
+/*  TF_Signal (job, sig)             sig 0 = forget the job (SIGKILL   */
+/*                                   if it still runs)                 */
+/* Output is buffered in RAM (JOBBUF per job); a full buffer simply    */
+/* stops reading the pipe, so a fast producer blocks instead of        */
+/* eating memory.                                                      */
+/* ------------------------------------------------------------------ */
+#ifndef TFMTP_TEST
+#define MAXJOBS 8
+#define JOBBUF  (512u << 10)
+typedef struct {
+    int used, out, in, state, code;
+    pid_t pid;
+    uint32_t id, len;
+    uint8_t *buf;
+} job_t;
+static job_t g_jobs[MAXJOBS];
+static uint32_t g_jobseq;
+
+static job_t *job_get(uint32_t id) {
+    uint32_t s = id & 7;
+    if (s >= MAXJOBS || !g_jobs[s].used || g_jobs[s].id != id) return NULL;
+    return &g_jobs[s];
+}
+static void job_pump(job_t *j) {
+    while (j->out >= 0 && j->len < JOBBUF) {
+        ssize_t r = read(j->out, j->buf + j->len, JOBBUF - j->len);
+        if (r > 0) { j->len += (uint32_t)r; continue; }
+        if (r < 0 && errno == EINTR) continue;
+        if (r < 0 && errno == EAGAIN) break;
+        close(j->out); j->out = -1;          /* EOF or error */
+    }
+    if (j->pid > 0 && j->state == 0) {
+        int st;
+        pid_t w = waitpid(j->pid, &st, WNOHANG);
+        if (w == j->pid) {
+            if (WIFEXITED(st)) { j->state = 1; j->code = WEXITSTATUS(st); }
+            else { j->state = 2; j->code = WIFSIGNALED(st) ? WTERMSIG(st) : 0; }
+        }
+    }
+}
+static void job_free(job_t *j) {
+    if (j->state == 0 && j->pid > 0) { kill(-j->pid, SIGKILL); kill(j->pid, SIGKILL); waitpid(j->pid, NULL, 0); }
+    if (j->out >= 0) close(j->out);
+    if (j->in >= 0) close(j->in);
+    free(j->buf);
+    memset(j, 0, sizeof *j);
+}
+static void jobs_kill_all(void) {
+    for (int i = 0; i < MAXJOBS; i++)
+        if (g_jobs[i].used && g_jobs[i].state == 0 && g_jobs[i].pid > 0) { kill(-g_jobs[i].pid, SIGKILL); kill(g_jobs[i].pid, SIGKILL); }
+}
+static void on_term(int sig) { (void)sig; jobs_kill_all(); _exit(0); }
+
+static uint16_t do_TF_Exec(uint32_t flags, uint32_t *jid) {
+    uint32_t len;
+    uint8_t *d = read_data(&len);
+    if (!d) return RC_IncompleteTransfer;
+    uint16_t rc = RC_OK;
+    char *cmd = malloc(len - 12 + 1);
+    if (!cmd) { free(d); return RC_GeneralError; }
+    memcpy(cmd, d + 12, len - 12); cmd[len - 12] = 0;
+    free(d);
+    int slot = -1;
+    for (int i = 0; i < MAXJOBS; i++) if (!g_jobs[i].used) { slot = i; break; }
+    if (slot < 0) {                                   /* reuse the oldest finished, fully read job */
+        for (int i = 0; i < MAXJOBS; i++) { job_pump(&g_jobs[i]); if (g_jobs[i].state && !g_jobs[i].len && g_jobs[i].out < 0) { job_free(&g_jobs[i]); slot = i; break; } }
+    }
+    if (slot < 0) { L("  exec: no free job slot"); free(cmd); return RC_GeneralError; }
+    int po[2] = { -1, -1 }, pi[2] = { -1, -1 };
+    uint8_t *buf = malloc(JOBBUF);
+    if (!buf || pipe(po) != 0 || ((flags & 1) && pipe(pi) != 0)) { L("  exec: pipe/malloc: %s", strerror(errno)); rc = RC_GeneralError; goto fail; }
+    pid_t pid = fork();
+    if (pid < 0) { L("  exec: fork: %s", strerror(errno)); rc = RC_GeneralError; goto fail; }
+    if (pid == 0) {
+        setsid();
+        /* tfusbd runs us with SCHED_IDLE; remote jobs (button injection,
+           recording) need normal scheduling to keep up with a game */
+        { struct sched_param sp = { 0 }; syscall(SYS_sched_setscheduler, 0, SCHED_OTHER, &sp); setpriority(PRIO_PROCESS, 0, 0); }
+        signal(SIGPIPE, SIG_DFL); signal(SIGTERM, SIG_DFL);
+        int in = (flags & 1) ? pi[0] : open("/dev/null", O_RDONLY);
+        dup2(in, 0); dup2(po[1], 1); dup2(po[1], 2);
+        for (int fd = 3; fd < 256; fd++) close(fd);
+        if (chdir("/") != 0) { /* keep going */ }
+        setenv("PATH", "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin", 1);
+        setenv("HOME", "/tmp", 1); setenv("TERM", "dumb", 1);
+        execl("/bin/sh", "sh", "-c", cmd, (char *)NULL);
+        _exit(127);
+    }
+    close(po[1]); if (pi[0] >= 0) close(pi[0]);
+    fcntl(po[0], F_SETFL, O_NONBLOCK); fcntl(po[0], F_SETFD, FD_CLOEXEC);
+    if (pi[1] >= 0) { fcntl(pi[1], F_SETFL, O_NONBLOCK); fcntl(pi[1], F_SETFD, FD_CLOEXEC); }
+    job_t *j = &g_jobs[slot];
+    memset(j, 0, sizeof *j);
+    j->used = 1; j->pid = pid; j->out = po[0]; j->in = pi[1]; j->buf = buf;
+    j->id = ((++g_jobseq) << 3) | (uint32_t)slot;
+    *jid = j->id;
+    L("  exec job %u pid %d: %.200s", j->id, (int)pid, cmd);
+    free(cmd);
+    return RC_OK;
+fail:
+    if (po[0] >= 0) { close(po[0]); close(po[1]); }
+    if (pi[0] >= 0) { close(pi[0]); close(pi[1]); }
+    free(buf); free(cmd);
+    return rc;
+}
+
+static uint16_t do_TF_Read(uint32_t id, uint32_t max, uint32_t wait_ms, uint32_t *r0, uint32_t *r1, uint32_t *r2) {
+    job_t *j = job_get(id);
+    if (!j) return RC_InvalidParameter;
+    if (max == 0 || max > JOBBUF) max = JOBBUF;
+    if (wait_ms > 2000) wait_ms = 2000;
+    job_pump(j);
+    if (!j->len && j->out >= 0 && wait_ms) {
+        struct pollfd pf = { j->out, POLLIN, 0 };
+        poll(&pf, 1, (int)wait_ms);
+        job_pump(j);
+    }
+    uint32_t n = j->len < max ? j->len : max;
+    data_begin(); tx_need(n); memcpy(g_tx + g_txlen, j->buf, n); g_txlen += n; data_send();
+    memmove(j->buf, j->buf + n, j->len - n); j->len -= n;
+    if (n) job_pump(j);                               /* refill what we just made room for */
+    *r0 = (uint32_t)j->state | (j->out < 0 ? 0x100u : 0u);
+    *r1 = (uint32_t)j->code; *r2 = j->len;
+    return RC_OK;
+}
+
+static uint16_t do_TF_Write(uint32_t id, uint32_t flags, uint32_t *acc) {
+    uint32_t len;
+    uint8_t *d = read_data(&len);              /* always drain the data phase */
+    if (!d) return RC_IncompleteTransfer;
+    job_t *j = job_get(id);
+    uint16_t rc = RC_OK;
+    uint32_t done = 0, n = len - 12;
+    if (!j || j->in < 0) { rc = RC_InvalidParameter; goto out; }
+    double t0 = now_s();
+    while (done < n && now_s() - t0 < 2.0) {
+        ssize_t w = write(j->in, d + 12 + done, n - done);
+        if (w > 0) { done += (uint32_t)w; continue; }
+        if (w < 0 && errno == EINTR) continue;
+        if (w < 0 && errno != EAGAIN) { L("  stdin write: %s", strerror(errno)); break; }
+        job_pump(j);                            /* let the child make progress on its output */
+        struct pollfd pf[2] = { { j->in, POLLOUT, 0 }, { j->out, POLLIN, 0 } };
+        poll(pf, j->out >= 0 ? 2 : 1, 50);
+    }
+    if ((flags & 1) && done == n) { close(j->in); j->in = -1; }
+out:
+    *acc = done;
+    free(d);
+    return rc;
+}
+
+static uint16_t do_TF_Signal(uint32_t id, uint32_t sig) {
+    job_t *j = job_get(id);
+    if (!j) return RC_InvalidParameter;
+    if (sig == 0) { job_free(j); return RC_OK; }
+    job_pump(j);
+    if (j->state == 0 && j->pid > 0) { if (kill(-j->pid, (int)sig) != 0) kill(j->pid, (int)sig); }
+    return RC_OK;
+}
+
+static uint16_t do_TF_Info(void) {
+    char s[256]; int used = 0;
+    for (int i = 0; i < MAXJOBS; i++) used += g_jobs[i].used;
+    snprintf(s, sizeof s, "tfmtp 1.2 remote=1 pid=%d jobs=%d/%d jobbuf=%u root=%s\n", (int)getpid(), used, MAXJOBS, JOBBUF, g_root);
+    size_t n = strlen(s);
+    data_begin(); tx_need(n); memcpy(g_tx + g_txlen, s, n); g_txlen += n; data_send();
+    return RC_OK;
+}
+#endif
+
+/* ------------------------------------------------------------------ */
 /* dispatcher                                                          */
 /* ------------------------------------------------------------------ */
 static void handle_command(const uint8_t *c, int n) {
@@ -832,6 +1037,21 @@ static void handle_command(const uint8_t *c, int n) {
         if (!obj_valid(p[0])) { rc = RC_InvalidObjectHandle; break; }
         data_begin(); p32(0); data_send();
         break;
+#ifndef TFMTP_TEST
+    case OP_TF_Info: case OP_TF_Exec: case OP_TF_Read: case OP_TF_Write: case OP_TF_Signal:
+        if (!g_remote) {
+            if (op == OP_TF_Exec || op == OP_TF_Write) { uint32_t dl; free(read_data(&dl)); }   /* drain */
+            rc = RC_OperationNotSupported; break;
+        }
+        switch (op) {
+        case OP_TF_Info: rc = do_TF_Info(); break;
+        case OP_TF_Exec: rc = do_TF_Exec(p[0], &r0); nr = rc == RC_OK; break;
+        case OP_TF_Read: rc = do_TF_Read(p[0], p[1], p[2], &r0, &r1, &r2); if (rc == RC_OK) nr = 3; break;
+        case OP_TF_Write: rc = do_TF_Write(p[0], p[1], &r0); nr = 1; break;
+        case OP_TF_Signal: rc = do_TF_Signal(p[0], p[1]); break;
+        }
+        break;
+#endif
     default: rc = RC_OperationNotSupported; break;
     }
     respond(rc, nr, r0, r1, r2);
@@ -842,9 +1062,15 @@ static void handle_command(const uint8_t *c, int n) {
 int main(int argc, char **argv) {
     if (argc > 1) g_root = argv[1];
     signal(SIGPIPE, SIG_IGN);
+    signal(SIGTERM, on_term); signal(SIGINT, on_term); signal(SIGHUP, on_term);
     setvbuf(stderr, NULL, _IOLBF, 0);
-    L("tfmtp 1.0 start root=%s pid=%d (lazy listing, no pre-index)", g_root, (int)getpid());
-    for (int tries = 0; (g_usb = open("/dev/mtp_usb", O_RDWR)) < 0; tries++) {
+    {
+        char flag[1024];
+        snprintf(flag, sizeof flag, "%s/cubegm/tfmtp.remote", g_root);
+        g_remote = access(flag, F_OK) == 0 || getenv("TFMTP_REMOTE") != NULL;
+    }
+    L("tfmtp 1.2 start root=%s pid=%d (lazy listing, no pre-index) remote=%d", g_root, (int)getpid(), g_remote);
+    for (int tries = 0; (g_usb = open("/dev/mtp_usb", O_RDWR | O_CLOEXEC)) < 0; tries++) {
         if (tries == 0 || tries % 10 == 0) L("open /dev/mtp_usb: %s (retrying)", strerror(errno));
         if (tries > 300) return 2;
         usleep(200000);

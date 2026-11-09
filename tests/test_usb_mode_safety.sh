@@ -31,6 +31,21 @@ file "$LAZY_MTP" | grep -q 'ELF 32-bit LSB.*MIPS' ||
     fail "tfmtp has wrong architecture"
 grep -q 'cubegm/tfmtp' "$SCRIPT" ||
     fail "usb_mode.sh does not prefer tfmtp"
+for b in tfusbd tfkey; do
+    grep -q "apps/usb_mode/$b " build_release.sh ||
+        fail "release does not package $b"
+    file "apps/usb_mode/$b" | grep -q 'ELF 32-bit LSB.*MIPS' ||
+        fail "$b has wrong architecture"
+done
+grep -q 'apps/usb_mode/tfusbd.sh' build_release.sh ||
+    fail "release does not package tfusbd.sh"
+sh -n apps/usb_mode/tfusbd.sh || fail "tfusbd.sh has a syntax error"
+grep -q 'cubegm/tfusbd.on' hijack/zhijack.tpl.sh ||
+    fail "zhijack template does not start tfusbd"
+grep -q 'tfusbd.pid' apps/usb_mode/usb_mtp.sh ||
+    fail "usb_mtp.sh does not step aside for tfusbd"
+grep -q 'treefrog_mtp_exit' apps/usb_mode/tfusbd.c ||
+    fail "tfusbd must end menu MTP sessions like the B button (SIGKILL blanks the display)"
 grep -q 'apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko' build_release.sh ||
     fail "release does not package module"
 

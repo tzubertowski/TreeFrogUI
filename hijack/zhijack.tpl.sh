@@ -186,6 +186,11 @@ if [ -n "$TF_NOSLEEP_ADDRS" ] && grep -q '^disable_sleep=on' /mnt/sdcard/frogui/
     [ -f /mnt/sdcard/cubegm/nosleep ] && /mnt/sdcard/cubegm/nosleep -w $TF_NOSLEEP_ADDRS >/dev/null 2>&1 &
 fi
 
+# tfusbd: background MTP on the OTG port, automatic OTG-host/PC switching and
+# optional remote control (apps/usb_mode/tfusbd.c). Opt-in: cubegm/tfusbd.on
+[ -f /mnt/sdcard/cubegm/tfusbd.on ] && [ -x /mnt/sdcard/cubegm/tfusbd.sh ] && \
+    /mnt/sdcard/cubegm/tfusbd.sh start >/dev/null 2>&1
+
 PICOARCH=/mnt/sdcard/cubegm/picoarch
 PICOARCH_HI=/mnt/sdcard/cubegm/picoarch_hi
 FROGUI_CORE=/mnt/sdcard/cubegm/cores/frogui_libretro.so
