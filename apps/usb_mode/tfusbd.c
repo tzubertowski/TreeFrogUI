@@ -13,8 +13,8 @@
  * on this board (the console powers the port) and the UDC state stays
  * "configured" after an unplug, so neither can be used.
  *
- * The MTP responder (tfmtp) runs the whole time with SCHED_IDLE, so it only
- * gets CPU time a running game does not want.  The SD card stays mounted.
+ * The MTP responder (tfmtp) runs the whole time at nice 19, so a running game
+ * keeps almost all of the CPU.  The SD card stays mounted.
  *
  *   tfusbd            run in the foreground (normally started by tfusbd.sh)
  *   tfusbd -d         daemonize
@@ -234,8 +234,10 @@ static void start_responder(void) {
     if (n) msleep(500);
     pid_t p = fork();
     if (p == 0) {
-        struct sched_param sp = { 0 };
-        syscall(SYS_sched_setscheduler, 0, SCHED_IDLE, &sp);   /* only CPU the game does not use (musl has no sched_setscheduler) */
+        /* nice 19: ~1.5 % of the CPU against a game at nice 0, so a busy game
+           keeps almost everything, yet MTP never stalls completely. SCHED_IDLE
+           (tried first) starved tfmtp under 100 % game load and Windows
+           dropped the device with timeouts (0x802A0006). */
         setpriority(PRIO_PROCESS, 0, 19);
         /* per-request log only in debug mode (TreeFrog convention: an
            empty log.txt in the SD root); /tmp is RAM and must not grow */
@@ -248,7 +250,7 @@ static void start_responder(void) {
         _exit(127);
     }
     g_responder = p;
-    L("responder started pid=%d (SCHED_IDLE)", (int)p);
+    L("responder started pid=%d (nice 19)", (int)p);
 }
 
 /* ------------------------------------------------------------------ */
@@ -316,6 +318,36 @@ static void housekeeping(void) {
     closedir(d);
 }
 
+/* The stock root filesystem is an initramfs, i.e. RAM that can never be
+ * swapped out ("Unevictable" in /proc/meminfo). TreeFrogUI bind-mounts the
+ * SD card's copies over /bin /sbin /lib /usr /etc, so the RAM copies under
+ * them can no longer be reached by any path, yet keep ~4 MB. hcdemo_files
+ * holds two "game corrupted" bitmaps (2.8 MB) only the stock boot check
+ * shows. Delete both through a private non-recursive bind of / (it shows
+ * the initramfs without any submounts, so nothing on the SD is touched).
+ * The initramfs is unpacked again from flash on every boot. */
+static long unevictable_kb(void) {
+    FILE *f = fopen("/proc/meminfo", "r"); char l[128]; long v = -1;
+    if (!f) return -1;
+    while (fgets(l, sizeof l, f)) if (sscanf(l, "Unevictable: %ld kB", &v) == 1) break;
+    fclose(f);
+    return v;
+}
+static void free_hidden_rootfs(void) {
+    long before = unevictable_kb();
+    const char *script =
+        "set -u; V=/tmp/.tfroot; mkdir -p $V || exit 1\n"
+        "mount -o bind / $V || { rmdir $V; exit 1; }\n"
+        "for d in bin sbin lib usr etc; do\n"
+        "  mountpoint -q /$d && [ -d $V/$d ] && ! mountpoint -q $V/$d && rm -rf $V/$d/* $V/$d/.[!.]* 2>/dev/null\n"
+        "done\n"
+        "[ -d $V/hcdemo_files ] && ! mountpoint -q $V/hcdemo_files && rm -f $V/hcdemo_files/*.bmp\n"
+        "umount $V; rmdir $V\n";
+    const char *a[] = { "/bin/sh", "-c", script, NULL };
+    int rc = run_cmd(a);
+    L("rootfs: freed hidden initramfs copies (rc=%d), Unevictable %ld -> %ld kB", rc, before, unevictable_kb());
+}
+
 static void on_signal(int s) { (void)s; g_stop = 1; }
 
 /* ------------------------------------------------------------------ */
@@ -337,6 +369,7 @@ int main(int argc, char **argv) {
     L("=== tfusbd (C) start pid=%d host=%dms peri=%dms ===", (int)getpid(), g_host_slice_ms, g_peri_slice_ms);
     if (map_regs() != 0) { L("FATAL cannot map MUSB registers: %s", strerror(errno)); return 1; }
     msleep(1000);
+    free_hidden_rootfs();
     takeover();
     if (setup_gadget() != 0) { L("FATAL gadget setup failed"); return 1; }
     start_responder();
