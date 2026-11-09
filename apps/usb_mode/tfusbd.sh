@@ -71,7 +71,8 @@ ensure_gadget() {
 responder_pid=
 ensure_responder() {
     [ -n "$responder_pid" ] && kill -0 "$responder_pid" 2>/dev/null && return 0
-    nice -n "$NICE" "$CG/tfmtp" "$ROOT" >> /tmp/tfmtp.log 2>&1 &
+    if [ -f "$ROOT/log.txt" ]; then mlog="$ROOT/log.txt"; else mlog=/dev/null; fi   # /tmp is RAM
+    nice -n "$NICE" "$CG/tfmtp" "$ROOT" >> "$mlog" 2>&1 &
     responder_pid=$!
     log "responder started pid=$responder_pid"
 }

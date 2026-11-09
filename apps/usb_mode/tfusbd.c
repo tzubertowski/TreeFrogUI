@@ -237,7 +237,11 @@ static void start_responder(void) {
         struct sched_param sp = { 0 };
         syscall(SYS_sched_setscheduler, 0, SCHED_IDLE, &sp);   /* only CPU the game does not use (musl has no sched_setscheduler) */
         setpriority(PRIO_PROCESS, 0, 19);
-        int fd = open("/tmp/tfmtp.log", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        /* per-request log only in debug mode (TreeFrog convention: an
+           empty log.txt in the SD root); /tmp is RAM and must not grow */
+        int fd = access(ROOT "/log.txt", F_OK) == 0
+                 ? open(ROOT "/log.txt", O_WRONLY | O_APPEND)
+                 : open("/dev/null", O_WRONLY);
         int nul = open("/dev/null", O_RDONLY);
         dup2(nul, 0); dup2(fd, 1); dup2(fd, 2);
         execl(CG "/tfmtp", "tfmtp", ROOT, (char *)NULL);
