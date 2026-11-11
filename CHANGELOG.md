@@ -10,6 +10,9 @@ Permanent project history. Per-release announcements are kept separately in
   option, and ProMinimal's compact settings and Apps-in-Settings layout. Added
   per-style controls for settings layout, pills, fonts, quick resume,
   auto-save/load, backgrounds, recents, battery indicators, and Apps placement.
+- **v1.9.0_f prerelease:** Set ProMinimal to start in Recents, restored the
+  previous Alium Nunito size 23 default for the other styles, and migrated
+  existing Start in Recents opt-ins into the user override settings.
 
 ## 2026-10-27
 

@@ -9,6 +9,7 @@
   "background_images": false,
   "game_switcher": true,
   "apps_in_settings": true,
+  "start_in_recents": true,
   "rounded_screenshots": true,
   "stock_battery": false,
   "battery_color": false
