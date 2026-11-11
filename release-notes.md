@@ -1,7 +1,28 @@
-# TreeFrogUI v1.9.0_d
+# TreeFrogUI v1.9.0_e prerelease
 
-## Changes since v1.9.0_c
+## FrogUI style profiles and ProMinimal
 
-- **Updated emulator cores:** Refreshed FCEUmm, SNES9x 2002, SNES9x 2005 Plus, GPSP, GPSP Multicore, and Gambatte with the November 9 builds. This includes SF3000 build integration fixes for SNES9x 2002 and GPSP.
+- **Per-style configuration:** FrogUI loads a JSON profile from
+  `frogui/style-profiles/<Style>.json`. Each style can define its own defaults
+  for `quick_resume`, `autosave_autoload`, `settings_layout`, `pillboxes`,
+  `font`, `font_size`, `background_images`, `game_switcher`,
+  `rounded_screenshots`, `stock_battery`, `battery_color`, and
+  `apps_in_settings`. Existing styles have explicit defaults; ProMinimal ships
+  with its compact Alium-inspired settings and Apps-in-Settings layout.
+- **User preference tracking:** Changes to profile-controlled settings are
+  stored separately from the active style defaults. Normal styles apply the
+  user's saved overrides when selected; `ignoreOverrides: true` lets a style
+  such as ProMinimal always use its own profile. Existing settings are migrated
+  so prior user choices are retained where they differ from the shipped style
+  defaults.
+- **Apps in Settings:** The Apps tab can be hidden and the existing Apps browser
+  opened from Settings → Library. Back returns to Settings. The option can be
+  enabled per style or changed in Settings.
+- **Settings and recents polish:** Adds the folder-based Settings layout,
+  decorative-pill control, rounded game-switcher screenshots, and ProMinimal's
+  compact font, typography, and display defaults.
 
-For a fresh installation, use the full archive and matching `install_first/<device>/` files. To update an existing installation, copy `update.zip` to the SD-card root and reboot.
+Style profiles are optional; a missing profile falls back to FrogUI's built-in
+defaults. For a fresh installation, use the full archive and matching
+`install_first/<device>/` files. To update an existing installation, copy
+`update.zip` to the SD-card root and reboot.
