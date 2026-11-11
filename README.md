@@ -85,8 +85,8 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 
 | Folder Name(s) | Target Console / System | Core Shared Library (`.so`) |
 |---|---|---|
-| **FC**, **nes** | NES / Famicom | `fceumm_libretro.so` |
-| **NES**, **nesq** | NES / Famicom (fast) | `quicknes_libretro.so` |
+| **FC** | NES / Famicom | `fceumm_libretro.so` |
+| **nes**, **NES**, **nesq** | NES / Famicom (fast default) | `quicknes_libretro.so` |
 | **nest** | NES / Famicom (accurate) | `nestopia_libretro.so` |
 | **fds** | Famicom Disk System | `fceumm_libretro.so` |
 | **SFC**, **snes** | Super Famicom / SNES | `snes9x2005_plus_libretro.so` |
