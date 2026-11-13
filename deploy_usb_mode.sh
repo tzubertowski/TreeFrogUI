@@ -9,6 +9,13 @@ MTP_ENTRY="$REPO/apps/usb_mode/usb_mtp.sh"
 HOST_ENTRY="$REPO/apps/usb_mode/usb_host.sh"
 MTP_SERVER="$REPO/apps/usb_mode/mtp-server"
 MTP_EXIT_WATCHER="$REPO/apps/usb_mode/usb_exit_watcher"
+MTP_LAZY="$REPO/apps/usb_mode/tfmtp"
+USB_DAEMON="$REPO/apps/usb_mode/tfusbd"
+USB_DAEMON_CTL="$REPO/apps/usb_mode/tfusbd.sh"
+KEY_TOOL="$REPO/apps/usb_mode/tfkey"
+REC_TOOL="$REPO/apps/usb_mode/tfrec"
+REC_SHIM="$REPO/apps/usb_mode/tfshim_gb350.so"
+REC_SHIM_TF="$REPO/apps/usb_mode/tfshim.so"
 MODULE="$REPO/apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko"
 MTP_MODULE="$REPO/apps/usb_mode/modules/4.4.186-release/usb_f_mtp.ko"
 LAUNCHER="$REPO/release/latest/release/install_first/r36hd/cubegm/zhijack.sh"
@@ -24,6 +31,13 @@ validate_sources() {
     [ -x "$HOST_ENTRY" ] || die "missing USB host entrypoint: $HOST_ENTRY"
     [ -x "$MTP_SERVER" ] || die "missing MTP responder: $MTP_SERVER"
     [ -x "$MTP_EXIT_WATCHER" ] || die "missing MTP exit watcher: $MTP_EXIT_WATCHER"
+    [ -x "$MTP_LAZY" ] || die "missing lazy MTP responder: $MTP_LAZY"
+    [ -x "$USB_DAEMON" ] || die "missing background USB service: $USB_DAEMON"
+    [ -x "$USB_DAEMON_CTL" ] || die "missing background USB service control script: $USB_DAEMON_CTL"
+    [ -x "$KEY_TOOL" ] || die "missing button tool: $KEY_TOOL"
+    [ -x "$REC_TOOL" ] || die "missing recorder: $REC_TOOL"
+    [ -f "$REC_SHIM" ] || die "missing capture layer: $REC_SHIM"
+    [ -f "$REC_SHIM_TF" ] || die "missing capture layer: $REC_SHIM_TF"
     [ -f "$MODULE" ] || die "missing module: $MODULE"
     [ -f "$MTP_MODULE" ] || die "missing MTP module: $MTP_MODULE"
     [ -x "$LAUNCHER" ] || die "missing generated launcher: $LAUNCHER"
@@ -115,6 +129,13 @@ install -m 0755 "$MTP_ENTRY" "$MOUNT/cubegm/usb_mtp.sh"
 install -m 0755 "$HOST_ENTRY" "$MOUNT/cubegm/usb_host.sh"
 install -m 0755 "$MTP_SERVER" "$MOUNT/cubegm/mtp-server"
 install -m 0755 "$MTP_EXIT_WATCHER" "$MOUNT/cubegm/usb_exit_watcher"
+install -m 0755 "$MTP_LAZY" "$MOUNT/cubegm/tfmtp"
+install -m 0755 "$USB_DAEMON" "$MOUNT/cubegm/tfusbd"
+install -m 0755 "$USB_DAEMON_CTL" "$MOUNT/cubegm/tfusbd.sh"
+install -m 0755 "$KEY_TOOL" "$MOUNT/cubegm/tfkey"
+install -m 0755 "$REC_TOOL" "$MOUNT/cubegm/tfrec"
+install -m 0644 "$REC_SHIM" "$MOUNT/cubegm/tfshim_gb350.so"
+install -m 0644 "$REC_SHIM_TF" "$MOUNT/cubegm/tfshim.so"
 install -m 0644 "$MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mass_storage.ko"
 install -m 0644 "$MTP_MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mtp.ko"
 install -m 0644 "$CORE" "$MOUNT/cubegm/cores/frogui_libretro.so"
@@ -133,6 +154,13 @@ verify_equal "$MTP_ENTRY" "$MOUNT/cubegm/usb_mtp.sh" usb_mtp.sh
 verify_equal "$HOST_ENTRY" "$MOUNT/cubegm/usb_host.sh" usb_host.sh
 verify_equal "$MTP_SERVER" "$MOUNT/cubegm/mtp-server" mtp-server
 verify_equal "$MTP_EXIT_WATCHER" "$MOUNT/cubegm/usb_exit_watcher" usb_exit_watcher
+verify_equal "$MTP_LAZY" "$MOUNT/cubegm/tfmtp" tfmtp
+verify_equal "$USB_DAEMON" "$MOUNT/cubegm/tfusbd" tfusbd
+verify_equal "$USB_DAEMON_CTL" "$MOUNT/cubegm/tfusbd.sh" tfusbd.sh
+verify_equal "$KEY_TOOL" "$MOUNT/cubegm/tfkey" tfkey
+verify_equal "$REC_TOOL" "$MOUNT/cubegm/tfrec" tfrec
+verify_equal "$REC_SHIM" "$MOUNT/cubegm/tfshim_gb350.so" tfshim_gb350.so
+verify_equal "$REC_SHIM_TF" "$MOUNT/cubegm/tfshim.so" tfshim.so
 verify_equal "$MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mass_storage.ko" usb_f_mass_storage.ko
 verify_equal "$MTP_MODULE" "$MOUNT/cubegm/modules/4.4.186-release/usb_f_mtp.ko" usb_f_mtp.ko
 verify_equal "$LAUNCHER" "$MOUNT/cubegm/zhijack.sh" zhijack.sh

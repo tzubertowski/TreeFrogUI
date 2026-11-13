@@ -6,6 +6,7 @@ cd "$(dirname "$0")/.."
 SCRIPT=apps/usb_mode/usb_mode.sh
 MODULE=apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko
 EXIT_WATCHER=apps/usb_mode/usb_exit_watcher
+LAZY_MTP=apps/usb_mode/tfmtp
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
@@ -24,6 +25,37 @@ grep -q 'apps/usb_mode/usb_exit_watcher' build_release.sh ||
     fail "release does not package MTP exit watcher"
 file "$EXIT_WATCHER" | grep -q 'ELF 32-bit LSB.*MIPS' ||
     fail "MTP exit watcher has wrong architecture"
+grep -q 'apps/usb_mode/tfmtp' build_release.sh ||
+    fail "release does not package the lazy MTP responder (tfmtp)"
+file "$LAZY_MTP" | grep -q 'ELF 32-bit LSB.*MIPS' ||
+    fail "tfmtp has wrong architecture"
+grep -q 'cubegm/tfmtp' "$SCRIPT" ||
+    fail "usb_mode.sh does not prefer tfmtp"
+for b in tfusbd tfkey; do
+    grep -q "apps/usb_mode/$b " build_release.sh ||
+        fail "release does not package $b"
+    file "apps/usb_mode/$b" | grep -q 'ELF 32-bit LSB.*MIPS' ||
+        fail "$b has wrong architecture"
+done
+grep -q 'apps/usb_mode/tfusbd.sh' build_release.sh ||
+    fail "release does not package tfusbd.sh"
+sh -n apps/usb_mode/tfusbd.sh || fail "tfusbd.sh has a syntax error"
+grep -q 'cubegm/tfusbd.on' hijack/zhijack.tpl.sh ||
+    fail "zhijack template does not start tfusbd"
+grep -q 'tfusbd.pid' apps/usb_mode/usb_mtp.sh ||
+    fail "usb_mtp.sh does not step aside for tfusbd"
+for b in tfrec tfshim_gb350.so tfshim.so; do
+    grep -q "apps/usb_mode/$b " build_release.sh ||
+        fail "release does not package $b"
+    file "apps/usb_mode/$b" | grep -q 'ELF 32-bit LSB.*MIPS' ||
+        fail "$b has wrong architecture"
+done
+grep -q 'PICOARCH_DRIVER=/mnt/sdcard/cubegm/tfshim_gb350.so' hijack/zhijack.tpl.sh ||
+    fail "zhijack template does not offer the capture layer"
+grep -q 'cubegm/tfshim.on' hijack/zhijack.tpl.sh ||
+    fail "capture layer must stay opt-in (cubegm/tfshim.on)"
+grep -q 'treefrog_mtp_exit' apps/usb_mode/tfusbd.c ||
+    fail "tfusbd must end menu MTP sessions like the B button (SIGKILL blanks the display)"
 grep -q 'apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko' build_release.sh ||
     fail "release does not package module"
 
