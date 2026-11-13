@@ -15,7 +15,12 @@ permalink: /scraper/
   <h2 id="scraper-output-title">Put the artwork on your card</h2>
   <ol class="installer-steps">
     <li><strong>Download the ZIP.</strong><span>When the scrape finishes, save the artwork ZIP to your computer.</span></li>
-    <li><strong>Extract it beside your ROM folders.</strong><span>Use the same folder level you selected below: the SD card root, the <code>Roms</code> folder, or the system folder. Keep the folders from the ZIP so each image lands beside the right games.</span></li>
+    <li>
+      <strong id="extract-title-default">Extract it beside your ROM folders.</strong>
+      <span id="extract-copy-default">Use the same folder level you selected below: the SD card root, the <code>Roms</code> folder, or the system folder. Keep the folders from the ZIP so each image lands beside the right games.</span>
+      <strong id="extract-title-muos" hidden>Extract it at the SD card root.</strong>
+      <span id="extract-copy-muos" hidden>For muOS, extract the ZIP at the root of the SD card, even if you selected the <code>Roms</code> folder or a system folder. The ZIP contains the <code>MUOS/info/catalogue/...</code> paths.</span>
+    </li>
     <li><strong>Eject the card safely and check your games.</strong><span>Put the card back in your handheld and open the game list. The selected frontend layout determines where the artwork is installed.</span></li>
   </ol>
   <p class="quiet">Prefer a desktop app? <a href="https://github.com/tzubertowski/mini-scraper-cfw/releases">Mini Scraper CFW</a> is the standalone alternative.</p>

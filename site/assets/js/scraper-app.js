@@ -179,6 +179,7 @@ function renderLibrary() {
   $('start').disabled = false;
   const detected = detectFormat([...files.keys()]);
   if (detected) $('format').value = detected;
+  updateExtractInstructions();
   $('scraper-message').textContent = '';
   schedulePreviews();
 }
@@ -769,16 +770,25 @@ function updateDirectButtons() {
   $('cleanup').hidden = !allowed;
 }
 
+function updateExtractInstructions() {
+  const muos = $('format').value === 'muos';
+  $('extract-title-default').hidden = muos;
+  $('extract-copy-default').hidden = muos;
+  $('extract-title-muos').hidden = !muos;
+  $('extract-copy-muos').hidden = !muos;
+}
+
 function setMessage(error) { $('scraper-message').textContent = error instanceof Error ? error.message : String(error); }
 
 $('choose-folder').addEventListener('click', () => chooseDirectory().catch(setMessage));
 $('folder-input').addEventListener('change', (event) => { try { chooseFiles(event); } catch (e) { setMessage(e); } });
 $('source').addEventListener('change', () => { $('ra-fields').hidden = $('source').value !== 'retroachievements'; });
-$('format').addEventListener('change', () => { document.querySelector('.esde-setting').hidden = $('format').value !== 'esde'; updateDirectButtons(); });
+$('format').addEventListener('change', () => { document.querySelector('.esde-setting').hidden = $('format').value !== 'esde'; updateDirectButtons(); updateExtractInstructions(); });
 for (const id of ['source', 'format', 'art-type', 'width', 'height', 'ra-user', 'ra-key', 'ai', 'ai-url', 'ai-model', 'ai-key', 'regions']) $(id).addEventListener('input', schedulePreviews);
 for (const id of ['source', 'format', 'art-type', 'ai']) $(id).addEventListener('change', schedulePreviews);
 $('start').addEventListener('click', () => run().catch(setMessage));
 $('write').addEventListener('click', () => { writeDirectly = true; run().catch(setMessage).finally(() => { writeDirectly = false; }); });
 $('cleanup').addEventListener('click', () => cleanup().catch(setMessage));
 $('cancel').addEventListener('click', () => controller?.abort());
+updateExtractInstructions();
 schedulePreviews();
