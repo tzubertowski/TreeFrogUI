@@ -460,7 +460,7 @@ stays happy.
 2. Copy `cubegm/`, `frogui/`, `roms/`, `MD/` onto the SD root (merge/overwrite).
 3. Copy the contents of **`install_first/<your-device>/`** onto the SD root too
    (REQUIRED: it carries the launcher script and autorun setup for your device):
-   - `install_first/r36sx/`    → R36SX (v2.6 and v2.7 - same xml)
+   - `install_first/r36sx/`    → R36SX v2.6/v2.7 and v3.0 (use the v2.7 setup for v3.0 per user reports)
    - `install_first/sf3000/`   → SF3000
    - `install_first/sf3000hd_nohdmi/` → SF3000HD without HDMI (SF3000 boot/display path)
    - `install_first/sf3500/`   → SF3500

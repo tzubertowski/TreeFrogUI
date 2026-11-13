@@ -6,7 +6,7 @@
 
 A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds - R36SX, SF3000, SF3500, GB350 and more (full list below). It replaces the stock menu and runs hundreds of retro systems.
 
-**Supported devices:** R36SX (v2.6 & v2.7), **R36 HD** (and R36SX clones - see [install guide](install.md#r36sx-clones-r36hd-etc)), SF3000, SF3000 HD, SF3000HD without HDMI, SF3100, SF3500, and GB350.
+**Supported devices:** R36SX (v2.6 & v2.7; v3.0 using the v2.7 setup per user reports), **R36 HD** (and R36SX clones - see [install guide](install.md#r36sx-clones-r36hd-etc)), SF3000, SF3000 HD, SF3000HD without HDMI, SF3100, SF3500, and GB350.
 
 ![UI Preview on SF3000 Console](console.jpg)
 
@@ -473,7 +473,7 @@ treefrog-ui/
 
 > [!NOTE]
 > One package now supports **seven device variants**, auto-detected at boot from the device
-> tree: **R36SX** (v2.6 / v2.7), **SF3000**, **SF3000 HD**, **SF3000HD without HDMI**, **SF3100**, **SF3500**,
+> tree: **R36SX** (v2.6 / v2.7; v3.0 using the v2.7 setup per user reports), **SF3000**, **SF3000 HD**, **SF3000HD without HDMI**, **SF3100**, **SF3500**,
 > and **GB350**. SF3000 HD, SF3100 and SF3500 share the same 854×480 panel + driver
 > (HD/SF3100 report as "SF3500" in the log, expected). GB350 is a 640×480 4:3
 > device. See the [install guide](install.md) for the per-device stock backup and

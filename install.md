@@ -4,7 +4,7 @@ One TreeFrogUI package supports **eight device variants** - it auto-detects whic
 at boot. Pick your device below, grab its required backup, then follow the same
 install steps for everyone.
 
-Supported: **R36SX** (v2.6 / v2.7) · **R36HD** · **SF3000** · **SF3000 HD** ·
+Supported: **R36SX** (v2.6 / v2.7; v3.0 using the v2.7 setup) · **R36HD** · **SF3000** · **SF3000 HD** ·
 **SF3000HD without HDMI** · **SF3100** · **SF3500** · **GB350**.
 
 > [!CAUTION]
@@ -46,6 +46,14 @@ factory card, or substitute a different backup.
 - Install folder: **`install_first/r36sx/`** (same xml as v2.6)
 - Boot logo: included in this folder (no action needed)
 - Clones (R36HD, etc.) run a different kernel/DTB - see [R36SX clones](#r36sx-clones-r36hd-etc).
+</details>
+
+<details>
+<summary><b>R36SX (v3.0 - reported compatible)</b></summary>
+
+- 📦 For now, use the [R36SX v2.7 Minimal Backup](https://drive.google.com/file/d/12G3CQAWkaRMWbrY_YmGH8nstGbs1hB-O) as the setup base.
+- Install folder: **`install_first/r36sx/`**
+- Compatibility is based on user reports; this hardware revision has not been independently verified yet.
 </details>
 
 <details>
