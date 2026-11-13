@@ -2,6 +2,10 @@
 
 - Luna handles implementation; the main agent handles analysis/review when available.
 
+## Markdown formatting
+
+- Do not hard-wrap prose or list items in changelogs and release notes. Keep each paragraph and bullet on one source line and let GitHub wrap it; preserve explicit breaks only where the content requires them.
+
 ## Repository and branch workflow
 
 - **TreeFrogUI:** `/home/tomaszz/sf3000-work/sf3000_treefrogui`; integration

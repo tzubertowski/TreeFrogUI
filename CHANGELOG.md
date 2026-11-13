@@ -3,6 +3,11 @@
 Permanent project history. Per-release announcements are kept separately in
 [`release-notes.md`](release-notes.md).
 
+## 2026-11-13
+
+- **v2.0.0_a prerelease preparation:** Documented the experimental MuOS-inspired theme renderer, Explore Content layout hotkey, and theme ports. Marked community theme assets as demo-only pending license or permission confirmation for any stable release.
+- Set QuickNES as the default NES core and corrected the muOS scraper instructions to extract at the SD-card root.
+
 ## 2026-11-11
 
 - **v1.9.0_e prerelease:** Added optional per-style JSON profiles for FrogUI,

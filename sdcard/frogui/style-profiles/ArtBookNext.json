@@ -1,0 +1,16 @@
+{
+  "ignoreOverrides": false,
+  "quick_resume": false,
+  "autosave_autoload": true,
+  "settings_layout": "sections",
+  "pillboxes": true,
+  "font": "alium_Nunito.ttf",
+  "font_size": 23,
+  "background_images": true,
+  "game_switcher": true,
+  "apps_in_settings": false,
+  "start_in_recents": false,
+  "rounded_screenshots": false,
+  "stock_battery": true,
+  "battery_color": false
+}
