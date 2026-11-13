@@ -19,7 +19,14 @@ TRACE_LOG=/dev/null
 LOG=$TRACE_LOG
 RAM_LOG=/tmp/treefrog-usb-mode.log
 MODULE_DIR=${TF_USB_MODULE_DIR:-$MOUNTPOINT/cubegm/modules/$(uname -r)}
-MTP_RESPONDER=${TF_USB_MTP_RESPONDER:-$MOUNTPOINT/cubegm/mtp-server}
+# tfmtp = lazy responder (lists folders on demand, answers the PC instantly).
+# The stock mtp-server pre-indexes the whole card first (minutes on a full
+# card) and stays as the fallback when tfmtp is absent.
+if [ -z "${TF_USB_MTP_RESPONDER:-}" ] && [ -x "$MOUNTPOINT/cubegm/tfmtp" ]; then
+    MTP_RESPONDER=$MOUNTPOINT/cubegm/tfmtp
+else
+    MTP_RESPONDER=${TF_USB_MTP_RESPONDER:-$MOUNTPOINT/cubegm/mtp-server}
+fi
 MTP_EXIT_FLAG=/tmp/treefrog_mtp_exit
 MTP_EXIT_WATCHER=${TF_USB_MTP_EXIT_WATCHER:-$MOUNTPOINT/cubegm/usb_exit_watcher}
 mtp_pid=
@@ -333,8 +340,62 @@ create_mtp_gadget() {
     fi
 }
 
-run_mtp_mode() {
-    # MTP deliberately keeps /mnt/sdcard mounted; the responder accesses it
+# ---- Deep MTP tracing (only when log.txt exists, i.e. LOG != /dev/null) ----
+# Every 2 s: per-thread state / kernel wait channel / syscall / CPU ticks of the
+# responder, its open files (which card dir it is scanning, /dev/mtp_usb),
+# RSS, free RAM/swap, UDC state, plus all new kernel messages. With dynamic
+# debug, f_mtp logs each read (PC command) and write (console reply).
+mtp_trace_init() {
+    [ "$LOG" != /dev/null ] || return 0
+    awk '$3=="debugfs"{f=1} END{exit f?0:1}' /proc/mounts 2>/dev/null || mount -t debugfs none /sys/kernel/debug 2>/dev/null
+    dd=/sys/kernel/debug/dynamic_debug/control
+    if [ -w "$dd" ]; then
+        for m in usb_f_mtp libcomposite; do
+            if echo "module $m +pflt" > "$dd" 2>/dev/null; then log "TRACE dyndbg module=$m on"; else log "TRACE dyndbg module=$m rejected"; fi
+        done
+    else
+        log "TRACE dyndbg unavailable (no $dd)"
+    fi
+    log "TRACE mem: $(grep -E '^(MemTotal|MemFree|Cached|SwapTotal|SwapFree):' /proc/meminfo 2>/dev/null | tr -s ' ' | tr '\n' ' ')"
+    log "TRACE devnode: $(ls -l /dev/mtp_usb 2>&1)"
+    TR_LAST=$(dmesg 2>/dev/null | tail -n 1)
+    TR_T0=$(cut -d' ' -f1 /proc/uptime 2>/dev/null)
+    log "TRACE start uptime=$TR_T0 responder_pid=$mtp_pid"
+}
+
+mtp_trace_kmsg() {
+    [ "$LOG" != /dev/null ] || return 0
+    new=$(dmesg 2>/dev/null | awk -v L="$TR_LAST" 'f{print} $0==L{f=1}')
+    if [ -z "$new" ] && [ "$(dmesg 2>/dev/null | tail -n 1)" != "$TR_LAST" ]; then
+        new=$(dmesg 2>/dev/null | tail -n 40)   # ring buffer wrapped
+    fi
+    [ -n "$new" ] && printf '%s\n' "$new" | sed 's/^/KMSG /' >> "$LOG"
+    TR_LAST=$(dmesg 2>/dev/null | tail -n 1)
+}
+
+mtp_trace_tick() {  # $1 = seconds since responder start
+    [ "$LOG" != /dev/null ] || return 0
+    up=$(cut -d' ' -f1 /proc/uptime 2>/dev/null)
+    th=
+    for t in /proc/$mtp_pid/task/*; do
+        [ -r "$t/stat" ] || continue
+        st=$(awk '{print $3" cpu="$14+$15}' "$t/stat" 2>/dev/null)
+        wc=$(cat "$t/wchan" 2>/dev/null)
+        sc=$(cut -d' ' -f1 "$t/syscall" 2>/dev/null)
+        th="$th [${t##*/} $st wchan=${wc:-?} sys=${sc:-?}]"
+    done
+    fds=
+    for fd in /proc/$mtp_pid/fd/*; do
+        l=$(readlink "$fd" 2>/dev/null)
+        case "$l" in ''|/dev/null|pipe:*|socket:*|anon_inode:*) ;; *) fds="$fds ${fd##*/}=$l" ;; esac
+    done
+    rss=$(awk '/^VmRSS/{print $2}' /proc/$mtp_pid/status 2>/dev/null)
+    mf=$(awk '/^MemFree/{f=$2} /^SwapFree/{s=$2} END{print f"/"s}' /proc/meminfo 2>/dev/null)
+    log "TRACE t=${1}s up=$up udc=$udc_state rss=${rss}kB free/swap=${mf}kB threads:$th fds:$fds"
+    mtp_trace_kmsg
+}
+
+run_mtp_mode() {    # MTP deliberately keeps /mnt/sdcard mounted; the responder accesses it
     # through normal filesystem operations instead of exporting its block
     # device. It must therefore run from the SD only after gadget setup.
     # Keep prior sessions: a hard lock/reboot can otherwise erase the only
@@ -372,23 +433,26 @@ run_mtp_mode() {
             log "MTP_STALE_GADGET_REUSE path=$GADGET"
         fi
     fi
-    set_mtp_peripheral_role || fail "cannot switch USB to peripheral role"
-    n=0; while [ "$n" -lt 20 ] && [ ! -e "$SYS_ROOT/class/udc/$UDC_NAME" ]; do sleep 0.1; n=$((n+1)); done
-    [ -e "$SYS_ROOT/class/udc/$UDC_NAME" ] || fail "UDC $UDC_NAME did not appear"
+    # The gadget (configfs + /dev/mtp_usb) is created while the controller is
+    # still in host role: in peripheral role without a bound gadget, MUSB
+    # already pulls D+ and Windows reports "device descriptor request failed".
+    # The role is switched only right before binding (see below).
     create_mtp_gadget || fail "could not create MTP gadget"
     log "MTP_OS_DESC vendor=$(cat "$GADGET/os_desc/b_vendor_code" 2>/dev/null || echo missing) sign=$(cat "$GADGET/os_desc/qw_sign" 2>/dev/null || echo missing) use=$(cat "$GADGET/os_desc/use" 2>/dev/null || echo missing) compat=$(cat "$GADGET/functions/mtp.usb0/os_desc/interface.MTP/compatible_id" 2>/dev/null || echo missing)"
-    printf '%s\n' "$UDC_NAME" > "$GADGET/UDC" || fail "could not bind MTP UDC"
-    bound=1; mtp_mode=1
     [ -x "$MTP_RESPONDER" ] || fail "MTP responder missing: $MTP_RESPONDER"
     rm -f "$MTP_EXIT_FLAG"
-    log "MTP_READY mount=$MOUNTPOINT responder=$MTP_RESPONDER"
-    printf 'MTP USB ready. Eject/disconnect USB to exit.\n'
-    # Keep the responder in the background so the launcher can surface the
-    # actual UDC state.  Windows may take several seconds to bind WPD; showing
-    # CONNECTED only after the gadget reports configured avoids a misleading
-    # "ready" message while the cable is still negotiating.
+    # FIX (2026-11-08): the responder indexes the WHOLE card before it reads
+    # its first command (~200 objects/s here; a 34k-object card took ~170 s).
+    # Windows cancels OpenSession after ~30 s ("driver start failed",
+    # 0x802A0006) and does not retry until the cable is replugged, so the PC
+    # used to give up long before the responder was ready. Now: start the
+    # responder first, wait until it blocks in mtp_read (index done, ready for
+    # commands), and only then bind the UDC, which makes the PC see the device.
+    printf 'Preparing MTP: scanning SD card files, please wait...\n'
     "$MTP_RESPONDER" "$MOUNTPOINT" >>"$LOG" 2>&1 &
     mtp_pid=$!
+    udc_state=unbound
+    mtp_trace_init
     if [ -x "$MTP_EXIT_WATCHER" ]; then
         "$MTP_EXIT_WATCHER" "$mtp_pid" >/dev/null 2>&1 &
         exit_watcher_pid=$!
@@ -396,6 +460,31 @@ run_mtp_mode() {
     else
         log "MTP_EXIT_WATCHER unavailable path=$MTP_EXIT_WATCHER"
     fi
+    log "MTP_INDEX_WAIT responder=$mtp_pid"
+    idx_wait=0; idx_ready=0; idx_max=${TF_USB_MTP_INDEX_TIMEOUT:-900}
+    while kill -0 "$mtp_pid" 2>/dev/null; do
+        if [ "$(cat "/proc/$mtp_pid/wchan" 2>/dev/null)" = mtp_read ]; then idx_ready=1; break; fi
+        [ "$idx_wait" -ge "$idx_max" ] && break
+        idx_wait=$((idx_wait + 1))
+        [ $((idx_wait % 10)) -eq 0 ] && printf 'Preparing MTP: scanning SD card files... %ss (B = cancel)\n' "$idx_wait"
+        [ $((idx_wait % 2)) -eq 0 ] && mtp_trace_tick "$idx_wait"
+        sleep 1
+    done
+    if ! kill -0 "$mtp_pid" 2>/dev/null; then
+        log "MTP_ABORT responder exited before USB bind (B pressed or crash) after ${idx_wait}s"
+        wait "$mtp_pid" 2>/dev/null
+        [ -n "${exit_watcher_pid:-}" ] && kill "$exit_watcher_pid" 2>/dev/null || true
+        rm -f "$MTP_EXIT_FLAG"
+        return 0
+    fi
+    log "MTP_INDEX_DONE ready=$idx_ready after ${idx_wait}s"
+    set_mtp_peripheral_role || fail "cannot switch USB to peripheral role"
+    n=0; while [ "$n" -lt 20 ] && [ ! -e "$SYS_ROOT/class/udc/$UDC_NAME" ]; do sleep 0.1; n=$((n+1)); done
+    [ -e "$SYS_ROOT/class/udc/$UDC_NAME" ] || fail "UDC $UDC_NAME did not appear"
+    printf '%s\n' "$UDC_NAME" > "$GADGET/UDC" || fail "could not bind MTP UDC"
+    bound=1; mtp_mode=1
+    log "MTP_READY mount=$MOUNTPOINT responder=$MTP_RESPONDER"
+    printf 'MTP USB ready. Eject/disconnect USB to exit.\n'
     connected_reported=0
     while kill -0 "$mtp_pid" 2>/dev/null; do
         udc_state=$(cat "$SYS_ROOT/class/udc/$UDC_NAME/state" 2>/dev/null || echo unknown)
@@ -404,10 +493,13 @@ run_mtp_mode() {
             printf 'CONNECTED - TreeFrogUI MTP is mounted on the PC.\n'
             connected_reported=1
         fi
+        hb_n=$((${hb_n:-0} + 1))
+        [ $((hb_n % 2)) -eq 0 ] && mtp_trace_tick "$hb_n"
         sleep 1
     done
     wait "$mtp_pid"
     mtp_rc=$?
+    mtp_trace_kmsg
     [ -n "${exit_watcher_pid:-}" ] && kill "$exit_watcher_pid" 2>/dev/null || true
     log "MTP_EXIT rc=$mtp_rc"
     if [ -f "$MTP_EXIT_FLAG" ]; then
