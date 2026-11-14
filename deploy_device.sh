@@ -10,7 +10,7 @@
 # is deployed. Optional development payloads:
 #   release, test-games, test-media, perf-test-roms, duke3d-data, undertale-data, openlara-data, vvvvvv, openbor, vvvvvv-data, clean-themes, picoarch, picoarch-hi, frogui, duke3d, butterscotch, picante8, openclaw, dsperate, frogshell, ebook, pcsx4all, pcsx4all-test-game, ps1-bios, pcsx4all-config,
 #   tic80, vecx, j2me, j2me-debug, o2em, o2em-test, c64-test, launcher, snesz-comparison, pokket,
-#   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test, froggyreader
+#   mame2000, mame2000-mslug, mame-test, amstrad-cap32-test, froggyreader, muos-frontend-mvp
 #
 # This script never formats a card and never uses rsync --delete.
 set -euo pipefail
@@ -32,7 +32,7 @@ die() {
 usage() {
     cat >&2 <<EOF
 usage: $0 <r36sx|r36hd|sf3000|sf3000hd_nohdmi|sf3500> [payload ...]
-    payloads: release test-games test-media perf-test-roms duke3d-data undertale-data openlara-data vvvvvv openbor vvvvvv-data clean-themes picoarch picoarch-hi frogui duke3d butterscotch picante8 openclaw dsperate frogshell ebook pcsx4all pcsx4all-test-game ps1-bios pcsx4all-config tic80 vecx j2me j2me-debug o2em o2em-test c64-test launcher snesz-comparison pokket mame2000 mame2000-mslug mame-test amstrad-cap32-test scummvm froggyreader
+    payloads: release test-games test-media perf-test-roms duke3d-data undertale-data openlara-data vvvvvv openbor vvvvvv-data clean-themes picoarch picoarch-hi frogui duke3d butterscotch picante8 openclaw dsperate frogshell ebook pcsx4all pcsx4all-test-game ps1-bios pcsx4all-config tic80 vecx j2me j2me-debug o2em o2em-test c64-test launcher snesz-comparison pokket mame2000 mame2000-mslug mame-test amstrad-cap32-test scummvm froggyreader muos-frontend-mvp
 default:  release
 EOF
     exit 2
@@ -77,15 +77,15 @@ readonly -a PAYLOADS=("$@")
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
-        release|test-games|test-media|perf-test-roms|snesz-comparison|pokket|duke3d-data|undertale-data|openlara-data|vvvvvv|openbor|vvvvvv-data|clean-themes|picoarch|picoarch-hi|frogui|duke3d|butterscotch|picante8|openclaw|dsperate|frogshell|ebook|pcsx4all|pcsx4all-test-game|ps1-bios|pcsx4all-config|tic80|vecx|j2me|j2me-debug|o2em|o2em-test|c64-test|launcher|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test|scummvm|froggyreader) ;;
+        release|test-games|test-media|perf-test-roms|snesz-comparison|pokket|duke3d-data|undertale-data|openlara-data|vvvvvv|openbor|vvvvvv-data|clean-themes|picoarch|picoarch-hi|frogui|duke3d|butterscotch|picante8|openclaw|dsperate|frogshell|ebook|pcsx4all|pcsx4all-test-game|ps1-bios|pcsx4all-config|tic80|vecx|j2me|j2me-debug|o2em|o2em-test|c64-test|launcher|mame2000|mame2000-mslug|mame-test|amstrad-cap32-test|scummvm|froggyreader|muos-frontend-mvp) ;;
         *) usage ;;
     esac
 done
 
 [ "$EUID" -eq 0 ] || die "run through pkexec"
 
-for tool in blkid cut dirname findmnt fsck.vfat grep lsblk mkdir mktemp mount \
-    mountpoint readlink rm rsync sed sha256sum sync umount; do
+for tool in blkid cp cut date dirname findmnt fsck.vfat grep lsblk mkdir mktemp mount \
+    mountpoint mv readlink rm rsync sed sha256sum sync umount; do
     command -v "$tool" >/dev/null || die "required command is missing: $tool"
 done
 
@@ -563,6 +563,75 @@ deploy_one() {
         [ "$src_hash" = "$dst_hash" ] || die "classes.zip verification failed"
         echo "j2me classes deployed: $dst_hash"
     fi
+}
+
+deploy_muos_frontend_mvp() {
+    local src="$WORK/muos_frontend_mvp/out/install/cubegm/cores/muos_frontend_mvp_libretro.so"
+    local dst="$MOUNT/cubegm/cores/muos_frontend_mvp_libretro.so"
+    local candidate="$WORK/muos_frontend_mvp/out/install/cubegm/muos_frontend_mvp"
+    local theme_src="$candidate/run/storage/theme/MinUIfied.-.Horizontal"
+    local theme_dst="$MOUNT/cubegm/muos_frontend_mvp/run/storage/theme/MinUIfied.-.Horizontal"
+    local override_src="$candidate/run/storage/theme/override/muxlaunch.ini"
+    local override_dst="$MOUNT/cubegm/muos_frontend_mvp/run/storage/theme/override/muxlaunch.ini"
+    local assign_src="$candidate/run/storage/info/manifest/assign.json"
+    local assign_dst="$MOUNT/cubegm/muos_frontend_mvp/run/storage/info/manifest/assign.json"
+    local coredb_src="$candidate/opt/share/info/manifest/core/treefrogui"
+    local coredb_dst="$MOUNT/cubegm/muos_frontend_mvp/opt/share/info/manifest/core/treefrogui"
+    local theme_active="$MOUNT/cubegm/muos_frontend_mvp/opt/config/theme/active"
+    local backup="$dst.pre-$(date -u +%Y%m%dT%H%M%SZ)"
+    local tmp="$dst.tmp.$$" active_tmp="$theme_active.tmp.$$" src_hash dst_hash old_hash
+    [ -s "$src" ] || die "QEMU-verified MuOS MVP core missing: $src"
+    [ -s "$theme_src/640x480/font/default.bin" ] || die "QEMU-verified MinUIfied 640x480 theme missing"
+    [ -s "$override_src" ] || die "QEMU-verified MuOS launcher style override missing"
+    [ -s "$assign_src" ] && [ -d "$coredb_src" ] || die "FrogUI MuOS core assignment metadata missing"
+    [ -f "$dst" ] && [ ! -L "$dst" ] || die "installed MuOS MVP core missing or unsafe: $dst"
+    [ -f "$MOUNT/cubegm/zhijack.sh" ] &&
+        grep -Fqx 'FROGUI_CORE=/mnt/sdcard/cubegm/cores/muos_frontend_mvp_libretro.so' \
+            "$MOUNT/cubegm/zhijack.sh" ||
+        die "MuOS MVP is not the selected frontend in zhijack.sh"
+    [ -f "$MOUNT/cubegm/zhijack.sh.muos_frontend_mvp.bak" ] ||
+        die "MuOS MVP launcher rollback backup missing"
+    mkdir -p "${theme_dst%/*}" "${override_dst%/*}" "${assign_dst%/*}" "${coredb_dst%/*}" "${theme_active%/*}"
+    rsync -a "$theme_src/" "$theme_dst/" || die "MinUIfied theme copy failed"
+    diff -qr "$theme_src" "$theme_dst" >/dev/null || die "MinUIfied theme verification failed"
+    rsync -tc "$override_src" "$override_dst.tmp.$$" || die "MuOS launcher style override copy failed"
+    cmp -s "$override_src" "$override_dst.tmp.$$" || { rm -f "$override_dst.tmp.$$"; die "MuOS launcher style override verification failed"; }
+    mv -f "$override_dst.tmp.$$" "$override_dst"
+    rsync -a "$coredb_src/" "$coredb_dst/" || die "FrogUI MuOS CoreDB copy failed"
+    diff -qr "$coredb_src" "$coredb_dst" >/dev/null || die "FrogUI MuOS CoreDB verification failed"
+    local assign_tmp="$assign_dst.tmp.$$"
+    rsync -tc "$assign_src" "$assign_tmp" || { rm -f "$assign_tmp"; die "FrogUI assignment index copy failed"; }
+    cmp -s "$assign_src" "$assign_tmp" || { rm -f "$assign_tmp"; die "FrogUI assignment index verification failed"; }
+    mv -f "$assign_tmp" "$assign_dst"
+
+    src_hash="$(sha256sum "$src")"; src_hash="${src_hash%% *}"
+    dst_hash="$(sha256sum "$dst")"; dst_hash="${dst_hash%% *}"
+    if [ "$src_hash" != "$dst_hash" ]; then
+        [ ! -e "$backup" ] || die "refusing to overwrite backup: $backup"
+        cp -p "$dst" "$backup"
+        old_hash="$(sha256sum "$backup")"; old_hash="${old_hash%% *}"
+        [ "$dst_hash" = "$old_hash" ] || die "previous MuOS MVP backup verification failed"
+        rsync -tc "$src" "$tmp" || { rm -f "$tmp"; die "MuOS MVP copy failed"; }
+        dst_hash="$(sha256sum "$tmp")"; dst_hash="${dst_hash%% *}"
+        [ "$src_hash" = "$dst_hash" ] || { rm -f "$tmp"; die "MuOS MVP temporary copy verification failed"; }
+        mv -f "$tmp" "$dst"
+    fi
+    sync
+    dst_hash="$(sha256sum "$dst")"; dst_hash="${dst_hash%% *}"
+    if [ "$src_hash" != "$dst_hash" ]; then
+        cp -p "$backup" "$tmp"
+        mv -f "$tmp" "$dst"
+        die "MuOS MVP deployment verification failed; previous core restored"
+    fi
+    if [ -f "$theme_active" ] && ! grep -Fqx 'MinUIfied.-.Horizontal' "$theme_active"; then
+        [ ! -e "$theme_active.pre-muos-frontend-mvp" ] || die "MuOS active-theme backup already exists"
+        cp -p "$theme_active" "$theme_active.pre-muos-frontend-mvp"
+    fi
+    printf '%s\n' 'MinUIfied.-.Horizontal' > "$active_tmp"
+    mv -f "$active_tmp" "$theme_active"
+    grep -Fqx 'MinUIfied.-.Horizontal' "$theme_active" || die "MinUIfied theme activation failed"
+    echo "MuOS MVP assets deployed and verified: $dst_hash"
+    [ "$src_hash" = "$dst_hash" ] && [ -e "$backup" ] && echo "Previous core saved as ${backup##*/}"
 }
 
 deploy_pokket() {
@@ -1258,6 +1327,7 @@ deploy_openlara_data() {
 
 for payload in "${PAYLOADS[@]}"; do
     case "$payload" in
+        muos-frontend-mvp) deploy_muos_frontend_mvp ;;
         release) deploy_release ;;
         pokket) deploy_pokket ;;
         froggyreader) deploy_froggyreader ;;
@@ -1283,7 +1353,7 @@ for payload in "${PAYLOADS[@]}"; do
 done
 
 case "${PAYLOADS[*]}" in
-    vvvvvv|openbor|snesz-comparison) ;;
+    vvvvvv|openbor|snesz-comparison|muos-frontend-mvp) ;;
     *) migrate_j2me_saves ;;
 esac
 
