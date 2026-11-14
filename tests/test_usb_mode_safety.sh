@@ -6,6 +6,7 @@ cd "$(dirname "$0")/.."
 SCRIPT=apps/usb_mode/usb_mode.sh
 MODULE=apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko
 EXIT_WATCHER=apps/usb_mode/usb_exit_watcher
+LAZY_MTP=apps/usb_mode/tfmtp
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT INT TERM
 
@@ -24,6 +25,12 @@ grep -q 'apps/usb_mode/usb_exit_watcher' build_release.sh ||
     fail "release does not package MTP exit watcher"
 file "$EXIT_WATCHER" | grep -q 'ELF 32-bit LSB.*MIPS' ||
     fail "MTP exit watcher has wrong architecture"
+grep -q 'apps/usb_mode/tfmtp' build_release.sh ||
+    fail "release does not package the lazy MTP responder (tfmtp)"
+file "$LAZY_MTP" | grep -q 'ELF 32-bit LSB.*MIPS' ||
+    fail "tfmtp has wrong architecture"
+grep -q 'cubegm/tfmtp' "$SCRIPT" ||
+    fail "usb_mode.sh does not prefer tfmtp"
 grep -q 'apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko' build_release.sh ||
     fail "release does not package module"
 

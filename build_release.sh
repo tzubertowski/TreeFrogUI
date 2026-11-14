@@ -329,6 +329,7 @@ install -m 0755 apps/powergpio "$OUT/cubegm/powergpio"
 install -m 0755 apps/usb_mode/usb_mtp.sh "$OUT/cubegm/usb_mtp.sh"
 install -m 0755 apps/usb_mode/mtp-server "$OUT/cubegm/mtp-server"
 install -m 0755 apps/usb_mode/usb_exit_watcher "$OUT/cubegm/usb_exit_watcher"
+install -m 0755 apps/usb_mode/tfmtp "$OUT/cubegm/tfmtp"
 mkdir -p "$OUT/cubegm/modules/4.4.186-release"
 install -m 0644 apps/usb_mode/modules/4.4.186-release/usb_f_mass_storage.ko \
     "$OUT/cubegm/modules/4.4.186-release/usb_f_mass_storage.ko"
