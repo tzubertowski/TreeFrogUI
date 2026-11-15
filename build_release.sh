@@ -57,6 +57,21 @@ OPENBOR_ROOT="${OPENBOR_ROOT:-$(pwd)/../OpenBOR-TreeFrogUI}"
 OPENBOR_CORE="${OPENBOR_CORE:-$OPENBOR_ROOT/build/sf3000/openbor_libretro.so}"
 SCUMMVM_CORE="${SCUMMVM_CORE:-$(pwd)/build/scummvm_libretro.so}"
 FROGGYREADER_CORE="${FROGGYREADER_CORE:-$(pwd)/build/froggyreader_libretro.so}"
+FROGGYTHEMES_ROOT="${FROGGYTHEMES_ROOT:-$(pwd)/../TreeFrogUI-Froggythemes}"
+FROGGYTHEMES_BIN="${FROGGYTHEMES_BIN:-$(pwd)/build/froggythemes.mipsel}"
+FROGGYTHEMES_PACK="$FROGGYTHEMES_ROOT/pack"
+FROGGYTHEMES_LICENSE="$FROGGYTHEMES_ROOT/LICENSE"
+FROGGYTHEMES_NOTICE="$FROGGYTHEMES_ROOT/NOTICE.md"
+FROGGYHWPROBE_ROOT="${FROGGYHWPROBE_ROOT:-$(pwd)/../froggyhwprobe}"
+FROGGYHWPROBE_BIN="${FROGGYHWPROBE_BIN:-$(pwd)/build/froggyhwprobe.mipsel}"
+FROGGYHWPROBE_PACK="$FROGGYHWPROBE_ROOT/pack"
+FROGGYHWPROBE_LICENSE="$FROGGYHWPROBE_ROOT/LICENSE"
+FROGGYHWPROBE_NOTICE="$FROGGYHWPROBE_ROOT/NOTICE.md"
+FROGGYBENCHMARK_ROOT="${FROGGYBENCHMARK_ROOT:-$(pwd)/../froggybenchmark}"
+FROGGYBENCHMARK_BIN="${FROGGYBENCHMARK_BIN:-$(pwd)/build/froggybenchmark.mipsel}"
+FROGGYBENCHMARK_PACK="$FROGGYBENCHMARK_ROOT/pack"
+FROGGYBENCHMARK_LICENSE="$FROGGYBENCHMARK_ROOT/LICENSE"
+FROGGYBENCHMARK_NOTICE="$FROGGYBENCHMARK_ROOT/NOTICE.md"
 SCUMMVM_LICENSE="${SCUMMVM_LICENSE:-$(pwd)/cores/FroggyScummvm/COPYING}"
 NDS_BANNER_NEXTUI="$(pwd)/assets/nds/nds-artbook-nextui.jpg"
 NDS_BANNER_NEXT="$(pwd)/assets/nds/nds-artbook-next.jpg"
@@ -177,6 +192,41 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -s "$OPENBOR_CORE" ] || { echo "missing OpenBOR libretro core: $OPENBOR_CORE (run ./build_all.sh)" >&2; exit 1; }
 [ -s "$SCUMMVM_CORE" ] || { echo "missing ScummVM libretro core: $SCUMMVM_CORE (run ./build_all.sh)" >&2; exit 1; }
 [ -s "$SCUMMVM_LICENSE" ] || { echo "missing ScummVM license: $SCUMMVM_LICENSE" >&2; exit 1; }
+[ -s "$FROGGYTHEMES_BIN" ] || { echo "missing FroggyThemes binary: $FROGGYTHEMES_BIN (run ./scripts/build_froggythemes.sh)" >&2; exit 1; }
+[ -s "$FROGGYTHEMES_LICENSE" ] || { echo "missing FroggyThemes license: $FROGGYTHEMES_LICENSE" >&2; exit 1; }
+[ -s "$FROGGYTHEMES_NOTICE" ] || { echo "missing FroggyThemes notices: $FROGGYTHEMES_NOTICE" >&2; exit 1; }
+for froggythemes_file in Froggythemes-app.sh active-frog.rgba run.sh \
+    README.txt libfreetype.so.6 libjpeg.so.9 libpng16.so.16 libz.so.1; do
+    [ -f "$FROGGYTHEMES_PACK/$froggythemes_file" ] ||
+        { echo "missing FroggyThemes runtime file: $FROGGYTHEMES_PACK/$froggythemes_file" >&2; exit 1; }
+done
+for diagnostics in hwprobe benchmark; do
+    case "$diagnostics" in
+        hwprobe)
+            diagnostics_pack="$FROGGYHWPROBE_PACK"
+            diagnostics_bin="$FROGGYHWPROBE_BIN"
+            diagnostics_license="$FROGGYHWPROBE_LICENSE"
+            diagnostics_notice="$FROGGYHWPROBE_NOTICE"
+            diagnostics_app="FroggyHWProbe-app.sh"
+            diagnostics_name="froggyhwprobe"
+            ;;
+        benchmark)
+            diagnostics_pack="$FROGGYBENCHMARK_PACK"
+            diagnostics_bin="$FROGGYBENCHMARK_BIN"
+            diagnostics_license="$FROGGYBENCHMARK_LICENSE"
+            diagnostics_notice="$FROGGYBENCHMARK_NOTICE"
+            diagnostics_app="FroggyBenchmark-app.sh"
+            diagnostics_name="froggybenchmark"
+            ;;
+    esac
+    [ -s "$diagnostics_bin" ] || { echo "missing $diagnostics_name binary: $diagnostics_bin" >&2; exit 1; }
+    [ -s "$diagnostics_license" ] || { echo "missing $diagnostics_name license: $diagnostics_license" >&2; exit 1; }
+    [ -s "$diagnostics_notice" ] || { echo "missing $diagnostics_name notices: $diagnostics_notice" >&2; exit 1; }
+    for diagnostics_file in "$diagnostics_app" run.sh README.txt; do
+        [ -f "$diagnostics_pack/$diagnostics_file" ] ||
+            { echo "missing $diagnostics_name runtime file: $diagnostics_pack/$diagnostics_file" >&2; exit 1; }
+    done
+done
 [ -f "$NDS_BANNER_NEXTUI" ] || { echo "missing NDS NextUI artwork: $NDS_BANNER_NEXTUI" >&2; exit 1; }
 [ -f "$NDS_BANNER_NEXT" ] || { echo "missing NDS Next artwork: $NDS_BANNER_NEXT" >&2; exit 1; }
 [ -f "$NDS_BANNER_NAO" ] || { echo "missing NDS Nao artwork: $NDS_BANNER_NAO" >&2; exit 1; }
@@ -199,6 +249,48 @@ cp_if_diff "$OPENBOR_CORE" "$STAGE/cubegm/cores/openbor_libretro.so"
 cp_if_diff "$SCUMMVM_CORE" "$STAGE/cubegm/cores/scummvm_libretro.so"
 cp_if_diff "$FROGGYREADER_CORE" "$STAGE/cubegm/cores/froggyreader_libretro.so"
 cp_if_diff "$SCUMMVM_LICENSE" "$STAGE/frogui/licenses/ScummVM.GPL-3.0"
+mkdir -p "$STAGE/cubegm/froggythemes"
+cp_if_diff "$FROGGYTHEMES_BIN" "$STAGE/cubegm/froggythemes/froggythemes.mipsel"
+cp_if_diff "$FROGGYTHEMES_PACK/active-frog.rgba" "$STAGE/cubegm/froggythemes/active-frog.rgba"
+cp_if_diff "$FROGGYTHEMES_PACK/run.sh" "$STAGE/cubegm/froggythemes/run.sh"
+cp_if_diff "$FROGGYTHEMES_PACK/README.txt" "$STAGE/cubegm/froggythemes/README.txt"
+for froggythemes_lib in libfreetype.so.6 libjpeg.so.9 libpng16.so.16 libz.so.1; do
+    cp_if_diff "$FROGGYTHEMES_PACK/$froggythemes_lib" "$STAGE/cubegm/froggythemes/$froggythemes_lib"
+done
+cp_if_diff "$FROGGYTHEMES_LICENSE" "$STAGE/frogui/licenses/FroggyThemes.GPL-3.0"
+cp_if_diff "$FROGGYTHEMES_NOTICE" "$STAGE/frogui/licenses/FroggyThemes.NOTICE.md"
+install -m 0755 "$FROGGYTHEMES_PACK/Froggythemes-app.sh" "$STAGE/cubegm/froggythemes.sh"
+for diagnostics in hwprobe benchmark; do
+    case "$diagnostics" in
+        hwprobe)
+            diagnostics_pack="$FROGGYHWPROBE_PACK"
+            diagnostics_bin="$FROGGYHWPROBE_BIN"
+            diagnostics_license="$FROGGYHWPROBE_LICENSE"
+            diagnostics_notice="$FROGGYHWPROBE_NOTICE"
+            diagnostics_app="FroggyHWProbe-app.sh"
+            diagnostics_name="froggyhwprobe"
+            diagnostics_license_name="FroggyHWProbe.GPL-3.0"
+            diagnostics_notice_name="FroggyHWProbe.NOTICE.md"
+            ;;
+        benchmark)
+            diagnostics_pack="$FROGGYBENCHMARK_PACK"
+            diagnostics_bin="$FROGGYBENCHMARK_BIN"
+            diagnostics_license="$FROGGYBENCHMARK_LICENSE"
+            diagnostics_notice="$FROGGYBENCHMARK_NOTICE"
+            diagnostics_app="FroggyBenchmark-app.sh"
+            diagnostics_name="froggybenchmark"
+            diagnostics_license_name="FroggyBenchmark.GPL-3.0"
+            diagnostics_notice_name="FroggyBenchmark.NOTICE.md"
+            ;;
+    esac
+    mkdir -p "$STAGE/cubegm/$diagnostics_name"
+    cp_if_diff "$diagnostics_bin" "$STAGE/cubegm/$diagnostics_name/$diagnostics_name.mipsel"
+    cp_if_diff "$diagnostics_pack/run.sh" "$STAGE/cubegm/$diagnostics_name/run.sh"
+    cp_if_diff "$diagnostics_pack/README.txt" "$STAGE/cubegm/$diagnostics_name/README.txt"
+    cp_if_diff "$diagnostics_license" "$STAGE/frogui/licenses/$diagnostics_license_name"
+    cp_if_diff "$diagnostics_notice" "$STAGE/frogui/licenses/$diagnostics_notice_name"
+    install -m 0755 "$diagnostics_pack/$diagnostics_app" "$STAGE/cubegm/$diagnostics_name.sh"
+done
 rm -f "$STAGE/cubegm/cores/fheroes2_libretro.so"
 mkdir -p "$STAGE/cubegm/bios"
 cp_if_diff "$J2ME_CLASSES" "$STAGE/cubegm/bios/classes.zip"
@@ -320,7 +412,7 @@ mkdir -p "$OUT/roms/epub/books"
 #     (retired boot), cubevol + generic driver.so (stock), *.bak / test bins (junk).
 # (boot logos are NOT shipped here - install_first/<dev>/ provides the device-correct
 #  xgame-logo.bmp, so no fix_bootlogo script is needed.)
-for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer ppsspp dsperate; do
+for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player image_viewer ppsspp dsperate froggythemes froggythemes.sh froggyhwprobe froggyhwprobe.sh froggybenchmark froggybenchmark.sh; do
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 install -m 0755 apps/usb_mode/usb_mode.sh "$OUT/cubegm/usb_mode.sh"
@@ -520,6 +612,23 @@ done
 [ -d "$OUT/roms/openbor" ] || fail "missing OpenBOR ROM folder"
 [ -s "$OUT/cubegm/cores/scummvm_libretro.so" ] || fail "missing ScummVM core"
 [ -s "$OUT/cubegm/cores/froggyreader_libretro.so" ] || fail "missing FroggyReader core"
+[ -x "$OUT/cubegm/froggythemes.sh" ] || fail "missing FroggyThemes Apps launcher"
+[ -x "$OUT/cubegm/froggythemes/froggythemes.mipsel" ] || fail "missing FroggyThemes binary"
+[ -x "$OUT/cubegm/froggythemes/run.sh" ] || fail "missing FroggyThemes runtime launcher"
+[ -f "$OUT/cubegm/froggythemes/active-frog.rgba" ] || fail "missing FroggyThemes active marker"
+[ -f "$OUT/cubegm/froggythemes/README.txt" ] || fail "missing FroggyThemes runtime README"
+[ -f "$OUT/frogui/licenses/FroggyThemes.GPL-3.0" ] || fail "missing FroggyThemes license"
+[ -f "$OUT/frogui/licenses/FroggyThemes.NOTICE.md" ] || fail "missing FroggyThemes notices"
+for diagnostics in froggyhwprobe froggybenchmark; do
+    [ -x "$OUT/cubegm/$diagnostics.sh" ] || fail "missing $diagnostics Apps launcher"
+    [ -x "$OUT/cubegm/$diagnostics/$diagnostics.mipsel" ] || fail "missing $diagnostics binary"
+    [ -x "$OUT/cubegm/$diagnostics/run.sh" ] || fail "missing $diagnostics runtime launcher"
+    [ -f "$OUT/cubegm/$diagnostics/README.txt" ] || fail "missing $diagnostics runtime README"
+done
+[ -f "$OUT/frogui/licenses/FroggyHWProbe.GPL-3.0" ] || fail "missing FroggyHWProbe license"
+[ -f "$OUT/frogui/licenses/FroggyHWProbe.NOTICE.md" ] || fail "missing FroggyHWProbe notices"
+[ -f "$OUT/frogui/licenses/FroggyBenchmark.GPL-3.0" ] || fail "missing FroggyBenchmark license"
+[ -f "$OUT/frogui/licenses/FroggyBenchmark.NOTICE.md" ] || fail "missing FroggyBenchmark notices"
 [ -d "$OUT/roms/epub/books" ] || fail "missing FroggyReader EPUB folder"
 [ -f "$OUT/roms/epub/Library.epub" ] || fail "missing FroggyReader library launcher"
 [ -f "$OUT/docs/cores/froggyreader.md" ] || fail "missing FroggyReader setup guide"
