@@ -24,6 +24,10 @@ if [[ -z "${FROGGYTHEMES_ROOT:-}" ]]; then
 fi
 FROGGYTHEMES_ROOT=${FROGGYTHEMES_ROOT:-$WORK_ROOT/TreeFrogUI-Froggythemes}
 FROGGYTHEMES_TOOLCHAIN_ROOT=${FROGGYTHEMES_TOOLCHAIN_ROOT:-$TOOLCHAIN/opt/ext-toolchain}
+FROGGYHWPROBE_ROOT=${FROGGYHWPROBE_ROOT:-$WORK_ROOT/froggyhwprobe}
+FROGGYBENCHMARK_ROOT=${FROGGYBENCHMARK_ROOT:-$WORK_ROOT/froggybenchmark}
+FROGGY_DIAGNOSTICS_TC=${FROGGY_DIAGNOSTICS_TC:-${SF3500_TC:-$WORK_ROOT/buildroot/output/host}}
+FROGGY_DIAGNOSTICS_REBUILD=${FROGGY_DIAGNOSTICS_REBUILD:-1}
 DSPERATE_SHA256=${DSPERATE_SHA256:-39c080709be1dca0056613b4f548aaffb1f0aaf18c1c988cdad3f37251e206a8}
 J2ME_HEAP_BYTES=${J2ME_HEAP_BYTES:-8388608}
 SOURCE_ID=$(git -C "$ROOT" rev-parse --short=7 HEAD)
@@ -39,6 +43,8 @@ for file in \
   "$ROOT/scripts/build_pokket.sh" \
   "$ROOT/scripts/build_froggyreader.sh" \
   "$ROOT/scripts/build_froggythemes.sh" \
+  "$ROOT/scripts/build_froggyhwprobe.sh" \
+  "$ROOT/scripts/build_froggybenchmark.sh" \
   "$PICANTE8_ROOT/Makefile" \
   "$EBOOK_ROOT/build_reader_sf.sh" \
   "$DSPERATE_ROOT/dsperate" \
@@ -48,7 +54,19 @@ for file in \
   "$FROGGYTHEMES_ROOT/pack/run.sh" \
   "$FROGGYTHEMES_ROOT/pack/README.txt" \
   "$FROGGYTHEMES_ROOT/LICENSE" \
-  "$FROGGYTHEMES_ROOT/NOTICE.md"; do
+  "$FROGGYTHEMES_ROOT/NOTICE.md" \
+  "$FROGGYHWPROBE_ROOT/build.sh" \
+  "$FROGGYHWPROBE_ROOT/pack/FroggyHWProbe-app.sh" \
+  "$FROGGYHWPROBE_ROOT/pack/run.sh" \
+  "$FROGGYHWPROBE_ROOT/pack/README.txt" \
+  "$FROGGYHWPROBE_ROOT/LICENSE" \
+  "$FROGGYHWPROBE_ROOT/NOTICE.md" \
+  "$FROGGYBENCHMARK_ROOT/build.sh" \
+  "$FROGGYBENCHMARK_ROOT/pack/FroggyBenchmark-app.sh" \
+  "$FROGGYBENCHMARK_ROOT/pack/run.sh" \
+  "$FROGGYBENCHMARK_ROOT/pack/README.txt" \
+  "$FROGGYBENCHMARK_ROOT/LICENSE" \
+  "$FROGGYBENCHMARK_ROOT/NOTICE.md"; do
   [[ -e "$file" ]] || { echo "Missing local build input: $file" >&2; exit 1; }
 done
 echo "$DSPERATE_SHA256  $DSPERATE_ROOT/dsperate" | sha256sum -c -
@@ -116,6 +134,22 @@ FROGGYTHEMES_ROOT="$FROGGYTHEMES_ROOT" \
 FROGGYTHEMES_TOOLCHAIN_ROOT="$FROGGYTHEMES_TOOLCHAIN_ROOT" \
   "$ROOT/scripts/build_froggythemes.sh"
 
+echo 'Building FroggyHWProbe...'
+WORK_ROOT="$WORK_ROOT" \
+FROGGYHWPROBE_ROOT="$FROGGYHWPROBE_ROOT" \
+FROGGYHWPROBE_BIN="$ROOT/build/froggyhwprobe.mipsel" \
+FROGGYHWPROBE_TC="$FROGGY_DIAGNOSTICS_TC" \
+FROGGYHWPROBE_REBUILD="$FROGGY_DIAGNOSTICS_REBUILD" \
+  "$ROOT/scripts/build_froggyhwprobe.sh"
+
+echo 'Building FroggyBenchmark...'
+WORK_ROOT="$WORK_ROOT" \
+FROGGYBENCHMARK_ROOT="$FROGGYBENCHMARK_ROOT" \
+FROGGYBENCHMARK_BIN="$ROOT/build/froggybenchmark.mipsel" \
+FROGGYBENCHMARK_TC="$FROGGY_DIAGNOSTICS_TC" \
+FROGGYBENCHMARK_REBUILD="$FROGGY_DIAGNOSTICS_REBUILD" \
+  "$ROOT/scripts/build_froggybenchmark.sh"
+
 echo 'Building TreeFrogUI hijack helpers...'
 "$ROOT/hijack/build_tfhijack.sh"
 
@@ -124,6 +158,10 @@ FROGUI_ROOT="$FROGUI_ROOT" \
 DSPERATE="$DSPERATE_ROOT" \
 FROGGYTHEMES_ROOT="$FROGGYTHEMES_ROOT" \
 FROGGYTHEMES_BIN="$ROOT/build/froggythemes.mipsel" \
+FROGGYHWPROBE_ROOT="$FROGGYHWPROBE_ROOT" \
+FROGGYHWPROBE_BIN="$ROOT/build/froggyhwprobe.mipsel" \
+FROGGYBENCHMARK_ROOT="$FROGGYBENCHMARK_ROOT" \
+FROGGYBENCHMARK_BIN="$ROOT/build/froggybenchmark.mipsel" \
   "$ROOT/build_release.sh"
 
 bundle_dir=$(mktemp -d /tmp/treefrog-local-bundle.XXXXXX)
