@@ -22,6 +22,7 @@ Current standalone apps:
 | `rockbox`        | `cubegm/rockbox.sh`| Rockbox music player               |
 | `Ebook`          | `cubegm/ebook`     | Ebook/document reader (MuPDF - EPUB/MOBI/PDF) - [guide](cores/ebook.md) |
 | `FroggyReader`   | `cubegm/cores/froggyreader_libretro.so` | EPUB-only Libretro alternative in Apps - [guide](cores/froggyreader.md) |
+| `FroggyThemes`   | `cubegm/froggythemes.sh` | TreeFrogUI theme and icon-pack manager |
 | `videos`         | `cubegm/video_player` | Hardware-decoded MP4/MKV/AVI/MOV video player |
 | `music`          | `cubegm/video_player` | Simple hardware-backed music player          |
 | `images`         | `cubegm/image_viewer` | Native hardware-decoded JPG/PNG/BMP/GIF/WebP/TIFF image viewer |
