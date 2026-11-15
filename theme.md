@@ -78,6 +78,15 @@ original pack available for comparison.
 `Nao_Black` is another adapted background set from
 [Leviathanium's Nao-Black theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/Nao-Black.theme).
 
+## FroggyThemes manager
+
+The optional FroggyThemes application is available from the Apps view when the
+release includes its launcher. It manages installed folders under
+`/mnt/sdcard/frogui/theme-packs/` and `/mnt/sdcard/frogui/icon-packs/`, applies matching
+background/icon presets, and leaves the artwork in place. Press Y to cycle
+alphabetical, reverse-alphabetical, and newest-first order; press Select + Start
+to return to TreeFrogUI.
+
 The supplied packs include explicit artwork aliases for the short TreeFrogUI
 folder names used on the device (for example `a26`, `m2k`, `pcesgx` and
 `ps1r`), so these systems do not fall back to the generic main image.
