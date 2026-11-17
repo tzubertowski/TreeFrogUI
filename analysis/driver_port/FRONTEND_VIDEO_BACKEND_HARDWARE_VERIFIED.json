@@ -1,0 +1,19 @@
+{
+  "trial": "analysis/boot_crypto/kernel_cold_frontend_backend_v3_trial.json",
+  "candidate": "payload/kernel_cold_frontend_backend_v3",
+  "library": "analysis/driver_port/driver_r36_drm_console_v3.so",
+  "video_backend_verified": true,
+  "frames_submitted": 60,
+  "input_frame": "320x240 RGB565 pitch640 generated pattern",
+  "output": "640x480 DRM dumb buffer pitch1280",
+  "runtime": "actual console SD glibc loader/libpthread/libc, not replacement runtime",
+  "child_exit": 0,
+  "module_load_rc": 0,
+  "watchdog_stock_return_verified": true,
+  "stock_hashes_original": true,
+  "host_cleanup_wrote_boot_file": false,
+  "full_UI_verified": false,
+  "physical_button_navigation_verified": false,
+  "real_games_verified": false,
+  "scope": "Real legacy video ABI library + DRM under Linux7, not full picoarch/FrogUI acceptance"
+}

@@ -1,0 +1,24 @@
+{
+  "scope": "Sequential console tests; each boot result is checked independently and failures are retained",
+  "input": {
+    "trial": "analysis/boot_crypto/kernel_cold_display_input_v1_trial.json",
+    "kernel_boot_verified": true,
+    "display_scanout_verified": true,
+    "inventory_verified": true,
+    "devices": ["r36-serial-keys", "r36-direct-keys"],
+    "events_recorded": 0,
+    "irq_errors_observed": 2,
+    "physical_mapping_verified": false,
+    "navigation_verified": false,
+    "automatic_stock_return": true,
+    "host_cleanup_wrote_boot_file": false
+  },
+  "audio": {"state": "v3 silent DMA HARDWARE PASS:24576frames,IRQ0->41,gain0mute1,DROP0,RUN0; watchdog stock return/hashes verified", "audible_verified": false, "automatic_stock_return": true},
+  "usb": {"state": "v4 HARDWARE CDC PASS:exact present Windows devnode COM12,3random PING/PONG,device114rx/114tx/3pings,bind/unbind0", "enumeration_verified": true, "bidirectional_verified": true, "MTP_verified": false, "host_OTG_verified": false, "automatic_stock_return": true, "receipt": "analysis/driver_port/USB_CDC_HARDWARE_VERIFIED.json"},
+  "frontend_video_backend": {"trial": "analysis/boot_crypto/kernel_cold_frontend_backend_v3_trial.json", "verified": true, "frames": 60, "glibc_runtime": "actual console SD loader/libraries", "automatic_stock_return": true, "full_UI_verified": false, "past_failure": "v1/v2 missing initial connector mode-probe query; fixed without changing kernel"},
+  "full_UI_verified": false,
+  "emulators_on_new_kernel_verified": true,
+  "emulator_scope": "Headless Gambatte/FCEUmm synthetic ROM CPU/callback/input/savestate acceptance on actual Linux7; not full UI/game/physical output",
+  "emulator_trial": "analysis/boot_crypto/kernel_cold_core_console_v1_trial.json",
+  "filesystem_auto_repair_installed": false
+}

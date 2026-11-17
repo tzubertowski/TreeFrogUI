@@ -1,0 +1,16 @@
+{
+  "stage": 16,
+  "stage_description": "stock watchdog reset trial",
+  "entry": "0x0",
+  "control": "0x0",
+  "trampoline": "0x0",
+  "watchdog_hz": 187495,
+  "watchdog_seconds": 10,
+  "session_tag": "0xbc4c48f3",
+  "copy_pages": 0,
+  "log_bytes": 0,
+  "automatic_reset_verified": true,
+  "trace_retained_after_reset": true,
+  "stock_uptime_before_seconds": 552.81,
+  "stock_uptime_after_seconds": 28.25
+}

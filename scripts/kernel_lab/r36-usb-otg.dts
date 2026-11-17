@@ -1,0 +1,8 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "r36-avp-poll.dts"
+
+/* USB OTG / Host bring-up for external USB Wi-Fi and Bluetooth adapters.
+ * usb0 = Type-C OTG port (role-switchable host/peripheral via sysfs),
+ * usb1 = secondary host controller. */
+&usb0 { status = "okay"; dr_mode = "otg"; };
+&usb1 { status = "okay"; dr_mode = "host"; };

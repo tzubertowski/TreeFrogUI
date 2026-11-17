@@ -1,0 +1,7 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "r36-avp-poll.dts"
+
+/* Isolated peripheral/PIO diagnostic. No UART, display takeover, audio,
+ * serializer, host/OTG or writable mass-storage LUN. */
+&usb0 { status = "okay"; dr_mode = "peripheral"; };
+&usb1 { status = "disabled"; };

@@ -1,0 +1,31 @@
+{
+  "staged_ramfs": "payload/fat_guard_ramfs_staged_v1",
+  "production_repair_enabled": false,
+  "built_into_kernel": false,
+  "deployed": false,
+  "hardware_verified": false,
+  "patched_fsck": "analysis/driver_port/r36-fsck-cp437-v2",
+  "fsck_sha256": "7333e996a1f8a6507859ec700e3b48fb28c7a6cd54cda4e673f12a73dd5a90c2",
+  "console_chkdsk_tool": "scripts/kernel_lab/r36_chkdsk_console.c",
+  "console_chkdsk_test": "scripts/kernel_lab/tests/test_r36_chkdsk_console.py",
+  "console_chkdsk_offline_verified": true,
+  "validated": [
+    "static MIPS32r2 binary and autonomous CP437",
+    "255 CP437 bytes roundtrip and wchar buffer bounds",
+    "clean/dirty/orphan/loop/invalid regular FAT32 image scenarios under qemu-mipsel",
+    "read-only check leaves images unchanged",
+    "repair followed by independent clean verification",
+    "eight native Linux guard orchestration tests with MIPS fsck child via test-only wrapper",
+    "fatal or missing completion marker refuses repair",
+    "read-only stage retains diagnostic watchdog",
+    "MIPS fsck directory traversal at offset 4296015872 (>4 GiB), FSInfo repair and clean verification in a 5-GiB sparse regular image; fat_large_image_v2.json"
+  ],
+  "pending": [
+    "embed staged PID1/guard/fsck into separate candidate",
+    "test RAM and real-card geometry limits",
+    "hardware read-only pre-mount check with full report collection",
+    "prove safe watchdog control and bounded power-failure behavior",
+    "enable production writer only after separate acceptance"
+  ],
+  "safety": "Never fsck mounted SD. Never force watchdog reset while a filesystem writer is active. No claim of installed self-repair."
+}

@@ -1,0 +1,31 @@
+{
+  "artifact": "analysis/driver_port/driver_r36_combined_v1.so",
+  "size_bytes": 21516,
+  "sha256": "5ae91af8a61ee70d216b02467db2c763ff1cf2660ed2f92d61bc750de0595328",
+  "source": "scripts/driver_port/driver_r36_combined_backend.c",
+  "compiler": "/usr/bin/mipsel-linux-gnu-gcc (QEMU build VM)",
+  "flags": "-O2 -fPIC -shared -Wall -Wextra -Werror -idirafter <uapi> -D__user= -Wl,--no-as-needed /work/console_runtime_20261115_v1/libpthread.so.0 /work/console_runtime_20261115_v1/libc.so.6",
+  "needed": [
+    "libpthread.so.0",
+    "libc.so.6",
+    "ld.so.1"
+  ],
+  "glibc_versions": [
+    "GLIBC_2.0",
+    "GLIBC_2.2",
+    "GLIBC_2.3.4",
+    "GLIBC_2.4"
+  ],
+  "exported_symbols": [
+    "video_drivers_init",
+    "video_driver_disp_frame",
+    "video_driver_deinit",
+    "sound_driver_init",
+    "sound_driver_playframe",
+    "sound_driver_deinit",
+    "sound_driver_flush"
+  ],
+  "qemu_dlopen_rtld_now": "PASS",
+  "console_runtime_dir": "/work/console_runtime_20261115_v1",
+  "hardware_tested": false
+}

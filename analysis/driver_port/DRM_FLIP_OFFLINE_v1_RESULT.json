@@ -1,0 +1,42 @@
+{
+  "run_id": "offline_drm_flip_v1",
+  "date": "2026-11-16",
+  "scope": "Offline-only: DRM double-buffer/page-flip capability verification and userspace backend fix. No hardware boot, no camera, no visual claim about the black-square defect.",
+  "defect_context": "UI_NAVIGATION_v1_RESULT.json: transient small black squares at bottom on frame changes, idle clean; cause not proven. Static risk: single active scanout buffer cleared/copied while display scans it.",
+  "driver_capability": {
+    "verified": true,
+    "method": "static analysis of driver source and deployed module bytes",
+    "test": "scripts/peripheral_lab/test_drm_flip_support.py",
+    "source": "payload/display_driver_source_v4/r36_hc16xx_drm.c",
+    "deployed_module": "payload/kernel_display_input_kms_vm_v1/r36_hc16xx_drm.ko",
+    "evidence": [
+      "driver_features = DRIVER_MODESET | DRIVER_GEM | DRIVER_ATOMIC",
+      ".page_flip = drm_atomic_helper_page_flip",
+      ".atomic_commit = drm_atomic_helper_commit, .set_config = drm_atomic_helper_set_config",
+      ".fb_create = drm_gem_fb_create_with_dirty (multiple FBs allowed)",
+      "drm_vblank_init(drm, 1); drm_crtc_send_vblank_event on hc16xx_latched or after 4 vblank timeouts (flip_timeouts sysfs counter)",
+      "ping-pong layer descriptors: next_desc ^= 1, two descriptor slots per layer",
+      "deployed .ko contains drm_atomic_helper_page_flip, 'flip not latched after 4 frames', flip_timeouts, boot_descriptor strings"
+    ],
+    "conclusion": "Double buffering and synchronous page flip are supported by the kernel driver; the single-buffer limitation was in the userspace backend only."
+  },
+  "backend_fix": {
+    "source": "scripts/peripheral_lab/video_drm_backend.c",
+    "change": "Two dumb buffers + FBs. Scaler always renders into the inactive buffer; presentation via DRM_IOCTL_MODE_PAGE_FLIP with DRM_MODE_PAGE_FLIP_EVENT and a bounded DRM_EVENT_FLIP_COMPLETE wait matched by token. First frame and resynchronisation use SETCRTC + WAIT_VBLANK. After a failed flip the scanout target is unknown, so the next frame modesets before any render; the active buffer is never rewritten.",
+    "preserved": "same exported ABI (video_drivers_init/video_driver_disp_frame/video_driver_deinit), same submitted_frames log format, trace header semantics (pixels = front), failed-restore retained-buffer cleanup"
+  },
+  "verification": {
+    "pytest_windows": "262 passed, 14 skipped (D:/r36s-/scripts)",
+    "native_mock": "REAL_BACKEND_MOCK_DRM=PASS in QEMU build VM, gcc -std=gnu11 -O2 -Wall -Wextra -Werror",
+    "mock_contract": "mock hashes the active scanout buffer at every activation and aborts if the CPU rewrites it (regression guard for the defect); flip ioctl failure, flip event timeout and stale-event drain covered",
+    "shared_library_contract": "SHARED_LIB_CONTRACT=PASS: -DR36_BACKEND_TEST_LIBRARY .so exports the five symbols libretro_smoke dlsyms",
+    "trace_build": "backend compiles with -DR36_SCANOUT_TRACE -Wall -Wextra -Werror",
+    "mips_mock_so_rebuild": "done: rebuilt in QEMU build VM with mipsel-linux-gnu-gcc10.3.0 (see analysis/driver_port/DRM_FLIP_MIPS_REBUILD_v1_RESULT.json); driver_r36_test_mockdrm_v1.so now contains the flip fix"
+  },
+  "restrictions": [
+    "no camera use",
+    "no new hardware boot without explicit user readiness",
+    "no claim that the black-square defect is fixed until user observes it on hardware"
+  ],
+  "next": "MIPS artifacts rebuilt and cold candidate payload/kernel_cold_ui_flip_v1 prepared offline (DRM_FLIP_MIPS_REBUILD_v1_RESULT.json). Hardware trial blocked at preflight: console not connected in USB (MTP) mode; no boot attempted. When connected: run_restored_cold_trial.py --deploy payload/kernel_cold_ui_flip_v1, observe the black-square artifact."
+}

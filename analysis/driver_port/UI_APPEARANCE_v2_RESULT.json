@@ -1,0 +1,17 @@
+{
+  "fresh": true,
+  "kernel_matches": true,
+  "complete": true,
+  "process_alive_at_deadline": true,
+  "frames_logged": 1,
+  "UI_process_and_frame_evidence": true,
+  "physical_visual_confirmation_required": true,
+  "full_UI_verified": false,
+  "navigation_verified": false,
+  "audio_verified": false,
+  "physical_UI_appearance_verified": false,
+  "camera_evidence_private": "analysis/driver_port/camera_kms/ui_appearance_v2/contact.jpg",
+  "note": "FrogUI core loaded and first video frame submitted, but no visible menu on camera; process RSS8712kB,zero swap. Thread/state diagnostics prepared for next candidate.",
+  "watchdog_stock_return_verified": true,
+  "protected_UI_files_unchanged": true
+}

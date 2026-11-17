@@ -1,0 +1,22 @@
+{
+  "candidate": "payload/kernel_cold_display_kms_v5_irqfix",
+  "source_profile": "payload/kernel_display_kms_vm_v6_irqfix",
+  "trial": "analysis/boot_crypto/kernel_cold_display_kms_v5_irqfix_trial.json",
+  "scanout_verified": true,
+  "physical_panel_visual_verified": true,
+  "visual_evidence_private": "analysis/driver_port/camera_kms/kms_v5_irqfix/contact.jpg",
+  "observed_pattern": "Stable colored bars on physical panel, followed by stock boot/menu after watchdog reset.",
+  "geometry": "640x480 RGB565 pitch1280",
+  "pixel_hash_cpu": "8d21d5c5",
+  "pixel_hash_dma": "8d21d5c5",
+  "display_irq_before": 2,
+  "display_irq_after": 18,
+  "mmc_irq_count": 213,
+  "irq_errors": 0,
+  "watchdog_seconds": 30,
+  "automatic_stock_return_verified": true,
+  "stock_restored_before_host_cleanup": true,
+  "host_cleanup_wrote_boot_file": false,
+  "scope": "One fixed-mode cold NOR-watchdog reset cycle; real DRM buffer/modeset/vblank/DMA readback and visible bars. Not full UI/audio/input/suspend/power-cycle acceptance.",
+  "camera_do_not_publish": true
+}

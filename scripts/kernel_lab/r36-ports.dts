@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "r36-base.dts"
+
+/ {
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+        r36log@2f91000 {
+            compatible = "r36lab,ramconsole";
+            reg = <0x02f91000 0x0e00>;
+            no-map;
+        };
+    };
+    chosen {
+        bootargs = "console=ttyS0,115200 console=r36ram earlycon rdinit=/init clk_ignore_unused loglevel=8 panic=0";
+    };
+    restart@18818500 {
+        compatible = "r36lab,hc16xx-restart";
+        reg = <0x18818500 8>;
+        clocks = <&clk HC16XX_CLK_WATCHDOG>;
+    };
+    adc@188184d0 {
+        compatible = "r36lab,hc16xx-adc-ro";
+        reg = <0x188184d0 8>;
+        clocks = <&clk HC16XX_CLK_SAR_ADC>;
+    };
+};
+
+&usb0 { status = "okay"; dr_mode = "peripheral"; };

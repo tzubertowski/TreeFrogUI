@@ -1,0 +1,41 @@
+{
+  "scope": "Actual unchanged FrogUI under Linux7, read-only internal-state observer; not visual acceptance",
+  "trial": "analysis/boot_crypto/kernel_cold_ui_state_trace_v9_trial.json",
+  "run_id": "66eb7d9d6666488cb5971bf99714d4cf",
+  "camera_used": false,
+  "visual_UI_verified": false,
+  "navigation_verified": false,
+  "audio_verified": false,
+  "cold_boot_verified": true,
+  "native_restore_verified": true,
+  "stock_return_verified": true,
+  "host_cleanup_wrote_boot_file": false,
+  "stock_boot_hashes_unchanged": 6,
+  "protected_UI_hashes_unchanged": true,
+  "maximum_logged_retro_run_return": 12240,
+  "state_samples": 44,
+  "video_callbacks_at_last_logged_return": 1,
+  "backend_submitted_frames": 1,
+  "observations": {
+    "profile_bound": true,
+    "first_before_first_run": 1,
+    "first_after_first_run": 0,
+    "last_sig_after_first_run": 2760972902,
+    "last_sig_stable_in_all_later_samples": true,
+    "idle_ticks_after_second_run": 1,
+    "idle_ticks_later_samples": "6->7 or14->15; counter wraps by static idle branch",
+    "view_transition_frame": 3,
+    "system_carousel_frame": 13,
+    "settings_anim": 1,
+    "toast_screenshot_usb_migration_flags": 0
+  },
+  "conclusion": "Actual state samples corroborate the static redraw-elision/idle branch after a single frame with neutral input. A single video callback is not evidence of failed rendering or a stalled frontend/core. The cause of the earlier visually black screen remains unresolved.",
+  "supersedes_interpretation": "v8 established progress without additional callbacks; v9 shows ordinary idle gating is consistent with that observation, so do not treat missing subsequent callbacks as the defect itself",
+  "limitations": [
+    "Observer changes timing and reads are not atomic across worker threads",
+    "Idle behavior does not establish correct physical scanout or full menu correctness",
+    "Missing legacy framebuffer open errors remain but are not proven causal",
+    "No exact conclusion about the sleeping worker or physical navigation"
+  ],
+  "next": "Verify first-frame content reaches the expected DRM mapped buffer and active scanout descriptor/read-back. Distinguish rendered menu from physical display state without camera; keep visual acceptance NOT_TESTED. Do not force redraw or add fake fb exports."
+}

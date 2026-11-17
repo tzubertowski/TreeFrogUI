@@ -1,0 +1,24 @@
+{
+  "scope": "Opt-in first-frame and before-cleanup scanout observation in real DRM backend source; no physical visual proof",
+  "mock_verified": true,
+  "mock_report_local": "analysis/driver_port/scanout_mock_v10_result.json",
+  "mock_cases": [
+    "Expected/mapped/uncached synthetic DMA match with padded pitch; raster progress observed",
+    "Corrupted DMA hash yields digital_match=0",
+    "Mismatched programmed/active descriptor rejected before DMA mapping",
+    "Missing /dev/mem produces observation_failed, never success",
+    "Read-only physical mapping and pixel RAM bounds asserted"
+  ],
+  "runtime_load_verified": true,
+  "runtime": "Saved console ld.so.1/libc/libpthread; MIPS qemu-user",
+  "runtime_test": "video-backend-load-console-v10c with explicit missing DRM path: MIPS_GLIBC_BACKEND_LOAD_AND_FAIL_CLOSED=PASS",
+  "earlier_runtime_attempts": "Old harness and initial relinks required GLIBC2.34 from startup objects. Final harness linked explicit saved libc/libdl; loader resolved private runtime symbols. No deployed libc changes.",
+  "mock_initial_failure": "Page-rounded mmap length assertion used unrounded synthetic allocation; corrected test allocation, actual mapping bounds unchanged. WSL -Wall/-Wextra/-Werror mock PASS afterward.",
+  "physical_access": "Only read-only /dev/mem RAM mapping after health-based bounds validation; no MMIO/descriptor writes added",
+  "extra_observation_cost": "Full-frame hashes plus 12x5ms raster sampling per phase; diagnostic timing, not performance acceptance",
+  "hardware_verified": false,
+  "camera_used": false,
+  "kernel_rebuilt": false,
+  "PID1_rebuilt": false,
+  "changed_candidate_file": "driver_r36_drm_ui_test.so only; v9 kernel/DTB/PID1/state observer reused"
+}
