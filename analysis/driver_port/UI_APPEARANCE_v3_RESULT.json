@@ -1,0 +1,20 @@
+{
+  "trial": "analysis/boot_crypto/kernel_cold_ui_appearance_v3_trial.json",
+  "UI_appearance_verified": false,
+  "FrogUI_core_loaded": true,
+  "frames_logged": 1,
+  "observation_seconds": 16,
+  "RSS_kB": 8712,
+  "swap_kB": 0,
+  "main_thread_observed_wait": "sys_nanosleep_time32",
+  "other_threads_observed": ["sys_nanosleep_time32", "__futex_wait"],
+  "memory_stable": true,
+  "watchdog_stock_return_verified": true,
+  "native_restore_verified": true,
+  "host_cleanup_wrote_boot_file": false,
+  "protected_UI_files_unchanged": true,
+  "conclusion": "Longer startup observation did not produce more frames; cannot claim menu visible. Next test observes unchanged time/sleep calls, no delay clamping.",
+  "next_candidate": "payload/kernel_cold_ui_appearance_v4",
+  "navigation_verified": false,
+  "audio_verified": false
+}

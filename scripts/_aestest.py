@@ -1,0 +1,5 @@
+exec(open(r'D:\r36s-\scripts\_aesguess.py').read().split("c=open(")[0])
+k=bytes(range(16)); pt=bytes.fromhex('00112233445566778899aabbccddeeff')
+print(enc(k,pt).hex(),'expect 69c4e0d86a7b0430d8cdb78070b4c55a')
+k2=bytes.fromhex('000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f')
+print(enc(k2,pt).hex(),'expect 8ea2b7ca516745bfeafc49904b496089')

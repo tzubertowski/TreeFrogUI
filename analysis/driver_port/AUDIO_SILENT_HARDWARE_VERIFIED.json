@@ -1,0 +1,23 @@
+{
+  "candidate": "payload/kernel_cold_audio_silent_v3",
+  "source_profile": "payload/kernel_audio_silent_active_v3",
+  "trial": "analysis/boot_crypto/kernel_cold_audio_silent_v3_trial.json",
+  "silent_DMA_hardware_verified": true,
+  "audio_frames": 24576,
+  "format": "48000 Hz stereo S16_LE, all-zero samples",
+  "dma_moved": true,
+  "irq_before": 0,
+  "irq_after": 41,
+  "gain": 0,
+  "mute": true,
+  "drop_rc": 0,
+  "DMA_run_after_drop": false,
+  "automatic_stock_return_verified": true,
+  "stock_restored_before_host_cleanup": true,
+  "host_cleanup_wrote_boot_file": false,
+  "audible_output_verified": false,
+  "speaker_verified": false,
+  "headphones_verified": false,
+  "microphone_recording_made": false,
+  "scope": "One real Linux7 ALSA/PCM/DMA/IRQ/STOP watchdog cycle; no audible output or picoarch audio acceptance"
+}

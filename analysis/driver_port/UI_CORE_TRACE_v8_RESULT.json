@@ -1,0 +1,43 @@
+{
+  "scope": "Actual unchanged picoarch/FrogUI on Linux7 with child-only libretro observer; diagnostic, not visual UI acceptance",
+  "trial": "analysis/boot_crypto/kernel_cold_ui_core_trace_v8_trial.json",
+  "run_id": "b634c1bd2e7144619d33235c8139fe5d",
+  "cold_boot_verified": true,
+  "native_restore_verified": true,
+  "stock_return_verified": true,
+  "stock_boot_hashes_unchanged": 6,
+  "host_cleanup_wrote_boot_file": false,
+  "camera_used": false,
+  "visual_UI_verified": false,
+  "navigation_verified": false,
+  "audio_verified": false,
+  "observer_loaded": true,
+  "maximum_logged_retro_run_entry": 12420,
+  "maximum_logged_retro_run_return": 12420,
+  "video_callbacks_at_last_logged_return": 1,
+  "first_frame": {
+    "width": 640,
+    "height": 480,
+    "pitch": 1280,
+    "RGB565_FNV1a": "0f4e3334",
+    "nonzero_bytes": 585299,
+    "backend_submitted_frames": 1
+  },
+  "RSS_kB": 8656,
+  "VmSwap_kB": 0,
+  "alive_at_deadline": true,
+  "child_exit": 0,
+  "child_signalled": false,
+  "protected_UI_MD5_before_and_after_match": {
+    "picoarch": "e154f7afade3f340263d7e0f89373c15",
+    "frogui_libretro.so": "403944038926bf102ac498a7376fdafd",
+    "frogui/settings.txt": "80b1652856ad284baaa3f7000a24db7c"
+  },
+  "conclusion": "In this instrumented trial the frontend continued calling retro_run and the core returned, but issued only one video callback. Frontend-loop blockage does not explain the single-frame observation here. The first callback was nonempty and submitted to DRM; physical visibility was not tested.",
+  "limitations": [
+    "Observer may affect timing; logged run count is not a performance measurement or proven uninstrumented behavior",
+    "Missing framebuffer device errors remain, but their sole causal role is not established",
+    "No visual, navigation, audible, game or full power-cycle acceptance"
+  ],
+  "next": "Inspect actual FrogUI retro_run draw conditions, initialization/worker state and legacy framebuffer dependency before preparing a new distinct experiment; do not repeat unchanged trials"
+}

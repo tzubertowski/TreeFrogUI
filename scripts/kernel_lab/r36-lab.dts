@@ -1,0 +1,31 @@
+// SPDX-License-Identifier: GPL-2.0
+/dts-v1/;
+#include "hc16xx.dtsi"
+
+/ {
+    model = "R36 clone HC16E310 kernel laboratory";
+    compatible = "r36lab,hc16e310", "hichip,hc16xx";
+    aliases { serial0 = &uart0; };
+    chosen {
+        bootargs = "console=ttyS0,115200 earlycon rdinit=/init clk_ignore_unused loglevel=8 panic=0";
+        stdout-path = "serial0:115200n8";
+    };
+    memory@0 {
+        device_type = "memory";
+        reg = <0x0 0x02f91e50>;
+    };
+    /* AVP-coexistence profile uses CPU Count/Compare, as stock Linux does. */
+    timer@4 { status = "disabled"; };
+};
+
+&uart0 { status = "okay"; };
+
+/* Keep the bootloader's pinmux; GPIO/PWM/display remain owned by stock AVP. */
+&mmc {
+    status = "okay";
+    bus-width = <4>;
+    no-1-8-v;
+    max-frequency = <25000000>;
+    broken-cd;
+    card-detect-delay = <200>;
+};

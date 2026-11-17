@@ -1,0 +1,24 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "r36-base.dts"
+
+/ {
+    reserved-memory {
+        #address-cells = <1>;
+        #size-cells = <1>;
+        ranges;
+        trace@2f91000 {
+            compatible = "r36lab,ramconsole";
+            reg = <0x02f91000 0x0e00>;
+            no-map;
+        };
+    };
+    chosen {
+        /delete-property/ stdout-path;
+        bootargs = "console=r36ram rdinit=/init clk_ignore_unused loglevel=8 panic=0";
+    };
+};
+
+/* Isolate the CPU/SD/module test from the old USB and AVP UART state. */
+&uart0 { status = "disabled"; };
+&usb0 { status = "disabled"; };
+&usb1 { status = "disabled"; };

@@ -1,0 +1,71 @@
+{
+  "passed": true,
+  "original_function": "0x802bad04",
+  "machine_code_sha256": "e061537abde80c5308c01e7b3f36071bd01a490f6f5d8da2f54540487d7a0755",
+  "scope": "native stock open packet before submission vs C bytes; no hardware/AVP acceptance",
+  "stubs": [
+    "strlen",
+    "memcpy",
+    "semaphores",
+    "slot allocator",
+    "submission observation"
+  ],
+  "rows": [
+    {
+      "path_bytes": 1,
+      "slot": 0,
+      "flags": "0x0",
+      "mode": "0x0",
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "path_bytes": 29,
+      "slot": 0,
+      "flags": "0x0",
+      "mode": "0x0",
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "path_bytes": 8,
+      "slot": 3,
+      "flags": "0x2",
+      "mode": "0x1a4",
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "path_bytes": 255,
+      "slot": 7,
+      "flags": "0x12345678",
+      "mode": "0xffffffff",
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "path_bytes": 4067,
+      "slot": 5,
+      "flags": "0x0",
+      "mode": "0x0",
+      "accepted": true,
+      "passed": true
+    },
+    {
+      "path_bytes": 4068,
+      "slot": 1,
+      "flags": "0x0",
+      "mode": "0x0",
+      "accepted": false,
+      "passed": true
+    },
+    {
+      "path_bytes": 4095,
+      "slot": 0,
+      "flags": "0x0",
+      "mode": "0x0",
+      "accepted": false,
+      "passed": true
+    }
+  ]
+}

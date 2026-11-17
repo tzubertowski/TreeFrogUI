@@ -1,0 +1,60 @@
+{
+  "run_id": "offline_drm_flip_mips_rebuild_v1",
+  "scope": "Offline only: MIPS rebuild of flip-fix backend/mock, console-runtime link contract, cold candidate preparation. No hardware boot, no camera, no visual claim about the black-square defect.",
+  "toolchain": {
+    "compiler": "mipsel-linux-gnu-gcc (Ubuntu 10.3.0-1ubuntu1) — the same version recorded in the historical deployed .so",
+    "source": "D:/wsl/ubmips/rootfs extracted to QEMU build VM absolute paths (no chroot)",
+    "fixes_required": [
+      "Windows-broken0-byte symlinks resolved to real siblings (liblto_plugin.so chain etc.)",
+      "exec bit on PT_INTERP ld-linux-x86-64.so.2 (open_exec requires +x)",
+      "PATH shim /opt/mipsbin -> glibc cross-binutils: gcc invokes unprefixed `as` which was Alpine musl and failed under glibc LD_LIBRARY_PATH",
+      "musl tools (llvm-readelf) must not run with glibc LD_LIBRARY_PATH"
+    ]
+  },
+  "builds": {
+    "production_trace": {
+      "file": "analysis/driver_port/driver_r36_drm_ui_test.so",
+      "sha256": "74012f126c6fea4357dbad182063a59ab05438d070cc967096fdcd3f91aa828b",
+      "flags": "-O2 -fPIC -shared -Wall -Wextra -Werror -DR36_SCANOUT_TRACE -idirafter <kernel uapi> -D__user= linked against saved console runtime + explicit libpthread.so.0",
+      "elf": "ELF32 little-endian MIPS R3000, MIPS32r2, FP ABI hard float (32-bit CPU Any FPU)",
+      "needed": ["libpthread.so.0", "libc.so.6", "ld.so.1"],
+      "glibc_versions": ["GLIBC_2.0", "GLIBC_2.2", "GLIBC_2.3.4", "GLIBC_2.4", "GLIBC_2.7"],
+      "exports": ["video_drivers_init", "video_driver_disp_frame", "video_driver_deinit", "r36_scanout_live_checkpoint"]
+    },
+    "production_notrace": {
+      "file": "analysis/driver_port/backend_notrace.so",
+      "flags": "same without -DR36_SCANOUT_TRACE (compile/contract check only)",
+      "needed": ["libpthread.so.0", "libc.so.6", "ld.so.1"],
+      "glibc_versions": ["GLIBC_2.0", "GLIBC_2.2", "GLIBC_2.3.4", "GLIBC_2.4"]
+    },
+    "mock": {
+      "file": "analysis/driver_port/driver_r36_test_mockdrm_v1.so",
+      "flags": "-O2 -fPIC -shared -Wall -Wextra -Werror -DR36_BACKEND_TEST_LIBRARY",
+      "needed": ["libc.so.6", "ld.so.1"],
+      "exports": ["video_drivers_init", "video_driver_disp_frame", "video_driver_deinit", "r36_test_backend_frames", "r36_test_backend_hash"],
+      "note": "mock targets the qemu test runtime (glibc with pthread merged into libc), never deployed to the device"
+    }
+  },
+  "verification": {
+    "v11_parity": "readelf vs historical payload/kernel_ui_navigation_v1 driver: identical NEEDED set, identical GLIBC set, identical exports, identical log format tokens (r36-drm: submitted_frames=%lu source=%dx%d pitch=%d and all r36-scanout strings)",
+    "console_runtime_dlopen": "CONSOLE_RUNTIME_DLOPEN=PASS: RTLD_NOW dlopen of the new production .so with saved console ld.so.1/libc (max GLIBC_2.19)/libpthread.so.0/libdl.so.2 under qemu-mipsel; all four exports resolved; test program itself <= GLIBC_2.3.4",
+    "native_mock": "REAL_BACKEND_MOCK_DRM=PASS in QEMU build VM (video_backend_test.c lifecycle: offscreen render, flip wait, recovery, hash guard)",
+    "emulator_smoke": "analysis/driver_port/DRM_FLIP_MOCK_SMOKE_v1/suite.json:8/8 PASS (gambatte, gearboy, fceumm, quicknes x press_release, neutral) with --mock-drm-backend driver_r36_test_mockdrm_v1.so, harness libretro-smoke-mips-v5, actual_backend_frames present in every run",
+    "capability_test": "test_drm_flip_support.py3/3 PASSED against the new payload",
+    "pytest": "full Windows suite:262 passed,14 skipped"
+  },
+  "candidate": {
+    "profile": "payload/kernel_ui_flip_v1 (copy of kernel_ui_navigation_v1 with only driver_r36_drm_ui_test.so replaced; manifest sha256 updated, driver_flip_fix provenance added)",
+    "cold": "payload/kernel_cold_ui_flip_v1",
+    "cold_image_sha256": "17ea5104b995fbb3ec6ecf5a5b042cd09b3b9a003fba188156276fc1c6d6939b",
+    "cold_wrapper_offline": "native loader image+gzip validate PASS inside build; cold_restore_emulation.json8 rows PASS; cold_restore_native_fallback.json1 row PASS",
+    "kernel_dtb_pid1_keys_map": "unchanged from verified navigation v1 (kernel7.2.0-rc5-r36disp #12)"
+  },
+  "constraints": {
+    "hardware_trial": "blocked at preflight: transport reported 'R36S not found: put the console in USB (MTP) mode and connect the cable'. No boot, no NOR write, no trial receipt created.",
+    "camera_used": false,
+    "black_squares_fixed_claimed": false,
+    "environment_note": "analysis/kernel_build_vm_v1/id_ed25519 ACL/owner set to SYSTEM-only (Windows OpenSSH private-key permission rule); content unchanged"
+  },
+  "next": "When the console is connected in USB (MTP) mode: python scripts/boot_crypto/run_restored_cold_trial.py --deploy payload/kernel_cold_ui_flip_v1; observe frame changes for the black-square artifact (camera allowed by user)."
+}

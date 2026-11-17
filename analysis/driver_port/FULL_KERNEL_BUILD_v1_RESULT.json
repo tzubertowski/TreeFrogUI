@@ -1,0 +1,35 @@
+{
+  "profile": "full",
+  "release": "7.2.0-rc5-r36full",
+  "build_version": "#22 Tue Nov 17 11:19:05 UTC 2026",
+  "kernel_revision": "da5f1a22ef2ff5c46aa3f750fa10825813970b09",
+  "compiler": "Alpine LLVM20/clang20 + GNU MIPS assembler2.44",
+  "vm_archive": "analysis/kernel_build_vm_v1/kernel-full-build.tar.gz",
+  "local_extract_dir": "payload/kernel_full_vm_v1",
+  "entry": "0x80846d54",
+  "filesz": 9969008,
+  "memsz": 10333336,
+  "end": "0x80adac98",
+  "dtb": "0x82e00000",
+  "modules_tar_ko_count": 66,
+  "external_ko_modules": [
+    "r36_hc16xx_drm.ko",
+    "r36_hc16xx_i2s.ko",
+    "r36_amprpc_poll.ko",
+    "r36hello.ko"
+  ],
+  "sha256": {
+    "vmlinux.bin": "750d849c8270771dbc269ad8296dc7dd63df1e5f610e6fc4997b0435fe234ab2",
+    "vmlinux.elf": "078390d7ea7b0bd07623fbcd2b741bf9a20163042a7eafca355b32f7b6a25ac5",
+    "r36-lab.dtb": "a2c7eef66245f3d243728cfe00e76c2b32c3b9f1db83f7a14551252c14962aab",
+    "kernel.config": "631f18790152343fa5d8525777015dab5d7175a244835002e4e6d6ac89da6dfa",
+    "modules.tar.gz": "9280056a5be91113bdf994758288e30c1656377441ffb5b3f102d5bf6da0a75d",
+    "r36_hc16xx_drm.ko": "8748cee150e4a00f54a1245cfcfa1db23268e8d06778d65c6ac9bda1061f5ce2",
+    "r36_hc16xx_i2s.ko": "56a768b4031ea3642f1a9a6b10ea985b353045676c43cd62f4ed133728a6414b",
+    "r36_amprpc_poll.ko": "480737c7606dce32459911b8e7d38169a3155662d49c1a061508bda60affdfb0",
+    "r36hello.ko": "a3d9bc3120c409cd9d39fdb5e533eb014ede6de36bf3414ea3c246fe60ef68a3",
+    "init.elf": "ebdbb2f721a201ee62c86fdbc66566af890bbb4e0bac564da8afe1e2139ba2d6",
+    "initramfs.cpio.gz": "29ffc93d88c1f2c3c708039f725b865d4f1405bb3c123afee3114da5a1a1b5be"
+  },
+  "hardware_boot_verified": false
+}

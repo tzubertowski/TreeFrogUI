@@ -1,0 +1,47 @@
+{
+  "scope": "Actual Linux7 unchanged FrogUI first-frame digital scanout observation; not physical UI visibility",
+  "trial": "analysis/boot_crypto/kernel_cold_ui_scanout_trace_v10_trial.json",
+  "run_id": "30a437e152884944aa24796101185915",
+  "digital_chain_verified": false,
+  "first_frame_verified": true,
+  "physical_visual_verified": false,
+  "source_hash": "0f4e3334",
+  "phases": {
+    "first": [
+      "0f4e3334",
+      "0f4e3334",
+      "0f4e3334"
+    ]
+  },
+  "cold_boot_verified": true,
+  "native_restore_verified": true,
+  "stock_return_verified": true,
+  "host_cleanup_wrote_boot_file": false,
+  "stock_boot_hashes_unchanged": 6,
+  "protected_UI_hashes_unchanged": true,
+  "camera_used": false,
+  "navigation_verified": false,
+  "audio_verified": false,
+  "first_frame": {
+    "hash": "0f4e3334",
+    "nonzero_bytes": 585299,
+    "active_descriptor": "02f90400",
+    "programmed_descriptor": "02f90400",
+    "boot_descriptor": "02f92a80",
+    "DMA_pixel_address": "01500000",
+    "format": "RGB565",
+    "width": 640,
+    "height": 480,
+    "pitch": 1280,
+    "active_on": 1,
+    "timing_stable": 1,
+    "flip_timeouts": 0,
+    "raster_progress": true
+  },
+  "RSS_kB": 8592,
+  "VmSwap_kB": 0,
+  "child_exit": 0,
+  "missing_evidence": "before_cleanup checkpoint absent in collected log; cannot verify persistence to end of16s window",
+  "conclusion": "First-frame callback/source/mapped/active DMA hashes match and raster advances. Full two-phase acceptance is false because the late checkpoint was not emitted; no claim about panel visibility or end-of-window persistence.",
+  "next": "Use an explicit bounded late checkpoint while child is alive, not cleanup-dependent logging; preserve no-camera policy and inspect panel/backlight/layer state read-only only after digital persistence is measured."
+}

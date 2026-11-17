@@ -1,0 +1,50 @@
+{
+  "scope": "Actual unchanged FrogUI Linux7 first and explicit late-live digital read-back; user screen report pending",
+  "trial": "analysis/boot_crypto/kernel_cold_ui_live_scanout_v11_trial.json",
+  "run_id": "7582265034904267972c2ceeace26843",
+  "digital_chain_verified": true,
+  "first_frame_verified": true,
+  "physical_visual_verified": false,
+  "source_hash": "0f4e3334",
+  "phases": {
+    "first": [
+      "0f4e3334",
+      "0f4e3334",
+      "0f4e3334"
+    ],
+    "late_live": [
+      "0f4e3334",
+      "0f4e3334",
+      "0f4e3334"
+    ]
+  },
+  "checkpoint_elapsed_ms": 10031,
+  "checkpoint_retro_run": 8460,
+  "submitted_frames_at_checkpoint": 1,
+  "camera_used": false,
+  "user_visual_observation": "PENDING",
+  "navigation_verified": false,
+  "audio_verified": false,
+  "cold_boot_verified": true,
+  "native_restore_verified": true,
+  "stock_return_verified": true,
+  "host_cleanup_wrote_boot_file": false,
+  "stock_boot_hashes_unchanged": 6,
+  "protected_UI_hashes_unchanged": true,
+  "first_and_late_health": {
+    "active_descriptor": "02f90400",
+    "programmed_descriptor": "02f90400",
+    "boot_descriptor": "02f92a80",
+    "pixel": "01500000",
+    "format": "RGB565",
+    "width": 640,
+    "height": 480,
+    "pitch": 1280,
+    "on": 1,
+    "timing_stable": 1,
+    "flip_timeouts": 0,
+    "raster_progress": true
+  },
+  "conclusion": "First-frame content matches mapped DRM and uncached active scanout memory at initial output and10.031seconds later. Digital persistence accepted at these two checkpoints, not continuous monitoring or physical panel proof.",
+  "next": "Obtain user observation for this exact trial before selecting another experiment. If panel remained black, inspect panel/backlight/layer state read-only; do not repeat unchanged trial."
+}

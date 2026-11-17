@@ -1,0 +1,161 @@
+{
+  "scope": "Actual Linux7 raw18-button press/release capture, labelled by user-confirmed physical sequence; not UI navigation",
+  "trial": "analysis/boot_crypto/kernel_cold_input_calibration_v3_trial.json",
+  "run_id": "6f3726c43ac6499ab4ce67e4336dee7b",
+  "capture_sha256": "0476b833a88a1b283929dfce6f85cddf36c4a1bdfe7fb911ef5cf739a1e60908",
+  "physical_labels_verified": true,
+  "human_order_confirmed": true,
+  "events": 36,
+  "complete_press_release_pairs": 18,
+  "dropped_events": 0,
+  "mapping": [
+    {
+      "device": "r36-serial-keys",
+      "code": 712,
+      "press_ordinal": 0,
+      "release_ordinal": 1,
+      "physical": "UP"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 715,
+      "press_ordinal": 2,
+      "release_ordinal": 3,
+      "physical": "RIGHT"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 713,
+      "press_ordinal": 4,
+      "release_ordinal": 5,
+      "physical": "DOWN"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 714,
+      "press_ordinal": 6,
+      "release_ordinal": 7,
+      "physical": "LEFT"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 709,
+      "press_ordinal": 8,
+      "release_ordinal": 9,
+      "physical": "A"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 708,
+      "press_ordinal": 10,
+      "release_ordinal": 11,
+      "physical": "B"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 705,
+      "press_ordinal": 12,
+      "release_ordinal": 13,
+      "physical": "X"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 706,
+      "press_ordinal": 14,
+      "release_ordinal": 15,
+      "physical": "Y"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 711,
+      "press_ordinal": 16,
+      "release_ordinal": 17,
+      "physical": "START"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 710,
+      "press_ordinal": 18,
+      "release_ordinal": 19,
+      "physical": "SELECT"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 704,
+      "press_ordinal": 20,
+      "release_ordinal": 21,
+      "physical": "L1"
+    },
+    {
+      "device": "r36-serial-keys",
+      "code": 707,
+      "press_ordinal": 22,
+      "release_ordinal": 23,
+      "physical": "R1"
+    },
+    {
+      "device": "r36-direct-keys",
+      "code": 109,
+      "press_ordinal": 24,
+      "release_ordinal": 25,
+      "physical": "L2"
+    },
+    {
+      "device": "r36-direct-keys",
+      "code": 104,
+      "press_ordinal": 26,
+      "release_ordinal": 27,
+      "physical": "R2"
+    },
+    {
+      "device": "r36-direct-keys",
+      "code": 59,
+      "press_ordinal": 28,
+      "release_ordinal": 29,
+      "physical": "FN"
+    },
+    {
+      "device": "r36-direct-keys",
+      "code": 115,
+      "press_ordinal": 30,
+      "release_ordinal": 31,
+      "physical": "VOLUME_UP"
+    },
+    {
+      "device": "r36-direct-keys",
+      "code": 114,
+      "press_ordinal": 32,
+      "release_ordinal": 33,
+      "physical": "VOLUME_DOWN"
+    },
+    {
+      "device": "r36-direct-keys",
+      "code": 116,
+      "press_ordinal": 34,
+      "release_ordinal": 35,
+      "physical": "POWER"
+    }
+  ],
+  "legacy12_map_local": "analysis/driver_port/physical_legacy_map_v3/evdev-to-legacy.map",
+  "legacy_map_installed": false,
+  "extra_legacy_bits_assigned": false,
+  "navigation_verified": false,
+  "audible_volume_action_verified": false,
+  "power_action_verified": false,
+  "camera_used": false,
+  "stock_return_verified": true,
+  "native_restore_verified": true,
+  "actual_watchdog_seconds": 90,
+  "host_cleanup_wrote_boot_file": false,
+  "stock_boot_hashes_unchanged": 6,
+  "protected_UI_hashes_unchanged": true,
+  "display_scanout_verified": true,
+  "IRQ_ERR_at_pre_input_snapshot": 0,
+  "important_observation": "Physical L1/R1 are serial codes704/707. Physical L2/R2 are direct codes109/104. Earlier DTS shoulder labels did not identify physical buttons correctly; calibrated mapping overrides names, not wiring guesses.",
+  "limitations": [
+    "Only one ordered individual press/release per button; simultaneous presses, debounce, held-at-start and repeat policy not accepted",
+    "No UI/game navigation, actual volume changes or shutdown behavior tested",
+    "Button names depend on explicit user-confirmed sequence; not independent video proof"
+  ],
+  "next": "Integrate canonical12 calibrated map with real MIPS evdev->SysV publisher and unchanged UI in a separate protected navigation test. Inspect actual consumer ABI for L2/R2/FN before assigning extra bits; no guessed volume/power actions."
+}
