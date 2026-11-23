@@ -53,6 +53,8 @@ See [cores.md](cores.md) for the full folder→core mapping table.
 - **Auto-Save/Auto-Load** - Auto-saves state on pause/quit and auto-loads it on any game launch (Quick Resume boot or a manual pick from the frontend). Independent of Quick Resume - turn it on to always pick up mid-game, however you launch.
 - **Clean, configurable menu** - Smooth background crossfades, an optional horizontal system carousel, an optional **Hide Empty Folders** setting, and right-stick drift filtering so accidental touches don't trigger phantom presses while navigating.
 - **Rich theming options** - Custom background images, fonts, and 30 built-in themes.
+- **FroggyThemes manager** - Optional Apps entry for switching installed background packs, system-icon packs, and matching presets without copying artwork.
+- **Froggy diagnostics** - Optional Apps entries for FroggyHWProbe hardware reports and FroggyBenchmark CPU/RAM measurements.
 - **Game switcher** - Optional OnionOS-style recents carousel: big box art, or a screenshot of where you left off (every game is auto-screenshotted on exit), resumes the game. Turn it on in Settings (Game Switcher), it replaces the recents list.
 - **Start in Recents** - Optional: boot straight into your recents (list or switcher) every time, in Settings.
 - **Play-time stats** - Tracks how long you play each game, shown in the browser.

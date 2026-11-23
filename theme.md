@@ -91,6 +91,15 @@ original pack available for comparison.
 `Nao_Black` is another adapted background set from
 [Leviathanium's Nao-Black theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/Nao-Black.theme).
 
+## FroggyThemes manager
+
+The optional FroggyThemes application is available from the Apps view when the
+release includes its launcher. It manages installed folders under
+`/mnt/sdcard/frogui/theme-packs/` and `/mnt/sdcard/frogui/icon-packs/`, applies matching
+background/icon presets, and leaves the artwork in place. Press Y to cycle
+alphabetical, reverse-alphabetical, and newest-first order; press Select + Start
+to return to TreeFrogUI.
+
 `PrettyTreeFrog` is an original CC0 pack with dark rainforest scenes and
 matching per-system artwork for the SF3000/SF3500 family. Its companion
 `PrettyTreeFrog` system-icon pack is installed separately and can be mixed with
