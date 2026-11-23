@@ -2,14 +2,20 @@
 # Import a MuOS theme archive into FrogUI's dynamic renderer scheme directory.
 set -eu
 
-SD=/mnt/sdcard
+SD=${FROGUI_SD_ROOT:-/mnt/sdcard}
 SCHEMES="$SD/frogui/schemes"
 STATUS="$SD/frogui/theme-install-status.txt"
 ARCHIVE=${1:-}
 
 fail() {
-    printf 'ERROR: %s\n' "$1" > "$STATUS"
+    printf 'ERROR: %s\n' "$1" > "$STATUS.tmp.$$"
+    mv "$STATUS.tmp.$$" "$STATUS"
     exit 1
+}
+
+progress() {
+    printf 'PROGRESS: %s: %s\n' "$1" "$2" > "$STATUS.tmp.$$"
+    mv "$STATUS.tmp.$$" "$STATUS"
 }
 
 extension=$(printf '%s' "${ARCHIVE##*.}" | tr '[:upper:]' '[:lower:]')
@@ -24,6 +30,8 @@ name=$(printf '%s' "${base%.*}" | sed -e 's/[^A-Za-z0-9_-]/_/g' -e 's/__*/_/g' -
 
 # Validate every archive member before extraction: reject absolute paths,
 # traversal, malformed listing rows, and archives larger than 64 MiB unpacked.
+mkdir -p "$SD/frogui"
+progress 4 'Checking theme archive'
 if ! unzip -l "$ARCHIVE" 2>&1 | awk '
     tolower($0) ~ /removing leading/ { unsafe = 1 }
     /(^|[[:space:]])Name$/ { header = 1; next }
@@ -50,20 +58,57 @@ fi
 work="$SD/frogui/.theme-import-$$"
 mkdir -p "$SCHEMES"
 mkdir "$work" || fail 'Could not create import folder'
-trap 'rm -rf "$work"' EXIT HUP INT TERM
-if ! unzip -o "$ARCHIVE" -d "$work" >/dev/null 2>&1; then
+trap 'rm -rf "$work"; rm -f "$STATUS.tmp.$$"' EXIT HUP INT TERM
+total_files=$(unzip -Z1 "$ARCHIVE" | awk 'NF && $0 !~ /\/$/ {count++} END {print count + 0}')
+[ "$total_files" -gt 0 ] || fail 'Theme archive contains no files'
+progress 8 'Preparing theme files'
+: > "$work/unzip.log"
+(
+    if unzip -o "$ARCHIVE" -d "$work" > "$work/unzip.log" 2>&1; then
+        unzip_status=0
+    else
+        unzip_status=$?
+    fi
+    printf '%s\n' "$unzip_status" > "$work/unzip.exit"
+) &
+unzip_monitor=$!
+while [ ! -f "$work/unzip.exit" ]; do
+    extracted=$(awk '/(inflating:|extracting:)/ {count++} END {print count + 0}' "$work/unzip.log")
+    percent=$((8 + extracted * 72 / total_files))
+    [ "$percent" -le 80 ] || percent=80
+    progress "$percent" 'Extracting theme files'
+    sleep 0.2
+done
+wait "$unzip_monitor" || true
+if [ "$(cat "$work/unzip.exit")" != 0 ]; then
     fail 'Could not extract theme archive'
 fi
 
-# MuOS archives may contain one wrapper directory around the theme payload.
-profile="$work/640x480/scheme/default.ini"
-if [ ! -f "$profile" ]; then
-    set -- "$work"/*/640x480/scheme/default.ini
-    [ -f "$1" ] || fail 'Theme has no 640x480/scheme/default.ini profile'
-    profile=$1
+# MuOS archives may wrap their resolution folders in one directory.
+payload=$work
+if [ ! -d "$payload/640x480" ]; then
+    for candidate in "$work"/*; do
+        [ -d "$candidate/640x480" ] || continue
+        payload=$candidate
+        break
+    done
 fi
-payload=${profile%/scheme/default.ini}
-payload=${payload%/640x480}
+[ -d "$payload/640x480" ] || fail 'Theme has no 640x480 assets'
+
+# MinUIfied provides 640x480 screen overrides but omits that size's base INI.
+profile="$payload/640x480/scheme/default.ini"
+if [ ! -f "$profile" ]; then
+    profile="$payload/720x480/scheme/default.ini"
+fi
+if [ ! -f "$profile" ]; then
+    for candidate in "$payload"/*/scheme/default.ini; do
+        [ -f "$candidate" ] || continue
+        profile=$candidate
+        break
+    done
+fi
+[ -f "$profile" ] || fail 'Theme has no default scheme profile'
+progress 86 'Preparing theme profile'
 
 target=$name
 suffix=2
@@ -83,11 +128,13 @@ else
     : > "$work/install.ini"
 fi
 cat "$profile" >> "$work/install.ini" || fail 'Could not stage theme profile'
+progress 94 'Installing theme files'
 mv "$work/install" "$SCHEMES/$target" || fail 'Could not install theme files'
 if ! mv "$work/install.ini" "$SCHEMES/$target.ini"; then
     rm -rf "$SCHEMES/$target"
     fail 'Could not install theme profile'
 fi
 sync
+progress 100 'Theme installed'
 printf 'SUCCESS: %s\n' "$target" > "$STATUS"
 exit 0
