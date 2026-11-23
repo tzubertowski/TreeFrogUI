@@ -16,6 +16,7 @@ MuOS themes can now travel with you. TreeFrogUI adds a new MuOS-compatible rende
 ## Cleaner artwork and navigation
 
 - Background art now has opaque, display-sized variants for 640×480 and 854×480 devices, avoiding alpha-related black areas and reducing resize work while navigating.
+- Adds the original CC0 PrettyTreeFrog background pack and matching System View icon pack.
 - MuOS home layouts with Explore, Apps, Favourites, History, and Settings screens now return to their correct FrogUI views, and Apps can exit back to the launcher.
 - Theme previews and attribution travel with the included TreeFrogUI MuOS theme; BPreplay is distributed under the SIL Open Font License.
 - Sets QuickNES as the default NES core and fixes the muOS scraper instructions so artwork extracts at the SD-card root.
