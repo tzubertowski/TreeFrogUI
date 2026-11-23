@@ -217,6 +217,15 @@ powered off. See the [Date and Time guide](docs/date-time.md).
 
 **Theme** - in TreeFrogUI: Settings → Theme, press Left/Right. There are 30 built-in colour themes. **Style** offers the standard Vertical list, an animated Horizontal carousel, or an Onion-style System View with a paged console-icon grid. **Icon Pack** changes System View artwork without changing its background or colours. **Friendly System Names** expands folder codes such as `ps` and `gba` in every style.
 
+**Install a theme on MuOS** - copy the `.muxthm` file to `MUOS/ARCHIVE`, open
+Applications → **Archive Manager** and extract it, then select it in
+Configuration → Customisation → **Theme Picker**. The release includes
+**TreeFrogUI MuOS**, a 640×480 MuOS theme using TreeFrogUI's black-and-white
+palette, BPreplay font, and screen artwork. MuOS keeps its own frontend layout;
+the theme supplies colors, typography, and wallpapers. To install a `.muxthm` in
+TreeFrogUI, copy it to `ARCHIVE/` at the SD card root and use
+Apps → **Theme Installer**; compatible themes then appear in Settings → Theme.
+
 **Background Theme Pack** - Settings → Appearance → **Background Theme Pack**. Choose **Art Book NextUI** (adapted from [Leviathanium's NextUI-Themes](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/ArtBookNextUI.theme)), **Nao Black** (adapted from [Leviathanium's Nao-Black theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/Nao-Black.theme)), or another installed pack. **Background Images** must be on for the selected pack to appear.
 
 **Font** - Settings → Font, press Left/Right. Or drop a `.ttf`/`.otf` in `frogui/fonts/` and pick it. The default is **BPreplayBold** (the bold font used by MinUI/NextUI).

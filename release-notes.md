@@ -1,25 +1,27 @@
 # 🔴🔴🔴 THIS IS AN EXPERIMENTAL BUILD — DO NOT UPGRADE 🔴🔴🔴
 
-# TreeFrogUI v2.0.0_a prerelease
+# TreeFrogUI v2.0.0_b — MuOS themes, now at home in TreeFrogUI
 
-This build explores a new MuOS-inspired theme renderer. It is an early compatibility port and is not a recommended update for daily use.
+MuOS themes can now travel with you. TreeFrogUI adds a new MuOS-compatible renderer and an on-device `.muxthm` installer, so you can bring supported MuOS themes into FrogUI without replacing its launcher or runtime.
 
-## MuOS-inspired theme renderer
+## Try a MuOS theme in TreeFrogUI
 
-- Adds an `.ini` scheme renderer that reads supported MuOS theme colors, transparency settings, typography, list and grid geometry, and per-screen scheme files. TreeFrogUI keeps its own runtime and maps supported theme settings onto FrogUI screens.
-- Adds the `UI Theme` choice for built-in styles and installed schemes. Theme selection remains separate from Explore Content layout.
-- Press **L2** in the Explore Content root to cycle Vertical, Horizontal, and System View in any theme. **Select** remains the core picker.
-- MinUIfied Vertical uses a vertical launcher menu. MinUIfied Grid keeps its grid launcher.
-- Adds experimental ports of Analogue, Art Book Next, CatOS ROYGBIV, Def-not-SNES, dsOS, GbOS, MinUIfied, Pip-Boy, Pip-Boy Frameless, and Pip-Boy Tube. Per-theme credits are retained in the scheme folders and summarized in `frogui/schemes/ATTRIBUTION.md`.
-- This is a compatibility layer, not a `.muxthm` installer. MuOS binary fonts, partial opacity, animations, and screens without a FrogUI equivalent are not supported by this experiment.
+- Put a `.muxthm` file in `/ARCHIVE` on the SD card, open **Apps → Theme Installer**, and choose it; FrogUI installs it and shows a clear success or failure result.
+- Pick the imported theme under **Settings → Theme**. The installer keeps existing themes and gives duplicate names a suffix.
+- Themes installed by users stay in place when applying this release's `update.zip`.
+- The renderer reads supported MuOS palettes, transparent colors, fonts, list and grid geometry, and per-screen scheme files, then maps them onto FrogUI views.
+- Switch between Vertical, Horizontal, and System View in Explore Content with **L2**; **Select** remains the core picker.
+- This release includes **TreeFrogUI_MuOS.muxthm** in `/ARCHIVE`, ready to install on MuOS with Archive Manager.
 
-## Other changes since v1.9.0_f
+## Cleaner artwork and navigation
 
-- Sets QuickNES as the default NES core.
-- Fixes the GitHub Pages scraper instructions for muOS: extract its ZIP at the SD-card root so artwork lands under `MUOS/info/catalogue/`.
+- Background art now has opaque, display-sized variants for 640×480 and 854×480 devices, avoiding alpha-related black areas and reducing resize work while navigating.
+- MuOS home layouts with Explore, Apps, Favourites, History, and Settings screens now return to their correct FrogUI views, and Apps can exit back to the launcher.
+- Theme previews and attribution travel with the included TreeFrogUI MuOS theme; BPreplay is distributed under the SIL Open Font License.
+- Sets QuickNES as the default NES core and fixes the muOS scraper instructions so artwork extracts at the SD-card root.
 
-## Demo-only theme licensing note
+## Compatibility notes
 
-This demo includes imported community theme assets with their upstream credits retained, despite the lack of per-theme license files in the downloaded archives. Their redistribution status remains unverified. This is a demo-only decision; do not carry these assets into a stable release until their individual terms or author permissions are confirmed. See `frogui/schemes/ATTRIBUTION.md` for the audit details.
+This is an experimental compatibility renderer, not the MuOS frontend. Themes that rely on unsupported MuOS screens, binary fonts, partial opacity, or LVGL-only animation may look different; the installer imports the theme's 640×480 assets and supported scheme data.
 
 For a fresh installation, use the full archive and matching `install_first/<device>/` files. To update an existing installation, copy `update.zip` to the SD-card root and reboot. **Do not use this experimental build to upgrade a daily-use card.**

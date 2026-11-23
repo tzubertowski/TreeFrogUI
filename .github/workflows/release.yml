@@ -33,9 +33,9 @@ permissions:
 env:
   # This archive is built and tested locally. CI only verifies, packages, and
   # publishes it; changing any of these values is a deliberate release action.
-  LOCAL_BUNDLE_TAG: local-build-v1.9.0-d
-  LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v1.9.0-d.tar.gz
-  LOCAL_BUNDLE_SHA256: c0bbec95a3cc6b0b4e1ba695dac1ed7d92bd90b4b5dd739828216834eb5097a5
+  LOCAL_BUNDLE_TAG: local-build-v2.0.0-b
+  LOCAL_BUNDLE_ASSET: TreeFrogUI-local-build-v2.0.0-b.tar.gz
+  LOCAL_BUNDLE_SHA256: 6d1e2cf18b281123f3a3ae14ca3757ba847917ef9dd4e50f8c520c1cd814309f
   CORE_BUILD_REPO: tzubertowski/TreeFrogUI-core-builds
   # update.zip is always cumulative from the last major stable baseline.
   # Change this deliberately when the product moves to a new major baseline;
@@ -154,6 +154,8 @@ jobs:
           required=(
             cubegm/picoarch cubegm/picoarch_hi
             cubegm/port_check.sh
+            cubegm/theme_installer.sh
+            ARCHIVE/TreeFrogUI_MuOS.muxthm
             cubegm/cores/frogui_libretro.so cubegm/cores/tyrquake_libretro.so
             cubegm/cores/scummvm_libretro.so frogui/licenses/ScummVM.GPL-3.0
             cubegm/cores/froggyreader_libretro.so

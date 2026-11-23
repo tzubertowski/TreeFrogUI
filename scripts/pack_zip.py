@@ -30,6 +30,7 @@ def normalize_tree(root) -> None:
 def main() -> None:
     output, parent, entry = sys.argv[1:]
     root = os.path.join(parent, entry)
+    archive_base = root if entry == "." else parent
     selected = files_by_casefolded_path(root)
 
     with zipfile.ZipFile(
@@ -43,14 +44,14 @@ def main() -> None:
             dirnames.sort()
             if directory == root:
                 continue
-            relative = os.path.relpath(directory, parent).replace(os.sep, "/")
+            relative = os.path.relpath(directory, archive_base).replace(os.sep, "/")
             directories.append(relative.rstrip("/") + "/")
         for relative in sorted(directories, key=str.casefold):
             info = zipfile.ZipInfo(relative)
             info.external_attr = (0o40755 << 16) | 0x10
             archive.writestr(info, b"")
         for path in sorted(selected.values(), key=lambda item: os.path.relpath(item, parent).casefold()):
-            archive.write(path, os.path.relpath(path, parent).replace(os.sep, "/"))
+            archive.write(path, os.path.relpath(path, archive_base).replace(os.sep, "/"))
 
 
 if __name__ == "__main__":
@@ -58,5 +59,5 @@ if __name__ == "__main__":
         normalize_tree(sys.argv[2])
         raise SystemExit(0)
     if len(sys.argv) != 4:
-        raise SystemExit("usage: pack_zip.py OUTPUT PARENT ENTRY")
+        raise SystemExit("usage: pack_zip.py OUTPUT PARENT ENTRY (use ENTRY '.' to zip its contents)")
     main()

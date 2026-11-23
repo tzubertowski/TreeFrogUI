@@ -95,6 +95,7 @@ validate_release() {
         "$RELEASE/cubegm" \
         "$RELEASE/frogui" \
         "$RELEASE/roms" \
+        "$RELEASE/ARCHIVE/TreeFrogUI_MuOS.muxthm" \
         "$RELEASE/MD" \
         "$OVERLAY/cubegm/setting.xml" \
         "$OVERLAY/cubegm/cores/libemu_md.so" \
@@ -295,7 +296,7 @@ deploy_release() {
 
     # Merge only: preserve ROMs, saves, settings, and stock files not present in
     # the release.
-    for dir in cubegm frogui roms MD; do
+    for dir in cubegm frogui roms ARCHIVE MD; do
         rsync -rltc "$RELEASE/$dir" "$MOUNT/"
     done
 
@@ -311,7 +312,7 @@ deploy_release() {
 
     sync
 
-    for dir in cubegm frogui roms MD; do
+    for dir in cubegm frogui roms ARCHIVE MD; do
         verify_tree "$RELEASE/$dir" "$MOUNT/" "$dir"
     done
     verify_tree "$OVERLAY/" "$MOUNT/" "$PROFILE overlay"
@@ -447,6 +448,18 @@ deploy_one() {
     if [ "$name" = frogui ]; then
         mkdir -p "$MOUNT/frogui/lang"
         rsync -rltc "$REPO/frogui/lang/" "$MOUNT/frogui/lang/"
+        if [ -d "$REPO/sdcard/frogui/style-profiles" ]; then
+            mkdir -p "$MOUNT/frogui/style-profiles"
+            rsync -rltc "$REPO/sdcard/frogui/style-profiles/" \
+                "$MOUNT/frogui/style-profiles/"
+        fi
+        if [ -d "$REPO/sdcard/frogui/schemes" ]; then
+            mkdir -p "$MOUNT/frogui/schemes"
+            rsync -rltc "$REPO/sdcard/frogui/schemes/" \
+                "$MOUNT/frogui/schemes/"
+        fi
+        rm -f "$MOUNT/frogui/schemes/Switch.ini"
+        rm -rf "$MOUNT/frogui/schemes/Switch"
         # Captain Claw is named openclaw everywhere. Remove files from the
         # retired claw alias so an older install cannot select stale artwork.
         rm -f "$MOUNT/frogui/claw.png" \

@@ -34,7 +34,7 @@ DUMMY_ABS="/mnt/sdcard/$DUMMY_REL"        # rkgame needs the ABSOLUTE path
 
 PICOARCH=/home/tomaszz/sf3000-work/picoarch/picoarch
 PICOARCH_HI=/home/tomaszz/sf3000-work/picoarch/picoarch_hi
-FROGUI_ROOT="${FROGUI_ROOT:-$(pwd)/frogui}"
+FROGUI_ROOT="${FROGUI_ROOT:-$(pwd)/../FrogUI}"
 FROGUI="$FROGUI_ROOT/out/frogui_libretro.so"
 FROGSHELL=/home/tomaszz/sf3000-work/FrogShell
 FROGSHELL_ASSET="$(pwd)/assets/frogshell_libretro.so"
@@ -185,6 +185,7 @@ cp_if_diff() { [ -f "$1" ] || return 0; cmp -s "$1" "$2" && return 0; cp "$1" "$
 [ -f "$POKKET_BANNER_NAO" ] || { echo "missing Pokket Nao Black artwork: $POKKET_BANNER_NAO" >&2; exit 1; }
 cp_if_diff "$PICOARCH"    "$STAGE/cubegm/picoarch"
 cp_if_diff "$PICOARCH_HI" "$STAGE/cubegm/picoarch_hi"
+make -C "$FROGUI_ROOT" all
 cp_if_diff "$FROGUI"      "$STAGE/cubegm/cores/frogui_libretro.so"
 cp_if_diff "$(pwd)/build/qpsx_libretro.so" "$STAGE/cubegm/cores/qpsx_libretro.so"
 cp_if_diff "$(pwd)/build/j2me_libretro.so" "$STAGE/cubegm/cores/j2me_libretro.so"
@@ -272,6 +273,11 @@ cp    "$STAGE/cubegm/lib/libpng12.so.0"   "$OUT/cubegm/lib/libpng12.so.0"
 # its assets ride along automatically via the cubegm/bios/PPSSPP staging copy.
 cp    "$STAGE/cubegm/lib/libpng16.so.16"  "$OUT/cubegm/lib/libpng16.so.16"
 [ -d "$STAGE/frogui" ] && cp -a "$STAGE/frogui" "$OUT/frogui"
+# MuOS theme ports in the staging tree were exploration builds; themes stay
+# user-installed through the Theme Installer instead of shipping by default.
+rm -rf "$OUT/frogui/schemes"
+mkdir -p "$OUT/frogui/schemes"
+rm -f "$OUT/frogui/style-profiles/Switch.json"
 # System View uses a small shared logo pack. Keep it outside ignored staging so
 # the exact release assets are versioned and reproducible.
 if [ -d "assets/system-icons" ]; then
@@ -314,6 +320,10 @@ mkdir -p "$OUT/roms/j2me"
 mkdir -p "$OUT/roms/pico8" "$OUT/roms/fake08" "$OUT/roms/retro8"
 mkdir -p "$OUT/roms/scummvm"
 mkdir -p "$OUT/roms/epub/books"
+mkdir -p "$OUT/ARCHIVE"
+python3 scripts/build_treefrogui_muxthm.py
+python3 scripts/pack_zip.py "$OUT/ARCHIVE/TreeFrogUI_MuOS.muxthm" \
+    assets/themes/TreeFrogUI_MuOS .
 
 # 1b) Our extra assets the old release shipped (these are OURS, not stock OS):
 #     standalone frontends, BIOS, boot logos. NOT shipped: icube/icube_start
@@ -324,6 +334,7 @@ for x in lgpt lgpt.elf pcsx4all pico286 rockbox rockbox.sh ebook video_player im
     [ -e "$STAGE/cubegm/$x" ] && cp -a "$STAGE/cubegm/$x" "$OUT/cubegm/$x"
 done
 install -m 0755 apps/usb_mode/usb_mode.sh "$OUT/cubegm/usb_mode.sh"
+install -m 0755 apps/theme_installer.sh "$OUT/cubegm/theme_installer.sh"
 install -m 0755 apps/shutdown.sh "$OUT/cubegm/shutdown.sh"
 install -m 0755 apps/powergpio "$OUT/cubegm/powergpio"
 install -m 0755 apps/usb_mode/usb_mtp.sh "$OUT/cubegm/usb_mtp.sh"
