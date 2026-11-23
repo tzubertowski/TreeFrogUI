@@ -91,6 +91,11 @@ original pack available for comparison.
 `Nao_Black` is another adapted background set from
 [Leviathanium's Nao-Black theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/Nao-Black.theme).
 
+`PrettyTreeFrog` is an original CC0 pack with dark rainforest scenes and
+matching per-system artwork for the SF3000/SF3500 family. Its companion
+`PrettyTreeFrog` system-icon pack is installed separately and can be mixed with
+other background packs.
+
 The supplied packs include explicit artwork aliases for the short TreeFrogUI
 folder names used on the device (for example `a26`, `m2k`, `pcesgx` and
 `ps1r`), so these systems do not fall back to the generic main image.
