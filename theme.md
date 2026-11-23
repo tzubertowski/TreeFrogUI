@@ -39,6 +39,19 @@ In-game savestate and last-screen images are captured automatically and need no 
 
 ## Appearance settings
 
+### Install a MuOS theme on the device
+
+Copy a `.muxthm` archive into `/mnt/sdcard/ARCHIVE/`, open **Apps → Theme
+Installer**, and select the archive. FrogUI imports the theme's compatible
+`640x480` scheme and assets into `frogui/schemes/`; it then appears under
+**Settings → Theme** after the launcher restarts. If that name is already
+installed, the importer keeps both by adding a suffix to the new theme name.
+
+The renderer supports the MuOS theme fields listed in
+[`FrogUI/THEMING.md`](https://github.com/tzubertowski/frogui/blob/r36sx/THEMING.md).
+Themes that depend on unsupported MuOS screens, fonts, or effects may not look
+identical.
+
 Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to select an option and Left/Right to change it. Press A or B to close Settings and save.
 
 | Setting | What it changes |
@@ -88,6 +101,12 @@ folder names used on the device (for example `a26`, `m2k`, `pcesgx` and
 `ps1r`), so these systems do not fall back to the generic main image.
 ScummVM uses `scummvm.jpg` in each theme pack. Each supplied pack has its own
 composition, matched to that pack's artwork layout.
+
+Built-in backgrounds ship as opaque panel-sized images. FrogUI selects the
+matching `640x480/` or `854x480/` folder from the detected display; 854×480
+source files remain the fallback when no normalized copy is needed. PNG
+transparency is flattened into the variants so it cannot expose black decoder
+pixels.
 
 ### Which background is used
 

@@ -69,7 +69,7 @@ protected_delete() {
         roms/*|PS/*|GB/*|GBA/*|GBC/*|FC/*|MD/*|SFC/*|cubegm/bios/*|\
         cubegm/saves/*|screenshots/*|saves/*|bios/*|frogui/settings.txt|\
         frogui/keymap.txt|picoarch.cfg|cubegm/.pcsx4all/*|\
-        cubegm/cores/.pcsx4all/*)
+        cubegm/cores/.pcsx4all/*|frogui/schemes/*)
             return 0 ;;
     esac
     return 1

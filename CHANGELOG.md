@@ -3,6 +3,11 @@
 Permanent project history. Per-release announcements are kept separately in
 [`release-notes.md`](release-notes.md).
 
+## 2026-11-23
+
+- **v2.0.0_b prerelease:** Added a MuOS-compatible FrogUI renderer and on-device `.muxthm` installer, plus a TreeFrogUI theme packaged for MuOS. Added opaque display-sized backgrounds for 640×480 and 854×480 panels, the original CC0 PrettyTreeFrog background and System View icon packs, corrected MuOS home-screen navigation and Apps exit behavior, and removed the abandoned Switch style profile from release builds.
+- Updated the renderer and archive build, documented installing themes on both MuOS and FrogUI, and retained QuickNES as the default NES core and the muOS scraper root-extraction fix.
+
 ## 2026-11-13
 
 - **v2.0.0_a prerelease preparation:** Documented the experimental MuOS-inspired theme renderer, Explore Content layout hotkey, and theme ports. Marked community theme assets as demo-only pending license or permission confirmation for any stable release.

@@ -136,6 +136,11 @@ if [ -n "$GENERATED_ARCHIVE" ]; then
 fi
 
 if [ -n "$GENERATED_ARCHIVE" ] && [ -n "$BASE_ARCHIVE" ]; then
+    if 7z e -so "$GENERATED_ARCHIVE" treefrog-update/delete.txt 2>/dev/null \
+        | grep -q '^frogui/schemes/'; then
+        echo "update package would delete installed theme data" >&2
+        exit 1
+    fi
     BASE_EXTRACT="$TMP/base-extract"
     BASE_SD="$TMP/base-sd"
     mkdir -p "$BASE_EXTRACT" "$BASE_SD"
