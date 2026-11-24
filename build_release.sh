@@ -297,24 +297,15 @@ mkdir -p "$STAGE/cubegm/bios"
 cp_if_diff "$J2ME_CLASSES" "$STAGE/cubegm/bios/classes.zip"
 cp_if_diff "$J2ME_SOUNDFONT" "$STAGE/cubegm/bios/Roland_SC-55.sf2"
 cp_if_diff "$J2ME_BANNER_NEXTUI" "$STAGE/frogui/j2me.png"
-cp_if_diff "$J2ME_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/j2me.png"
-cp_if_diff "$J2ME_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/j2me.png"
-cp_if_diff "$J2ME_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/j2me.png"
 mkdir -p "$STAGE/roms/j2me"
 mkdir -p "$STAGE/roms/openbor"
 rm -rf "$STAGE/roms/fheroes2"
 mkdir -p "$STAGE/roms/pico8" "$STAGE/roms/fake08" "$STAGE/roms/retro8"
-mkdir -p "$STAGE/frogui/theme-packs/Art_Book_NextUI" \
-    "$STAGE/frogui/theme-packs/Art_Book_Next" \
-    "$STAGE/frogui/theme-packs/Nao_Black"
+# The stock background packs are committed as complete, native-size
+# R36HD/SF3000 variants. Do not recreate unsuffixed or unoptimized folders
+# here; the FroggyThemes manager selects the matching family at runtime.
 cp_if_diff "$NDS_BANNER_NEXTUI" "$STAGE/frogui/nds.jpg"
-cp_if_diff "$NDS_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/nds.jpg"
-cp_if_diff "$NDS_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/nds.jpg"
-cp_if_diff "$NDS_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/nds.jpg"
 cp_if_diff "$POKKET_BANNER_NEXTUI" "$STAGE/frogui/pokket.jpg"
-cp_if_diff "$POKKET_BANNER_NEXTUI" "$STAGE/frogui/theme-packs/Art_Book_NextUI/pokket.jpg"
-cp_if_diff "$POKKET_BANNER_NEXT" "$STAGE/frogui/theme-packs/Art_Book_Next/pokket.jpg"
-cp_if_diff "$POKKET_BANNER_NAO" "$STAGE/frogui/theme-packs/Nao_Black/pokket.jpg"
 # Runtime language packs are FrogUI data, not compiled-in strings. Keep the
 # staged copy in sync so release archives and local deployments behave alike.
 mkdir -p "$STAGE/frogui/lang"
@@ -646,14 +637,16 @@ done
 [ -s "$OUT/frogui/system-icons/scummvm.png" ] || fail "missing ScummVM system icon"
 [ -f "$OUT/docs/cores/scummvm.md" ] || fail "missing ScummVM setup guide"
 [ -d "$OUT/roms/scummvm" ] || fail "missing ScummVM ROM folder"
-for art in frogui/scummvm.jpg \
-    frogui/theme-packs/Art_Book_NextUI/scummvm.jpg \
-    frogui/theme-packs/Art_Book_Next/scummvm.jpg \
-    frogui/theme-packs/Nao_Black/scummvm.jpg; do
+for art in frogui/scummvm.jpg; do
     [ -s "$OUT/$art" ] || fail "missing ScummVM background: $art"
 done
-for art_dir in frogui frogui/theme-packs/Art_Book_Next \
-    frogui/theme-packs/Art_Book_NextUI frogui/theme-packs/Nao_Black; do
+for pack in Art_Book_Next_R36HD Art_Book_Next_SF3000 \
+    Art_Book_NextUI_R36HD Art_Book_NextUI_SF3000 \
+    Nao_Black_R36HD Nao_Black_SF3000; do
+    art_dir="frogui/theme-packs/$pack"
+    [ -d "$OUT/$art_dir" ] || fail "missing theme pack: $art_dir"
+    [ -s "$OUT/$art_dir/main.jpg" ] || fail "missing main background: $art_dir"
+    [ -s "$OUT/$art_dir/scummvm.jpg" ] || fail "missing ScummVM background: $art_dir"
     for system in neogeo geolith sega md gpgx dos pico286; do
         [ -s "$OUT/$art_dir/$system.jpg" ] ||
             fail "missing $system background: $OUT/$art_dir/$system.jpg"

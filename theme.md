@@ -79,14 +79,19 @@ Theme packs live in a folder under `/mnt/sdcard/frogui/theme-packs/`. Select one
 Settings → Appearance → **Background Theme Pack**. Packs use the same filenames
 as per-system backgrounds: `main.jpg`, `settings.jpg`, `recents.jpg`,
 `favourites.jpg`, or a ROM folder name such as `gba.jpg`. The shipped
-`Art_Book_Next` pack preserves the original artwork. The test packs include
-per-system artwork adapted from **Elementerial**, **Iconic** and
-**PlayStation-X**.
+`Art_Book_Next_R36HD`, `Art_Book_Next_SF3000`, `Art_Book_NextUI_R36HD`,
+`Art_Book_NextUI_SF3000`, `Nao_Black_R36HD` and `Nao_Black_SF3000` packs
+preserve the available stock artwork while adding the converter's explicit
+TreeFrogUI aliases.
+
+The shipped device-specific packs use `_R36HD` for R36SX, R36 HD and GB350
+(640×480), and `_SF3000` for SF3000, SF3000 HD, SF3100 and SF3500 (854×480).
+FroggyThemes hides the non-matching family and keeps the suffix out of its
+on-device display. The icon packs are shared between both families.
 
 `Art_Book_NextUI` is the updated NextUI resource set adapted from
 [Leviathanium's ArtBookNextUI theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/ArtBookNextUI.theme).
-It is center-cropped to the supported 854×480 display size and keeps the
-original pack available for comparison.
+It is center-cropped to each device family's native display size.
 
 `Nao_Black` is another adapted background set from
 [Leviathanium's Nao-Black theme](https://github.com/Leviathanium/NextUI-Themes/tree/main/Catalog/Themes/Nao-Black.theme).
