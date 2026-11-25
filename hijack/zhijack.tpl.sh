@@ -321,6 +321,7 @@ while true; do
             log_event "game pid=$GAME_PID exe=$GAME_EXE"
             log_event "game cmdline: $(tr '\0' ' ' < /proc/$GAME_PID/cmdline 2>/dev/null)"
             log_event "game status: $(tr '\n' ' ' < /proc/$GAME_PID/status 2>/dev/null)"
+            GAME_LOG_TICK=0
             while process_running "$GAME_PID"; do
                 if [ -s "$LAUNCH" ]; then
                     log_event "game frontend requested next launch; stopping pid=$GAME_PID"
@@ -330,6 +331,12 @@ while true; do
                     break
                 fi
                 sleep 0.2
+                GAME_LOG_TICK=$((GAME_LOG_TICK + 1))
+                if [ "$GAME_LOG_TICK" -ge 50 ]; then
+                    mkdir -p /mnt/sdcard/cubegm/logs
+                    tail -c 65536 /tmp/treefrog_ui.log > /mnt/sdcard/cubegm/logs/last_game.log 2>/dev/null
+                    GAME_LOG_TICK=0
+                fi
             done
             wait "$GAME_PID"
             GRC=$?
@@ -341,7 +348,7 @@ while true; do
             fi
             log_event "core child exited pid=$GAME_PID rc=$GRC core=$CORE_PATH rom=$ROM_PATH"
             mkdir -p /mnt/sdcard/cubegm/logs
-            cp /tmp/treefrog_ui.log /mnt/sdcard/cubegm/logs/last_game.log 2>/dev/null
+            tail -c 65536 /tmp/treefrog_ui.log > /mnt/sdcard/cubegm/logs/last_game.log 2>/dev/null
         fi
     fi
     sleep 0.2
