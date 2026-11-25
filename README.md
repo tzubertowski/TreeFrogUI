@@ -116,7 +116,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **geolith** | Neo Geo AES/MVS | `geolith_libretro.so` |
 | **wswan** | WonderSwan / Color | `mednafen_wswan_libretro.so` |
 | **wsv** | Watara Supervision | `potator_libretro.so` |
-| **vb** | Virtual Boy | `mednafen_vb_libretro.so` |
+| **vb** | Virtual Boy — [Red Viper setup](docs/cores/virtual-boy.md) | `red-viper-mipsel_libretro.so` if installed, otherwise `mednafen_vb_libretro.so` |
 | **a26** | Atari 2600 | `stella2014_libretro.so` |
 | **a5200** | Atari 5200 | `a5200_libretro.so` |
 | **a78** | Atari 7800 | `prosystem_libretro.so` |

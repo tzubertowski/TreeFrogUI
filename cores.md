@@ -32,7 +32,7 @@ Emulator systems retain their normal `roms/<system>/` folders.
 | `gbav` | GBA | `vba_next_libretro.so` | [libretro/vba-next](https://github.com/libretro/vba-next) |
 | `mgba`, `gbaf` | GBA (accurate) | `mgba_libretro.so` | [libretro/mgba](https://github.com/libretro/mgba) |
 | `pokem` | Pokémon Mini | `pokemini_libretro.so` | [libretro/PokeMini](https://github.com/libretro/PokeMini) |
-| `vb` | Virtual Boy | `mednafen_vb_libretro.so` | [libretro/beetle-vb-libretro](https://github.com/libretro/beetle-vb-libretro) |
+| `vb` | Virtual Boy | `red-viper-mipsel_libretro.so` if installed, otherwise `mednafen_vb_libretro.so` | [Red Viper setup](docs/cores/virtual-boy.md) |
 | `gw` | Game & Watch | `gw_libretro.so` | [libretro/gw-libretro](https://github.com/libretro/gw-libretro) |
 
 ---
