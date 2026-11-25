@@ -1,28 +1,16 @@
 # 🔴🔴🔴 THIS IS AN EXPERIMENTAL BUILD — DO NOT UPGRADE 🔴🔴🔴
 
-# TreeFrogUI v2.0.0_b — MuOS themes, now at home in TreeFrogUI
+TreeFrogUI v2.0.0_c fixes theme navigation and display regressions reported on v2.0.0_b. Use a spare card for testing.
 
-MuOS themes can now travel with you. TreeFrogUI adds a new MuOS-compatible renderer and an on-device `.muxthm` installer, so you can bring supported MuOS themes into FrogUI without replacing its launcher or runtime.
+## Changes since v2.0.0_b
 
-## Try a MuOS theme in TreeFrogUI
+- Imported themes without launcher artwork now get a usable main menu. In QEMU, TokyoNightOS and Catppuccin Frappe could open Explore Content and return with B.
+- Imported wallpapers and navigation share a centered canvas on the SF3000’s 854×480 display.
+- Background pack selection refreshes without an extra cursor move, and adjacent footer pills have a visible gap.
+- Theme Installer shows install progress, accepts additional resolution profiles such as MinUIfied, and keeps the selected archive visible when scrolling. Put `.muxthm` files in `/ARCHIVE` on the SD card.
+- Virtual Boy prefers Red Viper if you build and install it separately. Beetle VB remains the bundled fallback, and existing core overrides still apply. See the [Virtual Boy setup guide](https://github.com/tzubertowski/TreeFrogUI/blob/main/docs/cores/virtual-boy.md).
+- The launcher preserves recent game logs during play so crash diagnostics can survive an interrupted session.
 
-- Put a `.muxthm` file in `/ARCHIVE` on the SD card, open **Apps → Theme Installer**, and choose it; FrogUI installs it and shows a clear success or failure result.
-- Pick the imported theme under **Settings → Theme**. The installer keeps existing themes and gives duplicate names a suffix.
-- Themes installed by users stay in place when applying this release's `update.zip`.
-- The renderer reads supported MuOS palettes, transparent colors, fonts, list and grid geometry, and per-screen scheme files, then maps them onto FrogUI views.
-- Switch between Vertical, Horizontal, and System View in Explore Content with **L2**; **Select** remains the core picker.
-- This release includes **TreeFrogUI_MuOS.muxthm** in `/ARCHIVE`, ready to install on MuOS with Archive Manager.
+## Known limits
 
-## Cleaner artwork and navigation
-
-- Background art now has opaque, display-sized variants for 640×480 and 854×480 devices, avoiding alpha-related black areas and reducing resize work while navigating.
-- Adds the original CC0 PrettyTreeFrog background pack and matching System View icon pack.
-- MuOS home layouts with Explore, Apps, Favourites, History, and Settings screens now return to their correct FrogUI views, and Apps can exit back to the launcher.
-- Theme previews and attribution travel with the included TreeFrogUI MuOS theme; BPreplay is distributed under the SIL Open Font License.
-- Sets QuickNES as the default NES core and fixes the muOS scraper instructions so artwork extracts at the SD-card root.
-
-## Compatibility notes
-
-This is an experimental compatibility renderer, not the MuOS frontend. Themes that rely on unsupported MuOS screens, binary fonts, partial opacity, or LVGL-only animation may look different; the installer imports the theme's 640×480 assets and supported scheme data.
-
-For a fresh installation, use the full archive and matching `install_first/<device>/` files. To update an existing installation, copy `update.zip` to the SD-card root and reboot. **Do not use this experimental build to upgrade a daily-use card.**
+Imported MuOS themes can still differ from the original, especially if they depend on unsupported artwork or animation. The reported memory-related freezes and missing PS splash are still under investigation. Red Viper binaries and the third-party regression test themes are not bundled.
