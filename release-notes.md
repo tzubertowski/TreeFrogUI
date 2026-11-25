@@ -8,7 +8,7 @@ TreeFrogUI v2.0.0_c fixes theme navigation and display regressions reported on v
 - Imported wallpapers and navigation share a centered canvas on the SF3000’s 854×480 display.
 - Background pack selection refreshes without an extra cursor move, and adjacent footer pills have a visible gap.
 - Theme Installer shows install progress, accepts additional resolution profiles such as MinUIfied, and keeps the selected archive visible when scrolling. Put `.muxthm` files in `/ARCHIVE` on the SD card.
-- Virtual Boy prefers Red Viper if you build and install it separately. Beetle VB remains the bundled fallback, and existing core overrides still apply. See the [Virtual Boy setup guide](https://github.com/tzubertowski/TreeFrogUI/blob/main/docs/cores/virtual-boy.md).
+- Virtual Boy prefers Red Viper if you build and install it separately. Beetle VB remains the bundled fallback, and existing core overrides still apply. See the [Virtual Boy setup guide](https://github.com/tzubertowski/TreeFrogUI/blob/v2.0.0_c/docs/cores/virtual-boy.md).
 - The launcher preserves recent game logs during play so crash diagnostics can survive an interrupted session.
 
 ## Known limits
