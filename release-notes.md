@@ -1,6 +1,4 @@
-# 🔴🔴🔴 THIS IS AN EXPERIMENTAL BUILD — DO NOT UPGRADE 🔴🔴🔴
-
-TreeFrogUI v2.0.0_d fixes theme installation on SF3000 and restores readable highlights and palette selection. Use a spare card for testing.
+TreeFrogUI v2.0.0_d fixes theme installation on SF3000 and makes imported themes easier to read. To change the palette in **TreeFrogUI** or **ProMinimal**, go to **Settings → Appearance → Theme colours**. Imported themes use their own colours.
 
 ## Changes since v2.0.0_c
 
