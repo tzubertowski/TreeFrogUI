@@ -31,8 +31,14 @@ name=$(printf '%s' "${base%.*}" | sed -e 's/[^A-Za-z0-9_-]/_/g' -e 's/__*/_/g' -
 # Validate every archive member before extraction: reject absolute paths,
 # traversal, malformed listing rows, and archives larger than 64 MiB unpacked.
 mkdir -p "$SD/frogui"
+listing="$SD/frogui/.theme-list-$$"
+work=
+trap 'if [ -n "$work" ]; then rm -rf "$work"; fi; rm -f "$listing" "$STATUS.tmp.$$"' EXIT HUP INT TERM
 progress 4 'Checking theme archive'
-if ! unzip -l "$ARCHIVE" 2>&1 | awk '
+if ! unzip -l "$ARCHIVE" > "$listing" 2>&1; then
+    fail 'Invalid or unsafe theme archive'
+fi
+if ! total_files=$(awk '
     tolower($0) ~ /removing leading/ { unsafe = 1 }
     /(^|[[:space:]])Name$/ { header = 1; next }
     header && /^ *-+([[:space:]]+-+)*[[:space:]]*$/ {
@@ -41,26 +47,30 @@ if ! unzip -l "$ARCHIVE" 2>&1 | awk '
         next
     }
     header && !footer {
-        if ($1 !~ /^[0-9]+$/ || NF < 4) exit 1
+        if ($1 !~ /^[0-9]+$/ || NF < 4) { invalid = 1; next }
         path = $4
         for (i = 5; i <= NF; i++) path = path " " $i
         if (path ~ /^\// || path ~ /^[A-Za-z]:/ || path ~ /\\/ ||
-            path ~ /(^|\/)\.\.(\/|$)/) exit 1
+            path ~ /(^|\/)\.\.(\/|$)/) { invalid = 1; next }
         total += $1
-        if (total > 67108864) exit 1
-        files++
+        if (total > 67108864) invalid = 1
+        entries++
+        if (path !~ /\/$/) files++
     }
-    END { if (unsafe || !header || separators < 2 || !footer || files == 0) exit 1 }
-'; then
+    END {
+        if (unsafe || invalid || !header || separators < 2 || !footer || entries == 0)
+            exit 1
+        print files + 0
+    }
+' "$listing"); then
     fail 'Invalid or unsafe theme archive'
 fi
+[ "$total_files" -gt 0 ] || fail 'Theme archive contains no files'
+rm -f "$listing"
 
 work="$SD/frogui/.theme-import-$$"
 mkdir -p "$SCHEMES"
 mkdir "$work" || fail 'Could not create import folder'
-trap 'rm -rf "$work"; rm -f "$STATUS.tmp.$$"' EXIT HUP INT TERM
-total_files=$(unzip -Z1 "$ARCHIVE" | awk 'NF && $0 !~ /\/$/ {count++} END {print count + 0}')
-[ "$total_files" -gt 0 ] || fail 'Theme archive contains no files'
 progress 8 'Preparing theme files'
 : > "$work/unzip.log"
 (

@@ -1,16 +1,15 @@
 # 🔴🔴🔴 THIS IS AN EXPERIMENTAL BUILD — DO NOT UPGRADE 🔴🔴🔴
 
-TreeFrogUI v2.0.0_c fixes theme navigation and display regressions reported on v2.0.0_b. Use a spare card for testing.
+TreeFrogUI v2.0.0_d fixes theme installation on SF3000 and restores readable highlights and palette selection. Use a spare card for testing.
 
-## Changes since v2.0.0_b
+## Changes since v2.0.0_c
 
-- Imported themes without launcher artwork now get a usable main menu. In QEMU, TokyoNightOS and Catppuccin Frappe could open Explore Content and return with B.
-- Imported wallpapers and navigation share a centered canvas on the SF3000’s 854×480 display.
-- Background pack selection refreshes without an extra cursor move, and adjacent footer pills have a visible gap.
-- Theme Installer shows install progress, accepts additional resolution profiles such as MinUIfied, and keeps the selected archive visible when scrolling. Put `.muxthm` files in `/ARCHIVE` on the SD card.
-- Virtual Boy prefers Red Viper if you build and install it separately. Beetle VB remains the bundled fallback, and existing core overrides still apply. See the [Virtual Boy setup guide](https://github.com/tzubertowski/TreeFrogUI/blob/v2.0.0_c/docs/cores/virtual-boy.md).
-- The launcher preserves recent game logs during play so crash diagnostics can survive an interrupted session.
+- Fixed a false “Theme archive contains no files” error on SF3000. The installer now counts files from the same BusyBox-compatible listing it validates, so extraction progress still works. TokyoNightOS, Art Book Next v2, and Catppuccin Frappe installed in QEMU with the MIPS BusyBox applet.
+- Dismissing the install result returns to the archive list. Press **B** there to go back to Apps.
+- Art Book Next v1 now uses the translucent highlight specified by the theme, so white text stays readable.
+- PipBoy Frameless uses a readable background while Settings loads its wallpaper. PipBoy Tube shows the theme’s green focus marker on the selected row.
+- Restored **Theme colours** under **Settings → Appearance** for TreeFrogUI and ProMinimal.
 
 ## Known limits
 
-Imported MuOS themes can still differ from the original, especially if they depend on unsupported artwork or animation. The reported memory-related freezes and missing PS splash are still under investigation. Red Viper binaries and the third-party regression test themes are not bundled.
+Imported themes can still differ from their MuOS originals. The reported freezes and missing PlayStation theme startup image remain under investigation. Third-party regression test themes and Red Viper binaries are not bundled.
