@@ -1,0 +1,12 @@
+{
+  "UI_appearance_verified": false,
+  "core_loaded": true,
+  "frames_logged": 1,
+  "actual_exec_cwd_preserved": true,
+  "missing_legacy_framebuffer_messages_observed": true,
+  "framebuffer_missing_is_sole_cause_proven": false,
+  "watchdog_stock_return_verified": true,
+  "host_cleanup_wrote_boot_file": false,
+  "camera_evidence_private": "analysis/driver_port/camera_kms/ui_appearance_v7/contact.jpg",
+  "next": "Stop repeating same black-screen boot; identify legacy framebuffer dependency and implement real compatibility path. Do not fake frame callbacks."
+}

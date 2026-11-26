@@ -1,0 +1,24 @@
+{
+  "scope": "Read-only FrogUI state observer: synthetic MIPS execution against saved actual console glibc under owned QEMU VM",
+  "passed": true,
+  "hardware_verified": false,
+  "camera_used": false,
+  "report": "analysis/driver_port/ui_state_verify_v2/result.json",
+  "tests": [
+    "Control without preload: standard forwarding PASS",
+    "Matching synthetic profile: 32-bit counter and 8-bit flag observed before/after actual core calls",
+    "Observed counter0->1->2 and flag0->1; original video callback data/hashes and unrelated export unchanged",
+    "Actual FrogUI profile against synthetic core rejected before state sampling; forwarding still PASS",
+    "Local/VM artifact and four saved console-runtime SHA256 match"
+  ],
+  "profile_safety": "Runtime full-file length/FNV64 plus in-memory function/code identity samples; generated offsets checked against ELF symbols and mapped PT_LOAD ranges. FNV64 is accidental-mismatch protection, not cryptographic authentication. Source ELF SHA256 retained locally.",
+  "state_access": "O_RDONLY /proc/self/mem, pread only; no core memory writes, fake frames, input override or delay manipulation",
+  "failed_attempt_preserved": "analysis/driver_port/ui_state_verify_v1/result.json: empty field-generation bug detected; fixed and retested in v2",
+  "generated_profile": "analysis/driver_port/ui_state_profile_v3/profile.json and ui_state_profile.h, ignored local-only; no derived address table committed",
+  "kernel_and_PID1": "v9 byte-identical to v8; only observer library rebuilt",
+  "limitations": [
+    "Actual FrogUI contains no GNU build ID; exact file fingerprint and two loaded-code samples used",
+    "Read-only observation may affect timing; not a performance benchmark",
+    "Profile reads are bounded observations, not an atomic snapshot across worker threads"
+  ]
+}

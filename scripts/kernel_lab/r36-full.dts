@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "r36-display-input.dts"
+#include "r36-audio.dts"
+
+/* Unified full-system Linux 7.2 DTS for R36S (display + audio + full 18-key
+ * input + SAR ADC /dev/check_adc1,5 + restart + dual-role USB0 OTG + USB1 host). */
+/ {
+    r36-direct-keys {
+        volume-up { linux,code = <KEY_VOLUMEUP>; gpios = <&gpio 13 GPIO_ACTIVE_LOW>; };
+        volume-down { linux,code = <KEY_VOLUMEDOWN>; gpios = <&gpio 12 GPIO_ACTIVE_LOW>; };
+        power-key { linux,code = <KEY_POWER>; gpios = <&gpio 14 GPIO_ACTIVE_LOW>; };
+    };
+
+    restart@18818500 {
+        compatible = "r36lab,hc16xx-restart";
+        reg = <0x18818500 8>;
+        clocks = <&clk HC16XX_CLK_WATCHDOG>;
+    };
+
+    adc@188184d0 {
+        compatible = "r36lab,hc16xx-adc-ro";
+        reg = <0x188184d0 8>;
+        clocks = <&clk HC16XX_CLK_SAR_ADC>;
+    };
+};
+
+&r36_audio { status = "okay"; };
+&usb0 { status = "okay"; dr_mode = "otg"; };
+&usb1 { status = "okay"; dr_mode = "host"; };

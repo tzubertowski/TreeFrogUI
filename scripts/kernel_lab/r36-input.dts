@@ -1,0 +1,42 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "r36-ports.dts"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+
+/ {
+    gpio-keys {
+        compatible = "gpio-keys";
+        autorepeat;
+        left-shoulder { label = "Left shoulder GPIO11"; linux,code = <KEY_PAGEUP>; gpios = <&gpio 11 GPIO_ACTIVE_LOW>; };
+        right-shoulder { label = "Right shoulder GPIO7"; linux,code = <KEY_PAGEDOWN>; gpios = <&gpio 7 GPIO_ACTIVE_LOW>; };
+        volume-down { linux,code = <KEY_VOLUMEDOWN>; gpios = <&gpio 12 GPIO_ACTIVE_LOW>; };
+        volume-up { linux,code = <KEY_VOLUMEUP>; gpios = <&gpio 13 GPIO_ACTIVE_LOW>; };
+        function-key { linux,code = <KEY_F1>; gpios = <&gpio 2 GPIO_ACTIVE_LOW>; };
+        power-button { linux,code = <KEY_POWER>; gpios = <&gpio 14 GPIO_ACTIVE_LOW>; };
+    };
+
+    serializer-keys {
+        compatible = "gpio-serializer-keys";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        clock-gpios = <&gpio 8 GPIO_ACTIVE_LOW>;
+        data-gpios = <&gpio 9 (GPIO_ACTIVE_LOW | GPIO_OPEN_DRAIN)>;
+        num-clocks = <12>;
+        autorepeat;
+        poll-interval = <16>;
+        /* Serial bit-to-key mapping inherited from the upstream SF3000 port;
+         * verify each physical key on this board before making it a release. */
+        key@0 { reg = <0>; linux,code = <KEY_TAB>; };
+        key@1 { reg = <1>; linux,code = <KEY_SPACE>; };
+        key@2 { reg = <2>; linux,code = <KEY_LEFTSHIFT>; };
+        key@3 { reg = <3>; linux,code = <KEY_BACKSPACE>; };
+        key@4 { reg = <4>; linux,code = <KEY_LEFTALT>; };
+        key@5 { reg = <5>; linux,code = <KEY_LEFTCTRL>; };
+        key@6 { reg = <6>; linux,code = <KEY_ESC>; };
+        key@7 { reg = <7>; linux,code = <KEY_ENTER>; };
+        key@8 { reg = <8>; linux,code = <KEY_UP>; };
+        key@9 { reg = <9>; linux,code = <KEY_DOWN>; };
+        key@10 { reg = <10>; linux,code = <KEY_LEFT>; };
+        key@11 { reg = <11>; linux,code = <KEY_RIGHT>; };
+    };
+};

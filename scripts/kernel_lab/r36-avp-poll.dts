@@ -1,0 +1,20 @@
+// SPDX-License-Identifier: GPL-2.0
+#include "r36-boot.dts"
+
+/ {
+    reserved-memory {
+        ge-queue@1980000 {
+            reg = <0x01980000 0x0003c000>;
+            no-map;
+        };
+        framebuffer1@1a00000 {
+            reg = <0x01a00000 0x0012c000>;
+            no-map;
+        };
+    };
+    amprpc_diag: amprpc-poll@18800800 {
+        compatible = "r36lab,amprpc-poll";
+        reg = <0x18800800 0x100 0x18866800 0x100>;
+        status = "disabled";
+    };
+};

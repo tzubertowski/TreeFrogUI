@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "result": "CORE_TRACE_FORWARDING=PASS",
+  "scope": "Existing synthetic MIPS core and harness under QEMU-user with saved actual console glibc; not actual FrogUI execution or hardware acceptance",
+  "hardware_verified": false,
+  "camera_used": false,
+  "rebuilt": false,
+  "verifier": "scripts/peripheral_lab/verify_ui_core_trace.py",
+  "raw_report_local": "analysis/driver_port/ui_core_trace_verify_v2/result.json",
+  "checks": [
+    "Local and VM SHA256 of harness, synthetic core, trace library and all four saved runtime files match",
+    "Without preload: exit0, forwarding PASS, no observer messages",
+    "With preload: exit0, exact run entry/exit and callback install/remove messages",
+    "Two forwarded 640x480 RGB565 frames retain expected byte hashes and callback data assertions",
+    "Unrelated exported function return and NULL callback removal checked by existing harness"
+  ],
+  "artifact_sha256": {
+    "harness": "29443da98da54dcca1c5d1644d5938ea131f1a25f383f4c822aeef5827222f27",
+    "synthetic_frogui_libretro.so": "08886e8fd6bd71f40d81d03e37f69f2349d5a4d37da77bfc3eca5e0bf0415117",
+    "trace.so": "1810395b7c3722b760bac86b76a66cef0056fde892f0bf815efd7bcec50134b5"
+  },
+  "binary_build_provenance_verified": false,
+  "limitations": [
+    "Behavior of saved binaries verified; exact rebuild equivalence to current C sources was not established",
+    "No physical framebuffer, UI appearance, navigation, sound or console performance acceptance"
+  ]
+}

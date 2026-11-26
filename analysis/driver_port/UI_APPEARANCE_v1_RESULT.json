@@ -1,0 +1,27 @@
+{
+  "trial": "analysis/boot_crypto/kernel_cold_ui_appearance_v1_trial.json",
+  "UI_appearance_verified": false,
+  "picoarch_started": true,
+  "DRM_backend_initialized": true,
+  "SDL_initialized": true,
+  "SysV_neutral_input_initialized": true,
+  "FrogUI_core_loaded": false,
+  "failure": "dlopen FrogUI: cannot map zero-fill pages; kernel __vm_enough_memory rejects78970880B allocation",
+  "actual_FrogUI_RW_segment": {"filesz": 28768, "memsz": 79002780, "zero_fill": 78974012},
+  "stock_UI_observation": {"VmRSS_kB": 6136, "VmSize_kB": 150360, "swap_total_kB": 131068, "overcommit_memory": 0},
+  "camera_evidence_private": "analysis/driver_port/camera_kms/ui_appearance_v1/contact.jpg",
+  "UI_frames_observed_during_new_kernel": false,
+  "automatic_stock_return_verified": true,
+  "native_restore_verified": true,
+  "host_cleanup_wrote_boot_file": false,
+  "protected_files_unchanged_after": true,
+  "protected_files_md5": {
+    "frogui/settings.txt": "80b1652856ad284baaa3f7000a24db7c",
+    "cubegm/picoarch": "e154f7afade3f340263d7e0f89373c15",
+    "cubegm/cores/frogui_libretro.so": "403944038926bf102ac498a7376fdafd"
+  },
+  "next_candidate": "payload/kernel_cold_ui_appearance_v2",
+  "next_change": "Diagnostic RAM overcommit1 plus RLIMIT_AS192MiB; no SD swap, SD remains read-only during UI lifetime",
+  "navigation_verified": false,
+  "audio_verified": false
+}

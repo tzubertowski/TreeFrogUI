@@ -1,0 +1,19 @@
+{
+  "scope": "Explicit live late scanout checkpoint; no camera or claimed user observation",
+  "scheduler_mock_verified": true,
+  "scheduler_test": "Native Linux C test -Wall/-Wextra/-Werror: no checkpoint before10seconds, no restart on later frame, single invocation after real core call, only RTLD_NOLOAD existing library, matching dlclose",
+  "runtime_verified": true,
+  "runtime_tests": [
+    "MIPS backend dlopen under saved console loader/libc/libpthread: explicit missing DRM returns failure, not dummy success",
+    "New state/live observer under saved console loader/libc/libdl: synthetic forwarding PASS, mismatched state profile rejected"
+  ],
+  "checkpoint_policy": "CLOCK_MONOTONIC measured from first callback return, polling every60 real core calls; one synchronous read-only diagnostic on frontend thread after10seconds. No new worker, signal handler, input change or extra frame.",
+  "backend_policy": "Explicit r36_scanout_live_checkpoint locks existing backend and checks submitted_frames==1 before late_live read-back; no added register or physical memory writes",
+  "parser_policy": "Existing v10 before_cleanup scope preserved. v11 late_live additionally requires elapsed10000..15000ms marker and exactly one submitted frame; hashes/health/raster still mandatory",
+  "kernel_rebuilt": false,
+  "PID1_rebuilt": false,
+  "changed_candidate_files": ["driver_r36_drm_ui_test.so", "r36-ui-core-trace.so"],
+  "camera_used": false,
+  "user_visual_observation": "PENDING",
+  "hardware_verified": false
+}
