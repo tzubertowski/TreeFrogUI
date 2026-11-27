@@ -129,6 +129,11 @@ done
 
 mkdir "$work/install"
 cp -R "$payload/640x480" "$work/install/640x480" || fail 'Could not stage theme files'
+# Keep optional, panel-sized artwork while retaining the 640x480 scheme.
+if [ -d "$payload/854x480/image" ]; then
+    mkdir "$work/install/854x480"
+    cp -R "$payload/854x480/image" "$work/install/854x480/image" || fail 'Could not stage wide theme artwork'
+fi
 if [ -f "$payload/640x480/image/wall/muxlaunch/explore.png" ] ||
    [ -f "$payload/640x480/image/static/muxlaunch/explore.png" ]; then
     printf '[frogui]\nhome_layout=switch\n\n' > "$work/install.ini"

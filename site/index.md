@@ -30,7 +30,7 @@ title: Minimalistic emulation frontend for SF3000-like handhelds
     <a href="{{ '/guides/installation/' | relative_url }}"><strong>Install TreeFrogUI</strong><span>Choose your device and follow the setup steps.</span></a>
     <a href="{{ '/guides/artwork/' | relative_url }}"><strong>Add box art</strong><span>Find artwork in your browser or use Mini Scraper.</span></a>
     <a href="{{ '/guides/folders/' | relative_url }}"><strong>Games, folders &amp; systems</strong><span>Find the right folder for each console.</span></a>
-    <a href="{{ '/guides/theming/' | relative_url }}"><strong>Change the look</strong><span>Pick colours, backgrounds and fonts.</span></a>
+    <a href="{{ '/guides/theming/' | relative_url }}"><strong>Change the look</strong><span>Install MuOS themes or pick colours, backgrounds and fonts.</span></a>
     <a href="{{ '/guides/ports/' | relative_url }}"><strong>Install game ports</strong><span>Add optional ports such as standalone games.</span></a>
     <a href="{{ '/guides/date-time/' | relative_url }}"><strong>Set date and time</strong><span>Use the emulated clock and account for time while powered off.</span></a>
   </div>

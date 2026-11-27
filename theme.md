@@ -41,24 +41,28 @@ In-game savestate and last-screen images are captured automatically and need no 
 
 ### Install a MuOS theme on the device
 
-Copy a `.muxthm` archive into `/mnt/sdcard/ARCHIVE/`, open **Apps → Theme
-Installer**, and select the archive. FrogUI imports the theme's compatible
-`640x480` scheme and assets into `frogui/schemes/`; it then appears under
-**Settings → Theme** after the launcher restarts. If that name is already
-installed, the importer keeps both by adding a suffix to the new theme name.
+Use TreeFrogUI [v2.0.0_d](https://github.com/tzubertowski/TreeFrogUI/releases/tag/v2.0.0_d) or later. This version includes the fix for theme installation on SF3000.
 
-The renderer supports the MuOS theme fields listed in
-[`FrogUI/THEMING.md`](https://github.com/tzubertowski/frogui/blob/r36sx/THEMING.md).
-Themes that depend on unsupported MuOS screens, fonts, or effects may not look
-identical.
+1. Pick a theme from the [MustardOS theme library](https://theme.muos.dev/) and download its `.muxthm` archive. Keep the file zipped.
+2. Copy it to **`ARCHIVE/` at the root of the SD card**, next to `cubegm/` and `roms/`. Create `ARCHIVE/` if needed.
+3. On the handheld, open **Apps → Theme Installer**, highlight the archive and press **A**. Wait for **Install Complete**. Press **B** to return to the archive list, then **B** again to return to Apps.
+4. Open **Settings → Appearance → UI theme**. If Appearance is a folder, open it with **A** first. Use **Left/Right** to select the installed theme. You can return here and select **TreeFrogUI** or **ProMinimal** at any time.
+
+If a theme with that name is already installed, TreeFrogUI keeps both copies and adds a suffix to the new one. Imported themes can show a separate main menu. From the Explore Content system list, press **B** to return to that menu.
+
+### How compatibility works
+
+TreeFrogUI imports supported MuOS scheme settings, colours, and artwork into `frogui/schemes/`. It draws them with FrogUI's own renderer. The importer requires a `640x480` asset folder and a default scheme profile. On SF3000's 854×480 panel, optional wide artwork fills the display. Themes with only 640×480 artwork use a centered canvas. Theme features such as animated artwork and platform-specific screens may render differently. See the [FrogUI theme format notes](https://github.com/tzubertowski/FrogUI/blob/r36sx/THEMING.md) for the supported fields.
 
 Open **`>> Settings`** at the bottom of the main system list. Use Up/Down to select an option and Left/Right to change it. Press A or B to close Settings and save.
 
 | Setting | What it changes |
 |---|---|
-| **Theme** | Interface colours |
+| **UI theme** | Selects TreeFrogUI-Horizontal, TreeFrogUI, ProMinimal or an installed MuOS theme |
+| **Theme colours** | Selects a palette for TreeFrogUI-Horizontal, TreeFrogUI or ProMinimal. Imported themes use their own colours |
+| **Wallpaper** | Picks from seven bundled wallpapers in TreeFrogUI-Horizontal or selects a custom wallpaper |
 | **Background Theme Pack** | Selects a folder of themed background artwork |
-| **Style** | Chooses Vertical, Horizontal or System View |
+| **Explore Content layout** | Press **Y** or **L2** at the Explore Content system list to cycle Vertical, Horizontal and System View |
 | **Icon Pack** | Chooses System View artwork independently from backgrounds |
 | **Friendly System Names** | Expands folder codes such as `ps` and `gba` |
 | **Font** | Menu typeface |

@@ -1,13 +1,16 @@
-TreeFrogUI v2.0.0_d fixes theme installation on SF3000 and makes imported themes easier to read. To change the palette in **TreeFrogUI** or **ProMinimal**, go to **Settings → Appearance → Theme colours**. Imported themes use their own colours.
+![TreeFrogUI-Horizontal on the SF3000 at 854 × 480, showing the Midnight Cyan forest and the enlarged Games, Favorites, Recents, and Apps icons](https://raw.githubusercontent.com/tzubertowski/TreeFrogUI/v2.0.0_f/site/assets/img/releases/v2.0.0_f-horizontal.png)
 
-## Changes since v2.0.0_c
+**TreeFrogUI-Horizontal** is the new default for fresh setups. It comes with a larger, easier-to-read launcher, the **Emerald** palette, and seven forest wallpapers at the native R36SX and SF3000 resolutions.
 
-- Fixed a false “Theme archive contains no files” error on SF3000. The installer now counts files from the same BusyBox-compatible listing it validates, so extraction progress still works. TokyoNightOS, Art Book Next v2, and Catppuccin Frappe installed in QEMU with the MIPS BusyBox applet.
-- Dismissing the install result returns to the archive list. Press **B** there to go back to Apps.
-- Art Book Next v1 now uses the translucent highlight specified by the theme, so white text stays readable.
-- PipBoy Frameless uses a readable background while Settings loads its wallpaper. PipBoy Tube shows the theme’s green focus marker on the selected row.
-- Restored **Theme colours** under **Settings → Appearance** for TreeFrogUI and ProMinimal.
+## Changes since v2.0.0_e
 
-## Known limits
+- **Make it yours.** Open **Settings → Appearance → Wallpaper** to choose Midnight Cyan, Indigo Dusk, Sunset Canopy, Aurora Bloom, Golden Grove, the original Plum, Teal & Olive, or Cyan, Green & Gold. Custom wallpapers also work. **Theme colours** remembers the Horizontal palette independently of the original TreeFrogUI and ProMinimal palettes. The offline updater backs up your previous settings.
+- **Change the game browser on the fly.** Press **Y** or **L2** at the Explore Content system list to cycle through the vertical list, horizontal carousel, and system grid. The footer shows the shortcut and a toast names the new layout. **Select** still opens the core picker.
+- **Sharper wide-screen theme art.** The installer retains optional 854 × 480 artwork for the SF3000 and falls back to the 640 × 480 assets when a theme only supplies those. TreeFrogUI-Horizontal is preinstalled and also available as a `.muxthm` in `ARCHIVE/`.
+- **Clearer menus.** Improved focus indicators and selected-row contrast in imported themes, including disabled settings, and adjusted spacing for themed list rows. The legacy battery overlay is cleared across a wider area when the TreeFrogUI battery indicator is selected.
+- **Settings defaults.** ProMinimal defaults to AliumBoy colours. File caching is off by default for fresh settings.
+- The [theming guide](https://tzubertowski.github.io/TreeFrogUI/guides/theming/) now explains where to put `.muxthm` files, how to install them, and which theme features TreeFrogUI supports.
 
-Imported themes can still differ from their MuOS originals. The reported freezes and missing PlayStation theme startup image remain under investigation. Third-party regression test themes and Red Viper binaries are not bundled.
+Horizontal’s archive layout took cues from **Analogue**, ported to MuOS by **Cheema OTB** from the original by **Aemiii91**. The forest artwork and launcher icons were made for TreeFrogUI-Horizontal. [MustardOS theme library](https://theme.muos.dev/)
+
+The launcher artwork and all seven wallpapers were checked in QEMU at 640 × 480 and 854 × 480. Imported themes can render differently depending on the MuOS features they use.

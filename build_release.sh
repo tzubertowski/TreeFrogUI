@@ -273,8 +273,8 @@ cp    "$STAGE/cubegm/lib/libpng12.so.0"   "$OUT/cubegm/lib/libpng12.so.0"
 # its assets ride along automatically via the cubegm/bios/PPSSPP staging copy.
 cp    "$STAGE/cubegm/lib/libpng16.so.16"  "$OUT/cubegm/lib/libpng16.so.16"
 [ -d "$STAGE/frogui" ] && cp -a "$STAGE/frogui" "$OUT/frogui"
-# MuOS theme ports in the staging tree were exploration builds; themes stay
-# user-installed through the Theme Installer instead of shipping by default.
+# Leave third-party themes to the Theme Installer. The first-party theme
+# is installed below from its versioned archive.
 rm -rf "$OUT/frogui/schemes"
 mkdir -p "$OUT/frogui/schemes"
 rm -f "$OUT/frogui/style-profiles/Switch.json"
@@ -324,6 +324,17 @@ mkdir -p "$OUT/ARCHIVE"
 python3 scripts/build_treefrogui_muxthm.py
 python3 scripts/pack_zip.py "$OUT/ARCHIVE/TreeFrogUI_MuOS.muxthm" \
     assets/themes/TreeFrogUI_MuOS .
+
+# Ship Horizontal both preinstalled and as a portable archive.
+horizontal_archive="assets/themes/TreeFrogUI-Horizontal.muxthm"
+horizontal_scheme="$OUT/frogui/schemes/TreeFrogUI-Horizontal"
+mkdir -p "$horizontal_scheme"
+cp "$horizontal_archive" "$OUT/ARCHIVE/"
+unzip -q "$horizontal_archive" '640x480/*' '854x480/*' -d "$horizontal_scheme"
+{
+    printf '[frogui]\nhome_layout=switch\n\n'
+    cat "$horizontal_scheme/640x480/scheme/default.ini"
+} > "$horizontal_scheme.ini"
 
 # 1b) Our extra assets the old release shipped (these are OURS, not stock OS):
 #     standalone frontends, BIOS, boot logos. NOT shipped: icube/icube_start
