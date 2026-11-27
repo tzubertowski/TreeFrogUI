@@ -98,6 +98,7 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **mgba**, **gbaf** | Game Boy Advance (accurate) | `mgba_libretro.so` |
 | **gbav** | Game Boy Advance (alt) | `vba_next_libretro.so` |
 | **gb**, **dblcherrygb** | Game Boy / Color | `gambatte_libretro.so` |
+| **gbc** | Game Boy Color (separate library folder) | `gambatte_libretro.so` |
 | **gbgb** | Game Boy (Gearboy) | `gearboy_libretro.so` |
 | **gbb** | Game Boy (TGBDual) | `tgbdual_libretro.so` |
 | **MD**, **SMS**, **sega** | Mega Drive / Genesis / Master System | `picodrive_libretro.so` |
