@@ -8,7 +8,7 @@ A free, custom game-menu (frontend) for a range of MIPS-based Hichip handhelds -
 
 **Supported devices:** R36SX (v2.6 & v2.7; v3.0 using the v2.7 setup per user reports), **R36 HD** (and R36SX clones - see [install guide](install.md#r36sx-clones-r36hd-etc)), SF3000, SF3000 HD, SF3000HD without HDMI, SF3100, SF3500, and GB350.
 
-![UI Preview on SF3000 Console](console.jpg)
+![TreeFrogUI-Horizontal in Midnight Cyan on an SF3000](console.jpg)
 
 > # ☕ Consider donating to extend device support: [ko-fi.com/proszty](https://ko-fi.com/proszty)
 > 💬 Join the [TreeFrogUI community server](https://discord.gg/JYFsmBYFBd) on Discord.
