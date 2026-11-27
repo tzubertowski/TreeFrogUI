@@ -13,7 +13,7 @@ title: Minimalistic emulation frontend for SF3000-like handhelds
       <a class="text-link" href="{{ '/scraper/' | relative_url }}">Easy boxart &amp; artwork →</a>
     </div>
   </div>
-  <img class="hero-image" src="{{ '/assets/images/console.jpg' | relative_url }}" alt="TreeFrogUI-Horizontal in Midnight Cyan on an SF3000">
+  <img class="hero-image" src="{{ '/assets/images/treefrogui-horizontal.png' | relative_url }}" alt="TreeFrogUI-Horizontal launcher in Midnight Cyan">
 </section>
 
 <section class="tool-shelf" aria-label="TreeFrogUI tools">
