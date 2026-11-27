@@ -107,6 +107,7 @@ factory card, or substitute a different backup.
 
 - 📦 [SF3500 Stock Backup](https://github.com/Q-ta-s/q-ta-s.github.io/releases/tag/sf3500)
 - 📦 Alternate backup (**newer SF3500 revisions**): [SF3500 v1.1 Stock Backup](https://github.com/Q-ta-s/q-ta-s.github.io/releases/tag/sf3500_1) - if your SF3500 **won't boot the standard backup above** (some later hardware revisions don't), restore this one instead. Everything else is identical.
+- If the SF3500 setup still hangs at the TreeFrogUI logo, try **SF3000HD — with HDMI** in the installer. For a manual install, use the [SF3000 HD stock backup](https://github.com/tzubertowski/H.OS_stock_backup/releases/download/stock-backups-v1/SF3000_HD_stock.7z) and **`install_first/sf3000hd/`**. This worked on the SF3500 in [issue #101](https://github.com/tzubertowski/TreeFrogUI/issues/101).
 - Install folder: **`install_first/sf3500/`**
 - Boot logo: included in this folder (no action needed)
 </details>
