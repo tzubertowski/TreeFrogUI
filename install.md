@@ -114,7 +114,7 @@ factory card, or substitute a different backup.
 <details>
 <summary><b>GB350</b></summary>
 
-- 📦 Stock backup: [Q-ta-s releases](https://github.com/Q-ta-s/q-ta-s.github.io/releases)
+- 📦 [GB350 Stock Backup (GB350.7z)](https://github.com/Q-ta-s/q-ta-s.github.io/releases/download/gb350/GB350.7z)
 - Install folder: **`install_first/gb350/`**
 - Boot logo: included in this folder (640×480 - no action needed)
 </details>
