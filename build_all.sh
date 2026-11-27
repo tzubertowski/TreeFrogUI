@@ -29,6 +29,7 @@ _apply_patch mame2000-load-failure.patch mame2000
 _apply_patch uae-posix-fs.patch        sf2000-uae-amiga-emulator
 _apply_patch uae-sf3000-fixes.patch    sf2000-uae-amiga-emulator
 _apply_patch castaway-linux-build.patch sf2000-atarist-emulator
+_apply_patch castaway-backlight.patch   sf2000-atarist-emulator
 _apply_patch pcsx_rearmed-sf3000-lightrec.patch pcsx_rearmed
 _apply_patch qpsx-sf3000.patch qpsx
 _apply_patch gpsp-upstream-sf3000.patch gpsp_upstream
@@ -633,7 +634,7 @@ make -C "$CORES/sf2000-uae-amiga-emulator" -f Makefile.libretro \
     "$STRIP" "$OUT/uae_libretro.so" && echo "→ $OUT/uae_libretro.so"
 
 echo "-- castaway atari-st make --"
-_b_angree castaway    sf2000-atarist-emulator                "-f Makefile.libretro"
+_b_angree castaway    sf2000-atarist-emulator                "-f Makefile.libretro TREEFROG_BACKLIGHT=1"
 
 echo ""
 echo "Done. Built cores:"

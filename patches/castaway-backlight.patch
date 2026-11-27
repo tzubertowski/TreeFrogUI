@@ -1,0 +1,120 @@
+diff --git a/Makefile.libretro b/Makefile.libretro
+index 77496fd..a4aad8e 100644
+--- a/Makefile.libretro
++++ b/Makefile.libretro
+@@ -30,6 +30,10 @@ else
+     LDFLAGS = -shared -lm
+ endif
+
++ifeq ($(TREEFROG_BACKLIGHT), 1)
++    CFLAGS += -DTREEFROG_CASTAWAY_BACKLIGHT
++endif
++
+ all: $(TARGET)
+
+ # Use FAME 68000 core (same as UAE4ALL and DCaSTaway Miyoo)
+diff --git a/libretro/libretro-castaway.cpp b/libretro/libretro-castaway.cpp
+index 4770319..76f2437 100644
+--- a/libretro/libretro-castaway.cpp
++++ b/libretro/libretro-castaway.cpp
+@@ -15,6 +15,13 @@
+ #include <string.h>
+ #include <stdint.h>
+
++#ifdef TREEFROG_CASTAWAY_BACKLIGHT
++#include <fcntl.h>
++#include <sys/stat.h>
++#include <time.h>
++#include <unistd.h>
++#endif
++
+ /* Include Castaway headers for proper declarations */
+ #include "config.h"
+ #include "st/st.h"
+@@ -1105,6 +1112,54 @@ void retro_deinit(void)
+ extern char *dcastaway_image_file;
+ extern int changed_fdc0;
+
++#ifdef TREEFROG_CASTAWAY_BACKLIGHT
++static int32_t backlight_level;
++static time_t next_backlight_refresh;
++
++static void init_backlight_refresh(void)
++{
++    struct stat device;
++    backlight_level = 0;
++    if (stat("/dev/backlight", &device) != 0 || !S_ISCHR(device.st_mode))
++        return;
++
++    /* MichaelLuca2020's working raw backlight value (TreeFrogUI issue #51). */
++    backlight_level = 40;
++    next_backlight_refresh = 0;
++    FILE *settings = fopen("/mnt/sdcard/frogui/settings.txt", "r");
++    if (!settings)
++        return;
++
++    char line[128];
++    int brightness;
++    while (fgets(line, sizeof line, settings)) {
++        if (sscanf(line, "brightness=%d", &brightness) == 1 &&
++            brightness >= 0 && brightness <= 100) {
++            /* Match TreeFrogUI's conversion to the display driver's level. */
++            backlight_level = brightness < 43 ? brightness + 23
++                                             : brightness * brightness / 43 + 23;
++            break;
++        }
++    }
++    fclose(settings);
++}
++
++static void refresh_backlight(void)
++{
++    struct timespec now;
++    if (!backlight_level || clock_gettime(CLOCK_MONOTONIC, &now) != 0 ||
++        now.tv_sec < next_backlight_refresh)
++        return;
++
++    next_backlight_refresh = now.tv_sec + 1;
++    int fd = open("/dev/backlight", O_WRONLY);
++    if (fd < 0)
++        return;
++    (void)!write(fd, &backlight_level, sizeof backlight_level);
++    close(fd);
++}
++#endif
++
+ int retro_load_game(const struct retro_game_info *game)
+ {
+     DIAG("retro_load_game() start");
+@@ -1164,6 +1219,10 @@ int retro_load_game(const struct retro_game_info *game)
+
+     /* Deferred init handled by static Deffered in retro_run() - UAE4ALL pattern */
+
++#ifdef TREEFROG_CASTAWAY_BACKLIGHT
++    init_backlight_refresh();
++#endif
++
+     DIAG("retro_load_game() - done");
+
+     return 1;
+@@ -1179,6 +1238,9 @@ int retro_load_game_special(unsigned game_type, const struct retro_game_info *in
+
+ void retro_unload_game(void)
+ {
++#ifdef TREEFROG_CASTAWAY_BACKLIGHT
++    backlight_level = 0;
++#endif
+     emulating = 0;
+ }
+
+@@ -1669,6 +1731,10 @@ void retro_run(void)
+ #endif
+     }
+
++#ifdef TREEFROG_CASTAWAY_BACKLIGHT
++    refresh_backlight();
++#endif
++
+     /* v032: REMOVED border clearing completely!
+      * Some demos/cracktros use overscan (320x240) which fills the entire screen.
+      * Border clearing was cutting off top/bottom 20 lines of overscan content.
