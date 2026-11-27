@@ -314,7 +314,7 @@ done
 find "$OUT/roms/openbor" -type f -iname '*.pak' -delete
 mkdir -p "$OUT/roms/images"
 mkdir -p "$OUT/roms/music"
-mkdir -p "$OUT/roms/nds"
+mkdir -p "$OUT/roms/nds" "$OUT/roms/c64" "$OUT/roms/c64v"
 mkdir -p "$OUT/roms/qpsx"
 mkdir -p "$OUT/roms/j2me"
 mkdir -p "$OUT/roms/pico8" "$OUT/roms/fake08" "$OUT/roms/retro8"

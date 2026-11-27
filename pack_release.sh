@@ -75,6 +75,9 @@ protected_delete() {
     return 1
 }
 
+# Core bundles built before the VICE folder was added still need it on new cards.
+mkdir -p "$CURRENT/roms/c64" "$CURRENT/roms/c64v"
+
 # Stamp the full installation so future deltas can enforce their exact base.
 printf '%s\n' "$VERSION" > "$CURRENT/cubegm/version.txt"
 python3 scripts/pack_zip.py --normalize-tree "$CURRENT"

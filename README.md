@@ -124,9 +124,10 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **lnx** | Atari Lynx | `handy_libretro.so` |
 | **atari-st** | Atari ST | `castaway_libretro.so` |
 | **amiga** | Commodore Amiga - 📖 [setup guide](docs/cores/amiga.md) | `uae_libretro.so` |
-| **c64** | Commodore 64 | `vice_x64_libretro.so` |
-| **c64sc** | Commodore 64 (accurate) | `vice_x64sc_libretro.so` |
-| **c64f**, **c64fc** | Commodore 64 (Frodo) | `frodo_libretro.so` |
+| **c64** | Commodore 64 (Frodo by default) | `frodo_libretro.so` |
+| **c64v** | Commodore 64 (VICE) | `vice_x64_libretro.so` |
+| **c64f**, **c64fc** | Commodore 64 (legacy Frodo folders) | `frodo_libretro.so` |
+| **c64sc** | Commodore 64 (legacy VICE folder) | `vice_x64_libretro.so` |
 | **vic20** | Commodore VIC-20 | `vice_xvic_libretro.so` |
 | **msx** | MSX | `bluemsx_libretro.so` |
 | **spec** | ZX Spectrum | `fuse_libretro.so` |
@@ -177,6 +178,8 @@ The **folder name is what picks the emulator** (so `GBA` runs Game Boy Advance, 
 | **music** | Simple themed music player (MP3/M4A/AAC/WAV/FLAC/OGG/Opus, standalone) | `video_player` |
 | **videos** | Hardware video player (MP4/MKV/AVI/MOV/MPEG/TS/WebM, standalone) | `video_player` |
 | **images** | Hardware image viewer (JPG/PNG/BMP/GIF/WebP/TIFF…, standalone) | `image_viewer` |
+
+If you previously used VICE from `roms/c64/`, move those games to `roms/c64v/` or select `vice_x64` with **Select** in the game browser.
 
 See [cores.md](cores.md) for detailed build status and source repositories of TreeFrogUI external cores.
 
