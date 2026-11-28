@@ -43,3 +43,4 @@ assets/themes/*.muxthm
 bios/
 bpreplay.zip
 site/_includes/generated-guides/
+apps/usb_mode/capture/build/
